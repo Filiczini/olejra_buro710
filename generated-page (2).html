@@ -1,0 +1,348 @@
+<html lang="uk" class="scroll-smooth"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BURO 710 - Architecture &amp; Interiors</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            font-feature-settings: "cv11", "ss01";
+        }
+        /* Hide scrollbar for slider */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Subtle Grain Overlay */
+        .bg-noise {
+            position: relative;
+        }
+        .bg-noise::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 50;
+        }
+        /* Smooth Reveal Animation */
+        .reveal-up {
+            animation: revealUp 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        @keyframes revealUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+    </style>
+</head>
+<body class="bg-zinc-50 text-zinc-900 antialiased selection:bg-zinc-900 selection:text-white">
+
+    <!-- Navigation (Fixed & Minimal) -->
+    <header class="fixed top-0 w-full z-[100] mix-blend-difference text-white">
+        <div class="max-w-[1800px] mx-auto px-6 h-20 flex items-center justify-between">
+            <a href="#" class="text-xl tracking-tight font-medium hover:opacity-70 transition-opacity">
+                BURO 710
+            </a>
+            <nav class="hidden md:flex items-center gap-10">
+                <a href="#" class="text-sm font-medium hover:text-zinc-300 transition-colors">Проекти</a>
+                <a href="#" class="text-sm font-medium hover:text-zinc-300 transition-colors">Про бюро</a>
+                <a href="#" class="text-sm font-medium hover:text-zinc-300 transition-colors">Контакти</a>
+            </nav>
+            <div class="flex items-center gap-4">
+                <a href="#" class="text-sm font-medium border border-white/20 px-5 py-2 rounded-full hover:bg-white hover:text-black transition-all">
+                    Меню
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- 1. Hero Section: Full Screen Slider -->
+        <section class="relative h-[90vh] w-full overflow-hidden bg-zinc-900 text-white group">
+            
+            <!-- Horizontal Scroll Container (CSS Snap) -->
+            <div class="flex h-full w-full overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth">
+                
+                <!-- Slide 1 -->
+                <div class="relative min-w-full h-full snap-center bg-noise cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&amp;w=2600&amp;auto=format&amp;fit=crop" alt="Project 1" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[2000ms] ease-out group-hover:scale-105 opacity-80">
+                    
+                    <!-- Gradient Overlay -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+
+                    <!-- Slide Content -->
+                    <div class="absolute bottom-0 left-0 w-full p-6 md:p-12 pb-16 flex flex-col md:flex-row md:items-end justify-between reveal-up delay-100">
+                        <div class="space-y-2">
+                            <h2 class="text-4xl md:text-7xl font-medium tracking-tight">Golden Ray Residence</h2>
+                            <div class="flex items-center gap-3 text-zinc-300 text-sm md:text-base">
+                                <span>Київ, Україна</span>
+                                <span class="w-1 h-1 rounded-full bg-zinc-400"></span>
+                                <span>145 м²</span>
+                                <span class="w-1 h-1 rounded-full bg-zinc-400"></span>
+                                <span>2023</span>
+                            </div>
+                        </div>
+                        <div class="hidden md:flex items-center gap-2 text-sm font-medium group/btn">
+                            <span>Переглянути проект</span>
+                            <iconify-icon icon="solar:arrow-right-linear" width="20" class="group-hover/btn:translate-x-1 transition-transform"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 2 (For functionality demo) -->
+                <div class="relative min-w-full h-full snap-center bg-zinc-800 cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&amp;w=2600&amp;auto=format&amp;fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-80">
+                    <div class="absolute bottom-0 left-0 w-full p-12 pb-16">
+                        <h2 class="text-4xl md:text-7xl font-medium tracking-tight">Onyx Penthouse</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Cursor Hint (Visual) -->
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 hidden md:flex items-center justify-center w-24 h-24 rounded-full border border-white/30 backdrop-blur-sm text-xs font-medium tracking-widest uppercase">
+                Explore
+            </div>
+
+            <!-- Pagination/Controls -->
+            <div class="absolute bottom-8 right-6 md:right-12 flex items-center gap-6 text-sm font-medium z-10">
+                <div class="flex items-center gap-2">
+                    <span class="text-white">01</span>
+                    <div class="w-12 h-[1px] bg-white/30 relative">
+                        <div class="absolute top-0 left-0 w-1/3 h-full bg-white"></div>
+                    </div>
+                    <span class="text-white/50">05</span>
+                </div>
+                <div class="flex gap-2">
+                    <button class="p-2 border border-white/20 rounded-full hover:bg-white hover:text-black transition-colors">
+                        <iconify-icon icon="solar:arrow-left-linear" width="20"></iconify-icon>
+                    </button>
+                    <button class="p-2 border border-white/20 rounded-full hover:bg-white hover:text-black transition-colors">
+                        <iconify-icon icon="solar:arrow-right-linear" width="20"></iconify-icon>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. About Studio (Minimal Split) -->
+        <section class="max-w-[1800px] mx-auto px-6 py-24 md:py-32 border-b border-zinc-200">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24">
+                <div>
+                    <h2 class="text-3xl md:text-5xl font-medium tracking-tight leading-tight reveal-up">
+                        Ми створюємо простори, <br class="hidden md:block">
+                        де архітектура зустрічається <br class="hidden md:block">
+                        з тишею.
+                    </h2>
+                </div>
+                <div class="space-y-8 flex flex-col justify-between reveal-up delay-200">
+                    <div class="space-y-6 text-lg text-zinc-500 font-light leading-relaxed max-w-xl">
+                        <p>
+                            Buro 710 — інтер’єрна студія, що спеціалізується на проектуванні приватних резиденцій, комерційних просторів та концептуальних об’єктів.
+                        </p>
+                        <p>
+                            Наш підхід базується на чистоті ліній, тактильності натуральних матеріалів та увазі до світлотіньових сценаріїв. Ми не просто робимо ремонт, ми створюємо атмосферу для життя.
+                        </p>
+                    </div>
+                    <div>
+                        <a href="#" class="inline-flex items-center gap-2 text-sm font-medium uppercase tracking-wider border-b border-zinc-900 pb-1 hover:opacity-60 transition-opacity">
+                            Про студію
+                            <iconify-icon icon="solar:arrow-right-up-linear" width="16"></iconify-icon>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Selected Projects Grid (Masonry feel) -->
+        <section class="max-w-[1800px] mx-auto px-6 py-24">
+            <div class="flex justify-between items-end mb-16">
+                <h3 class="text-xl font-medium tracking-tight">Вибрані проекти</h3>
+                <a href="#" class="text-sm text-zinc-500 hover:text-zinc-900 transition-colors hidden md:block">Всі проекти (24)</a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-16">
+                
+                <!-- Project 1 (Tall) -->
+                <a href="#" class="group block space-y-4">
+                    <div class="relative overflow-hidden aspect-[4/5] bg-zinc-100">
+                        <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&amp;w=2600&amp;auto=format&amp;fit=crop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Project">
+                    </div>
+                    <div class="flex justify-between items-start opacity-70 group-hover:opacity-100 transition-opacity">
+                        <div>
+                            <h4 class="text-lg font-medium text-zinc-900">Stone House</h4>
+                            <p class="text-sm text-zinc-500 mt-1">Lviv · 2023</p>
+                        </div>
+                        <iconify-icon icon="solar:arrow-right-linear" width="20" class="-rotate-45 group-hover:rotate-0 transition-transform"></iconify-icon>
+                    </div>
+                </a>
+
+                <!-- Project 2 (Wide/Tall) -->
+                <a href="#" class="group block space-y-4 md:mt-24">
+                    <div class="relative overflow-hidden aspect-[4/5] bg-zinc-100">
+                        <img src="https://images.unsplash.com/photo-1556912173-3db996ea8c3f?q=80&amp;w=2600&amp;auto=format&amp;fit=crop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Project">
+                    </div>
+                    <div class="flex justify-between items-start opacity-70 group-hover:opacity-100 transition-opacity">
+                        <div>
+                            <h4 class="text-lg font-medium text-zinc-900">Kyiv Modernist</h4>
+                            <p class="text-sm text-zinc-500 mt-1">Kyiv · 2022</p>
+                        </div>
+                        <iconify-icon icon="solar:arrow-right-linear" width="20" class="-rotate-45 group-hover:rotate-0 transition-transform"></iconify-icon>
+                    </div>
+                </a>
+
+                <!-- Project 3 -->
+                <a href="#" class="group block space-y-4">
+                    <div class="relative overflow-hidden aspect-[4/5] bg-zinc-100">
+                        <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&amp;w=2600&amp;auto=format&amp;fit=crop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Project">
+                    </div>
+                    <div class="flex justify-between items-start opacity-70 group-hover:opacity-100 transition-opacity">
+                        <div>
+                            <h4 class="text-lg font-medium text-zinc-900">Golden Ray</h4>
+                            <p class="text-sm text-zinc-500 mt-1">Kyiv · 2023</p>
+                        </div>
+                        <iconify-icon icon="solar:arrow-right-linear" width="20" class="-rotate-45 group-hover:rotate-0 transition-transform"></iconify-icon>
+                    </div>
+                </a>
+
+            </div>
+
+            <div class="mt-16 text-center md:hidden">
+                <a href="#" class="inline-block px-8 py-3 border border-zinc-200 rounded-full text-sm font-medium hover:bg-zinc-900 hover:text-white transition-colors">
+                    Всі проекти
+                </a>
+            </div>
+        </section>
+
+        <!-- 4. Philosophy / Values (Dark Block) -->
+        <section class="bg-zinc-900 text-white py-24 md:py-32 px-6">
+            <div class="max-w-[1800px] mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                    
+                    <div class="space-y-4 reveal-up delay-100">
+                        <iconify-icon icon="solar:soundwave-square-linear" width="32" class="text-zinc-500"></iconify-icon>
+                        <h4 class="text-xl font-medium">Тиша в деталях</h4>
+                        <p class="text-zinc-400 text-sm leading-relaxed">
+                            Ми прибираємо візуальний шум, залишаючи лише те, що має значення.
+                        </p>
+                    </div>
+
+                    <div class="space-y-4 reveal-up delay-200">
+                        <iconify-icon icon="solar:ruler-pen-linear" width="32" class="text-zinc-500"></iconify-icon>
+                        <h4 class="text-xl font-medium">Чистота форм</h4>
+                        <p class="text-zinc-400 text-sm leading-relaxed">
+                            Геометрія простору як основа для комфортного життя.
+                        </p>
+                    </div>
+
+                    <div class="space-y-4 reveal-up delay-300">
+                        <iconify-icon icon="solar:layers-minimalistic-linear" width="32" class="text-zinc-500"></iconify-icon>
+                        <h4 class="text-xl font-medium">Натуральність</h4>
+                        <p class="text-zinc-400 text-sm leading-relaxed">
+                            Камінь, дерево, метал — матеріали, що старіють красиво.
+                        </p>
+                    </div>
+
+                    <div class="space-y-4 reveal-up delay-100">
+                        <iconify-icon icon="solar:sun-2-linear" width="32" class="text-zinc-500"></iconify-icon>
+                        <h4 class="text-xl font-medium">Світло-архітектура</h4>
+                        <p class="text-zinc-400 text-sm leading-relaxed">
+                            Світло як інструмент формування об'єму та настрою.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Process (Minimal List) -->
+        <section class="max-w-[1800px] mx-auto px-6 py-24 border-b border-zinc-200">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                <div class="lg:col-span-4">
+                    <h3 class="text-2xl font-medium tracking-tight mb-4">Процес</h3>
+                    <p class="text-zinc-500">Системний підхід до творчості гарантує передбачуваний результат.</p>
+                </div>
+                <div class="lg:col-span-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="group py-4 border-t border-zinc-200 hover:border-zinc-900 transition-colors">
+                            <span class="text-xs font-medium text-zinc-400 mb-2 block group-hover:text-zinc-900">01</span>
+                            <span class="text-lg font-medium">Концепція</span>
+                        </div>
+                        <div class="group py-4 border-t border-zinc-200 hover:border-zinc-900 transition-colors">
+                            <span class="text-xs font-medium text-zinc-400 mb-2 block group-hover:text-zinc-900">02</span>
+                            <span class="text-lg font-medium">Проектування</span>
+                        </div>
+                        <div class="group py-4 border-t border-zinc-200 hover:border-zinc-900 transition-colors">
+                            <span class="text-xs font-medium text-zinc-400 mb-2 block group-hover:text-zinc-900">03</span>
+                            <span class="text-lg font-medium">Реалізація</span>
+                        </div>
+                        <div class="group py-4 border-t border-zinc-200 hover:border-zinc-900 transition-colors">
+                            <span class="text-xs font-medium text-zinc-400 mb-2 block group-hover:text-zinc-900">04</span>
+                            <span class="text-lg font-medium">Стайлінг</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. Cinematic Divider -->
+        <section class="relative w-full h-[60vh] md:h-[80vh] overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1631679706909-1844bbd07221?q=80&amp;w=2600&amp;auto=format&amp;fit=crop" class="absolute inset-0 w-full h-full object-cover filter grayscale-[20%] contrast-[0.9]" alt="Atmosphere">
+            <div class="absolute inset-0 bg-black/20"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <h2 class="text-3xl md:text-5xl font-medium text-white tracking-tight text-center px-4 mix-blend-overlay">
+                    Spaces designed for calm living.
+                </h2>
+            </div>
+        </section>
+
+        <!-- 7. Contact CTA -->
+        <section class="max-w-[1800px] mx-auto px-6 py-32 text-center">
+            <h2 class="text-4xl md:text-6xl font-medium tracking-tight mb-8 text-zinc-900">
+                Маєте проект?
+            </h2>
+            <p class="text-zinc-500 text-lg mb-12 max-w-xl mx-auto">
+                Ми відкриті до нових викликів. Розкажіть нам про свій простір, і ми знайдемо для нього ідеальну форму.
+            </p>
+            <a href="#" class="inline-flex items-center gap-3 bg-zinc-900 text-white px-8 py-4 rounded-full font-medium hover:bg-zinc-800 transition-all hover:px-10 group">
+                Зв'язатися з нами
+                <iconify-icon icon="solar:arrow-right-linear" width="20" class="group-hover:translate-x-1 transition-transform"></iconify-icon>
+            </a>
+        </section>
+
+    </main>
+
+    <!-- 8. Minimal Footer -->
+    <footer class="border-t border-zinc-200 bg-white">
+        <div class="max-w-[1800px] mx-auto px-6 py-12 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex gap-8 text-sm font-medium text-zinc-900">
+                <a href="#" class="hover:text-zinc-500 transition-colors">Проекти</a>
+                <a href="#" class="hover:text-zinc-500 transition-colors">Про бюро</a>
+                <a href="#" class="hover:text-zinc-500 transition-colors">Контакти</a>
+            </div>
+            
+            <div class="text-zinc-400 text-sm">
+                © 2024 BURO 710. Kyiv.
+            </div>
+
+            <div class="flex gap-6">
+                <a href="#" class="text-zinc-400 hover:text-zinc-900 transition-colors" title="Instagram">
+                    <iconify-icon icon="solar:camera-linear" width="20"></iconify-icon>
+                </a>
+                <a href="#" class="text-zinc-400 hover:text-zinc-900 transition-colors" title="Email">
+                    <iconify-icon icon="solar:letter-linear" width="20"></iconify-icon>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+
+</body></html>
