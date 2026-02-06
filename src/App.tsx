@@ -4,6 +4,7 @@ import ProjectPage from './pages/ProjectPage';
 import LoginPage from './pages/admin/LoginPage';
 import DashboardPage from './pages/admin/DashboardPage';
 import CreateProjectPage from './pages/admin/CreateProjectPage';
+import EditProjectPage from './pages/admin/EditProjectPage';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 
 function App() {
@@ -26,6 +27,14 @@ function App() {
           element={
             <ProtectedRoute>
               <CreateProjectPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/projects/edit/:id" 
+          element={
+            <ProtectedRoute>
+              <EditProjectPage />
             </ProtectedRoute>
           } 
         />
