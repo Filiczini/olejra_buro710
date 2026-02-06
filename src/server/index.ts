@@ -3,6 +3,7 @@ import cors from 'cors';
 import type { Request, Response } from 'express';
 import authRoutes from './routes/auth';
 import portfolioRoutes from './routes/portfolio';
+import siteSettingsRoutes from './routes/siteSettings';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,6 +13,7 @@ app.use(express.json({ limit: '50mb' }));
 
 app.use('/api/admin', authRoutes);
 app.use('/api/portfolio', portfolioRoutes);
+app.use('/api/settings', siteSettingsRoutes);
 
 app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
