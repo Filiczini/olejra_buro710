@@ -7,6 +7,7 @@ import CreateProjectPage from './pages/admin/CreateProjectPage';
 import EditProjectPage from './pages/admin/EditProjectPage';
 import SettingsPage from './pages/admin/SettingsPage';
 import ActivityLogPage from './pages/admin/ActivityLogPage';
+import SiteSettingsPage from './pages/admin/SiteSettingsPage';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 import AdminLayout from './layouts/AdminLayout';
 
@@ -35,6 +36,7 @@ function App() {
           <Route path="/admin/projects/create" element={<CreateProjectPage />} />
           <Route path="/admin/projects/edit/:id" element={<EditProjectPage />} />
           <Route path="/admin/settings" element={<SettingsPage />} />
+          <Route path="/admin/site-settings" element={<SiteSettingsPage />} />
           <Route path="/admin/logs" element={<ActivityLogPage />} />
         </Route>
       </Routes>
@@ -43,3 +45,4 @@ function App() {
 }
 
 export default App;
+

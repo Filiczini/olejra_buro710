@@ -18,6 +18,10 @@ export default function CreateProjectPage() {
     description: '',
     image: null as unknown as File,
     tags: [],
+    architects: '',
+    concept_heading: '',
+    concept_caption: '',
+    concept_quote: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -73,6 +77,18 @@ export default function CreateProjectPage() {
       }
       if (formData.team) {
         formDataToSend.append('team', formData.team);
+      }
+      if (formData.architects) {
+        formDataToSend.append('architects', formData.architects);
+      }
+      if (formData.concept_heading) {
+        formDataToSend.append('concept_heading', formData.concept_heading);
+      }
+      if (formData.concept_caption) {
+        formDataToSend.append('concept_caption', formData.concept_caption);
+      }
+      if (formData.concept_quote) {
+        formDataToSend.append('concept_quote', formData.concept_quote);
       }
 
       await portfolioService.create(formDataToSend);
@@ -158,6 +174,34 @@ export default function CreateProjectPage() {
               placeholder={t.createProject.teamPlaceholder}
               value={formData.team || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, team: e.target.value })}
+            />
+
+            <Input
+              label="Архітектори"
+              placeholder="Введіть назву архітектора або бюро"
+              value={formData.architects || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, architects: e.target.value })}
+            />
+
+            <Input
+              label="Заголовок концепції"
+              placeholder="Введіть заголовок концепції (наприклад, Культурний Код)"
+              value={formData.concept_heading || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_heading: e.target.value })}
+            />
+
+            <Input
+              label="Підпис концепції"
+              placeholder="Введіть підпис концепції (наприклад, Концепція дизайну)"
+              value={formData.concept_caption || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_caption: e.target.value })}
+            />
+
+            <Input
+              label="Цитата концепції"
+              placeholder="Введіть цитату концепції (необов'язково)"
+              value={formData.concept_quote || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_quote: e.target.value })}
             />
 
             {errors.submit && (
