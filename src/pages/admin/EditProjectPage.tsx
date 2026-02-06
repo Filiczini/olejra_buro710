@@ -6,9 +6,13 @@ import ImageUpload from '../../components/admin/ImageUpload';
 import TagInput from '../../components/admin/TagInput';
 import type { UpdateProjectData, Project } from '../../types/project';
 import { portfolioService } from '../../services/api';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { translations } from '../../config/translations';
 
 export default function EditProjectPage() {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const t = translations[language];
   const { id } = useParams<{ id: string }>();
   const [project, setProject] = useState<Project | null>(null);
   const [formData, setFormData] = useState<UpdateProjectData>({
@@ -56,15 +60,15 @@ export default function EditProjectPage() {
     const newErrors: Record<string, string> = {};
 
     if (formData.title && formData.title.length < 2) {
-      newErrors.title = 'Title must be at least 2 characters';
+      newErrors.title = t.editProject.requiredField;
     }
 
     if (formData.description && formData.description.length < 10) {
-      newErrors.description = 'Description must be at least 10 characters';
+      newErrors.description = t.editProject.requiredField;
     }
 
     if (formData.tags && formData.tags.length > 10) {
-      newErrors.tags = 'Maximum 10 tags allowed';
+      newErrors.tags = t.editProject.requiredField;
     }
 
     setErrors(newErrors);
@@ -110,9 +114,8 @@ export default function EditProjectPage() {
       await portfolioService.update(id!, formDataToSend);
 
       navigate('/admin/dashboard');
-    } catch (error) {
-      const err = error as Error;
-      setErrors({ submit: err.message });
+    } catch {
+      setErrors({ submit: t.editProject.error });
     } finally {
       setLoading(false);
     }
@@ -121,7 +124,7 @@ export default function EditProjectPage() {
   if (fetching) {
     return (
       <div className="min-h-screen bg-zinc-50 p-8 flex items-center justify-center">
-        <div className="text-lg text-zinc-600">Loading...</div>
+        <div className="text-lg text-zinc-600">{t.dashboard.loading}</div>
       </div>
     );
   }
@@ -129,29 +132,29 @@ export default function EditProjectPage() {
   if (!project) {
     return (
       <div className="min-h-screen bg-zinc-50 p-8 flex items-center justify-center">
-        <div className="text-lg text-zinc-600">Project not found</div>
+        <div className="text-lg text-zinc-600">{t.dashboard.noProjects}</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 p-8">
-      <div className="max-w-2xl mx-auto">
+    <div>
+      <div className="max-w-2xl">
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={() => navigate('/admin/dashboard')}
             className="text-zinc-600 hover:text-zinc-900"
           >
-            ← Back
+            ← {t.editProject.backToDashboard}
           </button>
-          <h1 className="text-3xl font-bold text-zinc-900">Edit Project</h1>
+          <h1 className="text-3xl font-bold text-zinc-900">{t.editProject.title}</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-8">
           <div className="flex flex-col gap-6">
             <Input
-              label="Title"
-              placeholder="Enter project title"
+              label={t.editProject.titleLabel}
+              placeholder={t.editProject.titlePlaceholder}
               value={formData.title}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, title: e.target.value })}
               error={errors.title}
@@ -159,10 +162,10 @@ export default function EditProjectPage() {
             />
 
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-zinc-700">Description</label>
+              <label className="text-sm font-medium text-zinc-700">{t.editProject.description}</label>
               <textarea
                 className="w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent min-h-[120px]"
-                placeholder="Enter project description"
+                placeholder={t.editProject.descriptionPlaceholder}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 required
@@ -182,29 +185,29 @@ export default function EditProjectPage() {
             {errors.tags && <span className="text-sm text-red-500">{errors.tags}</span>}
 
             <Input
-              label="Location"
-              placeholder="Enter location"
+              label={t.editProject.location}
+              placeholder={t.editProject.locationPlaceholder}
               value={formData.location || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, location: e.target.value })}
             />
 
             <Input
-              label="Area"
-              placeholder="Enter area (e.g., 150 m²)"
+              label={t.editProject.area}
+              placeholder={t.editProject.areaPlaceholder}
               value={formData.area || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, area: e.target.value })}
             />
 
             <Input
-              label="Year"
-              placeholder="Enter year (e.g., 2024)"
+              label={t.editProject.year}
+              placeholder={t.editProject.yearPlaceholder}
               value={formData.year || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, year: e.target.value })}
             />
 
             <Input
-              label="Team"
-              placeholder="Enter team members"
+              label={t.editProject.team}
+              placeholder={t.editProject.teamPlaceholder}
               value={formData.team || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, team: e.target.value })}
             />
@@ -217,7 +220,7 @@ export default function EditProjectPage() {
 
             <div className="flex gap-4">
               <Button type="submit" disabled={loading} className="flex-1 py-3">
-                {loading ? 'Updating...' : 'Update Project'}
+                {loading ? t.editProject.saving : t.editProject.save}
               </Button>
               <Button
                 type="button"
@@ -225,7 +228,7 @@ export default function EditProjectPage() {
                 onClick={() => navigate('/admin/dashboard')}
                 className="flex-1 py-3"
               >
-                Cancel
+                {t.editProject.cancel}
               </Button>
             </div>
           </div>

@@ -6,9 +6,13 @@ import ImageUpload from '../../components/admin/ImageUpload';
 import TagInput from '../../components/admin/TagInput';
 import type { CreateProjectData } from '../../types/project';
 import { portfolioService } from '../../services/api';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { translations } from '../../config/translations';
 
 export default function CreateProjectPage() {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const t = translations[language];
   const [formData, setFormData] = useState<CreateProjectData>({
     title: '',
     description: '',
@@ -22,19 +26,19 @@ export default function CreateProjectPage() {
     const newErrors: Record<string, string> = {};
 
     if (formData.title.length < 2) {
-      newErrors.title = 'Title must be at least 2 characters';
+      newErrors.title = t.createProject.requiredField;
     }
 
     if (formData.description.length < 10) {
-      newErrors.description = 'Description must be at least 10 characters';
+      newErrors.description = t.createProject.requiredField;
     }
 
     if (!formData.image || formData.image.size === 0) {
-      newErrors.image = 'Image is required';
+      newErrors.image = t.createProject.requiredField;
     }
 
     if (formData.tags.length > 10) {
-      newErrors.tags = 'Maximum 10 tags allowed';
+      newErrors.tags = t.createProject.requiredField;
     }
 
     setErrors(newErrors);
@@ -74,32 +78,31 @@ export default function CreateProjectPage() {
       await portfolioService.create(formDataToSend);
 
       navigate('/admin/dashboard');
-    } catch (error) {
-      const err = error as Error;
-      setErrors({ submit: err.message });
+    } catch {
+      setErrors({ submit: t.createProject.error });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 p-8">
-      <div className="max-w-2xl mx-auto">
+    <div>
+      <div className="max-w-2xl">
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={() => navigate('/admin/dashboard')}
             className="text-zinc-600 hover:text-zinc-900"
           >
-            ← Back
+            ← {t.createProject.backToDashboard}
           </button>
-          <h1 className="text-3xl font-bold text-zinc-900">Create Project</h1>
+          <h1 className="text-3xl font-bold text-zinc-900">{t.createProject.title}</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-8">
           <div className="flex flex-col gap-6">
             <Input
-              label="Title"
-              placeholder="Enter project title"
+              label={t.createProject.titleLabel}
+              placeholder={t.createProject.titlePlaceholder}
               value={formData.title}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, title: e.target.value })}
               error={errors.title}
@@ -107,10 +110,10 @@ export default function CreateProjectPage() {
             />
 
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-zinc-700">Description</label>
+              <label className="text-sm font-medium text-zinc-700">{t.createProject.description}</label>
               <textarea
                 className="w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent min-h-[120px]"
-                placeholder="Enter project description"
+                placeholder={t.createProject.descriptionPlaceholder}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 required
@@ -130,29 +133,29 @@ export default function CreateProjectPage() {
             {errors.tags && <span className="text-sm text-red-500">{errors.tags}</span>}
 
             <Input
-              label="Location"
-              placeholder="Enter location"
+              label={t.createProject.location}
+              placeholder={t.createProject.locationPlaceholder}
               value={formData.location || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, location: e.target.value })}
             />
 
             <Input
-              label="Area"
-              placeholder="Enter area (e.g., 150 m²)"
+              label={t.createProject.area}
+              placeholder={t.createProject.areaPlaceholder}
               value={formData.area || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, area: e.target.value })}
             />
 
             <Input
-              label="Year"
-              placeholder="Enter year (e.g., 2024)"
+              label={t.createProject.year}
+              placeholder={t.createProject.yearPlaceholder}
               value={formData.year || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, year: e.target.value })}
             />
 
             <Input
-              label="Team"
-              placeholder="Enter team members"
+              label={t.createProject.team}
+              placeholder={t.createProject.teamPlaceholder}
               value={formData.team || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, team: e.target.value })}
             />
@@ -164,7 +167,7 @@ export default function CreateProjectPage() {
             )}
 
             <Button type="submit" disabled={loading} className="w-full py-3">
-              {loading ? 'Creating...' : 'Create Project'}
+              {loading ? t.createProject.creating : t.createProject.create}
             </Button>
           </div>
         </form>

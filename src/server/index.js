@@ -2,8 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth';
 import portfolioRoutes from './routes/portfolio';
-import dotenv from 'dotenv';
-dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(cors());
