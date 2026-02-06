@@ -72,4 +72,26 @@ export const portfolioService = {
     });
     return response.data;
   },
+
+  getNextProject: async (currentId: string): Promise<Project | null> => {
+    try {
+      const { data } = await api.get<PaginatedResponse<Project>>('/portfolio', {
+        params: {
+          limit: 50,
+          sortBy: 'created_at',
+          sortOrder: 'asc'
+        }
+      });
+
+      const currentIndex = data.data.findIndex(p => p.id === currentId);
+      if (currentIndex === -1 || currentIndex === data.data.length - 1) {
+        return null;
+      }
+
+      return data.data[currentIndex + 1];
+    } catch (error) {
+      console.error('Error getting next project:', error);
+      return null;
+    }
+  },
 };
