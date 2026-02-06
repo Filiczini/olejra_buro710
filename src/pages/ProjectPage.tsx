@@ -1,30 +1,49 @@
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
-
-interface Project {
-  id: string;
-  title: string;
-  location: string;
-  area: string;
-  year: string;
-  team: string;
-  description: string[];
-  image: string;
-}
+import type { Project } from '../types/project';
+import { portfolioService } from '../services/api';
 
 export default function ProjectPage() {
-  const project: Project = {
-    id: 'golden-ray',
-    title: 'Golden Ray Residence',
-    location: 'Київ, Україна',
-    area: '145 м²',
-    year: '2023',
-    team: 'Олена Марченко, Іван Петренко',
-    description: [
-      'Інтер\'єр цієї резиденції втілює баланс між монументальною елегантністю та домашнім теплом. Ми використали поєднання натурального каменю, латуні та оксамиту глибокого бурштинового кольору, щоб створити простір, який випромінює спокій та статус.',
-      'Центральним елементом вітальної стала акцентна стіна з мармуру Nero Marquina, доповнена вертикальними латунними вставками, що візуально збільшують висоту приміщення. Освітлення спроектоване таким чином, щоб підкреслювати текстури матеріалів у вечірній час.',
-    ],
-    image: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2600&auto=format&fit=crop',
-  };
+  const { id } = useParams<{ id: string }>();
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const loadProject = async () => {
+      try {
+        setLoading(true);
+        const data = await portfolioService.getById(id!);
+        setProject(data);
+      } catch (err) {
+        setError('Failed to load project');
+        console.error('Error loading project:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      loadProject();
+    }
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50">
+        <div className="text-lg text-zinc-600">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error || !project) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50">
+        <div className="text-lg text-red-600">{error || 'Project not found'}</div>
+      </div>
+    );
+  }
 
   const materials = [
     { name: 'Velvet', color: 'bg-yellow-500' },
@@ -68,7 +87,7 @@ export default function ProjectPage() {
 
         <div className="relative w-full aspect-[16/9] md:aspect-[21/9] rounded-2xl overflow-hidden shadow-2xl shadow-zinc-200 bg-zinc-100 group">
           <img 
-            src={project.image} 
+            src={project.image_url} 
             alt={project.title}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
@@ -81,22 +100,30 @@ export default function ProjectPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mt-16">
           <div className="md:col-span-4 space-y-8">
-            <div className="pb-8 border-b border-zinc-200">
-              <h3 className="text-base font-medium text-zinc-900 mb-2">Локація</h3>
-              <p className="text-lg text-zinc-500">{project.location}</p>
-            </div>
-            <div className="pb-8 border-b border-zinc-200">
-              <h3 className="text-base font-medium text-zinc-900 mb-2">Площа</h3>
-              <p className="text-lg text-zinc-500">{project.area}</p>
-            </div>
-            <div className="pb-8 border-b border-zinc-200">
-              <h3 className="text-base font-medium text-zinc-900 mb-2">Рік</h3>
-              <p className="text-lg text-zinc-500">{project.year}</p>
-            </div>
-            <div>
-              <h3 className="text-base font-medium text-zinc-900 mb-2">Команда</h3>
-              <p className="text-lg text-zinc-500">{project.team}</p>
-            </div>
+            {project.location && (
+              <div className="pb-8 border-b border-zinc-200">
+                <h3 className="text-base font-medium text-zinc-900 mb-2">Локація</h3>
+                <p className="text-lg text-zinc-500">{project.location}</p>
+              </div>
+            )}
+            {project.area && (
+              <div className="pb-8 border-b border-zinc-200">
+                <h3 className="text-base font-medium text-zinc-900 mb-2">Площа</h3>
+                <p className="text-lg text-zinc-500">{project.area}</p>
+              </div>
+            )}
+            {project.year && (
+              <div className="pb-8 border-b border-zinc-200">
+                <h3 className="text-base font-medium text-zinc-900 mb-2">Рік</h3>
+                <p className="text-lg text-zinc-500">{project.year}</p>
+              </div>
+            )}
+            {project.team && (
+              <div>
+                <h3 className="text-base font-medium text-zinc-900 mb-2">Команда</h3>
+                <p className="text-lg text-zinc-500">{project.team}</p>
+              </div>
+            )}
           </div>
 
           <div className="md:col-span-8 md:pl-12">
@@ -108,6 +135,22 @@ export default function ProjectPage() {
                 <p key={index}>{paragraph}</p>
               ))}
             </div>
+
+            {project.tags.length > 0 && (
+              <div className="mt-12">
+                <h3 className="text-sm font-medium text-zinc-400 mb-4 uppercase tracking-wider">Теги</h3>
+                <div className="flex flex-wrap gap-2">
+                  {project.tags.map((tag, index) => (
+                    <span 
+                      key={index}
+                      className="px-4 py-2 bg-zinc-100 text-zinc-700 rounded-full text-sm"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="mt-12">
               <h3 className="text-sm font-medium text-zinc-400 mb-4 uppercase tracking-wider">Палітра матеріалів</h3>
