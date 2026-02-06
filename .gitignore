@@ -22,6 +22,17 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment files (NEVER COMMIT THESE)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.key
+*.crt
+seed-data.json
 *.env
 
 # Uploads and user-generated files
