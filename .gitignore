@@ -23,3 +23,18 @@ dist-ssr
 *.sln
 *.sw?
 *.env
+
+# Uploads and user-generated files
+uploads/
+temp/
+tmp/
+cache/
+*.tmp
+.cache/
+
+# Backup files
+*.bak
+
+# Local environment files (not committed)
+.env.local
+.env.*.local
