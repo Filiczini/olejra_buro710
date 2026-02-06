@@ -3,6 +3,7 @@ import HomePage from './pages/HomePage';
 import ProjectPage from './pages/ProjectPage';
 import LoginPage from './pages/admin/LoginPage';
 import DashboardPage from './pages/admin/DashboardPage';
+import CreateProjectPage from './pages/admin/CreateProjectPage';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 
 function App() {
@@ -17,6 +18,14 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/projects/create" 
+          element={
+            <ProtectedRoute>
+              <CreateProjectPage />
             </ProtectedRoute>
           } 
         />
