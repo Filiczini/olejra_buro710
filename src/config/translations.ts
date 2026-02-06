@@ -1,5 +1,9 @@
 export const translations = {
   uk: {
+    header: {
+      admin: 'Адмін',
+      logout: 'Вийти'
+    },
     navigation: {
       projects: 'Проєкти',
       createProject: 'Створити проєкт',
@@ -133,6 +137,10 @@ export const translations = {
     }
   },
   en: {
+    header: {
+      admin: 'Admin',
+      logout: 'Logout'
+    },
     navigation: {
       projects: 'Projects',
       createProject: 'Create Project',
