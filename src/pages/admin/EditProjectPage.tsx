@@ -1,39 +1,69 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import ImageUpload from '../../components/admin/ImageUpload';
 import TagInput from '../../components/admin/TagInput';
-import type { CreateProjectData } from '../../types/project';
+import type { UpdateProjectData, Project } from '../../types/project';
 import { portfolioService } from '../../services/api';
 
-export default function CreateProjectPage() {
+export default function EditProjectPage() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<CreateProjectData>({
+  const { id } = useParams<{ id: string }>();
+  const [project, setProject] = useState<Project | null>(null);
+  const [formData, setFormData] = useState<UpdateProjectData>({
     title: '',
     description: '',
-    image: null as unknown as File,
+    image: undefined,
     tags: [],
+    location: '',
+    area: '',
+    year: '',
+    team: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+
+  useEffect(() => {
+    if (!id) return;
+
+    const loadProject = async () => {
+      try {
+        const data = await portfolioService.getById(id);
+        setProject(data);
+        setFormData({
+          title: data.title,
+          description: data.description[0] || '',
+          tags: data.tags,
+          location: data.location || '',
+          area: data.area || '',
+          year: data.year || '',
+          team: data.team || '',
+        });
+      } catch (error) {
+        console.error('Error loading project:', error);
+        navigate('/admin/dashboard');
+      } finally {
+        setFetching(false);
+      }
+    };
+
+    loadProject();
+  }, [id, navigate]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (formData.title.length < 2) {
+    if (formData.title && formData.title.length < 2) {
       newErrors.title = 'Title must be at least 2 characters';
     }
 
-    if (formData.description.length < 10) {
+    if (formData.description && formData.description.length < 10) {
       newErrors.description = 'Description must be at least 10 characters';
     }
 
-    if (!formData.image || formData.image.size === 0) {
-      newErrors.image = 'Image is required';
-    }
-
-    if (formData.tags.length > 10) {
+    if (formData.tags && formData.tags.length > 10) {
       newErrors.tags = 'Maximum 10 tags allowed';
     }
 
@@ -52,12 +82,18 @@ export default function CreateProjectPage() {
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append('title', formData.title);
-      formDataToSend.append('description', formData.description);
+      if (formData.title) {
+        formDataToSend.append('title', formData.title);
+      }
+      if (formData.description) {
+        formDataToSend.append('description', formData.description);
+      }
       if (formData.image) {
         formDataToSend.append('image', formData.image);
       }
-      formDataToSend.append('tags', JSON.stringify(formData.tags));
+      if (formData.tags) {
+        formDataToSend.append('tags', JSON.stringify(formData.tags));
+      }
       if (formData.location) {
         formDataToSend.append('location', formData.location);
       }
@@ -71,7 +107,7 @@ export default function CreateProjectPage() {
         formDataToSend.append('team', formData.team);
       }
 
-      await portfolioService.create(formDataToSend);
+      await portfolioService.update(id!, formDataToSend);
 
       navigate('/admin/dashboard');
     } catch (error) {
@@ -81,6 +117,22 @@ export default function CreateProjectPage() {
       setLoading(false);
     }
   };
+
+  if (fetching) {
+    return (
+      <div className="min-h-screen bg-zinc-50 p-8 flex items-center justify-center">
+        <div className="text-lg text-zinc-600">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!project) {
+    return (
+      <div className="min-h-screen bg-zinc-50 p-8 flex items-center justify-center">
+        <div className="text-lg text-zinc-600">Project not found</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-zinc-50 p-8">
@@ -92,7 +144,7 @@ export default function CreateProjectPage() {
           >
             ← Back
           </button>
-          <h1 className="text-3xl font-bold text-zinc-900">Create Project</h1>
+          <h1 className="text-3xl font-bold text-zinc-900">Edit Project</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-8">
@@ -124,7 +176,7 @@ export default function CreateProjectPage() {
             />
 
             <TagInput
-              tags={formData.tags}
+              tags={formData.tags || []}
               onTagsChange={(tags) => setFormData({ ...formData, tags })}
             />
             {errors.tags && <span className="text-sm text-red-500">{errors.tags}</span>}
@@ -163,9 +215,19 @@ export default function CreateProjectPage() {
               </div>
             )}
 
-            <Button type="submit" disabled={loading} className="w-full py-3">
-              {loading ? 'Creating...' : 'Create Project'}
-            </Button>
+            <div className="flex gap-4">
+              <Button type="submit" disabled={loading} className="flex-1 py-3">
+                {loading ? 'Updating...' : 'Update Project'}
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => navigate('/admin/dashboard')}
+                className="flex-1 py-3"
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
         </form>
       </div>

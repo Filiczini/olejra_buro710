@@ -1,0 +1,39 @@
+[
+  {
+    "title": "Stone House",
+    "description": [
+      "Інтер'єр цієї резиденції втілює баланс між сучасною елегантністю та традиційним теплом.",
+      "Ми використали поєднання натурального каменю та дерева для створення простору."
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace",
+    "tags": ["residential", "stone", "modern"],
+    "location": "Львів",
+    "area": "180 м²",
+    "year": "2023"
+  },
+  {
+    "title": "Kyiv Modernist",
+    "description": [
+      "Цей проект відображає київський модернізм 1960-х років.",
+      "Зберігаючи оригінальні архітектурні деталі."
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1556912173-3db996ea8c3f",
+    "tags": ["modernist", "renovation", "historical"],
+    "location": "Київ",
+    "area": "210 м²",
+    "year": "2022"
+  },
+  {
+    "title": "Golden Ray",
+    "description": [
+      "Інтер'єр цієї резиденції втілює баланс між монументальною елегантністю та домашнім теплом.",
+      "Ми використали поєднання натурального каменю, латуні та оксамиту."
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6",
+    "tags": ["residential", "luxury", "velvet"],
+    "location": "Київ",
+    "area": "145 м²",
+    "year": "2023",
+    "team": "Олена Марченко, Іван Петренко"
+  }
+]
