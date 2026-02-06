@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "seed": "tsx src/server/seed.ts",
-    "seed:clean": "tsx src/server/clear-projects.ts"
+    "seed:clean": "tsx src/server/clear-projects.ts",
+    "migrate:projects": "tsx src/server/migrate-projects.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.95.2",

@@ -16,6 +16,13 @@ export const authService = {
   },
 };
 
+export const siteSettingsService = {
+  getAll: async () => {
+    const response = await api.get('/settings');
+    return response.data;
+  },
+};
+
 export const portfolioService = {
   getAll: async (params?: PaginationParams) => {
     const queryParams = new URLSearchParams();

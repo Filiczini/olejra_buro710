@@ -50,7 +50,7 @@ router.post('/', authMiddleware, uploadSingleImage, async (req, res) => {
         console.log('Headers:', req.headers.authorization ? 'Token present' : 'No token');
         console.log('Body:', { ...req.body, image: '[FILE]' });
         console.log('File:', req.file ? { name: req.file.originalname, mimetype: req.file.mimetype, size: req.file.size } : 'No file');
-        const { title, description, tags, location, area, year, team } = req.body;
+        const { title, description, tags, location, area, year, team, architects, concept_heading, concept_caption, concept_quote } = req.body;
         if (!title || !description) {
             console.log('❌ Validation failed: Title or description missing');
             return res.status(400).json({ error: 'Title and description are required' });
@@ -72,6 +72,10 @@ router.post('/', authMiddleware, uploadSingleImage, async (req, res) => {
             area,
             year,
             team,
+            architects,
+            concept_heading,
+            concept_caption,
+            concept_quote,
         });
         console.log('✅ Project created successfully:', project.id);
         res.status(201).json(project);
@@ -83,7 +87,7 @@ router.post('/', authMiddleware, uploadSingleImage, async (req, res) => {
 });
 router.put('/:id', authMiddleware, uploadSingleImage, async (req, res) => {
     try {
-        const { title, description, tags, location, area, year, team } = req.body;
+        const { title, description, tags, location, area, year, team, architects, concept_heading, concept_caption, concept_quote } = req.body;
         const existing = await projectService.getById(req.params.id);
         let imageUrl = existing.image_url;
         if (req.file) {
@@ -99,6 +103,10 @@ router.put('/:id', authMiddleware, uploadSingleImage, async (req, res) => {
             area,
             year,
             team,
+            architects,
+            concept_heading,
+            concept_caption,
+            concept_quote,
         });
         res.json(project);
     }

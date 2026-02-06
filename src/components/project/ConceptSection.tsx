@@ -1,24 +1,39 @@
 import type { ProjectImage } from '../../types/project';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { translations } from '../../config/translations';
 
 interface ConceptSectionProps {
   title?: string;
   description: string[];
   images: ProjectImage[];
   features?: string[];
+  heading?: string;
+  caption?: string;
+  quote?: string;
 }
 
-export default function ConceptSection({ title = 'Concept & Context', description, images, features }: ConceptSectionProps) {
-  // Use main description paragraphs, limit to first 2 for concept section
+export default function ConceptSection({
+  title = 'Concept & Context',
+  description,
+  images,
+  features,
+  heading,
+  caption,
+  quote
+}: ConceptSectionProps) {
+  const { language } = useLanguage();
+  const t = translations[language];
+  const project = t.project || {};
+
   const conceptDescription = description.slice(0, 2);
 
   return (
     <section className="max-w-[1800px] mx-auto px-6 mb-32 md:mb-48">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-start">
-        {/* Left: Sticky Sidebar */}
         <div className="lg:col-span-5 sticky top-32">
           <span className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-6 block">{title}</span>
           <h3 className="text-4xl md:text-6xl font-normal uppercase tracking-tight text-zinc-900 mb-8 leading-[0.9]">
-            Культурний <br /> Код
+            {heading || 'Культурний <br /> Код'}
           </h3>
           <div className="w-12 h-[1px] bg-zinc-900 mb-8" />
 
@@ -40,7 +55,6 @@ export default function ConceptSection({ title = 'Concept & Context', descriptio
           )}
         </div>
 
-        {/* Right: Images */}
         <div className="lg:col-span-7 flex flex-col gap-4">
           <div className="aspect-[4/5] bg-zinc-100 overflow-hidden relative group">
             {images[0] && (
@@ -51,7 +65,7 @@ export default function ConceptSection({ title = 'Concept & Context', descriptio
               />
             )}
             <div className="absolute bottom-6 left-6 text-white bg-black/50 backdrop-blur-sm px-4 py-2 text-xs uppercase tracking-wide">
-              Design Concept
+              {caption || project.designConcept || 'Концепція дизайну'}
             </div>
           </div>
 
@@ -67,7 +81,7 @@ export default function ConceptSection({ title = 'Concept & Context', descriptio
             </div>
             <div className="aspect-square bg-zinc-100 overflow-hidden flex items-center justify-center p-8 bg-zinc-50">
               <p className="text-zinc-400 text-xs uppercase tracking-widest text-center leading-loose">
-                "Ми поєднали матеріали та форми, щоб створити відчуття глибини простору."
+                {quote || '"Ми поєднали матеріали та форми, щоб створити відчуття глибини простору."'}
               </p>
             </div>
           </div>
@@ -76,3 +90,4 @@ export default function ConceptSection({ title = 'Concept & Context', descriptio
     </section>
   );
 }
+

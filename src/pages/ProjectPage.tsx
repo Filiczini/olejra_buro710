@@ -10,16 +10,27 @@ import ConceptSection from '../components/project/ConceptSection';
 import DesignZonesSection from '../components/project/DesignZonesSection';
 import FooterSection from '../components/project/FooterSection';
 import type { Project, ProjectImage } from '../types/project';
-import { portfolioService } from '../services/api';
-import { generateCategory, generateDesignZones, generateMaterials } from '../utils/projectGenerators';
+import { portfolioService, siteSettingsService } from '../services/api';
+import { generateCategory, generateDesignZones } from '../utils/projectGenerators';
+import { useLanguage } from '../contexts/LanguageContext';
+import { translations } from '../config/translations';
 
 export default function ProjectPage() {
+  const { language } = useLanguage();
+  const t = translations[language];
+  const projectTranslations = t.project || {};
+
   const { id } = useParams<{ id: string }>();
   const [project, setProject] = useState<Project | null>(null);
   const [nextProject, setNextProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingNext, setLoadingNext] = useState(false);
   const [error, setError] = useState('');
+  const [siteSettings, setSiteSettings] = useState({
+    company_name: 'Bureau 710',
+    company_tagline: 'Architecture & Consulting',
+    company_location: 'Kyiv, Ukraine',
+  });
 
   useEffect(() => {
     const loadProject = async () => {
@@ -33,6 +44,10 @@ export default function ProjectPage() {
         const next = await portfolioService.getNextProject(id!);
         setNextProject(next);
         setLoadingNext(false);
+
+        // Load site settings
+        const settings = await siteSettingsService.getAll();
+        setSiteSettings(settings);
       } catch (err) {
         setError('Failed to load project');
         console.error('Error loading project:', err);
@@ -49,7 +64,7 @@ export default function ProjectPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-50">
-        <div className="text-lg text-zinc-600">Loading...</div>
+        <div className="text-lg text-zinc-600">{projectTranslations.loading || 'Loading...'}</div>
       </div>
     );
   }
@@ -57,7 +72,7 @@ export default function ProjectPage() {
   if (error || !project) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-50">
-        <div className="text-lg text-red-600">{error || 'Project not found'}</div>
+        <div className="text-lg text-red-600">{error || (projectTranslations.notFound || 'Project not found')}</div>
       </div>
     );
   }
@@ -96,7 +111,8 @@ export default function ProjectPage() {
           area={project.area}
           location={project.location}
           year={project.year}
-          photoCredits={project.photo_credits || project.team || "Bureau 710"}
+          photoCredits={project.photo_credits || project.team}
+          architects={project.architects}
         />
 
         {/* 3. About Section */}
@@ -115,7 +131,9 @@ export default function ProjectPage() {
         {/* 5. Concept Section */}
         {project.description.length > 0 && (
           <ConceptSection
-            title="Concept & Context"
+            heading={project.concept_heading}
+            caption={project.concept_caption}
+            quote={project.concept_quote}
             description={project.description}
             images={projectImages}
             features={features}
@@ -128,7 +146,13 @@ export default function ProjectPage() {
         )}
 
         {/* 7. Footer Section */}
-        <FooterSection nextProject={nextProject || undefined} loadingNext={loadingNext} />
+        <FooterSection
+          nextProject={nextProject || undefined}
+          loadingNext={loadingNext}
+          companyName={siteSettings.company_name}
+          companyTagline={siteSettings.company_tagline}
+          companyLocation={siteSettings.company_location}
+        />
       </main>
 
       <Footer />

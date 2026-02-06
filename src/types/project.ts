@@ -45,6 +45,12 @@ export interface Project {
   project_images?: ProjectImage[];
   design_zones?: DesignZone[];
   materials?: Material[];
+
+  // Additional fields for hardcoded content removal
+  architects?: string;
+  concept_heading?: string;
+  concept_caption?: string;
+  concept_quote?: string;
 }
 
 export interface CreateProjectData {
@@ -56,6 +62,10 @@ export interface CreateProjectData {
   area?: string;
   year?: string;
   team?: string;
+  architects?: string;
+  concept_heading?: string;
+  concept_caption?: string;
+  concept_quote?: string;
 }
 
 export interface UpdateProjectData {
@@ -67,6 +77,10 @@ export interface UpdateProjectData {
   area?: string;
   year?: string;
   team?: string;
+  architects?: string;
+  concept_heading?: string;
+  concept_caption?: string;
+  concept_quote?: string;
 }
 
 export interface PaginationParams {
