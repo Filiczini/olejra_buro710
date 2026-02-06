@@ -11,7 +11,51 @@
     "location": "Київ",
     "area": "280 м²",
     "year": "2023",
-    "team": "Олена Марченко, Дмитро Коваленко"
+    "team": "Олена Марченко, Дмитро Коваленко",
+    "category": "Residential / Modern",
+    "category_primary": "Residential",
+    "category_secondary": "Modern",
+    "short_description": "Сучасний будинок з використанням натуральних каменю та дерева.",
+    "subtitle": "Природні матеріали, сучасні форми",
+    "photo_credits": "Olena Marchenko",
+    "design_zones": [
+      {
+        "id": "zone-1",
+        "name": "living",
+        "order": 1,
+        "title": "Living Space",
+        "description": "Центральна зона з великими панорамними вікнами, що виходять на сад. Відкритий план дозволяє вільно переміщатися між просторами.",
+        "image_url": "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0",
+        "layout": "split",
+        "features": ["Natural Light", "Open Plan", "Stone Accents"]
+      },
+      {
+        "id": "zone-2",
+        "name": "kitchen",
+        "order": 2,
+        "title": "Kitchen & Dining",
+        "description": "Сучасна кухня з острівцем та обідньою зоною. Натуральний камінь на робочій поверхні та тепле дерево в шафах.",
+        "image_url": "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea",
+        "layout": "split-reverse",
+        "features": ["Stone Countertops", "Oak Cabinets", "Open Concept"]
+      },
+      {
+        "id": "zone-3",
+        "name": "terrace",
+        "order": 3,
+        "title": "Outdoor Terrace",
+        "description": "Тераса з видом на сад та панораму міста. Зона для відпочинку та барбекю, що плавно перетікає в внутрішній простір.",
+        "image_url": "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c",
+        "layout": "centered",
+        "features": ["Garden View", "Outdoor Dining", "Seamless Indoor-Outdoor"]
+      }
+    ],
+    "materials": [
+      {"name": "Limestone", "color": "bg-stone-300", "type": "natural"},
+      {"name": "Oak Wood", "color": "bg-amber-700", "type": "natural"},
+      {"name": "Concrete", "color": "bg-zinc-400", "type": "surface"},
+      {"name": "Steel", "color": "bg-zinc-600", "type": "accent"}
+    ]
   },
   {
     "title": "Nordic Villa",
@@ -20,12 +64,55 @@
       "Використовуються світлі тони дерева, білі стіни та прості лінії, що створює відчуття простору та спокою.",
       "Головна особливість - панорамні вікна, що виходять на сад, дозволяючи насолоджуватися природою з комфортом будинку."
     ],
-    "image_url": "https://images.unsplash.com/photo-1556912173-3db996ea8c3f",
+    "image_url": "https://images.unsplash.com/photo-1556910103-1c02745a30bf",
     "tags": ["residential", "scandinavian", "minimalist", "villa", "wood"],
     "location": "Львів",
     "area": "220 м²",
     "year": "2022",
-    "team": "Марія Петренко, Андрій Бойко"
+    "team": "Марія Петренко, Андрій Бойко",
+    "category": "Residential / Scandinavian",
+    "category_primary": "Residential",
+    "category_secondary": "Scandinavian",
+    "short_description": "Скандинавська вілла з мінімалістичним дизайном та світлими тонами.",
+    "subtitle": "Легкість, простір, природність",
+    "photo_credits": "Maria Petrenko",
+    "design_zones": [
+      {
+        "id": "zone-1",
+        "name": "living",
+        "order": 1,
+        "title": "Living Area",
+        "description": "Світла вітальня з білими стінами та світлим деревом. Панорамні вікна забезпечують максимальне природне світло.",
+        "image_url": "https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83",
+        "layout": "split",
+        "features": ["White Walls", "Light Oak", "Panoramic Views"]
+      },
+      {
+        "id": "zone-2",
+        "name": "kitchen",
+        "order": 2,
+        "title": "Open Kitchen",
+        "description": "Мінімалістична кухня з сучасними лініями. Білі фасади та стільниці з натурального каменю.",
+        "image_url": "https://images.unsplash.com/photo-1556910103-1c02745a30bf",
+        "layout": "split-reverse",
+        "features": ["Minimal Design", "Marble Surfaces", "Integrated Appliances"]
+      },
+      {
+        "id": "zone-3",
+        "name": "bedroom",
+        "order": 3,
+        "title": "Master Bedroom",
+        "description": "Спальна зона з приглушеними тонами та простими лініями. Спокій та релаксація.",
+        "image_url": "https://images.unsplash.com/photo-1616594039964-ae9021a400a0",
+        "layout": "centered"
+      }
+    ],
+    "materials": [
+      {"name": "Light Oak", "color": "bg-amber-200", "type": "natural"},
+      {"name": "White Marble", "color": "bg-zinc-50", "type": "surface"},
+      {"name": "Linen", "color": "bg-stone-100", "type": "surface"},
+      {"name": "Brass", "color": "bg-orange-200", "type": "accent"}
+    ]
   },
   {
     "title": "Glass House",
@@ -39,7 +126,51 @@
     "location": "Київ",
     "area": "350 м²",
     "year": "2024",
-    "team": "Катерина Шевченко, Віталій Кравчук"
+    "team": "Катерина Шевченко, Віталій Кравчук",
+    "category": "Residential / Contemporary",
+    "category_primary": "Residential",
+    "category_secondary": "Contemporary",
+    "short_description": "Сучасний будинок з великою кількістю скляних елементів та інтеграцією природного світла.",
+    "subtitle": "Скляна архітектура, легкість форм",
+    "photo_credits": "Kateryna Shevchenko",
+    "design_zones": [
+      {
+        "id": "zone-1",
+        "name": "living",
+        "order": 1,
+        "title": "Main Living Space",
+        "description": "Велика вітальня з панорамним склінням на три сторони. Скляні стіни інтегровані з бетоном та металом.",
+        "image_url": "https://images.unsplash.com/photo-1613490493576-7fde63acd811",
+        "layout": "split",
+        "features": ["Glass Facades", "Concrete Floors", "Steel Structure"]
+      },
+      {
+        "id": "zone-2",
+        "name": "kitchen",
+        "order": 2,
+        "title": "Modern Kitchen",
+        "description": "Кухня з острівцем та сучасним обладнанням. Скляні шафи та металеві акценти.",
+        "image_url": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136",
+        "layout": "split-reverse",
+        "features": ["Glass Cabinets", "Marble Countertops", "Integrated Lighting"]
+      },
+      {
+        "id": "zone-3",
+        "name": "garden",
+        "order": 3,
+        "title": "Indoor Garden",
+        "description": "Внутрішній сад з вертикальним озелененням. Перехід між внутрішнім та зовнішнім простором.",
+        "image_url": "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae",
+        "layout": "centered",
+        "features": ["Vertical Garden", "Natural Light", "Living Plants"]
+      }
+    ],
+    "materials": [
+      {"name": "Tempered Glass", "color": "bg-blue-100", "type": "surface"},
+      {"name": "Concrete", "color": "bg-zinc-500", "type": "surface"},
+      {"name": "Steel", "color": "bg-zinc-700", "type": "accent"},
+      {"name": "Limestone", "color": "bg-stone-200", "type": "natural"}
+    ]
   },
   {
     "title": "Amber Bistro",
@@ -53,7 +184,51 @@
     "location": "Одеса",
     "area": "180 м²",
     "year": "2023",
-    "team": "Ольга Лисенко"
+    "team": "Ольга Лисенко",
+    "category": "Hospitality / Restaurant",
+    "category_primary": "Hospitality",
+    "category_secondary": "Restaurant",
+    "short_description": "Елегантний ресторан з інтимною атмосферою, темними інтер'єрами та мідними акцентами.",
+    "subtitle": "Вечірній камер та теплий світло",
+    "photo_credits": "Olha Lysenko",
+    "design_zones": [
+      {
+        "id": "zone-1",
+        "name": "dining-hall",
+        "order": 1,
+        "title": "Dining Hall",
+        "description": "Головний зал з каміном та приглушеним освітленням. Темні стіни, дерево та шкіра створюють інтимну атмосферу.",
+        "image_url": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0",
+        "layout": "split",
+        "features": ["Ambient Lighting", "Fireplace", "Velvet Seating"]
+      },
+      {
+        "id": "zone-2",
+        "name": "bar",
+        "order": 2,
+        "title": "Bar Area",
+        "description": "Барна зона з мідними акцентами та винним холодильником. Відкритий бар дозволяє спостерігати за барменами.",
+        "image_url": "https://images.unsplash.com/photo-1551024709-8f23befc6f87",
+        "layout": "split-reverse",
+        "features": ["Brass Accents", "Wine Cellar", "Open Bar"]
+      },
+      {
+        "id": "zone-3",
+        "name": "kitchen",
+        "order": 3,
+        "title": "Open Kitchen",
+        "description": "Відкрита кухня з сучасним обладнанням. Гості можуть спостерігати за процесом приготування страв.",
+        "image_url": "https://images.unsplash.com/photo-1556910103-1c02745a30bf",
+        "layout": "centered",
+        "features": ["Chef's Table", "Modern Equipment", "Theater Style"]
+      }
+    ],
+    "materials": [
+      {"name": "Dark Wood", "color": "bg-zinc-900", "type": "surface"},
+      {"name": "Velvet", "color": "bg-yellow-500", "type": "surface"},
+      {"name": "Brass", "color": "bg-orange-200", "type": "accent"},
+      {"name": "Leather", "color": "bg-amber-800", "type": "surface"}
+    ]
   },
   {
     "title": "Green Garden Restaurant",
@@ -67,7 +242,50 @@
     "location": "Дніпро",
     "area": "240 м²",
     "year": "2022",
-    "team": "Андрій Мельник"
+    "team": "Андрій Мельник",
+    "category": "Hospitality / Biophilic",
+    "category_primary": "Hospitality",
+    "category_secondary": "Biophilic",
+    "short_description": "Світлий ресторан з великою кількістю рослин та біофільним дизайном.",
+    "subtitle": "Жива природа в просторі ресторану",
+    "photo_credits": "Andriy Melnyk",
+    "design_zones": [
+      {
+        "id": "zone-1",
+        "name": "dining",
+        "order": 1,
+        "title": "Garden Dining",
+        "description": "Основна зона з вертикальними садами та зеленими стінами. Багато природного світла та зелених рослин.",
+        "image_url": "https://images.unsplash.com/photo-1559329007-40df8a9345d8",
+        "layout": "split",
+        "features": ["Vertical Gardens", "Natural Light", "Plant Walls"]
+      },
+      {
+        "id": "zone-2",
+        "name": "terrace",
+        "order": 2,
+        "title": "Winter Garden",
+        "description": "Зимовий сад зі скляним дахом та великою кількістю рослин. Зона для відпочинку та спілкування.",
+        "image_url": "https://images.unsplash.com/photo-1544025162-d76694265947",
+        "layout": "centered",
+        "features": ["Glass Roof", "Living Plants", "Sustainable Design"]
+      },
+      {
+        "id": "zone-3",
+        "name": "kitchen",
+        "order": 3,
+        "title": "Eco Kitchen",
+        "description": "Кухня з фокусом на стійкість та екологічні інгредієнти. Відкритий простір з використанням натуральних матеріалів.",
+        "image_url": "https://images.unsplash.com/photo-1556910103-1c02745a30bf",
+        "layout": "split-reverse"
+      }
+    ],
+    "materials": [
+      {"name": "Living Plants", "color": "bg-green-500", "type": "natural"},
+      {"name": "Natural Wood", "color": "bg-amber-800", "type": "natural"},
+      {"name": "Bamboo", "color": "bg-amber-600", "type": "natural"},
+      {"name": "Terracotta", "color": "bg-orange-400", "type": "surface"}
+    ]
   },
   {
     "title": "Urban Bistro",
@@ -81,7 +299,51 @@
     "location": "Київ",
     "area": "150 м²",
     "year": "2024",
-    "team": "Ірина Сидоренко"
+    "team": "Ірина Сидоренко",
+    "category": "Hospitality / Urban",
+    "category_primary": "Hospitality",
+    "category_secondary": "Urban",
+    "short_description": "Сучасний міський ресторан з індустріальним дизайном та відкритим простором.",
+    "subtitle": "Індустріальний шарм сучасного міста",
+    "photo_credits": "Iryna Sydorenko",
+    "design_zones": [
+      {
+        "id": "zone-1",
+        "name": "main-hall",
+        "order": 1,
+        "title": "Main Hall",
+        "description": "Головний зал з індустріальними матеріалами - цегла, бетон, метал. Відкритий простір з високими стелями.",
+        "image_url": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5",
+        "layout": "split",
+        "features": ["Exposed Brick", "Concrete Floors", "High Ceilings"]
+      },
+      {
+        "id": "zone-2",
+        "name": "bar",
+        "order": 2,
+        "title": "Industrial Bar",
+        "description": "Барна зона з металевими елементами та сучасним обладнанням. Темні тони та індустріальні акценти.",
+        "image_url": "https://images.unsplash.com/photo-1470337458703-46ad1756a187",
+        "layout": "split-reverse",
+        "features": ["Steel Accents", "Bar Counter", "Urban Vibes"]
+      },
+      {
+        "id": "zone-3",
+        "name": "kitchen",
+        "order": 3,
+        "title": "Open Kitchen",
+        "description": "Відкрита кухня з сучасним обладнанням. Гості можуть спостерігати за процесом приготування.",
+        "image_url": "https://images.unsplash.com/photo-1556912173-3db996ea8c3f",
+        "layout": "centered",
+        "features": ["Chef's Table", "Modern Equipment", "Open Concept"]
+      }
+    ],
+    "materials": [
+      {"name": "Red Brick", "color": "bg-orange-300", "type": "surface"},
+      {"name": "Concrete", "color": "bg-zinc-500", "type": "surface"},
+      {"name": "Steel", "color": "bg-zinc-600", "type": "accent"},
+      {"name": "Recycled Wood", "color": "bg-amber-900", "type": "natural"}
+    ]
   },
   {
     "title": "Artisan Coffee Lab",
@@ -95,62 +357,260 @@
     "location": "Львів",
     "area": "120 м²",
     "year": "2023",
-    "team": "Максим Грищенко"
+    "team": "Максим Грищенко",
+    "category": "Hospitality / Coffee",
+    "category_primary": "Hospitality",
+    "category_secondary": "Coffee",
+    "short_description": "Індустріальна кав'ярня з сучасним дизайном та акцентом на процес приготування кави.",
+    "subtitle": "Крафт кава в індустріальному просторі",
+    "photo_credits": "Maksym Hryshchenko",
+    "design_zones": [
+      {
+        "id": "zone-1",
+        "name": "coffee-bar",
+        "order": 1,
+        "title": "Coffee Bar",
+        "description": "Основна барна зона з сучасним обладнанням. Відкритий простір дозволяє гостям спостерігати за баристами.",
+        "image_url": "https://images.unsplash.com/photo-1445116572660-236099ec97a0",
+        "layout": "split",
+        "features": ["Specialty Equipment", "Barista Station", "Bean Bar"]
+      },
+      {
+        "id": "zone-2",
+        "name": "seating",
+        "order": 2,
+        "title": "Cozy Seating",
+        "description": "Зона для відпочинку з дерев'яними столами та комфортними кріслами. Рослини додають затишок.",
+        "image_url": "https://images.unsplash.com/photo-1521017432531-fbd92d768814",
+        "layout": "split-reverse",
+        "features": ["Wood Tables", "Comfortable Chairs", "Greenery"]
+      },
+      {
+        "id": "zone-3",
+        "name": "lounge",
+        "order": 3,
+        "title": "Lounge Area",
+        "description": "Лаунж зона з софами та кутками для роботи. Світлі тони та м'яке освітлення.",
+        "image_url": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
+        "layout": "centered",
+        "features": ["Sofa Seating", "Work Corners", "Soft Lighting"]
+      }
+    ],
+    "materials": [
+      {"name": "Polished Concrete", "color": "bg-zinc-400", "type": "surface"},
+      {"name": "Dark Wood", "color": "bg-amber-900", "type": "natural"},
+      {"name": "Brass", "color": "bg-orange-200", "type": "accent"},
+      {"name": "Green Plants", "color": "bg-green-400", "type": "natural"}
+    ]
   },
   {
-    "title": "The Coffee House",
+    "title": "Cozy Corner Cafe",
     "description": [
-      "Світла кав'ярня з мінімалістичним дизайном та відкритим простором для релаксації.",
-      "Використовуються світлі тони - білі стіни, світле дерево, легкі акценти - що створюють відчуття простору.",
-      "Великі вікна забезпечують максимальне природне світло, а затишні куточки дозволяють відпочити та попрацювати."
+      "Затишна кав'ярня в центрі міста з теплими тонами та м'якими меблями.",
+      "Використовуються природні матеріали - дерево, камінь, тканини - що створюють атмосферу затишку.",
+      "Велика кількість рослин та приглушене освітлення доповнюють атмосферу."
     ],
-    "image_url": "https://images.unsplash.com/photo-15593393520-11d035aa65de",
-    "tags": ["cafe", "coffee", "light", "minimalist", "cozy"],
+    "image_url": "https://images.unsplash.com/photo-1554118811-1e0d58224f24",
+    "tags": ["cafe", "cozy", "warm", "urban", "coffee"],
     "location": "Київ",
     "area": "90 м²",
     "year": "2022",
-    "team": "Наталія Коваленко"
+    "team": "Бюро 710",
+    "category": "Hospitality / Cafe",
+    "category_primary": "Hospitality",
+    "category_secondary": "Cafe",
+    "short_description": "Затишна кав'ярня з теплими тонами, м'якими меблями та приглушеним освітленням.",
+    "subtitle": "Місце для спокою та кави",
+    "photo_credits": "Bureau 710",
+    "design_zones": [
+      {
+        "id": "zone-1",
+        "name": "main-cafe",
+        "order": 1,
+        "title": "Main Cafe Area",
+        "description": "Основна зона з теплими тонами та м'якими меблями. Затишна атмосфера для відпочинку.",
+        "image_url": "https://images.unsplash.com/photo-1554118811-1e0d58224f24",
+        "layout": "split",
+        "features": ["Warm Lighting", "Soft Furniture", "Cozy Atmosphere"]
+      },
+      {
+        "id": "zone-2",
+        "name": "corner",
+        "order": 2,
+        "title": "Quiet Corner",
+        "description": "Куток для читання та роботи з видом на вулицю. Затишна та приватна зона.",
+        "image_url": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085",
+        "layout": "centered",
+        "features": ["Reading Corner", "Work Space", "Street View"]
+      }
+    ],
+    "materials": [
+      {"name": "Light Wood", "color": "bg-amber-200", "type": "natural"},
+      {"name": "Soft Fabrics", "color": "bg-rose-200", "type": "surface"},
+      {"name": "Warm Paint", "color": "bg-orange-100", "type": "surface"},
+      {"name": "Brass", "color": "bg-orange-200", "type": "accent"}
+    ]
   },
   {
-    "title": "Riverside Cafe",
+    "title": "Morning Brew Cafe",
     "description": [
-      "Кав'ярня біля річки з природними матеріалами та релаксуючою атмосферою.",
-      "Використовуються натуральні матеріали - дерево, камінь, рослини - що доповнюються скляними конструкціями.",
-      "Тераса з видом на річку дозволяє гостям насолоджуватися природою з комфортом кав'ярні."
+      "Світла кав'ярня з акцентом на ранкові сніданки та добірну каву.",
+      "Використовуються світлі тони та багато природного світла для створення атмосфери ранку.",
+      "Меню включає свіжі сніданки та добірні кавові напої."
     ],
-    "image_url": "https://images.unsplash.com/photo-1554118811-1e0d58224f24",
-    "tags": ["cafe", "riverside", "natural", "wood", "cozy"],
+    "image_url": "https://images.unsplash.com/photo-1533777857889-4be7c70b33f7",
+    "tags": ["cafe", "breakfast", "bright", "coffee", "morning"],
     "location": "Одеса",
-    "area": "130 м²",
+    "area": "100 м²",
     "year": "2023",
-    "team": "Олександр Тимошенко"
+    "team": "Юлія Коваленко",
+    "category": "Hospitality / Coffee",
+    "category_primary": "Hospitality",
+    "category_secondary": "Coffee",
+    "short_description": "Світла кав'ярня з акцентом на ранкові сніданки та добірну каву.",
+    "subtitle": "Світлий початок дня",
+    "photo_credits": "Yulia Kovalenko",
+    "design_zones": [
+      {
+        "id": "zone-1",
+        "name": "breakfast",
+        "order": 1,
+        "title": "Breakfast Area",
+        "description": "Зона для сніданків зі світлими тонами та великою кількістю природного світла.",
+        "image_url": "https://images.unsplash.com/photo-1533777857889-4be7c70b33f7",
+        "layout": "split",
+        "features": ["Morning Light", "White Tables", "Fresh Flowers"]
+      },
+      {
+        "id": "zone-2",
+        "name": "coffee",
+        "order": 2,
+        "title": "Coffee Counter",
+        "description": "Кав'ярня з добірним зерном та сучасним обладнанням. Баристи з професійним підходом.",
+        "image_url": "https://images.unsplash.com/photo-1453614512568-c4024d13c247",
+        "layout": "split-reverse",
+        "features": ["Specialty Coffee", "Professional Baristas", "Bean Selection"]
+      }
+    ],
+    "materials": [
+      {"name": "White Marble", "color": "bg-zinc-50", "type": "surface"},
+      {"name": "Light Oak", "color": "bg-amber-300", "type": "natural"},
+      {"name": "Copper", "color": "bg-orange-400", "type": "accent"},
+      {"name": "Fresh Flowers", "color": "bg-pink-200", "type": "natural"}
+    ]
   },
   {
-    "title": "Urban Fashion Boutique",
+    "title": "Fashion Boutique",
     "description": [
-      "Сучасний бутик одягу з модним дизайном та акцентом на візуальний мерчандайзинг.",
-      "Використовуються сучасні матеріали - метал, скло, світле дерево - що доповнюються яскравими акцентами.",
-      "Модульна конструкція дозволяє легко змінювати виставку відповідно до сезонів та колекцій."
+      "Елегантний бутик з фокусом на бренд та продукти. Мінімалістичний дизайн з акцентами.",
+      "Використовуються високоякісні матеріали - мармур, латунь, дерево - що створюють атмосферу розкоші.",
+      "Світлий простір з чистими лініями дозволяє продуктам бути головними."
     ],
-    "image_url": "https://images.unsplash.com/photo-1556905055-8f358a7a47b2",
-    "tags": ["retail", "fashion", "boutique", "modern", "shopping"],
+    "image_url": "https://images.unsplash.com/photo-1441986300917-64674bd600d8",
+    "tags": ["shop", "retail", "boutique", "fashion", "modern"],
     "location": "Дніпро",
     "area": "160 м²",
     "year": "2023",
-    "team": "Вікторія Лебідь"
+    "team": "Бюро 710",
+    "category": "Commercial / Boutique",
+    "category_primary": "Commercial",
+    "category_secondary": "Boutique",
+    "short_description": "Елегантний бутик з фокусом на бренд та продукти. Мінімалістичний дизайн з акцентами.",
+    "subtitle": "Елегантність в деталях",
+    "photo_credits": "Bureau 710",
+    "design_zones": [
+      {
+        "id": "zone-1",
+        "name": "showroom",
+        "order": 1,
+        "title": "Main Showroom",
+        "description": "Основний шоурум з мінімалістичним дизайном та фокусом на продукти. Світлі тони та чисті лінії.",
+        "image_url": "https://images.unsplash.com/photo-1441986300917-64674bd600d8",
+        "layout": "split",
+        "features": ["Minimal Design", "Product Focus", "Clean Lines"]
+      },
+      {
+        "id": "zone-2",
+        "name": "fitting",
+        "order": 2,
+        "title": "Fitting Rooms",
+        "description": "Примерні кімнати з дзеркалами та якісним освітленням. Затишна та приватна атмосфера.",
+        "image_url": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64",
+        "layout": "centered",
+        "features": ["Full Mirrors", "Quality Lighting", "Privacy"]
+      },
+      {
+        "id": "zone-3",
+        "name": "checkout",
+        "order": 3,
+        "title": "Checkout Area",
+        "description": "Зона оформлення замовлень з брендованими елементами та якісними матеріалами.",
+        "image_url": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d",
+        "layout": "split-reverse"
+      }
+    ],
+    "materials": [
+      {"name": "White Marble", "color": "bg-zinc-50", "type": "surface"},
+      {"name": "Brass", "color": "bg-orange-200", "type": "accent"},
+      {"name": "Dark Wood", "color": "bg-zinc-800", "type": "natural"},
+      {"name": "Glass", "color": "bg-blue-100", "type": "surface"}
+    ]
   },
   {
-    "title": "Minimalist Furniture Store",
+    "title": "Local Goods Store",
     "description": [
-      "Меблевий магазин з мінімалістичним дизайном та акцентом на функціональність.",
-      "Використовуються сучасні матеріали - метал, скло, світле дерево - що доповнюються скандинавським стилем.",
-      "Відкритий простір дозволяє легко орієнтуватися та обирати меблі, а виставка організована згідно з типами."
+      "Магазин локальних товарів з акцентом на бренд та натуральні матеріали.",
+      "Використовуються натуральні матеріали - дерево, камінь, бавовна - що створюють атмосферу теплоти.",
+      "Концепція фокусується на локальних виробників та натуральних продуктах."
     ],
-    "image_url": "https://images.unsplash.com/photo-1555529732-58e34c367637",
-    "tags": ["retail", "furniture", "minimalist", "scandinavian", "design"],
+    "image_url": "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a",
+    "tags": ["shop", "retail", "store", "local", "natural"],
     "location": "Херсон",
-    "area": "200 м²",
+    "area": "140 м²",
     "year": "2024",
-    "team": "Дмитро Поліщук"
+    "team": "Бюро 710",
+    "category": "Commercial / Retail",
+    "category_primary": "Commercial",
+    "category_secondary": "Retail",
+    "short_description": "Магазин локальних товарів з акцентом на бренд та натуральні матеріали.",
+    "subtitle": "Локальне, натуральне, унікальне",
+    "photo_credits": "Bureau 710",
+    "design_zones": [
+      {
+        "id": "zone-1",
+        "name": "storefront",
+        "order": 1,
+        "title": "Storefront",
+        "description": "Вітрина з великими вікнами та брендовими елементами. Використання натуральних матеріалів.",
+        "image_url": "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a",
+        "layout": "split",
+        "features": ["Large Windows", "Natural Materials", "Brand Display"]
+      },
+      {
+        "id": "zone-2",
+        "name": "interior",
+        "order": 2,
+        "title": "Main Interior",
+        "description": "Внутрішній простір з дерев'яними полицями та натуральними матеріалами. Світлі тони та комфортна атмосфера.",
+        "image_url": "https://images.unsplash.com/photo-1535381234969-5f1ce7f542d7",
+        "layout": "centered",
+        "features": ["Wooden Shelves", "Natural Light", "Cozy Atmosphere"]
+      },
+      {
+        "id": "zone-3",
+        "name": "checkout",
+        "order": 3,
+        "title": "Checkout Counter",
+        "description": "Оформлення замовлень з дерев'яним прилавком та брендованими елементами.",
+        "image_url": "https://images.unsplash.com/photo-1611095785943-dc076c4086c8",
+        "layout": "split-reverse"
+      }
+    ],
+    "materials": [
+      {"name": "Pine Wood", "color": "bg-amber-500", "type": "natural"},
+      {"name": "Natural Stone", "color": "bg-stone-400", "type": "natural"},
+      {"name": "Cotton", "color": "bg-stone-200", "type": "surface"},
+      {"name": "Black Iron", "color": "bg-zinc-800", "type": "accent"}
+    ]
   }
 ]

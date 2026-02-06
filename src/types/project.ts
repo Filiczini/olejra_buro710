@@ -1,3 +1,27 @@
+export interface DesignZone {
+  id: string;
+  name: string;
+  order: number;
+  title: string;
+  description: string;
+  image_url?: string;
+  layout?: 'full-width' | 'split' | 'centered' | 'split-reverse';
+  features?: string[];
+  alt?: string;
+}
+
+export interface ProjectImage {
+  url: string;
+  caption?: string;
+  alt?: string;
+}
+
+export interface Material {
+  name: string;
+  color?: string;
+  type?: 'surface' | 'accent' | 'natural';
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -10,6 +34,17 @@ export interface Project {
   team?: string;
   created_at: string;
   updated_at: string;
+
+  // New optional fields for enhanced design
+  category?: string;
+  category_primary?: string;
+  category_secondary?: string;
+  short_description?: string;
+  subtitle?: string;
+  photo_credits?: string;
+  project_images?: ProjectImage[];
+  design_zones?: DesignZone[];
+  materials?: Material[];
 }
 
 export interface CreateProjectData {
