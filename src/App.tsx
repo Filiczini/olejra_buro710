@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import HomePage from './pages/HomePage';
+import AllProjectsPage from './pages/AllProjectsPage';
 import ProjectPage from './pages/ProjectPage';
 import LoginPage from './pages/admin/LoginPage';
 import DashboardPage from './pages/admin/DashboardPage';
@@ -28,6 +29,7 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<HomePage />} />
+        <Route path="/projects" element={<AllProjectsPage />} />
         <Route path="/project/:id" element={<ProjectPage />} />
         <Route path="/admin/login" element={<LoginPage />} />
 

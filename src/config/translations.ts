@@ -4,6 +4,12 @@ export const translations = {
       admin: 'Адмін',
       logout: 'Вийти'
     },
+    home: {
+      featuredProjects: 'Вибрані проєкти',
+      viewAll: 'Всі проєкти',
+      about: 'Про бюро',
+      contact: 'Контакти',
+    },
     project: {
       loading: 'Завантаження...',
       notFound: 'Проект не знайдено',
@@ -52,6 +58,11 @@ export const translations = {
       noProjects: 'Проєктів не знайдено',
       showing: 'Показано',
       of: 'з',
+      previous: 'Попередня',
+      next: 'Наступна'
+    },
+    allProjects: {
+      clearFilters: 'Очистити фільтри',
       previous: 'Попередня',
       next: 'Наступна'
     },
@@ -153,6 +164,12 @@ export const translations = {
       admin: 'Admin',
       logout: 'Logout'
     },
+    home: {
+      featuredProjects: 'Featured Projects',
+      viewAll: 'All Projects',
+      about: 'About',
+      contact: 'Contact',
+    },
     project: {
       loading: 'Loading...',
       notFound: 'Project not found',
@@ -201,6 +218,11 @@ export const translations = {
       noProjects: 'No projects found',
       showing: 'Showing',
       of: 'of',
+      previous: 'Previous',
+      next: 'Next'
+    },
+    allProjects: {
+      clearFilters: 'Clear filters',
       previous: 'Previous',
       next: 'Next'
     },

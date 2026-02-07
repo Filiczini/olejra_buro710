@@ -17,9 +17,9 @@ export default function Header() {
           BURO 710
         </a>
         <nav className="hidden md:flex items-center gap-10">
-          <a href="/" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">Проекти</a>
-          <a href="#" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">Про бюро</a>
-          <a href="#" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">Контакти</a>
+          <a href="/projects" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">{t.navigation.projects}</a>
+          <a href="#" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">{language === 'uk' ? 'Про бюро' : 'About'}</a>
+          <a href="#" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">{language === 'uk' ? 'Контакти' : 'Contact'}</a>
         </nav>
         <div className="flex items-center gap-6">
           {isAuthenticated ? (
