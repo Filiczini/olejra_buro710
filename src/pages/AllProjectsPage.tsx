@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Icon } from '@iconify-icon/react';
 import { Link } from 'react-router-dom';
-import type { Project } from '../../types/project';
-import { portfolioService } from '../../services/api';
-import { useLanguage } from '../../contexts/LanguageContext';
-import { translations } from '../../config/translations';
+import type { Project } from '../types/project';
+import { portfolioService } from '../services/api';
+import { useLanguage } from '../contexts/LanguageContext';
+import { translations } from '../config/translations';
 
 export default function AllProjectsPage() {
   const { language } = useLanguage();
@@ -21,7 +21,7 @@ export default function AllProjectsPage() {
 
   // Extract unique locations and years
   const [locations, setLocations] = useState<string[]>([]);
-  const [years, setYears] = useState<number[]>([]);
+  const [years, setYears] = useState<string[]>([]);
 
   const loadProjects = async () => {
     try {
@@ -38,11 +38,11 @@ export default function AllProjectsPage() {
 
       // Extract unique locations and years for filters
       if (result.data.length > 0 && (locations.length === 0 || years.length === 0)) {
-        const uniqueLocations = [...new Set(result.data.map(p => p.location).filter(Boolean))].sort();
-        const uniqueYears = [...new Set(result.data.map(p => p.year).filter(Boolean))]
-          .sort((a, b) => b - a);
-        setLocations(uniqueLocations as string[]);
-        setYears(uniqueYears as number[]);
+        const uniqueLocations = [...new Set(result.data.map(p => p.location).filter((loc): loc is string => Boolean(loc)))].sort();
+        const uniqueYears = [...new Set(result.data.map(p => p.year).filter((year): year is string => Boolean(year)))]
+          .sort((a, b) => b.localeCompare(a));
+        setLocations(uniqueLocations);
+        setYears(uniqueYears);
       }
     } catch (error) {
       console.error('Error loading projects:', error);
