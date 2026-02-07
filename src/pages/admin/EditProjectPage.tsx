@@ -260,25 +260,35 @@ export default function EditProjectPage() {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_quote: e.target.value })}
             />
 
-            {errors.submit && (
-              <div className="text-sm text-red-500 bg-red-50 p-3 rounded-lg">
-                {errors.submit}
-              </div>
-            )}
+             {errors.submit && (
+               <div className="text-sm text-red-500 bg-red-50 p-3 rounded-lg">
+                 {errors.submit}
+               </div>
+             )}
 
-            <div className="flex gap-4">
-              <Button type="submit" disabled={loading} className="flex-1 py-3">
-                {loading ? t.editProject.saving : t.editProject.save}
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => navigate('/admin/dashboard')}
-                className="flex-1 py-3"
-              >
-                {t.editProject.cancel}
-              </Button>
-            </div>
+             <div className="border-t border-zinc-200 pt-6 mt-6">
+               <button
+                 type="button"
+                 onClick={() => navigate(`/admin/projects/${id}/sections`)}
+                 className="w-full px-4 py-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-medium rounded-lg transition-colors"
+               >
+                 📋 Manage Sections ({project.sections?.length || 0} sections)
+               </button>
+             </div>
+
+             <div className="flex gap-4">
+               <Button type="submit" disabled={loading} className="flex-1 py-3">
+                 {loading ? t.editProject.saving : t.editProject.save}
+               </Button>
+               <Button
+                 type="button"
+                 variant="secondary"
+                 onClick={() => navigate('/admin/dashboard')}
+                 className="flex-1 py-3"
+               >
+                 {t.editProject.cancel}
+               </Button>
+             </div>
           </div>
         </form>
       </div>

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -75,7 +76,7 @@ app.use(cors({
 // Configure rate limiting for login endpoint (strict)
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 attempts per window
+  limit: 5, // 5 attempts per window (v7.x uses 'limit' instead of 'max')
   message: { error: 'Too many login attempts, please try again later' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -84,7 +85,7 @@ const loginLimiter = rateLimit({
 // Configure rate limiting for API endpoints (standard)
 const apiLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: 100, // 100 requests per minute
+  limit: 100, // 100 requests per minute (v7.x uses 'limit' instead of 'max')
   message: { error: 'Too many requests, please try again later' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -93,7 +94,7 @@ const apiLimiter = rateLimit({
 app.use(express.json({ limit: '50mb' }));
 
 // Apply rate limiting
-app.post('/api/admin/login', loginLimiter); // Strict limit for login
+app.post('/api/admin/login', loginLimiter); // Strict limit for login (before routes)
 app.use(apiLimiter); // Standard limit for all other routes
 
 app.use('/api/admin', authRoutes);

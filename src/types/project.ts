@@ -1,3 +1,9 @@
+// Import section types from sections.ts
+import type {
+  ProjectSection,
+} from './sections';
+
+// Core types (maintained here for backward compatibility)
 export interface DesignZone {
   id: string;
   name: string;
@@ -28,6 +34,11 @@ export interface Project {
   description: string[];
   image_url: string;
   tags: string[];
+
+  // DYNAMIC SECTIONS (ALL sections including Hero are here!)
+  sections?: ProjectSection[];
+
+  // Legacy fields (for backward compatibility, will be migrated to sections)
   location?: string;
   area?: string;
   year?: string;

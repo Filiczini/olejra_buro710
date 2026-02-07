@@ -1,7 +1,7 @@
 import { Icon } from '@iconify-icon/react';
-import type { Project } from '../../types/project';
-import { useLanguage } from '../../contexts/LanguageContext';
-import { translations } from '../../config/translations';
+import type { Project } from '@/types/project';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { translations } from '@/config/translations';
 
 interface FooterSectionProps {
   nextProject?: Project;

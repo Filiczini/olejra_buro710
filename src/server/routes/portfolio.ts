@@ -48,6 +48,16 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+router.get('/:id/next', async (req, res) => {
+  try {
+    const nextProject = await projectService.getNextProject(req.params.id as string);
+    res.json(nextProject);
+  } catch (error) {
+    console.error('Error fetching next project:', error);
+    res.status(500).json({ error: 'Failed to fetch next project' });
+  }
+});
+
 router.post('/', authMiddleware, uploadSingleImage, async (req, res) => {
   try {
     console.log('=== POST /portfolio ===');
@@ -134,15 +144,92 @@ router.put('/:id', authMiddleware, uploadSingleImage, async (req, res) => {
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const project = await projectService.getById(req.params.id as string);
-    
+
     await storageService.deleteImage(project.image_url);
-    
+
     await projectService.delete(req.params.id as string);
-    
+
     res.json({ message: 'Project deleted successfully' });
   } catch (error) {
     console.error('Error deleting project:', error);
     res.status(500).json({ error: 'Failed to delete project' });
+  }
+});
+
+// GET sections for a project
+router.get('/:projectId/sections', async (req, res) => {
+  try {
+    const projectId = req.params.projectId as string;
+
+    const { data, error } = await projectService.getById(projectId);
+
+    if (error) {
+      console.error('Error fetching project sections:', error);
+      return res.status(500).json({ error: 'Failed to fetch project' });
+    }
+
+    return res.json({ sections: data.sections || [] });
+  } catch (error) {
+    console.error('Error fetching project sections:', error);
+    res.status(500).json({ error: 'Failed to fetch sections' });
+  }
+});
+
+// PUT update sections (admin only)
+router.put('/:projectId/sections', authMiddleware, async (req, res) => {
+  try {
+    const projectId = req.params.projectId as string;
+    const { sections } = req.body as { sections: any[] };
+
+    if (!Array.isArray(sections)) {
+      return res.status(400).json({ error: 'Sections must be an array' });
+    }
+
+    console.log(`=== PUT /portfolio/${projectId}/sections ===`);
+    console.log('Sections count:', sections.length);
+
+    const project = await projectService.update(projectId, { sections });
+
+    console.log('✅ Sections updated successfully');
+    res.json({ project });
+  } catch (error) {
+    console.error('Error updating sections:', error);
+    res.status(500).json({ error: 'Failed to update sections' });
+  }
+});
+
+// PUT update section translations (admin only)
+router.put('/:projectId/translations', authMiddleware, async (req, res) => {
+  try {
+    const projectId = req.params.projectId as string;
+    const { translations } = req.body as { translations: Record<string, any> };
+
+    if (!translations || typeof translations !== 'object') {
+      return res.status(400).json({ error: 'Invalid translations format' });
+    }
+
+    console.log(`=== PUT /portfolio/${projectId}/translations ===`);
+    console.log('Translations:', Object.keys(translations));
+
+    // Get existing project to merge translations
+    const existing = await projectService.getById(projectId);
+    const existingTranslations = (existing as any).translations || {};
+
+    // Merge translations
+    const updatedTranslations = {
+      ...existingTranslations,
+      ...translations
+    };
+
+    const project = await projectService.update(projectId, {
+      translations: updatedTranslations
+    } as any);
+
+    console.log('✅ Translations updated successfully');
+    res.json({ project });
+  } catch (error) {
+    console.error('Error updating translations:', error);
+    res.status(500).json({ error: 'Failed to update translations' });
   }
 });
 
