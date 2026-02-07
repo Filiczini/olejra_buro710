@@ -55,7 +55,7 @@ router.post('/', authMiddleware, uploadSingleImage, async (req, res) => {
     console.log('Body:', { ...req.body, image: '[FILE]' });
     console.log('File:', req.file ? { name: req.file.originalname, mimetype: req.file.mimetype, size: req.file.size } : 'No file');
 
-    const { title, description, tags, location, area, year, team } = req.body as any;
+    const { title, description, tags, location, area, year, team, architects, concept_heading, concept_caption, concept_quote } = req.body as any;
 
     if (!title || !description) {
       console.log('❌ Validation failed: Title or description missing');
@@ -82,6 +82,10 @@ router.post('/', authMiddleware, uploadSingleImage, async (req, res) => {
       area,
       year,
       team,
+      architects,
+      concept_heading,
+      concept_caption,
+      concept_quote,
     });
 
     console.log('✅ Project created successfully:', project.id);
@@ -94,12 +98,12 @@ router.post('/', authMiddleware, uploadSingleImage, async (req, res) => {
 
 router.put('/:id', authMiddleware, uploadSingleImage, async (req, res) => {
   try {
-    const { title, description, tags, location, area, year, team } = req.body as any;
-    
+    const { title, description, tags, location, area, year, team, architects, concept_heading, concept_caption, concept_quote } = req.body as any;
+
     const existing = await projectService.getById(req.params.id as string);
-    
+
     let imageUrl = existing.image_url;
-    
+
     if (req.file) {
       await storageService.deleteImage(existing.image_url);
       imageUrl = await storageService.uploadImage(req.file);
@@ -114,6 +118,10 @@ router.put('/:id', authMiddleware, uploadSingleImage, async (req, res) => {
       area,
       year,
       team,
+      architects,
+      concept_heading,
+      concept_caption,
+      concept_quote,
     });
 
     res.json(project);

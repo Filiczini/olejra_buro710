@@ -1,10 +1,9 @@
 interface FullWidthImageProps {
   imageUrl: string;
-  caption?: string;
   alt?: string;
 }
 
-export default function FullWidthImage({ imageUrl, caption, alt }: FullWidthImageProps) {
+export default function FullWidthImage({ imageUrl, alt }: FullWidthImageProps) {
   return (
     <section className="w-full h-[80vh] bg-zinc-100 overflow-hidden">
       <img
