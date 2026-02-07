@@ -5,6 +5,8 @@ import type { Project } from '../types/project';
 import { portfolioService } from '../services/api';
 import { useLanguage } from '../contexts/LanguageContext';
 import { translations } from '../config/translations';
+import Header from '../components/layout/Header';
+import Footer from '../components/layout/Footer';
 
 export default function AllProjectsPage() {
   const { language } = useLanguage();
@@ -80,17 +82,23 @@ export default function AllProjectsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-50 pt-20">
-        <div className="max-w-[1800px] mx-auto px-6 py-24">
-          <div className="text-center text-zinc-600">{t.project.loading}</div>
+      <div className="min-h-screen bg-zinc-50">
+        <Header />
+        <div className="pt-20">
+          <div className="max-w-[1800px] mx-auto px-6 py-24">
+            <div className="text-center text-zinc-600">{t.project.loading}</div>
+          </div>
         </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 pt-20">
-      <div className="max-w-[1800px] mx-auto px-6 py-16">
+    <div className="min-h-screen bg-zinc-50">
+      <Header />
+      <div className="pt-20">
+        <div className="max-w-[1800px] mx-auto px-6 py-16">
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-medium tracking-tight mb-4">
@@ -228,6 +236,8 @@ export default function AllProjectsPage() {
           </>
         )}
       </div>
+      </div>
+      <Footer />
     </div>
   );
 }
