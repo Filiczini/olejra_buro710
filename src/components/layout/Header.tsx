@@ -18,7 +18,7 @@ export default function Header() {
         </a>
         <nav className="hidden md:flex items-center gap-10">
           <a href="/projects" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">{t.navigation.projects}</a>
-          <a href="#" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">{language === 'uk' ? 'Про бюро' : 'About'}</a>
+          <a href="/about" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">{language === 'uk' ? 'Про бюро' : 'About'}</a>
           <a href="#" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">{language === 'uk' ? 'Контакти' : 'Contact'}</a>
         </nav>
         <div className="flex items-center gap-6">
