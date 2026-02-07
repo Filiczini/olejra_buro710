@@ -17,7 +17,6 @@ export default function AllProjectsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
 
@@ -29,7 +28,6 @@ export default function AllProjectsPage() {
     try {
       setLoading(true);
       const filters: any = { page, limit: 12 };
-      if (searchQuery) filters.search = searchQuery;
       if (selectedLocation) filters.location = selectedLocation;
       if (selectedYear) filters.year = selectedYear;
 
@@ -55,13 +53,7 @@ export default function AllProjectsPage() {
 
   useEffect(() => {
     loadProjects();
-  }, [page, searchQuery, selectedLocation, selectedYear]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setPage(1);
-    loadProjects();
-  };
+  }, [page, selectedLocation, selectedYear]);
 
   const handleLocationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedLocation(e.target.value);
@@ -74,7 +66,6 @@ export default function AllProjectsPage() {
   };
 
   const clearFilters = () => {
-    setSearchQuery('');
     setSelectedLocation('');
     setSelectedYear('');
     setPage(1);
@@ -111,23 +102,6 @@ export default function AllProjectsPage() {
 
         {/* Filters */}
         <div className="mb-12 space-y-6">
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="relative">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t.dashboard.searchPlaceholder}
-              className="w-full max-w-md px-5 py-3 bg-white border border-zinc-200 rounded-full text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent"
-            />
-            <button
-              type="submit"
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-zinc-400 hover:text-zinc-900 transition-colors"
-            >
-              <Icon icon="solar:magnifer-linear" width={20} />
-            </button>
-          </form>
-
           {/* Filter Dropdowns */}
           <div className="flex flex-wrap gap-4">
             <select
@@ -152,7 +126,7 @@ export default function AllProjectsPage() {
               ))}
             </select>
 
-            {(searchQuery || selectedLocation || selectedYear) && (
+            {(selectedLocation || selectedYear) && (
               <button
                 onClick={clearFilters}
                 className="px-5 py-3 text-zinc-500 hover:text-zinc-900 transition-colors"
