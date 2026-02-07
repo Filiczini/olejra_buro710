@@ -3,11 +3,16 @@ import type { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { authMiddleware } from '../middleware/auth';
 import { generateToken } from '../config/jwt';
+import dotenv from 'dotenv';
+
+// Load environment variables BEFORE reading them
+// This ensures dotenv.config() runs before we access process.env
+dotenv.config();
 
 const router = Router();
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@example.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL!;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD!;
 
 const generatePasswordHash = async (password: string): Promise<string> => {
   return await bcrypt.hash(password, 10);
