@@ -1,5 +1,21 @@
 export const translations = {
   uk: {
+    header: {
+      admin: 'Адмін',
+      logout: 'Вийти'
+    },
+    project: {
+      loading: 'Завантаження...',
+      notFound: 'Проект не знайдено',
+      architects: 'Архітектори',
+      area: 'Площа',
+      location: 'Локація',
+      year: 'Рік',
+      photoCredits: 'Фотограф',
+      nextProject: 'Наступний проект',
+      noMoreProjects: 'Більше проектів немає',
+      designConcept: 'Концепція дизайну',
+    },
     navigation: {
       projects: 'Проєкти',
       createProject: 'Створити проєкт',
@@ -133,6 +149,22 @@ export const translations = {
     }
   },
   en: {
+    header: {
+      admin: 'Admin',
+      logout: 'Logout'
+    },
+    project: {
+      loading: 'Loading...',
+      notFound: 'Project not found',
+      architects: 'Architects',
+      area: 'Area',
+      location: 'Location',
+      year: 'Year',
+      photoCredits: 'Photo Credits',
+      nextProject: 'Next Project',
+      noMoreProjects: 'No More Projects',
+      designConcept: 'Design Concept',
+    },
     navigation: {
       projects: 'Projects',
       createProject: 'Create Project',

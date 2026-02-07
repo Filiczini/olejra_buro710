@@ -29,6 +29,11 @@ export default function Sidebar() {
           path="/admin/projects/create"
         />
         <SidebarMenuItem
+          icon="solar:home-smile-linear"
+          label="Налаштування сайту"
+          path="/admin/site-settings"
+        />
+        <SidebarMenuItem
           icon="solar:settings-linear"
           label={t.navigation.settings}
           path="/admin/settings"
