@@ -9,7 +9,10 @@
     "dev:backend": "tsx watch src/server/index.ts",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "seed": "tsx src/server/seed.ts",
+    "seed:clean": "tsx src/server/clear-projects.ts",
+    "migrate:projects": "tsx src/server/migrate-projects.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.95.2",
