@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Icon } from '@iconify-icon/react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
 interface Project {
@@ -12,7 +11,10 @@ interface Project {
 }
 
 export default function HeroSlider() {
+  const [isPaused, setIsPaused] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const slideWidthRef = useRef<number>(0);
 
   const projects: Project[] = [
     {
@@ -32,22 +34,111 @@ export default function HeroSlider() {
     },
   ];
 
+  // Extracted scroll logic to reusable function
+  const scrollToSlide = useCallback((index: number) => {
+    if (sliderRef.current) {
+      const slideWidth = slideWidthRef.current || sliderRef.current.clientWidth;
+      sliderRef.current.scrollTo({
+        left: index * slideWidth,
+        behavior: 'smooth'
+      });
+    }
+  }, []);
+
+  // Keyboard navigation handler
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'ArrowRight') {
+      const nextIndex = (currentSlide + 1) % projects.length;
+      setCurrentSlide(nextIndex);
+      scrollToSlide(nextIndex);
+    } else if (e.key === 'ArrowLeft') {
+      const prevIndex = (currentSlide - 1 + projects.length) % projects.length;
+      setCurrentSlide(prevIndex);
+      scrollToSlide(prevIndex);
+    }
+  }, [currentSlide, projects.length, scrollToSlide]);
+
+  // Auto-scroll with interval
+  useEffect(() => {
+    if (isPaused) return;
+
+    const interval = setInterval(() => {
+      const nextSlide = (currentSlide + 1) % projects.length;
+      setCurrentSlide(nextSlide);
+      scrollToSlide(nextSlide);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [isPaused, currentSlide, projects.length, scrollToSlide]);
+
+  // Manual scroll handling - detect user-initiated scrolling and pause
+  useEffect(() => {
+    const slider = sliderRef.current;
+    if (!slider) return;
+
+    const handleScroll = () => {
+      const scrollLeft = slider.scrollLeft;
+      const newIndex = Math.round(scrollLeft / slider.clientWidth);
+      setCurrentSlide(newIndex);
+      setIsPaused(true);
+    };
+
+    slider.addEventListener('scroll', handleScroll);
+    return () => slider.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Resume auto-scroll after delay when paused
+  useEffect(() => {
+    if (!isPaused) return;
+    const timeout = setTimeout(() => setIsPaused(false), 10000);
+    return () => clearTimeout(timeout);
+  }, [isPaused]);
+
+  // Calculate and cache slide width on mount and resize
+  useEffect(() => {
+    const calculateSlideWidth = () => {
+      if (sliderRef.current) {
+        slideWidthRef.current = sliderRef.current.clientWidth;
+      }
+    };
+
+    calculateSlideWidth();
+    window.addEventListener('resize', calculateSlideWidth);
+    return () => window.removeEventListener('resize', calculateSlideWidth);
+  }, []);
+
+  const handleMouseEnter = () => setIsPaused(true);
+  const handleMouseLeave = () => setIsPaused(false);
+
   return (
-    <section className="relative h-[90vh] w-full overflow-hidden bg-zinc-900 text-white group">
-      <div className="flex h-full w-full overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth">
+    <section className="relative h-[90vh] w-full overflow-hidden bg-zinc-900 text-white">
+      <div
+        ref={sliderRef}
+        role="region"
+        aria-label="Featured projects carousel"
+        aria-live="polite"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        className="flex h-full w-full overflow-x-auto overflow-y-hidden snap-x snap-mandatory no-scrollbar scroll-smooth focus:outline-none"
+      >
         {projects.map((project, index) => (
-          <Link 
-            key={project.id} 
+          <Link
+            key={project.id}
             to={`/project/${project.id}`}
-            className="relative min-w-full h-full snap-center bg-noise cursor-pointer"
+            role="article"
+            aria-label={`${project.title}, ${project.location}, ${project.year}`}
+            tabIndex={currentSlide === index ? 0 : -1}
+            className="relative min-w-full h-full snap-center bg-noise cursor-pointer focus:outline-none focus:ring-4 focus:ring-white/20 focus:ring-inset"
           >
-            <img 
-              src={project.image} 
+            <img
+              src={project.image}
               alt={project.title}
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2000ms] ease-out group-hover:scale-105 opacity-80"
+              className="absolute inset-0 w-full h-full object-cover opacity-80"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-            <div className="absolute bottom-0 left-0 w-full p-6 md:p-12 pb-16 flex flex-col md:flex-row md:items-end justify-between animate-reveal-up">
+            <div className="absolute bottom-0 left-0 w-full p-6 md:p-12 pb-16 flex flex-col md:flex-row md:items-end justify-between">
               <div className="space-y-2">
                 <h2 className="text-4xl md:text-7xl font-medium tracking-tight">{project.title}</h2>
                 <div className="flex items-center gap-3 text-zinc-300 text-sm md:text-base">
@@ -62,35 +153,9 @@ export default function HeroSlider() {
                   <span>{project.year}</span>
                 </div>
               </div>
-              <div className="hidden md:flex items-center gap-2 text-sm font-medium group/btn">
-                <span>Переглянути проект</span>
-                <Icon icon="solar:arrow-right-linear" width={20} className="group-hover/btn:translate-x-1 transition-transform" />
-              </div>
             </div>
           </Link>
         ))}
-      </div>
-
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 hidden md:flex items-center justify-center w-24 h-24 rounded-full border border-white/30 backdrop-blur-sm text-xs font-medium tracking-widest uppercase">
-        Explore
-      </div>
-
-      <div className="absolute bottom-8 right-6 md:right-12 flex items-center gap-6 text-sm font-medium z-10">
-        <div className="flex items-center gap-2">
-          <span className="text-white">01</span>
-          <div className="w-12 h-[1px] bg-white/30 relative">
-            <div className="absolute top-0 left-0 w-1/3 h-full bg-white"></div>
-          </div>
-          <span className="text-white/50">05</span>
-        </div>
-        <div className="flex gap-2">
-          <button className="p-2 border border-white/20 rounded-full hover:bg-white hover:text-black transition-colors">
-            <Icon icon="solar:arrow-left-linear" width={20} />
-          </button>
-          <button className="p-2 border border-white/20 rounded-full hover:bg-white hover:text-black transition-colors">
-            <Icon icon="solar:arrow-right-linear" width={20} />
-          </button>
-        </div>
       </div>
     </section>
   );
