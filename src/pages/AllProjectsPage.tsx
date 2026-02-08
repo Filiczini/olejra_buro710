@@ -66,8 +66,7 @@ export default function AllProjectsPage() {
       // Extract unique locations and years for filters
       if (result.data.length > 0 && (locations.length === 0 || years.length === 0)) {
         const uniqueLocations = [...new Set(result.data.map(p => p.location).filter((loc): loc is string => Boolean(loc)))].sort();
-        const uniqueYears = [...new Set(result.data.map(p => p.year).filter((year): year is string => Boolean(year))]
-          .sort((a, b) => b.localeCompare(a));
+        const uniqueYears = [...new Set(result.data.map(p => p.year).filter((year): year is string => Boolean(year))].sort((a, b) => b.localeCompare(a));
         setLocations(uniqueLocations);
         setYears(uniqueYears);
       }
