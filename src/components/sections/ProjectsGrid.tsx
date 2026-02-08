@@ -58,12 +58,12 @@ export default function ProjectsGrid() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-16 mb-12">
-        {projects.map((project, index) => (
+      <div className="columns-1 md:columns-2 lg:columns-3 gap-6 mb-12">
+        {projects.map((project) => (
           <Link
             key={project.id}
             to={`/project/${project.id}`}
-            className={`group block space-y-4 ${index === 1 ? 'md:mt-24' : ''}`}
+            className="group block space-y-4 break-inside-avoid mb-6"
           >
             <div className="relative overflow-hidden aspect-[4/5] bg-zinc-100">
               <img
