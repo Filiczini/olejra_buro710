@@ -254,6 +254,16 @@ export interface Translations {
     location: string;
     area: string;
   };
+  featured: {
+    title: string;
+    allProjects: string;
+    commercial: string;
+    horeca: string;
+    restaurant: string;
+    project1Description: string;
+    project2Description: string;
+    project3Description: string;
+  };
   about: {
     heroLine1: string;
     heroLine2: string;
