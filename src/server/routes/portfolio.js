@@ -52,16 +52,16 @@ router.post('/', authMiddleware, uploadSingleImage, async (req, res) => {
         console.log('File:', req.file ? { name: req.file.originalname, mimetype: req.file.mimetype, size: req.file.size } : 'No file');
         const { title, description, tags, location, area, year, team, architects, concept_heading, concept_caption, concept_quote } = req.body;
         if (!title || !description) {
-            console.log('❌ Validation failed: Title or description missing');
+            console.log('Validation failed: Title or description missing');
             return res.status(400).json({ error: 'Title and description are required' });
         }
         if (!req.file) {
-            console.log('❌ Validation failed: Image missing');
+            console.log('Validation failed: Image missing');
             return res.status(400).json({ error: 'Image is required' });
         }
-        console.log('✅ Validation passed, uploading image...');
+        console.log('Validation passed, uploading image...');
         const imageUrl = await storageService.uploadImage(req.file);
-        console.log('✅ Image uploaded:', imageUrl);
+        console.log('Image uploaded:', imageUrl);
         console.log('Creating project in database...');
         const project = await projectService.create({
             title,
@@ -77,11 +77,11 @@ router.post('/', authMiddleware, uploadSingleImage, async (req, res) => {
             concept_caption,
             concept_quote,
         });
-        console.log('✅ Project created successfully:', project.id);
+        console.log('Project created successfully:', project.id);
         res.status(201).json(project);
     }
     catch (error) {
-        console.error('❌ Error creating project:', error);
+        console.error('Error creating project:', error);
         res.status(500).json({ error: 'Failed to create project' });
     }
 });

@@ -29,8 +29,10 @@ export interface Translations {
     contactInfoDesc: string;
     email: string;
     emailPlaceholder: string;
+    emailAddress: string;
     phone: string;
     phonePlaceholder: string;
+    phoneNumber: string;
     address: string;
     addressValue: string;
     workingHours: string;
@@ -281,6 +283,16 @@ export interface Translations {
     team02Role: string;
     team03Name: string;
     team03Role: string;
+    contactUs: string;
+    team: string;
+    valuesTitle: string;
+    valuesDescription: string;
+    processTitle: string;
+    processDescription: string;
+    teamSectionTitle: string;
+    teamSectionDescription: string;
+    contactCTATitle: string;
+    contactCTADescription: string;
   };
 }
 

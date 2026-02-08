@@ -186,9 +186,9 @@ function formatViolation(filePath, violation) {
   const relativePath = path.relative(process.cwd(), filePath);
 
   if (violation.type === 'ternary') {
-    return `${relativePath}:${violation.line}\n   ❌ Ternary operator: ${violation.content}`;
+    return `${relativePath}:${violation.line}\n   Ternary operator: ${violation.content}`;
   } else {
-    return `${relativePath}:${violation.line}\n   ❌ Hardcoded Ukrainian text: "${violation.content}"`;
+    return `${relativePath}:${violation.line}\n   Hardcoded Ukrainian text: "${violation.content}"`;
   }
 }
 
@@ -196,13 +196,13 @@ function formatViolation(filePath, violation) {
  * Main validation function
  */
 function validate() {
-  console.log('🔍 Checking for hardcoded text and language ternary operators...\n');
+  console.log('Checking for hardcoded text and language ternary operators...\n');
 
   const srcDir = path.join(process.cwd(), 'src');
 
   // Check if src directory exists
   if (!fs.existsSync(srcDir)) {
-    console.error('❌ Error: src directory not found');
+    console.error('Error: src directory not found');
     process.exit(1);
   }
 
@@ -210,11 +210,11 @@ function validate() {
   const files = getAllFiles(srcDir);
 
   if (files.length === 0) {
-    console.log('⚠️  No TypeScript/TSX files found in src directory');
+    console.log('No TypeScript/TSX files found in src directory');
     process.exit(0);
   }
 
-  console.log(`📂 Checking ${files.length} files...\n`);
+  console.log(`Checking ${files.length} files...\n`);
 
   let allViolations = [];
 
@@ -233,11 +233,11 @@ function validate() {
 
   // Report results
   if (allViolations.length === 0) {
-    console.log('✅ i18n validation passed');
+    console.log('i18n validation passed');
     console.log('No hardcoded text or language ternary operators found.\n');
     process.exit(0);
   } else {
-    console.log(`❌ i18n validation failed\n`);
+    console.log(`i18n validation failed\n`);
     console.log(`Found ${allViolations.length} violation${allViolations.length > 1 ? 's' : ''}:\n`);
 
     allViolations.forEach((item, index) => {

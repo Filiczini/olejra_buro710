@@ -151,10 +151,6 @@ export function generateDesignZones(project: Project): DesignZone[] {
     zones.push({ id, name, order, title, description, layout, image_url, features });
   };
 
-  // Extract descriptions for zone generation
-  const mainDesc = project.description[0] || '';
-  const addDesc = project.description[1] || '';
-
   // Residential zones
   if (tagsLower.includes('residential') || tagsLower.includes('house') || tagsLower.includes('villa')) {
     const style = tagsLower.includes('scandinavian') ? 'scandinavian' :

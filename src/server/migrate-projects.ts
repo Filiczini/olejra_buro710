@@ -1,7 +1,7 @@
 import { supabase } from './config/supabase';
 
 async function migrateProjects() {
-  console.log('🔄 Starting project migration...');
+  console.log('Starting project migration...');
 
   try {
     const { data: projects, error } = await supabase
@@ -11,11 +11,11 @@ async function migrateProjects() {
     if (error) throw error;
 
     if (!projects || projects.length === 0) {
-      console.log('ℹ️  No projects found to migrate');
+      console.log('No projects found to migrate');
       return;
     }
 
-    console.log(`📊 Found ${projects.length} projects to check`);
+    console.log(`Found ${projects.length} projects to check`);
 
     let updatedCount = 0;
 
@@ -47,26 +47,26 @@ async function migrateProjects() {
           .eq('id', project.id);
 
         if (updateError) {
-          console.error(`❌ Error updating project "${project.title}":`, updateError.message);
+          console.error(`Error updating project "${project.title}":`, updateError.message);
         } else {
-          console.log(`✅ Updated project: ${project.title}`);
+          console.log(`Updated project: ${project.title}`);
           updatedCount++;
         }
       } else {
-        console.log(`⏭️  Project already has all fields: ${project.title}`);
+        console.log(`Project already has all fields: ${project.title}`);
       }
     }
 
     console.log('');
     console.log('========================================');
-    console.log('📋 Migration Summary:');
-    console.log(`   ✅ Total projects checked: ${projects.length}`);
-    console.log(`   ✅ Projects updated: ${updatedCount}`);
+    console.log('Migration Summary:');
+    console.log(`   Total projects checked: ${projects.length}`);
+    console.log(`   Projects updated: ${updatedCount}`);
     console.log('========================================');
-    console.log('✅ Migration completed successfully!');
+    console.log('Migration completed successfully!');
 
   } catch (error) {
-    console.error('❌ Migration failed:', error);
+    console.error('Migration failed:', error);
     process.exit(1);
   }
 }
