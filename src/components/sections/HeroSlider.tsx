@@ -1,97 +1,143 @@
 import { Icon } from '@iconify-icon/react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../contexts/LanguageContext';
-
-interface Project {
-  id: number;
-  title: string;
-  location: string;
-  area?: string;
-  year: string;
-  image: string;
-}
+import { useEffect, useState } from 'react';
+import { portfolioService } from '../../services/api';
+import type { Project } from '../../types/project';
 
 export default function HeroSlider() {
   const t = useTranslation();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  const projects: Project[] = [
-    {
-      id: 1,
-      title: 'Golden Ray Residence',
-      location: t.hero.location,
-      area: t.hero.area.replace('{area}', '145'),
-      year: '2023',
-      image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2600&auto=format&fit=crop',
-    },
-    {
-      id: 2,
-      title: 'Onyx Penthouse',
-      location: t.hero.location,
-      year: '2024',
-      image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2600&auto=format&fit=crop',
-    },
-  ];
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await portfolioService.getAll({ limit: 10, sortBy: 'created_at', sortOrder: 'desc' });
+        const featuredProjects = response.data.filter(p => p.image_url).slice(0, 5);
+        setProjects(featuredProjects);
+      } catch (error) {
+        console.error('Failed to fetch projects:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProjects();
+  }, []);
+
+  useEffect(() => {
+    if (projects.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % projects.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [projects.length]);
+
+  const nextSlide = () => {
+    setCurrentSlide(prev => (prev + 1) % projects.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide(prev => (prev - 1 + projects.length) % projects.length);
+  };
+
+  if (loading || projects.length === 0) {
+    return (
+      <section className="relative w-full h-screen overflow-hidden bg-zinc-900 text-white">
+        <div className="flex items-center justify-center h-full">
+          <div className="text-zinc-400">Завантаження...</div>
+        </div>
+      </section>
+    );
+  }
+
+  const currentProject = projects[currentSlide];
 
   return (
-    <section className="relative h-[90vh] w-full overflow-hidden bg-zinc-900 text-white group">
-      <div className="flex h-full w-full overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth">
-        {projects.map((project) => (
-          <Link
+    <header className="relative w-full h-screen overflow-hidden bg-zinc-900 text-white">
+      <div className="relative w-full h-full">
+        {projects.map((project, index) => (
+          <div
             key={project.id}
-            to={`/project/${project.id}`}
-            className="relative min-w-full h-full snap-center bg-noise cursor-pointer"
+            className={`slide absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+            data-index={index}
           >
-            <img
-              src={project.image}
-              alt={project.title}
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2000ms] ease-out group-hover:scale-105 opacity-80"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-            <div className="absolute bottom-0 left-0 w-full p-6 md:p-12 pb-16 flex flex-col md:flex-row md:items-end justify-between animate-reveal-up">
-              <div className="space-y-2">
-                <h2 className="text-4xl md:text-7xl font-medium tracking-tight">{project.title}</h2>
-                <div className="flex items-center gap-3 text-zinc-300 text-sm md:text-base">
-                  <span>{project.location}</span>
-                  {project.area && (
-                    <>
-                      <span className="w-1 h-1 rounded-full bg-zinc-400"></span>
-                      <span>{project.area}</span>
-                    </>
-                  )}
-                  <span className="w-1 h-1 rounded-full bg-zinc-400"></span>
-                  <span>{project.year}</span>
+            <div className="absolute inset-0 bg-zinc-800">
+              <img
+                src={project.image_url}
+                alt={project.title}
+                className={`w-full h-full object-cover opacity-90 transition-transform duration-[6000ms] ease-out ${index === currentSlide ? 'scale-105' : 'scale-100'}`}
+              />
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/30"></div>
+            <div className="absolute bottom-0 w-full h-full px-6 md:px-10 pb-10 md:pb-14 flex flex-col justify-end">
+              <div className="max-w-[1800px] mx-auto w-full flex flex-col md:flex-row items-end justify-between gap-10">
+                <div className="w-full md:max-w-4xl">
+                  <h1 className="text-5xl md:text-7xl lg:text-[88px] font-semibold tracking-tight leading-[0.9] mb-6">
+                    {project.title}
+                  </h1>
+                  <div className="flex items-center gap-4 text-sm md:text-base font-medium text-white/80">
+                    <span>{project.location || t.hero.location}</span>
+                    {project.area && (
+                      <>
+                        <span className="w-1 h-1 bg-white/60 rounded-full"></span>
+                        <span>{project.area}</span>
+                      </>
+                    )}
+                    {project.year && (
+                      <>
+                        <span className="w-1 h-1 bg-white/60 rounded-full"></span>
+                        <span>{project.year}</span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
-              <div className="hidden md:flex items-center gap-2 text-sm font-medium group/btn">
-                <span>{t.hero.viewProject}</span>
-                <Icon icon="solar:arrow-right-linear" width={20} className="group-hover/btn:translate-x-1 transition-transform" />
-              </div>
             </div>
-          </Link>
+          </div>
         ))}
       </div>
 
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 hidden md:flex items-center justify-center w-24 h-24 rounded-full border border-white/30 backdrop-blur-sm text-xs font-medium tracking-widest uppercase">
-        {t.hero.explore}
-      </div>
-
-      <div className="absolute bottom-8 right-6 md:right-12 flex items-center gap-6 text-sm font-medium z-10">
-        <div className="flex items-center gap-2">
-          <span className="text-white">01</span>
-          <div className="w-12 h-[1px] bg-white/30 relative">
-            <div className="absolute top-0 left-0 w-1/3 h-full bg-white"></div>
+      <div className="absolute bottom-0 w-full px-6 md:px-10 pb-10 md:pb-14 pointer-events-none z-20">
+        <div className="max-w-[1800px] mx-auto w-full flex justify-end">
+          <div className="flex flex-col items-end gap-6 pointer-events-auto">
+            <div className="flex items-center gap-6">
+              <span className="text-sm font-semibold tracking-wide">
+                {String(currentSlide + 1).padStart(2, '0')}
+              </span>
+              <div className="hidden md:block w-12 h-[1px] bg-white/30"></div>
+              <Link
+                to={`/project/${currentProject.id}`}
+                className="group hidden md:flex items-center gap-2 text-sm font-medium text-white hover:text-white transition-all duration-300 hover:opacity-80 cursor-pointer"
+              >
+                {t.hero.viewProject}
+                <Icon icon="solar:arrow-right-linear" width={16} className="transition-transform duration-300 group-hover:translate-x-3 group-hover:scale-110" />
+              </Link>
+              <div className="flex gap-2 ml-4">
+                <button
+                  onClick={prevSlide}
+                  className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white hover:text-black hover:border-white hover:scale-110 hover:shadow-lg hover:shadow-white/20 transition-all duration-300 backdrop-blur-sm group cursor-pointer"
+                >
+                  <Icon icon="solar:arrow-left-linear" width={16} className="transition-transform duration-300 group-hover:-translate-x-0.5" />
+                </button>
+                <button
+                  onClick={nextSlide}
+                  className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white hover:text-black hover:border-white hover:scale-110 hover:shadow-lg hover:shadow-white/20 transition-all duration-300 backdrop-blur-sm group cursor-pointer"
+                >
+                  <Icon icon="solar:arrow-right-linear" width={16} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+                </button>
+              </div>
+            </div>
+            <Link
+              to={`/project/${currentProject.id}`}
+              className="md:hidden flex items-center gap-2 text-sm font-medium text-white/90 hover:text-white transition-all duration-300 hover:opacity-80 cursor-pointer"
+            >
+              {t.hero.viewProject} <Icon icon="solar:arrow-right-linear" width={16} className="transition-transform duration-300 group-hover:translate-x-1 group-hover:scale-110" />
+            </Link>
           </div>
-          <span className="text-white/50">05</span>
-        </div>
-        <div className="flex gap-2">
-          <button className="p-2 border border-white/20 rounded-full hover:bg-white hover:text-black transition-colors">
-            <Icon icon="solar:arrow-left-linear" width={20} />
-          </button>
-          <button className="p-2 border border-white/20 rounded-full hover:bg-white hover:text-black transition-colors">
-            <Icon icon="solar:arrow-right-linear" width={20} />
-          </button>
         </div>
       </div>
-    </section>
+    </header>
   );
 }

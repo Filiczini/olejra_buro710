@@ -74,35 +74,35 @@ export default function FeaturedProjectsSection() {
             className="group flex flex-col gap-6"
           >
             {/* Project Image */}
-            <div className="aspect-[4/3] bg-zinc-100 overflow-hidden w-full relative">
+            <div className="aspect-[4/3] bg-zinc-100 overflow-hidden w-full relative rounded-lg">
               <img
                 src={project.image}
                 alt={project.title}
-                className="w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 grayscale group-hover:grayscale-0"
+                className="w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 grayscale group-hover:grayscale-0 rounded-lg"
               />
             </div>
 
             {/* Project Content */}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 group-hover:translate-y-[-4px] transition-transform duration-300">
               {/* Project Title */}
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-900">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-900 group-hover:text-zinc-700 transition-colors duration-300">
                 {project.title}
               </h3>
 
               {/* Project Badge (optional) */}
               {project.badge && (
-                <div className="text-xs text-zinc-800 mt-2 font-medium">
+                <div className="text-xs text-zinc-800 mt-2 font-medium group-hover:text-zinc-600 transition-colors duration-300">
                   {project.badge}
                 </div>
               )}
 
               {/* Project Metadata */}
-              <div className="text-xs text-zinc-500 font-medium">
+              <div className="text-xs text-zinc-500 font-medium group-hover:text-zinc-400 transition-colors duration-300">
                 {project.type} | {project.area} | {project.city} | {project.year}
               </div>
 
               {/* Project Description */}
-              <p className="text-sm leading-relaxed text-zinc-500 text-justify mt-[0.625rem]">
+              <p className="text-sm leading-relaxed text-zinc-500 text-justify mt-[0.625rem] group-hover:text-zinc-600 transition-colors duration-300">
                 {project.description}
               </p>
             </div>
