@@ -157,7 +157,7 @@ export default function AllProjectsPage() {
                 onClick={clearFilters}
                 className="px-5 py-3 text-zinc-500 hover:text-zinc-900 transition-colors"
               >
-                {t.allProjects.clearFilters}
+                {language === 'uk' ? 'Очистити фільтри' : 'Clear filters'}
               </button>
             )}
           </div>
@@ -205,7 +205,7 @@ export default function AllProjectsPage() {
                   disabled={page === 1}
                   className="px-6 py-3 border border-zinc-200 rounded-full hover:bg-zinc-900 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-zinc-900 transition-colors"
                 >
-                  {t.allProjects.previous}
+                  {t.dashboard.previous}
                 </button>
 
                 {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
@@ -229,7 +229,7 @@ export default function AllProjectsPage() {
                   disabled={page === totalPages}
                   className="px-6 py-3 border border-zinc-200 rounded-full hover:bg-zinc-900 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-zinc-900 transition-colors"
                 >
-                  {t.allProjects.next}
+                  {t.dashboard.next}
                 </button>
               </div>
             )}
