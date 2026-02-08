@@ -4,13 +4,11 @@ import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import { authService } from '../../services/api';
 import type { LoginCredentials } from '../../types/auth';
-import { useLanguage } from '../../contexts/LanguageContext';
-import { translations } from '../../config/translations';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { language } = useLanguage();
-  const t = translations[language];
+  const t = useTranslation();
   const [credentials, setCredentials] = useState<LoginCredentials>({
     email: '',
     password: '',

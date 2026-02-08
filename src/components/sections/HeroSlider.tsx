@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { Icon } from '@iconify-icon/react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from '../../contexts/LanguageContext';
 
 interface Project {
   id: number;
@@ -12,21 +12,21 @@ interface Project {
 }
 
 export default function HeroSlider() {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const t = useTranslation();
 
   const projects: Project[] = [
     {
       id: 1,
       title: 'Golden Ray Residence',
-      location: 'Київ, Україна',
-      area: '145 м²',
+      location: t.hero.location,
+      area: t.hero.area.replace('{area}', '145'),
       year: '2023',
       image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2600&auto=format&fit=crop',
     },
     {
       id: 2,
       title: 'Onyx Penthouse',
-      location: 'Київ, Україна',
+      location: t.hero.location,
       year: '2024',
       image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2600&auto=format&fit=crop',
     },
@@ -35,14 +35,14 @@ export default function HeroSlider() {
   return (
     <section className="relative h-[90vh] w-full overflow-hidden bg-zinc-900 text-white group">
       <div className="flex h-full w-full overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth">
-        {projects.map((project, index) => (
-          <Link 
-            key={project.id} 
+        {projects.map((project) => (
+          <Link
+            key={project.id}
             to={`/project/${project.id}`}
             className="relative min-w-full h-full snap-center bg-noise cursor-pointer"
           >
-            <img 
-              src={project.image} 
+            <img
+              src={project.image}
               alt={project.title}
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2000ms] ease-out group-hover:scale-105 opacity-80"
             />
@@ -63,7 +63,7 @@ export default function HeroSlider() {
                 </div>
               </div>
               <div className="hidden md:flex items-center gap-2 text-sm font-medium group/btn">
-                <span>Переглянути проект</span>
+                <span>{t.hero.viewProject}</span>
                 <Icon icon="solar:arrow-right-linear" width={20} className="group-hover/btn:translate-x-1 transition-transform" />
               </div>
             </div>
@@ -72,7 +72,7 @@ export default function HeroSlider() {
       </div>
 
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 hidden md:flex items-center justify-center w-24 h-24 rounded-full border border-white/30 backdrop-blur-sm text-xs font-medium tracking-widest uppercase">
-        Explore
+        {t.hero.explore}
       </div>
 
       <div className="absolute bottom-8 right-6 md:right-12 flex items-center gap-6 text-sm font-medium z-10">

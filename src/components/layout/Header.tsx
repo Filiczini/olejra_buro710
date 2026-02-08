@@ -1,14 +1,12 @@
 import { Icon } from '@iconify-icon/react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { useLanguage } from '../../contexts/LanguageContext';
-import { translations } from '../../config/translations';
+import { useTranslation } from '../../contexts/LanguageContext';
 
 export default function Header() {
   const { isAuthenticated, handleLogout } = useAuth();
-  const { language } = useLanguage();
   const navigate = useNavigate();
-  const t = translations[language];
+  const t = useTranslation();
 
   return (
     <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-zinc-200/50">
@@ -18,7 +16,7 @@ export default function Header() {
         </a>
         <nav className="hidden md:flex items-center gap-10">
           <a href="/projects" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">{t.navigation.projects}</a>
-          <a href="/about" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">{language === 'uk' ? 'Про бюро' : 'About'}</a>
+          <a href="/about" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">{t.home.about}</a>
           <a href="/contact" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">{t.home.contact}</a>
         </nav>
         <div className="flex items-center gap-6">

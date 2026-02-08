@@ -1,11 +1,9 @@
 import { Link } from 'react-router-dom';
-import { useLanguage } from '../../contexts/LanguageContext';
-import { translations } from '../../config/translations';
+import { useTranslation } from '../../contexts/LanguageContext';
 import Button from '../../components/ui/Button';
 
 export default function ActivityLogPage() {
-  const { language } = useLanguage();
-  const t = translations[language];
+  const t = useTranslation();
 
   return (
     <div className="max-w-4xl mx-auto">

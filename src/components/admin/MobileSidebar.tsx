@@ -1,5 +1,4 @@
-import { useLanguage } from '../../contexts/LanguageContext';
-import { translations } from '../../config/translations';
+import { useTranslation } from '../../hooks/useTranslation';
 import SidebarMenuItem from './SidebarMenuItem';
 
 interface MobileSidebarProps {
@@ -8,8 +7,7 @@ interface MobileSidebarProps {
 }
 
 export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
-  const { language } = useLanguage();
-  const t = translations[language];
+  const t = useTranslation();
 
   return (
     <>

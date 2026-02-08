@@ -1,5 +1,5 @@
 import { Icon } from '@iconify-icon/react';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useTranslation } from '../hooks/useTranslation';
 import { useState } from 'react';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
@@ -7,7 +7,7 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 
 export default function ContactPage() {
-  const { language } = useLanguage();
+  const t = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -28,26 +28,26 @@ export default function ContactPage() {
   const contactInfo = [
     {
       icon: 'solar:letter-linear',
-      label: language === 'uk' ? 'Email' : 'Email',
-      value: 'hello@buro710.com',
-      link: 'mailto:hello@buro710.com'
+      label: t.contact.email,
+      value: t.contact.emailAddress,
+      link: `mailto:${t.contact.emailAddress}`
     },
     {
       icon: 'solar:phone-linear',
-      label: language === 'uk' ? 'Телефон' : 'Phone',
-      value: '+380 44 123 45 67',
-      link: 'tel:+380441234567'
+      label: t.contact.phone,
+      value: t.contact.phoneNumber,
+      link: `tel:${t.contact.phoneNumber.replace(/\s/g, '')}`
     },
     {
       icon: 'solar:map-point-linear',
-      label: language === 'uk' ? 'Адреса' : 'Address',
-      value: language === 'uk' ? 'Київ, вул. Хрещатик, 1' : 'Kyiv, Khreshchatyk Street, 1',
+      label: t.contact.address,
+      value: t.contact.addressValue,
       link: null
     },
     {
       icon: 'solar:clock-linear',
-      label: language === 'uk' ? 'Робочий час' : 'Working Hours',
-      value: language === 'uk' ? 'Пн-Пт: 9:00 - 18:00' : 'Mon-Fri: 9:00 - 18:00',
+      label: t.contact.workingHours,
+      value: t.contact.workingHoursValue,
       link: null
     }
   ];
@@ -79,41 +79,31 @@ export default function ContactPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
             <div>
               <h1 className="text-5xl md:text-7xl font-medium tracking-tight leading-tight animate-reveal-up">
-                {language === 'uk' ? (
-                  <>
-                    Зв&apos;яжіться з нами
-                  </>
-                ) : (
-                  <>
-                    Get in touch
-                  </>
-                )}
+                <>
+                  {t.contact.title}
+                </>
               </h1>
             </div>
             <div className="space-y-8 flex flex-col justify-between">
               <div className="space-y-6 text-lg text-zinc-500 font-light leading-relaxed max-w-xl">
                 <p>
-                  {language === 'uk' ? (
-                    <>Ми раді допомогти вам втілити ваш дизайн-проект у життя. Напишіть нам, і ми відповімо протягом 24 годин.</>
-                  ) : (
-                    <>We are here to help you bring your design project to life. Write to us, and we will respond within 24 hours.</>
-                  )}
+                  <>{t.contact.subtitle}</>
                 </p>
               </div>
               <div className="flex gap-6">
                 <a
-                  href="mailto:hello@buro710.com"
+                  href={`mailto:${t.contact.emailAddress}`}
                   className="inline-flex items-center gap-2 px-8 py-3 bg-zinc-900 text-white rounded-full text-sm font-medium hover:bg-zinc-800 transition-colors"
                 >
                   <Icon icon="solar:letter-linear" width={18} />
-                  {language === 'uk' ? 'Написати нам' : 'Write to us'}
+                  {t.contact.writeToUs}
                 </a>
                 <a
                   href="#contact-form"
                   className="inline-flex items-center gap-2 px-8 py-3 border border-zinc-200 rounded-full text-sm font-medium hover:bg-zinc-900 hover:text-white hover:border-zinc-900 transition-colors"
                 >
                   <Icon icon="solar:chat-circle-dots-linear" width={18} />
-                  {language === 'uk' ? 'Зв&apos;язатися' : 'Contact'}
+                  {t.contact.contactButton}
                 </a>
               </div>
             </div>
@@ -125,12 +115,10 @@ export default function ContactPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
             <div>
               <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-6">
-                {language === 'uk' ? 'Контактна інформація' : 'Contact Information'}
+                {t.contact.contactInfo}
               </h2>
               <p className="text-zinc-500 text-lg mb-8">
-                {language === 'uk'
-                  ? 'Зв&apos;яжіться з нами зручним для вас способом.'
-                  : 'Contact us in a way that is convenient for you.'}
+                {t.contact.contactInfoDesc}
               </p>
               <div className="space-y-6">
                 {contactInfo.map((info, index) => (
@@ -157,12 +145,10 @@ export default function ContactPage() {
             </div>
             <div>
               <h3 className="text-2xl font-medium tracking-tight mb-6">
-                {language === 'uk' ? 'Соціальні мережі' : 'Social Media'}
+                {t.contact.socialMedia}
               </h3>
               <p className="text-zinc-500 text-lg mb-8">
-                {language === 'uk'
-                  ? 'Дізнавайтеся про наші нові проекти та новини.'
-                  : 'Stay updated with our new projects and news.'}
+                {t.contact.socialMediaDesc}
               </p>
               <div className="space-y-4">
                 {socialLinks.map((social, index) => (
@@ -187,22 +173,20 @@ export default function ContactPage() {
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-4">
-                {language === 'uk' ? 'Напишіть нам' : 'Write to us'}
+                {t.contact.formTitle}
               </h2>
               <p className="text-zinc-500 text-lg max-w-2xl mx-auto">
-                {language === 'uk'
-                  ? 'Розкажіть про свій проект, і ми зв&apos;яжемося з вами протягом 24 годин.'
-                  : 'Tell us about your project, and we will get back to you within 24 hours.'}
+                {t.contact.formDesc}
               </p>
             </div>
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Input
-                  label={language === 'uk' ? 'Ім&apos;я' : 'Name'}
+                  label={t.contact.name}
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder={language === 'uk' ? 'Ваше ім&apos;я' : 'Your name'}
+                  placeholder={t.contact.namePlaceholder}
                   required
                 />
                 <Input
@@ -211,27 +195,27 @@ export default function ContactPage() {
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder={language === 'uk' ? 'Ваш email' : 'Your email'}
+                  placeholder={t.contact.emailPlaceholder}
                   required
                 />
               </div>
               <Input
-                label={language === 'uk' ? 'Тема' : 'Subject'}
+                label={t.contact.subject}
                 name="subject"
                 value={formData.subject}
                 onChange={handleChange}
-                placeholder={language === 'uk' ? 'Тема вашого повідомлення' : 'Subject of your message'}
+                placeholder={t.contact.subjectPlaceholder}
                 required
               />
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-zinc-700">
-                  {language === 'uk' ? 'Повідомлення' : 'Message'}
+                  {t.contact.message}
                 </label>
                 <textarea
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
-                  placeholder={language === 'uk' ? 'Ваше повідомлення...' : 'Your message...'}
+                  placeholder={t.contact.messagePlaceholder}
                   rows={6}
                   className="w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent resize-none"
                   required
@@ -243,7 +227,7 @@ export default function ContactPage() {
                   variant="primary"
                   className="px-12 py-4"
                 >
-                  {language === 'uk' ? 'Надіслати повідомлення' : 'Send message'}
+                  {t.contact.sendMessage}
                 </Button>
               </div>
             </form>
@@ -256,32 +240,30 @@ export default function ContactPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
                 <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-6">
-                  {language === 'uk' ? 'Знайти нас' : 'Find us'}
+                  {t.contact.findUs}
                 </h2>
                 <p className="text-zinc-400 text-lg mb-8">
-                  {language === 'uk'
-                    ? 'Наш офіс знаходиться в центрі Києва. Приходьте на зустріч для обговорення вашого проекту.'
-                    : 'Our office is located in the center of Kyiv. Come for a meeting to discuss your project.'}
+                  {t.contact.findUsDesc}
                 </p>
                 <div className="space-y-4">
                   <div className="flex items-start gap-4">
                     <Icon icon="solar:map-point-linear" width={24} className="text-zinc-500" />
                     <div>
-                      <p className="text-zinc-400 text-sm">{language === 'uk' ? 'Адреса' : 'Address'}</p>
-                      <p className="text-lg">{language === 'uk' ? 'Київ, вул. Хрещатик, 1' : 'Kyiv, Khreshchatyk Street, 1'}</p>
+                      <p className="text-zinc-400 text-sm">{t.contact.address}</p>
+                      <p className="text-lg">{t.contact.addressValue}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
                     <Icon icon="solar:train-linear" width={24} className="text-zinc-500" />
                     <div>
-                      <p className="text-zinc-400 text-sm">{language === 'uk' ? 'Метро' : 'Metro'}</p>
-                      <p className="text-lg">{language === 'uk' ? 'Майдан Незалежності' : 'Maidan Nezalezhnosti'}</p>
+                      <p className="text-zinc-400 text-sm">{t.contact.metro}</p>
+                      <p className="text-lg">{t.contact.metroStation}</p>
                     </div>
                   </div>
                 </div>
               </div>
               <div className="h-[400px] bg-zinc-800 rounded-lg flex items-center justify-center">
-                <p className="text-zinc-500">{language === 'uk' ? 'Інтерактивна карта' : 'Interactive map'}</p>
+                <p className="text-zinc-500">{t.contact.interactiveMap}</p>
               </div>
             </div>
           </div>

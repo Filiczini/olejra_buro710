@@ -45,14 +45,9 @@ export const projectService = {
         return data;
     },
     create: async (data) => {
-        // Initialize with empty sections array if not provided
-        const projectData = {
-            ...data,
-            sections: data.sections || []
-        };
         const { data: project, error } = await supabase
             .from('projects')
-            .insert(projectData)
+            .insert(data)
             .select()
             .single();
         if (error)
@@ -75,39 +70,6 @@ export const projectService = {
             .from('projects')
             .delete()
             .eq('id', id);
-    },
-    getNextProject: async (currentId) => {
-        // Get current project to find its order
-        const { data: current, error: currentError } = await supabase
-            .from('projects')
-            .select('created_at')
-            .eq('id', currentId)
-            .single();
-        if (currentError || !current) {
-            throw currentError || new Error('Current project not found');
-        }
-        // Get next project (created after current)
-        const { data: next, error: nextError } = await supabase
-            .from('projects')
-            .select('id, title, image_url, slug')
-            .gt('created_at', current.created_at)
-            .order('created_at', { ascending: true })
-            .limit(1)
-            .single();
-        // If no next project, get the first one
-        if (nextError || !next) {
-            const { data: first, error: firstError } = await supabase
-                .from('projects')
-                .select('id, title, image_url, slug')
-                .order('created_at', { ascending: true })
-                .limit(1)
-                .single();
-            if (firstError || !first) {
-                return null; // No projects at all
-            }
-            return first;
-        }
-        return next;
     },
     getFiltersOptions: async () => {
         const [tagsResult, locationsResult, yearsResult] = await Promise.all([

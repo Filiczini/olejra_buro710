@@ -3,12 +3,10 @@ import { Icon } from '@iconify-icon/react';
 import { Link } from 'react-router-dom';
 import type { Project } from '../../types/project';
 import { portfolioService } from '../../services/api';
-import { useLanguage } from '../../contexts/LanguageContext';
-import { translations } from '../../config/translations';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export default function ProjectsGrid() {
-  const { language } = useLanguage();
-  const t = translations[language];
+  const t = useTranslation();
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,13 +45,13 @@ export default function ProjectsGrid() {
     <section className="max-w-[1800px] mx-auto px-6 py-24">
       <div className="flex justify-between items-end mb-16">
         <h3 className="text-xl font-medium tracking-tight">
-          {language === 'uk' ? 'Вибрані проєкти' : 'Featured Projects'}
+          {t.home.featuredProjects}
         </h3>
         <Link
           to="/projects"
           className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors hidden md:inline-flex items-center gap-2"
         >
-          {language === 'uk' ? 'Всі проєкти' : 'All Projects'} ({total})
+          {t.home.viewAll} ({total})
           <Icon icon="solar:arrow-right-linear" width={18} />
         </Link>
       </div>
@@ -91,7 +89,7 @@ export default function ProjectsGrid() {
           to="/projects"
           className="inline-flex items-center gap-2 px-8 py-3 border border-zinc-200 rounded-full text-sm font-medium hover:bg-zinc-900 hover:text-white transition-colors"
         >
-          {language === 'uk' ? 'Всі проєкти' : 'All Projects'} ({total})
+          {t.home.viewAll} ({total})
           <Icon icon="solar:arrow-right-linear" width={18} />
         </Link>
       </div>

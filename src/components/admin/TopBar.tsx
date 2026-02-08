@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { translations } from '../../config/translations';
+import { useTranslation } from '../../contexts/LanguageContext';
 
 interface TopBarProps {
   onMobileMenuClick?: () => void;
@@ -11,7 +11,7 @@ interface TopBarProps {
 export default function TopBar({ onMobileMenuClick }: TopBarProps) {
   const { language, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
-  const t = translations[language];
+  const t = useTranslation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {

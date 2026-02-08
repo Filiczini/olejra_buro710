@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import Input from '../../components/ui/Input';
+import { useTranslation } from '../../contexts/LanguageContext';
 
 export default function SiteSettingsPage() {
+  const t = useTranslation();
   const [settings, setSettings] = useState({
     company_name: '',
     company_tagline: '',
@@ -57,43 +59,43 @@ export default function SiteSettingsPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-zinc-900 mb-8">Налаштування сайту</h1>
+      <h1 className="text-3xl font-bold text-zinc-900 mb-8">{t.siteSettings.title}</h1>
 
       {loading ? (
-        <div className="text-zinc-600">Завантаження...</div>
+        <div className="text-zinc-600">{t.siteSettings.loading}</div>
       ) : (
         <div className="bg-white rounded-xl shadow-lg p-8 space-y-6 max-w-2xl">
           <Input
-            label="Назва компанії"
-            placeholder="Введіть назву компанії"
+            label={t.siteSettings.companyName}
+            placeholder={t.siteSettings.companyNamePlaceholder}
             value={settings.company_name}
             onChange={(e) => setSettings({ ...settings, company_name: e.target.value })}
             onBlur={() => handleSave('company_name', settings.company_name)}
           />
           {success.company_name && (
-            <div className="text-sm text-green-600">✓ Збережено</div>
+            <div className="text-sm text-green-600">✓ {t.siteSettings.saved}</div>
           )}
 
           <Input
-            label="Слоган компанії"
-            placeholder="Введіть слоган компанії"
+            label={t.siteSettings.companyTagline}
+            placeholder={t.siteSettings.companyTaglinePlaceholder}
             value={settings.company_tagline}
             onChange={(e) => setSettings({ ...settings, company_tagline: e.target.value })}
             onBlur={() => handleSave('company_tagline', settings.company_tagline)}
           />
           {success.company_tagline && (
-            <div className="text-sm text-green-600">✓ Збережено</div>
+            <div className="text-sm text-green-600">✓ {t.siteSettings.saved}</div>
           )}
 
           <Input
-            label="Локація компанії"
-            placeholder="Введіть локацію компанії"
+            label={t.siteSettings.companyLocation}
+            placeholder={t.siteSettings.companyLocationPlaceholder}
             value={settings.company_location}
             onChange={(e) => setSettings({ ...settings, company_location: e.target.value })}
             onBlur={() => handleSave('company_location', settings.company_location)}
           />
           {success.company_location && (
-            <div className="text-sm text-green-600">✓ Збережено</div>
+            <div className="text-sm text-green-600">✓ {t.siteSettings.saved}</div>
           )}
         </div>
       )}

@@ -2,14 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { portfolioService } from '../../services/api';
 import type { Project, FilterOptions, PaginationParams } from '../../types/project';
-import { useLanguage } from '../../contexts/LanguageContext';
-import { translations } from '../../config/translations';
+import { useTranslation } from '../../contexts/LanguageContext';
 import Button from '../../components/ui/Button';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { language } = useLanguage();
-  const t = translations[language];
+  const t = useTranslation();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });

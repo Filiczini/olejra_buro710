@@ -3,14 +3,12 @@ import { Icon } from '@iconify-icon/react';
 import { Link } from 'react-router-dom';
 import type { Project } from '../types/project';
 import { portfolioService } from '../services/api';
-import { useLanguage } from '../contexts/LanguageContext';
-import { translations } from '../config/translations';
+import { useTranslation } from '../hooks/useTranslation';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 
 export default function AllProjectsPage() {
-  const { language } = useLanguage();
-  const t = translations[language];
+  const t = useTranslation();
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,7 +62,7 @@ export default function AllProjectsPage() {
               {t.navigation.projects}
             </h1>
             <p className="text-zinc-600 text-lg">
-              {total} {language === 'uk' ? 'проєктів' : 'projects'}
+              {total} {t.dashboard.projects}
             </p>
           </div>
 

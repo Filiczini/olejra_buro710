@@ -12,12 +12,10 @@ import FooterSection from '../components/project/FooterSection';
 import type { Project, ProjectImage } from '../types/project';
 import { portfolioService, siteSettingsService } from '../services/api';
 import { generateCategory, generateDesignZones } from '../utils/projectGenerators';
-import { useLanguage } from '../contexts/LanguageContext';
-import { translations } from '../config/translations';
+import { useTranslation } from '../hooks/useTranslation';
 
 export default function ProjectPage() {
-  const { language } = useLanguage();
-  const t = translations[language];
+  const t = useTranslation();
   const projectTranslations = t.project || {};
 
   const { id } = useParams<{ id: string }>();
