@@ -8,6 +8,9 @@ export const en = {
     viewAll: 'All Projects',
     about: 'About',
     contact: 'Contact',
+    loading: 'Loading projects...',
+    error: 'Failed to load projects',
+    noProjects: 'No projects available',
   },
   contact: {
     title: 'Get in touch',
