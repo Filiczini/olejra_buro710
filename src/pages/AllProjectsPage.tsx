@@ -28,7 +28,7 @@ export default function AllProjectsPage() {
   const loadProjects = async () => {
     try {
       setLoading(true);
-      const filters: any = { page, limit: 12 };
+      const filters: any = { page, limit: 10 };
       if (searchQuery) filters.search = searchQuery;
       if (selectedLocation) filters.location = selectedLocation;
       if (selectedYear) filters.year = selectedYear;
