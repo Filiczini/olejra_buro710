@@ -6,13 +6,11 @@ import ImageUpload from '../../components/admin/ImageUpload';
 import TagInput from '../../components/admin/TagInput';
 import type { CreateProjectData } from '../../types/project';
 import { portfolioService } from '../../services/api';
-import { useLanguage } from '../../contexts/LanguageContext';
-import { translations } from '../../config/translations';
+import { useTranslation } from '../../contexts/LanguageContext';
 
 export default function CreateProjectPage() {
   const navigate = useNavigate();
-  const { language } = useLanguage();
-  const t = translations[language];
+  const t = useTranslation();
   const [formData, setFormData] = useState<CreateProjectData>({
     title: '',
     description: '',
@@ -177,29 +175,29 @@ export default function CreateProjectPage() {
             />
 
             <Input
-              label="Архітектори"
-              placeholder="Введіть назву архітектора або бюро"
+              label={t.createProject.architects}
+              placeholder={t.createProject.architectsPlaceholder}
               value={formData.architects || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, architects: e.target.value })}
             />
 
             <Input
-              label="Заголовок концепції"
-              placeholder="Введіть заголовок концепції (наприклад, Культурний Код)"
+              label={t.createProject.conceptHeading}
+              placeholder={t.createProject.conceptHeadingPlaceholder}
               value={formData.concept_heading || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_heading: e.target.value })}
             />
 
             <Input
-              label="Підпис концепції"
-              placeholder="Введіть підпис концепції (наприклад, Концепція дизайну)"
+              label={t.createProject.conceptCaption}
+              placeholder={t.createProject.conceptCaptionPlaceholder}
               value={formData.concept_caption || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_caption: e.target.value })}
             />
 
             <Input
-              label="Цитата концепції"
-              placeholder="Введіть цитату концепції (необов'язково)"
+              label={t.createProject.conceptQuote}
+              placeholder={t.createProject.conceptQuotePlaceholder}
               value={formData.concept_quote || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_quote: e.target.value })}
             />

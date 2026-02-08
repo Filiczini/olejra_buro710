@@ -1,7 +1,6 @@
 import { Icon } from '@iconify-icon/react';
 import type { Project } from '../../types/project';
-import { useLanguage } from '../../contexts/LanguageContext';
-import { translations } from '../../config/translations';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface FooterSectionProps {
   nextProject?: Project;
@@ -18,8 +17,7 @@ export default function FooterSection({
   companyTagline = 'Architecture & Consulting',
   companyLocation = 'Kyiv, Ukraine'
 }: FooterSectionProps) {
-  const { language } = useLanguage();
-  const t = translations[language];
+  const t = useTranslation();
   const project = t.project || {};
 
   return (

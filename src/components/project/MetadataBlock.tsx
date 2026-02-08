@@ -1,5 +1,4 @@
-import { useLanguage } from '../../contexts/LanguageContext';
-import { translations } from '../../config/translations';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface MetadataBlockProps {
   area?: string;
@@ -10,8 +9,7 @@ interface MetadataBlockProps {
 }
 
 export default function MetadataBlock({ area, location, year, photoCredits, architects }: MetadataBlockProps) {
-  const { language } = useLanguage();
-  const t = translations[language];
+  const t = useTranslation();
   const project = t.project || {};
 
   return (

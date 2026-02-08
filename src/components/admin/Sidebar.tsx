@@ -1,10 +1,8 @@
-import { useLanguage } from '../../contexts/LanguageContext';
-import { translations } from '../../config/translations';
+import { useTranslation } from '../../contexts/LanguageContext';
 import SidebarMenuItem from './SidebarMenuItem';
 
 export default function Sidebar() {
-  const { language } = useLanguage();
-  const t = translations[language];
+  const t = useTranslation();
 
   return (
     <aside className="fixed left-0 top-0 h-full w-64 bg-zinc-900 text-white flex flex-col z-40">
@@ -30,7 +28,7 @@ export default function Sidebar() {
         />
         <SidebarMenuItem
           icon="solar:home-smile-linear"
-          label="Налаштування сайту"
+          label={t.navigation.siteSettings}
           path="/admin/site-settings"
         />
         <SidebarMenuItem
