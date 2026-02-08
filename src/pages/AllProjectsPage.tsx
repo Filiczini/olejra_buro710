@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Icon } from '@iconify-icon/react';
 import { Link } from 'react-router-dom';
 import type { Project } from '../types/project';
@@ -14,8 +14,9 @@ export default function AllProjectsPage() {
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [total, setTotal] = useState(0);
   const [selectedLocation, setSelectedLocation] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
@@ -24,22 +25,48 @@ export default function AllProjectsPage() {
   const [locations, setLocations] = useState<string[]>([]);
   const [years, setYears] = useState<string[]>([]);
 
-  const loadProjects = async () => {
+  // Ref for intersection observer
+  const observer = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useCallback((node: HTMLDivElement) => {
+    if (loadingMore) return;
+    if (observer.current) observer.current.disconnect();
+
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore && !loadingMore) {
+        setPage(p => p + 1);
+      }
+    }, { threshold: 0.5, rootMargin: '100px' });
+
+    if (node) observer.current.observe(node);
+  }, [hasMore, loadingMore]);
+
+  const loadProjects = async (isLoadMore = false) => {
     try {
-      setLoading(true);
-      const filters: any = { page, limit: 10 };
+      if (isLoadMore) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
+
+      const filters: any = { page, limit: 6 };
       if (selectedLocation) filters.location = selectedLocation;
       if (selectedYear) filters.year = selectedYear;
 
       const result = await portfolioService.getAll(filters);
-      setProjects(result.data);
+
+      if (isLoadMore) {
+        setProjects(prev => [...prev, ...result.data]);
+      } else {
+        setProjects(result.data);
+      }
+
       setTotal(result.pagination.total);
-      setTotalPages(result.pagination.totalPages);
+      setHasMore(page < result.pagination.totalPages);
 
       // Extract unique locations and years for filters
       if (result.data.length > 0 && (locations.length === 0 || years.length === 0)) {
         const uniqueLocations = [...new Set(result.data.map(p => p.location).filter((loc): loc is string => Boolean(loc)))].sort();
-        const uniqueYears = [...new Set(result.data.map(p => p.year).filter((year): year is string => Boolean(year)))]
+        const uniqueYears = [...new Set(result.data.map(p => p.year).filter((year): year is string => Boolean(year))]
           .sort((a, b) => b.localeCompare(a));
         setLocations(uniqueLocations);
         setYears(uniqueYears);
@@ -48,27 +75,31 @@ export default function AllProjectsPage() {
       console.error('Error loading projects:', error);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
   useEffect(() => {
-    loadProjects();
-  }, [page, selectedLocation, selectedYear]);
+    setProjects([]);
+    setPage(1);
+    setHasMore(true);
+  }, [selectedLocation, selectedYear]);
+
+  useEffect(() => {
+    loadProjects(page > 1);
+  }, [page]);
 
   const handleLocationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedLocation(e.target.value);
-    setPage(1);
   };
 
   const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedYear(e.target.value);
-    setPage(1);
   };
 
   const clearFilters = () => {
     setSelectedLocation('');
     setSelectedYear('');
-    setPage(1);
   };
 
   if (loading) {
@@ -155,6 +186,7 @@ export default function AllProjectsPage() {
                     <img
                       src={project.image_url}
                       alt={project.title}
+                      loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   </div>
@@ -171,42 +203,20 @@ export default function AllProjectsPage() {
               ))}
             </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex justify-center gap-2">
-                <button
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="px-6 py-3 border border-zinc-200 rounded-full hover:bg-zinc-900 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-zinc-900 transition-colors"
-                >
-                  {t.dashboard.previous}
-                </button>
-
-                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                  const pageNum = Math.max(1, page - 2) + i;
-                  if (pageNum > totalPages) return null;
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setPage(pageNum)}
-                      className={`px-6 py-3 border border-zinc-200 rounded-full hover:bg-zinc-900 hover:text-white transition-colors ${
-                        pageNum === page ? 'bg-zinc-900 text-white' : ''
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-
-                <button
-                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                  disabled={page === totalPages}
-                  className="px-6 py-3 border border-zinc-200 rounded-full hover:bg-zinc-900 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-zinc-900 transition-colors"
-                >
-                  {t.dashboard.next}
-                </button>
-              </div>
-            )}
+            {/* Loading More Indicator */}
+            <div ref={loadMoreRef} className="flex justify-center py-12">
+              {loadingMore && (
+                <div className="flex items-center gap-2 text-zinc-500">
+                  <Icon icon="solar:spinner-linear" width={24} className="animate-spin" />
+                  <span>{language === 'uk' ? 'Завантаження...' : 'Loading...'}</span>
+                </div>
+              )}
+              {!hasMore && projects.length > 0 && (
+                <p className="text-zinc-400 text-sm">
+                  {language === 'uk' ? 'Всі проєкти показано' : 'All projects shown'}
+                </p>
+              )}
+            </div>
           </>
         )}
       </div>
