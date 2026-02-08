@@ -24,9 +24,9 @@ export default function AboutSection() {
             </p>
           </div>
           <div>
-            <a href="#" className="inline-flex items-center gap-2 text-sm font-medium uppercase tracking-wider border-b border-zinc-900 pb-1 hover:opacity-60 transition-opacity">
+            <a href="/about" className="inline-flex items-center gap-2 text-sm font-medium uppercase tracking-wider border-b border-zinc-900 pb-1 hover:opacity-60 hover:border-zinc-600 hover:gap-3 transition-all duration-300 group">
               {t.about.ctaButton}
-              <Icon icon="solar:arrow-right-up-linear" width={16} />
+              <Icon icon="solar:arrow-right-up-linear" width={16} className="group-hover:-translate-y-0.5 group-hover:-translate-x-0.5 transition-transform duration-300" />
             </a>
           </div>
         </div>

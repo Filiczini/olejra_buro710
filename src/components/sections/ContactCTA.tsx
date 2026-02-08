@@ -9,9 +9,9 @@ export default function ContactCTA() {
       <p className="text-zinc-500 text-lg mb-12 max-w-xl mx-auto">
         Ми відкриті до нових викликів. Розкажіть нам про свій простір, і ми знайдемо для нього ідеальну форму.
       </p>
-      <a 
-        href="#" 
-        className="inline-flex items-center gap-3 bg-zinc-900 text-white px-8 py-4 rounded-full font-medium hover:bg-zinc-800 transition-all hover:px-10 group"
+      <a
+        href="/contact"
+        className="inline-flex items-center gap-3 bg-zinc-900 text-white px-8 py-4 rounded-full font-medium hover:bg-zinc-800 transition-all hover:px-10 hover:shadow-lg hover:shadow-zinc-900/20 group"
       >
         Зв'язатися з нами
         <Icon icon="solar:arrow-right-linear" width={20} className="group-hover:translate-x-1 transition-transform" />
