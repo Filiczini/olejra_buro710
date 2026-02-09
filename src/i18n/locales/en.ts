@@ -58,6 +58,7 @@ export const en = {
     nextProject: 'Next Project',
     noMoreProjects: 'No More Projects',
     designConcept: 'Design Concept',
+    client: 'Client',
   },
   navigation: {
     projects: 'Projects',
@@ -141,7 +142,22 @@ export const en = {
     requiredField: 'This field is required',
     invalidImage: 'Invalid image format',
     imageTooLarge: 'Image size exceeds 5MB',
-    error: 'Error creating project'
+    error: 'Error creating project',
+    heroImages: 'Hero Images',
+    heroImagesPlaceholder: 'Drag and drop hero images, or browse',
+    heroImagesDescription: 'Add 1-5 images for the hero slider. These will be displayed prominently at the top of the project page.',
+    heroImagesRequired: 'At least one hero image is required',
+    heroImagesMax: 'Maximum 5 hero images allowed',
+    galleryImages: 'Gallery Images',
+    galleryImagesPlaceholder: 'Drag and drop gallery images, or browse',
+    galleryImagesDescription: 'Add project gallery images. These will appear in the project gallery section.',
+    galleryImagesMax: 'Maximum 10 gallery images allowed',
+    sections: {
+      mainInfo: 'Main Information',
+      description: 'Description',
+      heroImages: 'Hero Slider Images',
+      galleryImages: 'Gallery Images'
+    }
   },
   editProject: {
     title: 'Edit Project',
@@ -185,7 +201,24 @@ export const en = {
     requiredField: 'This field is required',
     invalidImage: 'Invalid image format',
     imageTooLarge: 'Image size exceeds 5MB',
-    error: 'Error saving project'
+    error: 'Error saving project',
+    heroImages: 'Hero Slider Images',
+    galleryImages: 'Gallery Images',
+    addHeroImages: 'Add Hero Images',
+    heroImagesPlaceholder: 'Drag and drop hero images, or browse',
+    heroImagesDescription: 'Add 1-5 images for the hero slider. These will be displayed prominently at the top of the project page.',
+    heroImagesRequired: 'At least one hero image is required',
+    heroImagesMax: 'Maximum 5 hero images allowed',
+    addGalleryImages: 'Add Gallery Images',
+    galleryImagesPlaceholder: 'Drag and drop gallery images, or browse',
+    galleryImagesDescription: 'Add project gallery images. These will appear in the project gallery section.',
+    galleryImagesMax: 'Maximum 10 gallery images allowed',
+    sections: {
+      mainInfo: 'Main Information',
+      description: 'Description',
+      heroImages: 'Hero Slider Images',
+      galleryImages: 'Gallery Images'
+    }
   },
   login: {
     title: 'Admin Login',
@@ -260,7 +293,7 @@ export const en = {
     contactCTADescription: 'Let us help you create the space of your dreams.'
   },
   footer: {
-    copyright: '© 2024 BURO 710. All rights reserved.'
+    copyright: '© 2026 BURO 710. All rights reserved.'
   },
   process: {
     title: 'Process',
@@ -285,5 +318,32 @@ export const en = {
     explore: 'Explore',
     location: 'Location',
     area: '{area} m²'
+  },
+  mediaList: {
+    title: 'Media Items',
+    dragToReorder: 'Drag to reorder',
+    altText: 'Alt text',
+    altTextPlaceholder: 'Enter alt text for accessibility',
+    remove: 'Remove',
+    removeConfirm: 'Are you sure you want to remove this media item?',
+    confirm: 'Confirm',
+    cancel: 'Cancel',
+    noMedia: 'No media items yet',
+    loading: 'Loading media...',
+    removeConfirmationTitle: 'Remove Media',
+    removeConfirmationMessage: 'Are you sure you want to remove this media item? This action cannot be undone.',
+    confirmRemove: 'Remove',
+    cancelRemove: 'Cancel'
+  },
+  heroSlider: {
+    heroNavigation: 'Hero Slider',
+    heroSlideIndicator: 'Slide {current}/{total}',
+    noHeroImages: 'No hero images uploaded'
+  },
+  common: {
+    reorderMedia: 'Reorder media',
+    deleteMedia: 'Delete media',
+    altText: 'Alt text',
+    uploadMore: 'Upload more'
   }
 };

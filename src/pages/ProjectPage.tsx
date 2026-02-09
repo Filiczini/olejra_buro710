@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import type { Project } from '../types/project';
 import { portfolioService } from '../services/api';
@@ -7,13 +7,45 @@ import { Icon } from '@iconify-icon/react';
 
 export default function ProjectPage() {
   const t = useTranslation();
-  const projectTranslations = t.project || {};
+  const projectTranslations = t.project || {} as any;
 
   const { id } = useParams<{ id: string }>();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isNavVisible, setIsNavVisible] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [totalSlides, setTotalSlides] = useState(1);
+  const sliderRef = useRef<HTMLDivElement>(null);
+
+  // Generate images to display in hero slider
+  const getHeroImages = (project: Project): string[] => {
+    const images: string[] = [];
+
+    // 1. Add heroMedia if available
+    if (project.heroMedia && project.heroMedia.length > 0) {
+      images.push(...project.heroMedia.map(m => m.url));
+    }
+
+    // 2. Fallback to galleryMedia[0] if no heroMedia
+    if (images.length === 0 && project.galleryMedia && project.galleryMedia.length > 0) {
+      images.push(project.galleryMedia[0].url);
+    }
+
+    // 3. Fallback to image_url if still no images
+    if (images.length === 0 && project.image_url) {
+      images.push(project.image_url);
+    }
+
+    // 4. Final fallback to placeholder
+    if (images.length === 0) {
+      images.push('https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1920&q=80');
+    }
+
+    return images;
+  };
+
+  const heroImages = project ? getHeroImages(project) : [];
 
   useEffect(() => {
     const loadProject = async () => {
@@ -21,6 +53,7 @@ export default function ProjectPage() {
         setLoading(true);
         const data = await portfolioService.getById(id!);
         setProject(data);
+        setTotalSlides(getHeroImages(data).length);
       } catch (err) {
         setError('Failed to load project');
         console.error('Error loading project:', err);
@@ -34,7 +67,43 @@ export default function ProjectPage() {
     }
   }, [id]);
 
-  const description = project?.shortDescription || project?.description?.[0] || '';
+  // Handle slide change via scroll
+  useEffect(() => {
+    const slider = sliderRef.current;
+    if (!slider) return;
+
+    const handleScroll = () => {
+      const slideWidth = slider.offsetWidth;
+      const slideIndex = Math.round(slider.scrollLeft / slideWidth);
+      setCurrentSlide(slideIndex);
+    };
+
+    slider.addEventListener('scroll', handleScroll);
+    return () => slider.removeEventListener('scroll', handleScroll);
+  }, [heroImages.length]);
+
+  const scrollToSlide = (index: number) => {
+    const slider = sliderRef.current;
+    if (!slider) return;
+
+    const slideWidth = slider.offsetWidth;
+    slider.scrollTo({
+      left: index * slideWidth,
+      behavior: 'smooth'
+    });
+  };
+
+  const nextSlide = () => {
+    const newIndex = (currentSlide + 1) % totalSlides;
+    scrollToSlide(newIndex);
+  };
+
+  const prevSlide = () => {
+    const newIndex = currentSlide === 0 ? totalSlides - 1 : currentSlide - 1;
+    scrollToSlide(newIndex);
+  };
+
+  const description = project?.short_description || project?.description?.[0] || '';
 
   if (loading) {
     return (
@@ -76,22 +145,57 @@ export default function ProjectPage() {
       {/* HERO SECTION: 100vh with Carousel + Overlay */}
       <header className="relative w-full h-[100vh] overflow-hidden bg-zinc-900">
         {/* CAROUSEL: Horizontal Snap Scroll */}
-        <div className="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide z-0">
-          {/* Slide 1 */}
-          <div className="w-full h-full flex-shrink-0 snap-center relative">
-            <img
-              src={project.imageUrl}
-              alt={project.title}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-black/20"></div>
-          </div>
+        <div
+          ref={sliderRef}
+          className="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide z-0 scroll-smooth"
+        >
+          {heroImages.map((image, index) => (
+            <div key={index} className="w-full h-full flex-shrink-0 snap-center relative">
+              <img
+                src={image}
+                alt={`${project.title} - Slide ${index + 1}`}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/20"></div>
+            </div>
+          ))}
         </div>
 
-        {/* Hint to scroll */}
-        <div className="absolute right-6 top-1/2 -translate-y-1/2 z-20 mix-blend-difference hidden md:block animate-pulse pointer-events-none">
-          <Icon icon="solar:arrow-right-linear" width={32} className="text-white/50" />
-        </div>
+        {/* Navigation Arrows */}
+        {totalSlides > 1 && (
+          <>
+            <button
+              onClick={prevSlide}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/30 backdrop-blur-md text-white mix-blend-difference hover:bg-black/50 transition-all duration-300 hidden md:block"
+              aria-label="Previous slide"
+            >
+              <Icon icon="solar:arrow-left-linear" width={24} />
+            </button>
+            <button
+              onClick={nextSlide}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/30 backdrop-blur-md text-white mix-blend-difference hover:bg-black/50 transition-all duration-300 hidden md:block"
+              aria-label="Next slide"
+            >
+              <Icon icon="solar:arrow-right-linear" width={24} />
+            </button>
+          </>
+        )}
+
+        {/* Slide Indicators */}
+        {totalSlides > 1 && (
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+            {heroImages.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => scrollToSlide(index)}
+                className={`h-1 rounded-full transition-all duration-300 ${
+                  index === currentSlide ? 'w-8 bg-white' : 'w-2 bg-white/30'
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
 
         {/* CONTENT OVERLAY: Gradient + Text */}
         <div className="absolute bottom-0 left-0 w-full z-10 bg-gradient-to-t from-black/90 via-black/40 to-transparent pt-32 pb-12 px-6">
@@ -123,15 +227,21 @@ export default function ProjectPage() {
               {/* Meta Data Columns */}
               <div className="lg:col-span-4 flex justify-start lg:justify-end gap-12 pb-2">
                 <div>
-                  <span className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1">Client</span>
+                  <span className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1">
+                    {(projectTranslations as any).client || 'Client'}
+                  </span>
                   <span className="text-sm font-medium text-white">{project.location || 'TBD'}</span>
                 </div>
                 <div>
-                  <span className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1">Year</span>
+                  <span className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1">
+                    {projectTranslations.year || 'Year'}
+                  </span>
                   <span className="text-sm font-medium text-white">{project.year || 'TBD'}</span>
                 </div>
                 <div>
-                  <span className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1">Area</span>
+                  <span className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1">
+                    {projectTranslations.area || 'Area'}
+                  </span>
                   <span className="text-sm font-medium text-white">{project.area || 'TBD'}</span>
                 </div>
               </div>
@@ -179,7 +289,7 @@ export default function ProjectPage() {
           {/* SECTION: Full Width Image */}
           <div className="w-full aspect-[16/9] mb-4 animate-fade-in" style={{ animationDelay: '0.4s' }}>
             <img
-              src={project.imageUrl}
+              src={project.image_url}
               alt={project.title}
               className="w-full h-full object-cover rounded-sm grayscale hover:grayscale-0 transition-all duration-700"
             />
@@ -229,7 +339,7 @@ export default function ProjectPage() {
 
           {/* SECTION: Masonry Gallery */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 animate-fade-in" style={{ animationDelay: '0.5s' }}>
-            {project.projectImages?.slice(0, 5).map((img, index) => (
+            {project.project_images?.slice(0, 5).map((img: any, index: number) => (
               <div key={index} className="space-y-4 md:space-y-8">
                 <img
                   src={img.url}

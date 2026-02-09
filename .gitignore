@@ -53,3 +53,8 @@ cache/
 # Vite build artifacts
 .vite/
 *.js.map
+
+# TypeScript compiled files (when .ts exists)
+src/server/**/*.js
+src/types/project.js
+!src/server/index.js

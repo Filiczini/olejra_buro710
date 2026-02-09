@@ -4,7 +4,9 @@ import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import ImageUpload from '../../components/admin/ImageUpload';
 import TagInput from '../../components/admin/TagInput';
-import type { UpdateProjectData, Project } from '../../types/project';
+import DragDropMediaList from '../../components/admin/DragDropMediaList';
+import MultiImageUpload from '../../components/admin/MultiImageUpload';
+import type { UpdateProjectData, Project, Media } from '../../types/project';
 import { portfolioService } from '../../services/api';
 import { useTranslation } from '../../contexts/LanguageContext';
 
@@ -30,6 +32,10 @@ export default function EditProjectPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [heroMedia, setHeroMedia] = useState<Media[]>([]);
+  const [galleryMedia, setGalleryMedia] = useState<Media[]>([]);
+  const [heroImagesToUpload, setHeroImagesToUpload] = useState<File[]>([]);
+  const [galleryImagesToUpload, setGalleryImagesToUpload] = useState<File[]>([]);
 
   useEffect(() => {
     if (!id) return;
@@ -51,6 +57,8 @@ export default function EditProjectPage() {
           concept_caption: data.concept_caption || '',
           concept_quote: data.concept_quote || '',
         });
+        setHeroMedia(data.heroMedia || []);
+        setGalleryMedia(data.galleryMedia || []);
       } catch (error) {
         console.error('Error loading project:', error);
         navigate('/admin/dashboard');
@@ -98,9 +106,6 @@ export default function EditProjectPage() {
       if (formData.description) {
         formDataToSend.append('description', formData.description);
       }
-      if (formData.image) {
-        formDataToSend.append('image', formData.image);
-      }
       if (formData.tags) {
         formDataToSend.append('tags', JSON.stringify(formData.tags));
       }
@@ -129,6 +134,30 @@ export default function EditProjectPage() {
         formDataToSend.append('concept_quote', formData.concept_quote);
       }
 
+      if (heroMedia.length > 0) {
+        const heroMediaIdsOrdered = heroMedia.map(m => m.id);
+        heroMediaIdsOrdered.forEach(id => formDataToSend.append('heroMediaIdsOrdered', id));
+      }
+
+      if (galleryMedia.length > 0) {
+        const galleryMediaIdsOrdered = galleryMedia.map(m => m.id);
+        galleryMediaIdsOrdered.forEach(id => formDataToSend.append('galleryMediaIdsOrdered', id));
+      }
+
+      // Append new hero images to upload
+      if (heroImagesToUpload.length > 0) {
+        heroImagesToUpload.forEach((file) => {
+          formDataToSend.append(`heroMedia`, file);
+        });
+      }
+
+      // Append new gallery images to upload
+      if (galleryImagesToUpload.length > 0) {
+        galleryImagesToUpload.forEach((file) => {
+          formDataToSend.append(`galleryMedia`, file);
+        });
+      }
+
       await portfolioService.update(id!, formDataToSend);
 
       navigate('/admin/dashboard');
@@ -137,6 +166,30 @@ export default function EditProjectPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleHeroMediaReorder = (reorderedMedia: Media[]) => {
+    setHeroMedia(reorderedMedia);
+  };
+
+  const handleGalleryMediaReorder = (reorderedMedia: Media[]) => {
+    setGalleryMedia(reorderedMedia);
+  };
+
+  const handleHeroMediaRemove = (id: string) => {
+    setHeroMedia(prev => prev.filter(m => m.id !== id));
+  };
+
+  const handleGalleryMediaRemove = (id: string) => {
+    setGalleryMedia(prev => prev.filter(m => m.id !== id));
+  };
+
+  const handleHeroAltTextChange = (id: string, alt: string) => {
+    setHeroMedia(prev => prev.map(m => m.id === id ? { ...m, alt } : m));
+  };
+
+  const handleGalleryAltTextChange = (id: string, alt: string) => {
+    setGalleryMedia(prev => prev.map(m => m.id === id ? { ...m, alt } : m));
   };
 
   if (fetching) {
@@ -257,6 +310,56 @@ export default function EditProjectPage() {
               value={formData.concept_quote || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_quote: e.target.value })}
             />
+
+            {/* Divider */}
+            <div className="border-t border-zinc-200 my-4" />
+
+            {/* Hero Slider Images Section */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-zinc-900">{t.editProject.heroImages}</h2>
+
+              {/* Existing Hero Media */}
+              <DragDropMediaList
+                mediaItems={heroMedia}
+                onReorder={handleHeroMediaReorder}
+                onRemove={handleHeroMediaRemove}
+                onAltTextChange={handleHeroAltTextChange}
+              />
+
+              {/* Add New Hero Images */}
+              <MultiImageUpload
+                images={heroImagesToUpload}
+                onImagesChange={setHeroImagesToUpload}
+                maxCount={10}
+                label={t.editProject.addHeroImages}
+                placeholder={t.editProject.heroImagesPlaceholder}
+              />
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-zinc-200 my-4" />
+
+            {/* Gallery Images Section */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-zinc-900">{t.editProject.galleryImages}</h2>
+
+              {/* Existing Gallery Media */}
+              <DragDropMediaList
+                mediaItems={galleryMedia}
+                onReorder={handleGalleryMediaReorder}
+                onRemove={handleGalleryMediaRemove}
+                onAltTextChange={handleGalleryAltTextChange}
+              />
+
+              {/* Add New Gallery Images */}
+              <MultiImageUpload
+                images={galleryImagesToUpload}
+                onImagesChange={setGalleryImagesToUpload}
+                maxCount={20}
+                label={t.editProject.addGalleryImages}
+                placeholder={t.editProject.galleryImagesPlaceholder}
+              />
+            </div>
 
             {errors.submit && (
               <div className="text-sm text-red-500 bg-red-50 p-3 rounded-lg">

@@ -58,6 +58,7 @@ export const uk = {
     nextProject: 'Наступний проект',
     noMoreProjects: 'Більше проектів немає',
     designConcept: 'Концепція дизайну',
+    client: 'Клієнт',
   },
   navigation: {
     projects: 'Проєкти',
@@ -141,51 +142,41 @@ export const uk = {
     requiredField: 'Це поле обов\'язкове',
     invalidImage: 'Невірний формат зображення',
     imageTooLarge: 'Розмір зображення перевищує 5MB',
-    error: 'Помилка створення проєкту'
+    error: 'Помилка створення проєкту',
+    heroImages: 'Зображення героя',
+    heroImagesPlaceholder: 'Перетягніть зображення героя або перегляньте',
+    heroImagesDescription: 'Додайте 1-5 зображень для слайдера героя. Вони будуть відображатися на початку сторінки проєкту.',
+    heroImagesRequired: 'Потрібно принаймні одне зображення героя',
+    heroImagesMax: 'Максимум 5 зображень героя',
+    galleryImages: 'Зображення галереї',
+    galleryImagesPlaceholder: 'Перетягніть зображення галереї або перегляньте',
+    galleryImagesDescription: 'Додайте зображення галереї проєкту. Вони будуть відображатися у секції галереї.',
+    galleryImagesMax: 'Максимум 10 зображень галереї',
+    sections: {
+      mainInfo: 'Основна інформація',
+      description: 'Опис',
+      heroImages: 'Зображення слайдера героя',
+      galleryImages: 'Зображення галереї'
+    }
   },
   editProject: {
-    title: 'Редагувати проєкт',
-    backToDashboard: 'Повернутися до панелі керування',
-    basicInfo: 'Основна інформація',
-    titleLabel: 'Назва',
-    titlePlaceholder: 'Введіть назву проєкту',
-    description: 'Опис',
-    descriptionPlaceholder: 'Введіть детальний опис проєкту',
-    location: 'Локація',
-    locationPlaceholder: 'Введіть локацію',
-    year: 'Рік',
-    yearPlaceholder: 'Введіть рік',
-    area: 'Площа (м²)',
-    areaPlaceholder: 'Введіть площу',
-    details: 'Деталі',
-    team: 'Команда',
-    teamPlaceholder: 'Введіть учасників команди',
-    architects: 'Архітектори',
-    architectsPlaceholder: 'Введіть назву архітектора або бюро',
-    conceptHeading: 'Заголовок концепції',
-    conceptHeadingPlaceholder: 'Введіть заголовок концепції (наприклад, Культурний Код)',
-    conceptCaption: 'Підпис концепції',
-    conceptCaptionPlaceholder: 'Введіть підпис концепції (наприклад, Концепція дизайну)',
-    conceptQuote: 'Цитата концепції',
-    conceptQuotePlaceholder: 'Введіть цитату концепції (необов\'язково)',
-    tags: 'Теги',
-    tagsPlaceholder: 'Введіть теги та натисніть Enter',
-    addTag: 'Додати',
-    image: 'Зображення',
-    uploadImage: 'Завантажити зображення',
-    dragDrop: 'Перетягніть зображення сюди або',
-    selectFile: 'виберіть файл',
-    currentImage: 'Поточне зображення',
-    supportedFormats: 'Підтримувані формати: JPG, PNG, WEBP (макс. 5MB)',
-    uploading: 'Завантаження...',
-    remove: 'Видалити',
-    cancel: 'Скасувати',
-    save: 'Зберегти',
-    saving: 'Збереження...',
-    requiredField: 'Це поле обов\'язкове',
-    invalidImage: 'Невірний формат зображення',
-    imageTooLarge: 'Розмір зображення перевищує 5MB',
-    error: 'Помилка збереження проєкту'
+    heroImages: 'Зображення слайдера героя',
+    galleryImages: 'Зображення галереї',
+    addHeroImages: 'Додати зображення героя',
+    heroImagesPlaceholder: 'Перетягніть зображення героя або перегляньте',
+    heroImagesDescription: 'Додайте 1-5 зображень для слайдера героя. Вони будуть відображатися на початку сторінки проєкту.',
+    heroImagesRequired: 'Потрібно принаймні одне зображення героя',
+    heroImagesMax: 'Максимум 5 зображень героя',
+    addGalleryImages: 'Додати зображення галереї',
+    galleryImagesPlaceholder: 'Перетягніть зображення галереї або перегляньте',
+    galleryImagesDescription: 'Додайте зображення галереї проєкту. Вони будуть відображатися у секції галереї.',
+    galleryImagesMax: 'Максимум 10 зображень галереї',
+    sections: {
+      mainInfo: 'Основна інформація',
+      description: 'Опис',
+      heroImages: 'Зображення слайдера героя',
+      galleryImages: 'Зображення галереї'
+    }
   },
   login: {
     title: 'Вхід адміністратора',
@@ -260,7 +251,7 @@ export const uk = {
     contactCTADescription: 'Дозвольте нам допомогти вам створити простір вашої мрії.'
   },
   footer: {
-    copyright: '©2024 BURO 710. Всі права захищено.'
+    copyright: '©2026 BURO 710. Всі права захищено.'
   },
   process: {
     title: 'Процес',
@@ -285,5 +276,32 @@ export const uk = {
     explore: 'Дослідити',
     location: 'Локація',
     area: '{area} м²'
+  },
+  mediaList: {
+    title: 'Медіа елементи',
+    dragToReorder: 'Перетягніть для зміни порядку',
+    altText: 'Alt текст',
+    altTextPlaceholder: 'Введіть alt текст для доступності',
+    remove: 'Видалити',
+    removeConfirm: 'Ви впевнені, що хочете видалити цей медіа елемент?',
+    confirm: 'Підтвердити',
+    cancel: 'Скасувати',
+    noMedia: 'Медіа елементів поки немає',
+    loading: 'Завантаження медіа...',
+    removeConfirmationTitle: 'Видалити медіа',
+    removeConfirmationMessage: 'Ви впевнені, що хочете видалити цей медіа елемент? Цю дію не можна скасувати.',
+    confirmRemove: 'Видалити',
+    cancelRemove: 'Скасувати'
+  },
+  heroSlider: {
+    heroNavigation: 'Слайдер героя',
+    heroSlideIndicator: 'Слайд {current}/{total}',
+    noHeroImages: 'Зображення героя не завантажено'
+  },
+  common: {
+    reorderMedia: 'Змінити порядок',
+    deleteMedia: 'Видалити',
+    altText: 'Alt текст',
+    uploadMore: 'Завантажити більше'
   }
 };
