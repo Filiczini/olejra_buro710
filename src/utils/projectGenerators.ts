@@ -128,21 +128,6 @@ export function generateCategory(tags: string[]): CategoryResult {
   };
 }
 
-export function generateMaterials(tags: string[]): Material[] {
-  const tagsLower = tags.map(t => t.toLowerCase());
-  const uniqueMaterials = new Map<string, Material>();
-
-  for (const [key, materials] of Object.entries(MATERIAL_MAPPING)) {
-    if (tagsLower.includes(key)) {
-      materials.forEach(mat => {
-        uniqueMaterials.set(mat.name, mat);
-      });
-    }
-  }
-
-  return uniqueMaterials.size > 0 ? Array.from(uniqueMaterials.values()) : DEFAULT_MATERIALS;
-}
-
 export function generateDesignZones(project: Project): DesignZone[] {
   const tagsLower = project.tags.map(t => t.toLowerCase());
   const zones: DesignZone[] = [];
