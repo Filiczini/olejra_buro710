@@ -77,7 +77,7 @@ export default function FeaturedProjectsSection() {
   return (
     <section className="max-w-[1600px] mx-auto px-6 mb-40">
       {/* Section Header */}
-      <div className="flex justify-between items-end mb-16 pb-6">
+      <div className="flex justify-between items-end mb-16 pb-6 gap-12">
         <h2 className="text-4xl font-medium tracking-tight uppercase text-zinc-900">
           {t.home.featuredProjects}
         </h2>
