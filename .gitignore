@@ -49,3 +49,7 @@ cache/
 # Local environment files (not committed)
 .env.local
 .env.*.local
+
+# Vite build artifacts
+.vite/
+*.js.map
