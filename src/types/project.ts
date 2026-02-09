@@ -16,6 +16,14 @@ export interface ProjectImage {
   alt?: string;
 }
 
+export interface Media {
+  id: string;
+  url: string;
+  role: 'hero' | 'gallery';
+  sort_order: number;
+  alt?: string;
+}
+
 export interface Material {
   name: string;
   color?: string;
@@ -46,6 +54,10 @@ export interface Project {
   design_zones?: DesignZone[];
   materials?: Material[];
 
+  // Media management
+  heroMedia?: Media[];
+  galleryMedia?: Media[];
+
   // Additional fields for hardcoded content removal
   architects?: string;
   concept_heading?: string;
@@ -56,8 +68,9 @@ export interface Project {
 export interface CreateProjectData {
   title: string;
   description: string;
-  image: File;
   tags: string[];
+  heroMedia?: File[];
+  galleryMedia?: File[];
   location?: string;
   area?: string;
   year?: string;
@@ -71,7 +84,6 @@ export interface CreateProjectData {
 export interface UpdateProjectData {
   title?: string;
   description?: string;
-  image?: File;
   tags?: string[];
   location?: string;
   area?: string;
@@ -81,6 +93,10 @@ export interface UpdateProjectData {
   concept_heading?: string;
   concept_caption?: string;
   concept_quote?: string;
+
+  // Ordered media IDs for reordering
+  heroMediaIdsOrdered?: string[];
+  galleryMediaIdsOrdered?: string[];
 }
 
 export interface PaginationParams {

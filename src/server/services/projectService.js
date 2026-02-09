@@ -1,4 +1,5 @@
 import { supabase } from '../config/supabase';
+import { storageService } from './storageService';
 export const projectService = {
     getAll: async (params) => {
         const { page = 1, limit = 10, sortBy = 'created_at', sortOrder = 'desc', tags, location, year, search } = params || {};
@@ -35,34 +36,68 @@ export const projectService = {
         };
     },
     getById: async (id) => {
-        const { data, error } = await supabase
-            .from('projects')
-            .select('*')
-            .eq('id', id)
-            .single();
-        if (error)
-            throw error;
-        return data;
+        const [projectResult, mediaResult] = await Promise.all([
+            supabase
+                .from('projects')
+                .select('*')
+                .eq('id', id)
+                .single(),
+            supabase
+                .from('media')
+                .select('*')
+                .eq('project_id', id)
+                .order('sort_order', { ascending: true }),
+        ]);
+        if (projectResult.error)
+            throw projectResult.error;
+        if (mediaResult.error)
+            throw mediaResult.error;
+        const media = mediaResult.data || [];
+        const heroMedia = media.filter(m => m.role === 'hero');
+        const galleryMedia = media.filter(m => m.role === 'gallery');
+        return {
+            project: projectResult.data,
+            heroMedia: heroMedia,
+            galleryMedia: galleryMedia,
+        };
     },
     create: async (data) => {
-        const { data: project, error } = await supabase
+        const { heroMedia, galleryMedia, ...projectData } = data;
+        const { data: project, error: projectError } = await supabase
             .from('projects')
-            .insert(data)
+            .insert(projectData)
             .select()
             .single();
-        if (error)
-            throw error;
+        if (projectError)
+            throw projectError;
+        if (!project)
+            throw new Error('Failed to create project');
+        if (heroMedia && heroMedia.length > 0) {
+            await createMediaForProject(project.id, heroMedia, 'hero');
+        }
+        if (galleryMedia && galleryMedia.length > 0) {
+            await createMediaForProject(project.id, galleryMedia, 'gallery');
+        }
         return project;
     },
     update: async (id, data) => {
-        const { data: project, error } = await supabase
+        const { heroMediaIdsOrdered, galleryMediaIdsOrdered, ...projectData } = data;
+        const { data: project, error: projectError } = await supabase
             .from('projects')
-            .update(data)
+            .update(projectData)
             .eq('id', id)
             .select()
             .single();
-        if (error)
-            throw error;
+        if (projectError)
+            throw projectError;
+        if (!project)
+            throw new Error('Failed to update project');
+        if (heroMediaIdsOrdered) {
+            await reorderMedia(heroMediaIdsOrdered);
+        }
+        if (galleryMediaIdsOrdered) {
+            await reorderMedia(galleryMediaIdsOrdered);
+        }
         return project;
     },
     delete: async (id) => {
@@ -90,3 +125,44 @@ export const projectService = {
         };
     },
 };
+/**
+ * Create media records for a project by uploading images
+ * @param projectId - UUID of the project
+ * @param files - Array of file objects to upload
+ * @param role - Role of the media ('hero' or 'gallery')
+ */
+async function createMediaForProject(projectId, files, role) {
+    const uploadResult = await storageService.uploadImages(files);
+    if (uploadResult.errors.length > 0) {
+        console.warn(`Some uploads failed: ${uploadResult.errors.join(', ')}`);
+    }
+    if (uploadResult.urls.length === 0) {
+        throw new Error('No files were uploaded successfully');
+    }
+    const mediaRecords = uploadResult.urls.map((url, index) => ({
+        project_id: projectId,
+        url,
+        role,
+        sort_order: index,
+    }));
+    const { error } = await supabase
+        .from('media')
+        .insert(mediaRecords);
+    if (error)
+        throw error;
+}
+/**
+ * Reorder media records by updating sort_order based on the ordered IDs
+ * @param mediaIdsOrdered - Array of media IDs in the desired order
+ */
+async function reorderMedia(mediaIdsOrdered) {
+    const updatePromises = mediaIdsOrdered.map((id, index) => supabase
+        .from('media')
+        .update({ sort_order: index })
+        .eq('id', id));
+    const results = await Promise.all(updatePromises);
+    const errors = results.filter(r => r.error).map(r => r.error);
+    if (errors.length > 0) {
+        throw new Error(`Failed to reorder media: ${errors.map(e => e?.message).join(', ')}`);
+    }
+}

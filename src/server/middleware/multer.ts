@@ -21,3 +21,13 @@ export const uploadMiddleware = multer({
 });
 
 export const uploadSingleImage = uploadMiddleware.single('image');
+
+/**
+ * Middleware to handle multiple file uploads with different field names.
+ * Accepts 'heroMedia' (max 1 file) and 'galleryMedia' (max 10 files) fields.
+ * Files are stored in memory as Buffers.
+ */
+export const uploadProjectMedia = uploadMiddleware.fields([
+  { name: 'heroMedia', maxCount: 5 },
+  { name: 'galleryMedia', maxCount: 10 },
+]);

@@ -153,6 +153,21 @@ export interface Translations {
     invalidImage: string;
     imageTooLarge: string;
     error: string;
+    heroImages: string;
+    heroImagesPlaceholder: string;
+    heroImagesDescription: string;
+    heroImagesRequired: string;
+    heroImagesMax: string;
+    galleryImages: string;
+    galleryImagesPlaceholder: string;
+    galleryImagesDescription: string;
+    galleryImagesMax: string;
+    sections: {
+      mainInfo: string;
+      description: string;
+      heroImages: string;
+      galleryImages: string;
+    };
   };
   editProject: {
     title: string;
@@ -197,6 +212,18 @@ export interface Translations {
     invalidImage: string;
     imageTooLarge: string;
     error: string;
+    heroImages: string;
+    galleryImages: string;
+    addHeroImages: string;
+    heroImagesPlaceholder: string;
+    addGalleryImages: string;
+    galleryImagesPlaceholder: string;
+    sections: {
+      mainInfo: string;
+      description: string;
+      heroImages: string;
+      galleryImages: string;
+    };
   };
   login: {
     title: string;
@@ -257,6 +284,18 @@ export interface Translations {
     location: string;
     area: string;
   };
+  mediaList: {
+    title: string;
+    dragToReorder: string;
+    altText: string;
+    altTextPlaceholder: string;
+    remove: string;
+    removeConfirm: string;
+    confirm: string;
+    cancel: string;
+    noMedia: string;
+    loading: string;
+  };
   about: {
     heroLine1: string;
     heroLine2: string;
@@ -303,8 +342,8 @@ export interface Translations {
  * All available translations by locale
  */
 export const translations: Record<Locale, Translations> = {
-  uk: uk as Translations,
-  en: en as Translations,
+  uk: uk as unknown as Translations,
+  en: en as unknown as Translations,
 };
 
 /**
