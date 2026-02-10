@@ -4,6 +4,7 @@ import type { Project, Media } from '../types/project';
 import { portfolioService } from '../services/api';
 import { useTranslation } from '../hooks/useTranslation';
 import { Icon } from '@iconify-icon/react';
+import Header from '../components/layout/Header';
 
 export default function ProjectPage() {
   const t = useTranslation();
@@ -12,7 +13,6 @@ export default function ProjectPage() {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [isNavVisible, setIsNavVisible] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [totalSlides, setTotalSlides] = useState(1);
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -124,24 +124,7 @@ export default function ProjectPage() {
 
   return (
     <div className="bg-white text-zinc-900 antialiased">
-      {/* NAVIGATION: Absolute Overlay */}
-      <nav className="fixed top-0 left-0 w-full z-50 mix-blend-difference text-white">
-        <div className="w-full px-6 h-20 flex justify-between items-center">
-          <a href="/" className="text-xs font-semibold tracking-tight uppercase hover:opacity-70 transition-opacity">
-            Bureau 710
-          </a>
-
-          <button
-            onClick={() => setIsNavVisible(!isNavVisible)}
-            className="flex items-center gap-2 group"
-          >
-            <span className="text-[10px] font-semibold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
-              Close
-            </span>
-            <Icon icon="solar:close-circle-linear" width={24} className="opacity-80 group-hover:opacity-100 transition-opacity" />
-          </button>
-        </div>
-      </nav>
+      <Header transparent={true} />
 
       {/* HERO SECTION: 100vh with Carousel + Overlay */}
       <header className="relative w-full h-[100vh] overflow-hidden bg-zinc-900">
