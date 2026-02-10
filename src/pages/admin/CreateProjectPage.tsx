@@ -4,6 +4,7 @@ import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import TagInput from '../../components/admin/TagInput';
 import MultiImageUpload from '../../components/admin/MultiImageUpload';
+import SingleImageUpload from '../../components/admin/SingleImageUpload';
 import type { CreateProjectData } from '../../types/project';
 import { portfolioService } from '../../services/api';
 import { useTranslation } from '../../contexts/LanguageContext';
@@ -28,7 +29,7 @@ export default function CreateProjectPage() {
     context_title: '',
     figure_number: '',
     figure_caption: '',
-    heroMedia: [],
+    heroMedia: undefined,
     galleryMedia: [],
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -45,16 +46,12 @@ export default function CreateProjectPage() {
       newErrors.description = t.createProject.requiredField;
     }
 
-    if (!formData.heroMedia || formData.heroMedia.length === 0) {
+    if (!formData.heroMedia) {
       newErrors.heroMedia = t.createProject.heroImagesRequired;
     }
 
     if (formData.tags.length > 10) {
       newErrors.tags = t.createProject.requiredField;
-    }
-
-    if (!formData.heroMedia || formData.heroMedia.length === 0) {
-      newErrors.heroMedia = t.createProject.heroImagesRequired;
     }
 
     setErrors(newErrors);
@@ -128,10 +125,8 @@ export default function CreateProjectPage() {
         formDataToSend.append('figure_caption', formData.figure_caption);
       }
 
-      if (formData.heroMedia && formData.heroMedia.length > 0) {
-        formData.heroMedia.forEach((file) => {
-          formDataToSend.append('heroMedia', file);
-        });
+      if (formData.heroMedia) {
+        formDataToSend.append('heroMedia', formData.heroMedia);
       }
 
       if (formData.galleryMedia && formData.galleryMedia.length > 0) {
@@ -164,6 +159,23 @@ export default function CreateProjectPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Hero Image Section */}
+          <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
+              {t.createProject.sections.heroImage}
+            </h2>
+            <div className="mb-4">
+              <p className="text-sm text-zinc-600">{t.createProject.heroImagesDescription}</p>
+            </div>
+            <SingleImageUpload
+              image={formData.heroMedia}
+              onImageChange={(img) => setFormData({ ...formData, heroMedia: img || undefined })}
+              label={t.createProject.heroImage}
+              placeholder={t.createProject.heroImagesPlaceholder}
+              error={errors.heroMedia}
+            />
+          </section>
+
           {/* Main Info Section */}
           <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
@@ -332,24 +344,6 @@ export default function CreateProjectPage() {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, figure_caption: e.target.value })}
               />
             </div>
-          </section>
-
-          {/* Hero Images Section */}
-          <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
-            <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
-              {t.createProject.sections.heroImages}
-            </h2>
-            <div className="mb-4">
-              <p className="text-sm text-zinc-600">{t.createProject.heroImagesDescription}</p>
-            </div>
-            <MultiImageUpload
-              images={formData.heroMedia || []}
-              onImagesChange={(images) => setFormData({ ...formData, heroMedia: images })}
-              maxCount={5}
-              label={t.createProject.heroImages}
-              placeholder={t.createProject.heroImagesPlaceholder}
-              error={errors.heroMedia}
-            />
           </section>
 
           {/* Gallery Images Section */}

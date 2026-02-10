@@ -76,7 +76,7 @@ export interface CreateProjectData {
   title: string;
   description: string;
   tags: string[];
-  heroMedia?: File[];
+  heroMedia?: File;
   galleryMedia?: File[];
   location?: string;
   area?: string;
