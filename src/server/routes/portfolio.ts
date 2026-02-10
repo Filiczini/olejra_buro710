@@ -65,7 +65,7 @@ router.post('/', authMiddleware, uploadProjectMedia, async (req, res) => {
     console.log('Hero files:', heroFiles.map(f => f.originalname));
     console.log('Gallery files:', galleryFiles.map(f => f.originalname));
 
-    const { title, description, tags, location, area, year, team, architects, concept_heading, concept_caption, concept_quote } = req.body as any;
+    const { title, description, tags, location, area, year, team, architects, concept_heading, concept_caption, concept_quote, hero_description } = req.body as any;
 
     if (!title || !description) {
       console.log('Validation failed: Title or description missing');
@@ -104,6 +104,7 @@ router.post('/', authMiddleware, uploadProjectMedia, async (req, res) => {
       concept_heading,
       concept_caption,
       concept_quote,
+      hero_description,
       heroMedia,
       galleryMedia,
     });
@@ -134,7 +135,7 @@ router.put('/:id', authMiddleware, uploadProjectMedia, async (req, res) => {
     console.log('=== PUT /portfolio/:id ===');
     console.log('Body:', req.body);
 
-    const { title, description, tags, location, area, year, team, architects, concept_heading, concept_caption, concept_quote, heroMediaIdsOrdered, galleryMediaIdsOrdered } = req.body as any;
+    const { title, description, tags, location, area, year, team, architects, concept_heading, concept_caption, concept_quote, hero_description, heroMediaIdsOrdered, galleryMediaIdsOrdered } = req.body as any;
 
     const existing = await projectService.getById(req.params.id as string);
     const existingProject = existing.project;
@@ -205,10 +206,11 @@ router.put('/:id', authMiddleware, uploadProjectMedia, async (req, res) => {
       concept_heading: concept_heading !== undefined ? concept_heading : existingProject.concept_heading,
       concept_caption: concept_caption !== undefined ? concept_caption : existingProject.concept_caption,
       concept_quote: concept_quote !== undefined ? concept_quote : existingProject.concept_quote,
+      hero_description: hero_description !== undefined ? hero_description : existingProject.hero_description,
     };
 
     // Compare fields
-    const fieldsToCompare = ['title', 'description', 'tags', 'location', 'area', 'year', 'team', 'architects', 'concept_heading', 'concept_caption', 'concept_quote'];
+    const fieldsToCompare = ['title', 'description', 'tags', 'location', 'area', 'year', 'team', 'architects', 'concept_heading', 'concept_caption', 'concept_quote', 'hero_description'];
     for (const field of fieldsToCompare) {
       const existingValue = existingProject[field as keyof typeof existingProject];
       const newValue = newProjectData[field];
@@ -260,6 +262,7 @@ router.put('/:id', authMiddleware, uploadProjectMedia, async (req, res) => {
       concept_heading,
       concept_caption,
       concept_quote,
+      hero_description,
       heroMediaIdsOrdered: heroIds as string[],
       galleryMediaIdsOrdered: galleryIds as string[],
     });

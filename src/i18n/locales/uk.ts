@@ -59,6 +59,7 @@ export const uk = {
     noMoreProjects: 'Більше проектів немає',
     designConcept: 'Концепція дизайну',
     client: 'Клієнт',
+    heroDescription: 'Опис до фото',
   },
   navigation: {
     projects: 'Проєкти',
@@ -126,6 +127,7 @@ export const uk = {
     conceptCaptionPlaceholder: 'Введіть підпис концепції (наприклад, Концепція дизайну)',
     conceptQuote: 'Цитата концепції',
     conceptQuotePlaceholder: 'Введіть цитату концепції (необов\'язково)',
+    heroDescriptionPlaceholder: 'Введіть опис до фото',
     tags: 'Теги',
     tagsPlaceholder: 'Введіть теги та натисніть Enter',
     addTag: 'Додати',

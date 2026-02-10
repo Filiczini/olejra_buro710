@@ -69,6 +69,8 @@ export interface Translations {
     nextProject: string;
     noMoreProjects: string;
     designConcept: string;
+    client: string;
+    heroDescription: string;
   };
   navigation: {
     projects: string;
@@ -136,6 +138,7 @@ export interface Translations {
     conceptCaptionPlaceholder: string;
     conceptQuote: string;
     conceptQuotePlaceholder: string;
+    heroDescriptionPlaceholder: string;
     tags: string;
     tagsPlaceholder: string;
     addTag: string;
@@ -194,6 +197,7 @@ export interface Translations {
     conceptCaptionPlaceholder: string;
     conceptQuote: string;
     conceptQuotePlaceholder: string;
+    heroDescriptionPlaceholder: string;
     tags: string;
     tagsPlaceholder: string;
     addTag: string;
