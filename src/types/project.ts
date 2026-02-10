@@ -63,7 +63,13 @@ export interface Project {
   concept_heading?: string;
   concept_caption?: string;
   concept_quote?: string;
-  hero_description?: string;
+
+  // Section labels for dynamic control
+  challenge_title?: string;
+  materials_title?: string;
+  context_title?: string;
+  figure_number?: string;
+  figure_caption?: string;
 }
 
 export interface CreateProjectData {
@@ -80,7 +86,15 @@ export interface CreateProjectData {
   concept_heading?: string;
   concept_caption?: string;
   concept_quote?: string;
-  hero_description?: string;
+  short_description?: string;
+  category?: string;
+  subtitle?: string;
+  photo_credits?: string;
+  challenge_title?: string;
+  materials_title?: string;
+  context_title?: string;
+  figure_number?: string;
+  figure_caption?: string;
 }
 
 export interface UpdateProjectData {
@@ -95,7 +109,15 @@ export interface UpdateProjectData {
   concept_heading?: string;
   concept_caption?: string;
   concept_quote?: string;
-  hero_description?: string;
+  short_description?: string;
+  category?: string;
+  subtitle?: string;
+  photo_credits?: string;
+  challenge_title?: string;
+  materials_title?: string;
+  context_title?: string;
+  figure_number?: string;
+  figure_caption?: string;
 
   // Ordered media IDs for reordering
   heroMediaIdsOrdered?: string[];
