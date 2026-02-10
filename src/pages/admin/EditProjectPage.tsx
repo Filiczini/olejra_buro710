@@ -26,7 +26,15 @@ export default function EditProjectPage() {
     concept_heading: '',
     concept_caption: '',
     concept_quote: '',
-    hero_description: '',
+    short_description: '',
+    category: '',
+    subtitle: '',
+    photo_credits: '',
+    challenge_title: '',
+    materials_title: '',
+    context_title: '',
+    figure_number: '',
+    figure_caption: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -55,7 +63,15 @@ export default function EditProjectPage() {
           concept_heading: data.project.concept_heading || '',
           concept_caption: data.project.concept_caption || '',
           concept_quote: data.project.concept_quote || '',
-          hero_description: data.project.hero_description || '',
+          short_description: data.project.short_description || '',
+          category: data.project.category || '',
+          subtitle: data.project.subtitle || '',
+          photo_credits: data.project.photo_credits || '',
+          challenge_title: data.project.challenge_title || '',
+          materials_title: data.project.materials_title || '',
+          context_title: data.project.context_title || '',
+          figure_number: data.project.figure_number || '',
+          figure_caption: data.project.figure_caption || '',
         });
         setHeroMedia(data.heroMedia || []);
         setGalleryMedia(data.galleryMedia || []);
@@ -134,8 +150,32 @@ export default function EditProjectPage() {
         formDataToSend.append('concept_quote', formData.concept_quote);
       }
 
-      if (formData.hero_description) {
-        formDataToSend.append('hero_description', formData.hero_description);
+      if (formData.short_description) {
+        formDataToSend.append('short_description', formData.short_description);
+      }
+      if (formData.category) {
+        formDataToSend.append('category', formData.category);
+      }
+      if (formData.subtitle) {
+        formDataToSend.append('subtitle', formData.subtitle);
+      }
+      if (formData.photo_credits) {
+        formDataToSend.append('photo_credits', formData.photo_credits);
+      }
+      if (formData.challenge_title) {
+        formDataToSend.append('challenge_title', formData.challenge_title);
+      }
+      if (formData.materials_title) {
+        formDataToSend.append('materials_title', formData.materials_title);
+      }
+      if (formData.context_title) {
+        formDataToSend.append('context_title', formData.context_title);
+      }
+      if (formData.figure_number) {
+        formDataToSend.append('figure_number', formData.figure_number);
+      }
+      if (formData.figure_caption) {
+        formDataToSend.append('figure_caption', formData.figure_caption);
       }
 
       if (heroMedia.length > 0) {
@@ -242,10 +282,31 @@ export default function EditProjectPage() {
               />
 
               <Input
-                label={(t as any).project.heroDescription || 'Photo description'}
-                placeholder={(t as any).createProject.heroDescriptionPlaceholder || 'Enter photo description'}
-                value={formData.hero_description || ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, hero_description: e.target.value })}
+                label={(t as any).createProject.shortDescription || 'Short Description'}
+                placeholder={(t as any).createProject.shortDescriptionPlaceholder || 'Brief project description for hero section'}
+                value={formData.short_description || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, short_description: e.target.value })}
+              />
+
+              <Input
+                label={(t as any).createProject.category || 'Category'}
+                placeholder={(t as any).createProject.categoryPlaceholder || 'Project category (e.g., Residential / Modern)'}
+                value={formData.category || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, category: e.target.value })}
+              />
+
+              <Input
+                label={(t as any).createProject.subtitle || 'Subtitle'}
+                placeholder={(t as any).createProject.subtitlePlaceholder || 'Project subtitle'}
+                value={formData.subtitle || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, subtitle: e.target.value })}
+              />
+
+              <Input
+                label={(t as any).createProject.photoCredits || 'Photo Credits'}
+                placeholder={(t as any).createProject.photoCreditsPlaceholder || 'Photographer name'}
+                value={formData.photo_credits || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, photo_credits: e.target.value })}
               />
 
               <TagInput
@@ -328,6 +389,49 @@ export default function EditProjectPage() {
                 placeholder={(t as any).createProject.conceptQuotePlaceholder || 'Concept quote'}
                 value={formData.concept_quote || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_quote: e.target.value })}
+              />
+            </div>
+          </section>
+
+          {/* Section Labels Section */}
+          <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
+              {(t as any).createProject.sections.sectionLabels || 'Section Labels'}
+            </h2>
+            <div className="flex flex-col gap-6">
+              <Input
+                label={(t as any).createProject.challengeTitle || 'Challenge Section Title'}
+                placeholder={(t as any).createProject.challengeTitlePlaceholder || 'The Challenge'}
+                value={formData.challenge_title || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, challenge_title: e.target.value })}
+              />
+
+              <Input
+                label={(t as any).createProject.materialsTitle || 'Materials Section Title'}
+                placeholder={(t as any).createProject.materialsTitlePlaceholder || 'Materials'}
+                value={formData.materials_title || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, materials_title: e.target.value })}
+              />
+
+              <Input
+                label={(t as any).createProject.contextTitle || 'Context Section Title'}
+                placeholder={(t as any).createProject.contextTitlePlaceholder || 'Context'}
+                value={formData.context_title || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, context_title: e.target.value })}
+              />
+
+              <Input
+                label={(t as any).createProject.figureNumber || 'Figure Number'}
+                placeholder={(t as any).createProject.figureNumberPlaceholder || 'Figure 01'}
+                value={formData.figure_number || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, figure_number: e.target.value })}
+              />
+
+              <Input
+                label={(t as any).createProject.figureCaption || 'Figure Caption'}
+                placeholder={(t as any).createProject.figureCaptionPlaceholder || 'Main Dining Hall'}
+                value={formData.figure_caption || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, figure_caption: e.target.value })}
               />
             </div>
           </section>

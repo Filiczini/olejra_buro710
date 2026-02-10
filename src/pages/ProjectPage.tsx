@@ -184,8 +184,13 @@ export default function ProjectPage() {
         {/* CONTENT OVERLAY: Gradient + Text */}
         <div className="absolute bottom-0 left-0 w-full z-10 bg-gradient-to-t from-black/90 via-black/40 to-transparent pt-32 pb-12 px-6">
           <div className="max-w-screen-xl mx-auto w-full">
-            {/* Tags */}
+            {/* Category & Tags */}
             <div className="flex gap-3 mb-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+              {project.category && (
+                <span className="px-3 py-1 rounded-full border border-white/20 bg-white/10 backdrop-blur-md text-[10px] font-medium uppercase tracking-wider text-white">
+                  {project.category}
+                </span>
+              )}
               {project.tags?.slice(0, 2).map((tag, index) => (
                 <span
                   key={index}
@@ -200,16 +205,16 @@ export default function ProjectPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end animate-fade-in" style={{ animationDelay: '0.2s' }}>
               {/* Title */}
               <div className="lg:col-span-8">
+                {project.subtitle && (
+                  <p className="text-base md:text-lg font-light text-zinc-300 mb-2 leading-relaxed">
+                    {project.subtitle}
+                  </p>
+                )}
                 <h1 className="text-6xl md:text-8xl lg:text-9xl font-medium tracking-tighter text-white leading-[0.85] mb-4">
                   {project.title}
                 </h1>
-                {project.hero_description && (
-                  <p className="text-base md:text-lg font-normal text-zinc-200 max-w-2xl mb-6 leading-relaxed">
-                    {project.hero_description}
-                  </p>
-                )}
                 <p className="text-lg md:text-xl font-light text-zinc-300 max-w-2xl leading-relaxed">
-                  {description}
+                  {project.short_description || description}
                 </p>
               </div>
 
@@ -217,7 +222,7 @@ export default function ProjectPage() {
               <div className="lg:col-span-4 flex justify-start lg:justify-end gap-12 pb-2">
                 <div>
                   <span className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1">
-                    {(t.project as any).client || 'Client'}
+                    {t.project.location || 'Location'}
                   </span>
                   <span className="text-sm font-medium text-white">{project.location || 'TBD'}</span>
                 </div>
@@ -233,6 +238,14 @@ export default function ProjectPage() {
                   </span>
                   <span className="text-sm font-medium text-white">{project.area || 'TBD'}</span>
                 </div>
+                {project.photo_credits && (
+                  <div>
+                    <span className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1">
+                      {t.project.photoCredits || 'Photo Credits'}
+                    </span>
+                    <span className="text-sm font-medium text-white">{project.photo_credits}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -248,7 +261,9 @@ export default function ProjectPage() {
             <div className="md:col-span-4 lg:col-span-3">
               <div className="sticky top-32 space-y-8">
                 <span className="block w-8 h-[1px] bg-zinc-900 mb-6"></span>
-                <h3 className="text-sm font-medium uppercase tracking-wide mb-4">The Challenge</h3>
+                <h3 className="text-sm font-medium uppercase tracking-wide mb-4">
+                  {project.challenge_title || 'The Challenge'}
+                </h3>
                 <p className="text-sm text-zinc-500 leading-6">
                   {description}
                 </p>
@@ -285,8 +300,8 @@ export default function ProjectPage() {
           </div>
 
           <div className="flex justify-between items-center text-[10px] text-zinc-400 uppercase tracking-widest mb-32 border-b border-zinc-100 pb-4">
-            <span>Figure 01</span>
-            <span>Main Dining Hall</span>
+            <span>{project.figure_number || 'Figure 01'}</span>
+            <span>{project.figure_caption || 'Main Dining Hall'}</span>
           </div>
 
           {/* SECTION: Secondary Content Grid */}
@@ -295,7 +310,9 @@ export default function ProjectPage() {
             <div className="md:col-span-4 lg:col-span-3">
               <div className="sticky top-32 space-y-8">
                 <div>
-                  <h3 className="text-xs font-semibold uppercase text-zinc-400 mb-2">Materials</h3>
+                  <h3 className="text-xs font-semibold uppercase text-zinc-400 mb-2">
+                    {project.materials_title || 'Materials'}
+                  </h3>
                   <ul className="text-sm space-y-1 text-zinc-800">
                     {project.materials?.map((material, index) => (
                       <li key={index}>
@@ -316,7 +333,9 @@ export default function ProjectPage() {
 
             {/* Text Content */}
             <div className="md:col-span-8 lg:col-span-8 lg:col-start-5">
-              <h2 className="text-3xl font-medium tracking-tight mb-8">Context</h2>
+              <h2 className="text-3xl font-medium tracking-tight mb-8">
+                {project.context_title || 'Context'}
+              </h2>
               <p className="text-base text-zinc-600 leading-7 font-light mb-8">
                 {description}
               </p>
