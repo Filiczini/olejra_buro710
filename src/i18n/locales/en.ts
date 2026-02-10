@@ -163,11 +163,10 @@ export const en = {
     invalidImage: 'Invalid image format',
     imageTooLarge: 'Image size exceeds 5MB',
     error: 'Error creating project',
-    heroImages: 'Hero Images',
-    heroImagesPlaceholder: 'Drag and drop hero images, or browse',
-    heroImagesDescription: 'Add 1-5 images for hero slider. These will be displayed prominently at the top of the project page.',
-    heroImagesRequired: 'At least one hero image is required',
-    heroImagesMax: 'Maximum 5 hero images allowed',
+    heroImage: 'Hero Image',
+    heroImagesPlaceholder: 'Drag and drop hero image, or browse',
+    heroImagesDescription: 'Add hero image that will be displayed prominently at the top of the project page.',
+    heroImagesRequired: 'Hero image is required',
     galleryImages: 'Gallery Images',
     galleryImagesPlaceholder: 'Drag and drop gallery images, or browse',
     galleryImagesDescription: 'Add project gallery images. These will appear in project gallery section.',
@@ -175,7 +174,7 @@ export const en = {
     sections: {
       mainInfo: 'Main Information',
       description: 'Description',
-      heroImages: 'Hero Slider Images',
+      heroImage: 'Hero Image',
       galleryImages: 'Gallery Images',
       sectionLabels: 'Section Labels'
     }
@@ -224,13 +223,12 @@ export const en = {
     invalidImage: 'Invalid image format',
     imageTooLarge: 'Image size exceeds 5MB',
     error: 'Error saving project',
-    heroImages: 'Hero Slider Images',
+    heroImage: 'Hero Image',
     galleryImages: 'Gallery Images',
-    addHeroImages: 'Add Hero Images',
-    heroImagesPlaceholder: 'Drag and drop hero images, or browse',
-    heroImagesDescription: 'Add 1-5 images for the hero slider. These will be displayed prominently at the top of the project page.',
-    heroImagesRequired: 'At least one hero image is required',
-    heroImagesMax: 'Maximum 5 hero images allowed',
+    addHeroImages: 'Add Hero Image',
+    heroImagesPlaceholder: 'Drag and drop hero image, or browse',
+    heroImagesDescription: 'Add hero image that will be displayed prominently at the top of the project page.',
+    heroImagesRequired: 'Hero image is required',
     addGalleryImages: 'Add Gallery Images',
     galleryImagesPlaceholder: 'Drag and drop gallery images, or browse',
     galleryImagesDescription: 'Add project gallery images. These will appear in the project gallery section.',
@@ -238,7 +236,7 @@ export const en = {
     sections: {
       mainInfo: 'Main Information',
       description: 'Description',
-      heroImages: 'Hero Slider Images',
+      heroImage: 'Hero Image',
       galleryImages: 'Gallery Images'
     }
   },

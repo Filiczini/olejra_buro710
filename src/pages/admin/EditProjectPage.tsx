@@ -5,6 +5,7 @@ import Button from '../../components/ui/Button';
 import TagInput from '../../components/admin/TagInput';
 import DragDropMediaList from '../../components/admin/DragDropMediaList';
 import MultiImageUpload from '../../components/admin/MultiImageUpload';
+import SingleImageUpload from '../../components/admin/SingleImageUpload';
 import type { UpdateProjectData, Project, Media } from '../../types/project';
 import { portfolioService } from '../../services/api';
 import { useTranslation } from '../../contexts/LanguageContext';
@@ -41,7 +42,7 @@ export default function EditProjectPage() {
   const [fetching, setFetching] = useState(true);
   const [heroMedia, setHeroMedia] = useState<Media[]>([]);
   const [galleryMedia, setGalleryMedia] = useState<Media[]>([]);
-  const [heroImagesToUpload, setHeroImagesToUpload] = useState<File[]>([]);
+  const [heroImageToUpload, setHeroImageToUpload] = useState<File | undefined>();
   const [galleryImagesToUpload, setGalleryImagesToUpload] = useState<File[]>([]);
 
   useEffect(() => {
@@ -188,11 +189,9 @@ export default function EditProjectPage() {
         galleryMediaIdsOrdered.forEach(id => formDataToSend.append('galleryMediaIdsOrdered', id));
       }
 
-      // Append new hero images to upload
-      if (heroImagesToUpload.length > 0) {
-        heroImagesToUpload.forEach((file) => {
-          formDataToSend.append(`heroMedia`, file);
-        });
+      // Append new hero image to upload
+      if (heroImageToUpload) {
+        formDataToSend.append(`heroMedia`, heroImageToUpload);
       }
 
       // Append new gallery images to upload
@@ -212,24 +211,12 @@ export default function EditProjectPage() {
     }
   };
 
-  const handleHeroMediaReorder = (reorderedMedia: Media[]) => {
-    setHeroMedia(reorderedMedia);
-  };
-
   const handleGalleryMediaReorder = (reorderedMedia: Media[]) => {
     setGalleryMedia(reorderedMedia);
   };
 
-  const handleHeroMediaRemove = (id: string) => {
-    setHeroMedia(prev => prev.filter(m => m.id !== id));
-  };
-
   const handleGalleryMediaRemove = (id: string) => {
     setGalleryMedia(prev => prev.filter(m => m.id !== id));
-  };
-
-  const handleHeroAltTextChange = (id: string, alt: string) => {
-    setHeroMedia(prev => prev.map(m => m.id === id ? { ...m, alt } : m));
   };
 
   const handleGalleryAltTextChange = (id: string, alt: string) => {
@@ -266,6 +253,47 @@ export default function EditProjectPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Hero Image Section */}
+          <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
+              {(t as any).editProject.heroImage || 'Hero Image'}
+            </h2>
+            <div className="mb-4">
+              <p className="text-sm text-zinc-600">            {(t as any).editProject.heroImagesDescription || 'Add hero image that will be displayed prominently at the top of the project page.'}</p>
+            </div>
+
+            {/* Existing Hero Image */}
+            {heroMedia.length > 0 && (
+              <div className="mb-4">
+                <div className="relative aspect-video w-full max-w-lg bg-zinc-100 rounded-lg overflow-hidden">
+                  <img
+                    src={heroMedia[0].url}
+                    alt="Current hero image"
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setHeroMedia([])}
+                    className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                    title="Remove"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Upload New Hero Image */}
+            <SingleImageUpload
+              image={heroImageToUpload}
+              onImageChange={(img) => setHeroImageToUpload(img || undefined)}
+              label={(t as any).editProject.addHeroImages || 'Add Hero Image'}
+              placeholder={(t as any).editProject.heroImagesPlaceholder || 'Drag and drop hero image, or browse'}
+            />
+          </section>
+
           {/* Main Info Section */}
           <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
@@ -434,35 +462,6 @@ export default function EditProjectPage() {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, figure_caption: e.target.value })}
               />
             </div>
-          </section>
-
-          {/* Hero Images Section */}
-          <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
-            <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
-              {(t as any).createProject.sections.heroImages || 'Hero Images'}
-            </h2>
-            <div className="mb-4">
-              <p className="text-sm text-zinc-600">{(t as any).createProject.heroImagesDescription || 'Manage hero images'}</p>
-            </div>
-
-            {/* Existing Hero Media */}
-            {heroMedia.length > 0 && (
-              <DragDropMediaList
-                mediaItems={heroMedia}
-                onReorder={handleHeroMediaReorder}
-                onRemove={handleHeroMediaRemove}
-                onAltTextChange={handleHeroAltTextChange}
-              />
-            )}
-
-            {/* Add New Hero Images */}
-            <MultiImageUpload
-              images={heroImagesToUpload}
-              onImagesChange={setHeroImagesToUpload}
-              maxCount={5}
-              label={(t as any).createProject.heroImages || 'Hero Images'}
-              placeholder={(t as any).createProject.heroImagesPlaceholder || 'Upload hero images'}
-            />
           </section>
 
           {/* Gallery Images Section */}

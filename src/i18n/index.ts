@@ -156,11 +156,10 @@ export interface Translations {
     invalidImage: string;
     imageTooLarge: string;
     error: string;
-    heroImages: string;
+    heroImage: string;
     heroImagesPlaceholder: string;
     heroImagesDescription: string;
     heroImagesRequired: string;
-    heroImagesMax: string;
     galleryImages: string;
     galleryImagesPlaceholder: string;
     galleryImagesDescription: string;
@@ -168,7 +167,7 @@ export interface Translations {
     sections: {
       mainInfo: string;
       description: string;
-      heroImages: string;
+      heroImage: string;
       galleryImages: string;
     };
   };
@@ -216,7 +215,7 @@ export interface Translations {
     invalidImage: string;
     imageTooLarge: string;
     error: string;
-    heroImages: string;
+    heroImage: string;
     galleryImages: string;
     addHeroImages: string;
     heroImagesPlaceholder: string;
@@ -225,7 +224,7 @@ export interface Translations {
     sections: {
       mainInfo: string;
       description: string;
-      heroImages: string;
+      heroImage: string;
       galleryImages: string;
     };
   };

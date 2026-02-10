@@ -163,11 +163,10 @@ export const uk = {
     invalidImage: 'Невірний формат зображення',
     imageTooLarge: 'Розмір зображення перевищує 5MB',
     error: 'Помилка створення проєкту',
-    heroImages: 'Зображення героя',
-    heroImagesPlaceholder: 'Перетягніть зображення героя або перегляньте',
-    heroImagesDescription: 'Додайте 1-5 зображень для слайдера героя. Вони будуть відображатися на початку сторінки проєкту.',
-    heroImagesRequired: 'Потрібно принаймні одне зображення героя',
-    heroImagesMax: 'Максимум 5 зображень героя',
+    heroImage: 'Головне зображення',
+    heroImagesPlaceholder: 'Перетягніть головне зображення або перегляньте',
+    heroImagesDescription: 'Додайте головне зображення, яке буде відображатися на початку сторінки проєкту.',
+    heroImagesRequired: 'Головне зображення є обов\'язковим',
     galleryImages: 'Зображення галереї',
     galleryImagesPlaceholder: 'Перетягніть зображення галереї або перегляньте',
     galleryImagesDescription: 'Додайте зображення галереї проєкту. Вони будуть відображатися у секції галереї.',
@@ -175,19 +174,18 @@ export const uk = {
     sections: {
       mainInfo: 'Основна інформація',
       description: 'Опис',
-      heroImages: 'Зображення слайдера героя',
+      heroImage: 'Головне зображення',
       galleryImages: 'Зображення галереї',
       sectionLabels: 'Заголовки секцій'
     }
   },
   editProject: {
-    heroImages: 'Зображення слайдера героя',
+    heroImage: 'Головне зображення',
     galleryImages: 'Зображення галереї',
-    addHeroImages: 'Додати зображення героя',
-    heroImagesPlaceholder: 'Перетягніть зображення героя або перегляньте',
-    heroImagesDescription: 'Додайте 1-5 зображень для слайдера героя. Вони будуть відображатися на початку сторінки проєкту.',
-    heroImagesRequired: 'Потрібно принаймні одне зображення героя',
-    heroImagesMax: 'Максимум 5 зображень героя',
+    addHeroImages: 'Додати головне зображення',
+    heroImagesPlaceholder: 'Перетягніть головне зображення або перегляньте',
+    heroImagesDescription: 'Додайте головне зображення, яке буде відображатися на початку сторінки проєкту.',
+    heroImagesRequired: 'Головне зображення є обов\'язковим',
     addGalleryImages: 'Додати зображення галереї',
     galleryImagesPlaceholder: 'Перетягніть зображення галереї або перегляньте',
     galleryImagesDescription: 'Додайте зображення галереї проєкту. Вони будуть відображатися у секції галереї.',
@@ -195,7 +193,7 @@ export const uk = {
     sections: {
       mainInfo: 'Основна інформація',
       description: 'Опис',
-      heroImages: 'Зображення слайдера героя',
+      heroImage: 'Головне зображення',
       galleryImages: 'Зображення галереї'
     }
   },
@@ -251,7 +249,7 @@ export const uk = {
   siteSettings: {
     title: 'Налаштування сайту',
     loading: 'Завантаження...',
-    companyName: 'Назва компанії',
+    companyName: 'Наз  ва компанії',
     companyNamePlaceholder: 'Введіть назву компанії',
     companyTagline: 'Слоган компанії',
     companyTaglinePlaceholder: 'Введіть слоган компанії',
