@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
-import ImageUpload from '../../components/admin/ImageUpload';
 import TagInput from '../../components/admin/TagInput';
 import DragDropMediaList from '../../components/admin/DragDropMediaList';
 import MultiImageUpload from '../../components/admin/MultiImageUpload';
@@ -18,7 +17,6 @@ export default function EditProjectPage() {
   const [formData, setFormData] = useState<UpdateProjectData>({
     title: '',
     description: '',
-    image: undefined,
     tags: [],
     location: '',
     area: '',
@@ -43,19 +41,19 @@ export default function EditProjectPage() {
     const loadProject = async () => {
       try {
         const data = await portfolioService.getById(id);
-        setProject(data);
+        setProject(data.project);
         setFormData({
-          title: data.title,
-          description: data.description[0] || '',
-          tags: data.tags,
-          location: data.location || '',
-          area: data.area || '',
-          year: data.year || '',
-          team: data.team || '',
-          architects: data.architects || '',
-          concept_heading: data.concept_heading || '',
-          concept_caption: data.concept_caption || '',
-          concept_quote: data.concept_quote || '',
+          title: data.project.title,
+          description: data.project.description[0] || '',
+          tags: data.project.tags,
+          location: data.project.location || '',
+          area: data.project.area || '',
+          year: data.project.year || '',
+          team: data.project.team || '',
+          architects: data.project.architects || '',
+          concept_heading: data.project.concept_heading || '',
+          concept_caption: data.project.concept_caption || '',
+          concept_quote: data.project.concept_quote || '',
         });
         setHeroMedia(data.heroMedia || []);
         setGalleryMedia(data.galleryMedia || []);
@@ -221,155 +219,175 @@ export default function EditProjectPage() {
           <h1 className="text-3xl font-bold text-zinc-900">{t.editProject.title}</h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-8">
-          <div className="flex flex-col gap-6">
-            <Input
-              label={t.editProject.titleLabel}
-              placeholder={t.editProject.titlePlaceholder}
-              value={formData.title}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, title: e.target.value })}
-              error={errors.title}
-              required
-            />
-
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-zinc-700">{t.editProject.description}</label>
-              <textarea
-                className="w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent min-h-[120px]"
-                placeholder={t.editProject.descriptionPlaceholder}
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Main Info Section */}
+          <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
+              {(t as any).createProject.sections.mainInfo || 'Main Info'}
+            </h2>
+            <div className="flex flex-col gap-6">
+              <Input
+                label={(t as any).createProject.titleLabel || 'Title'}
+                placeholder={(t as any).createProject.titlePlaceholder || 'Project title'}
+                value={formData.title}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, title: e.target.value })}
+                error={errors.title}
                 required
               />
-              {errors.description && <span className="text-sm text-red-500">{errors.description}</span>}
+
+              <TagInput
+                tags={formData.tags || []}
+                onTagsChange={(tags) => setFormData({ ...formData, tags })}
+              />
+              {errors.tags && <span className="text-sm text-red-500">{errors.tags}</span>}
+
+              <Input
+                label={(t as any).createProject.location || 'Location'}
+                placeholder={(t as any).createProject.locationPlaceholder || 'Location'}
+                value={formData.location || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, location: e.target.value })}
+              />
+
+              <Input
+                label={(t as any).createProject.area || 'Area'}
+                placeholder={(t as any).createProject.areaPlaceholder || 'Area'}
+                value={formData.area || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, area: e.target.value })}
+              />
+
+              <Input
+                label={(t as any).createProject.year || 'Year'}
+                placeholder={(t as any).createProject.yearPlaceholder || 'Year'}
+                value={formData.year || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, year: e.target.value })}
+              />
+
+              <Input
+                label={(t as any).createProject.team || 'Team'}
+                placeholder={(t as any).createProject.teamPlaceholder || 'Team'}
+                value={formData.team || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, team: e.target.value })}
+              />
+
+              <Input
+                label={(t as any).createProject.architects || 'Architects'}
+                placeholder={(t as any).createProject.architectsPlaceholder || 'Architects'}
+                value={formData.architects || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, architects: e.target.value })}
+              />
+            </div>
+          </section>
+
+          {/* Description Section */}
+          <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
+              {(t as any).createProject.sections.description || 'Description'}
+            </h2>
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-zinc-700">{(t as any).createProject.description || 'Description'}</label>
+                <textarea
+                  className="w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent min-h-[120px]"
+                  placeholder={(t as any).createProject.descriptionPlaceholder || 'Project description'}
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  required
+                />
+                {errors.description && <span className="text-sm text-red-500">{errors.description}</span>}
+              </div>
+
+              <Input
+                label={(t as any).createProject.conceptHeading || 'Concept Heading'}
+                placeholder={(t as any).createProject.conceptHeadingPlaceholder || 'Concept heading'}
+                value={formData.concept_heading || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_heading: e.target.value })}
+              />
+
+              <Input
+                label={(t as any).createProject.conceptCaption || 'Concept Caption'}
+                placeholder={(t as any).createProject.conceptCaptionPlaceholder || 'Concept caption'}
+                value={formData.concept_caption || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_caption: e.target.value })}
+              />
+
+              <Input
+                label={(t as any).createProject.conceptQuote || 'Concept Quote'}
+                placeholder={(t as any).createProject.conceptQuotePlaceholder || 'Concept quote'}
+                value={formData.concept_quote || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_quote: e.target.value })}
+              />
+            </div>
+          </section>
+
+          {/* Hero Images Section */}
+          <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
+              {(t as any).createProject.sections.heroImages || 'Hero Images'}
+            </h2>
+            <div className="mb-4">
+              <p className="text-sm text-zinc-600">{(t as any).createProject.heroImagesDescription || 'Manage hero images'}</p>
             </div>
 
-            <ImageUpload
-              onFileSelect={(file) => setFormData({ ...formData, image: file as unknown as File })}
-              error={errors.image}
-            />
-
-            <TagInput
-              tags={formData.tags || []}
-              onTagsChange={(tags) => setFormData({ ...formData, tags })}
-            />
-            {errors.tags && <span className="text-sm text-red-500">{errors.tags}</span>}
-
-            <Input
-              label={t.editProject.location}
-              placeholder={t.editProject.locationPlaceholder}
-              value={formData.location || ''}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, location: e.target.value })}
-            />
-
-            <Input
-              label={t.editProject.area}
-              placeholder={t.editProject.areaPlaceholder}
-              value={formData.area || ''}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, area: e.target.value })}
-            />
-
-            <Input
-              label={t.editProject.year}
-              placeholder={t.editProject.yearPlaceholder}
-              value={formData.year || ''}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, year: e.target.value })}
-            />
-
-            <Input
-              label={t.editProject.team}
-              placeholder={t.editProject.teamPlaceholder}
-              value={formData.team || ''}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, team: e.target.value })}
-            />
-
-            <Input
-              label={t.editProject.architects}
-              placeholder={t.editProject.architectsPlaceholder}
-              value={formData.architects || ''}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, architects: e.target.value })}
-            />
-
-            <Input
-              label={t.editProject.conceptHeading}
-              placeholder={t.editProject.conceptHeadingPlaceholder}
-              value={formData.concept_heading || ''}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_heading: e.target.value })}
-            />
-
-            <Input
-              label={t.editProject.conceptCaption}
-              placeholder={t.editProject.conceptCaptionPlaceholder}
-              value={formData.concept_caption || ''}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_caption: e.target.value })}
-            />
-
-            <Input
-              label={t.editProject.conceptQuote}
-              placeholder={t.editProject.conceptQuotePlaceholder}
-              value={formData.concept_quote || ''}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_quote: e.target.value })}
-            />
-
-            {/* Divider */}
-            <div className="border-t border-zinc-200 my-4" />
-
-            {/* Hero Slider Images Section */}
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-zinc-900">{t.editProject.heroImages}</h2>
-
-              {/* Existing Hero Media */}
+            {/* Existing Hero Media */}
+            {heroMedia.length > 0 && (
               <DragDropMediaList
                 mediaItems={heroMedia}
                 onReorder={handleHeroMediaReorder}
                 onRemove={handleHeroMediaRemove}
                 onAltTextChange={handleHeroAltTextChange}
               />
+            )}
 
-              {/* Add New Hero Images */}
-              <MultiImageUpload
-                images={heroImagesToUpload}
-                onImagesChange={setHeroImagesToUpload}
-                maxCount={10}
-                label={t.editProject.addHeroImages}
-                placeholder={t.editProject.heroImagesPlaceholder}
-              />
+            {/* Add New Hero Images */}
+            <MultiImageUpload
+              images={heroImagesToUpload}
+              onImagesChange={setHeroImagesToUpload}
+              maxCount={5}
+              label={(t as any).createProject.heroImages || 'Hero Images'}
+              placeholder={(t as any).createProject.heroImagesPlaceholder || 'Upload hero images'}
+            />
+          </section>
+
+          {/* Gallery Images Section */}
+          <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
+              {(t as any).createProject.sections.galleryImages || 'Gallery Images'}
+            </h2>
+            <div className="mb-4">
+              <p className="text-sm text-zinc-600">{(t as any).createProject.galleryImagesDescription || 'Manage gallery images'}</p>
             </div>
 
-            {/* Divider */}
-            <div className="border-t border-zinc-200 my-4" />
-
-            {/* Gallery Images Section */}
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-zinc-900">{t.editProject.galleryImages}</h2>
-
-              {/* Existing Gallery Media */}
+            {/* Existing Gallery Media */}
+            {galleryMedia.length > 0 && (
               <DragDropMediaList
                 mediaItems={galleryMedia}
                 onReorder={handleGalleryMediaReorder}
                 onRemove={handleGalleryMediaRemove}
                 onAltTextChange={handleGalleryAltTextChange}
               />
+            )}
 
-              {/* Add New Gallery Images */}
-              <MultiImageUpload
-                images={galleryImagesToUpload}
-                onImagesChange={setGalleryImagesToUpload}
-                maxCount={20}
-                label={t.editProject.addGalleryImages}
-                placeholder={t.editProject.galleryImagesPlaceholder}
-              />
-            </div>
+            {/* Add New Gallery Images */}
+            <MultiImageUpload
+              images={galleryImagesToUpload}
+              onImagesChange={setGalleryImagesToUpload}
+              maxCount={10}
+              label={(t as any).createProject.galleryImages || 'Gallery Images'}
+              placeholder={(t as any).createProject.galleryImagesPlaceholder || 'Upload gallery images'}
+            />
+          </section>
 
+          {/* Submit Section */}
+          <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             {errors.submit && (
-              <div className="text-sm text-red-500 bg-red-50 p-3 rounded-lg">
+              <div className="text-sm text-red-500 bg-red-50 p-3 rounded-lg mb-4">
                 {errors.submit}
               </div>
             )}
 
             <div className="flex gap-4">
               <Button type="submit" disabled={loading} className="flex-1 py-3">
-                {loading ? t.editProject.saving : t.editProject.save}
+                {loading ? (t as any).editProject.saving : (t as any).editProject.save}
               </Button>
               <Button
                 type="button"
@@ -377,10 +395,10 @@ export default function EditProjectPage() {
                 onClick={() => navigate('/admin/dashboard')}
                 className="flex-1 py-3"
               >
-                {t.editProject.cancel}
+                {(t as any).editProject.cancel || 'Cancel'}
               </Button>
             </div>
-          </div>
+          </section>
         </form>
       </div>
     </div>
