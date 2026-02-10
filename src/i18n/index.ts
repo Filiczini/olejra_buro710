@@ -243,7 +243,35 @@ export interface Translations {
   };
   activityLog: {
     title: string;
-    comingSoon: string;
+    date: string;
+    user: string;
+    action: string;
+    entity: string;
+    details: string;
+    filters: {
+      title: string;
+      user: string;
+      action: string;
+      allUsers: string;
+      allActions: string;
+    };
+    actions: {
+      create: string;
+      update: string;
+      delete: string;
+    };
+    changes: {
+      fields: string;
+      mediaAdded: string;
+      mediaRemoved: string;
+      mediaReordered: string;
+    };
+    loading: string;
+    noLogs: string;
+    showing: string;
+    of: string;
+    previous: string;
+    next: string;
     backToDashboard: string;
   };
   siteSettings: {

@@ -5,6 +5,10 @@ import type {
   PaginationParams,
   FilterOptions,
 } from '../types/project';
+import type {
+  ActivityLog,
+  ActivityLogsParams,
+} from '../types/activityLog';
 
 export const authService = {
   login: async (email: string, password: string) => {
@@ -102,3 +106,23 @@ export const portfolioService = {
     }
   },
 };
+
+export const activityLogService = {
+  getAll: async (params?: ActivityLogsParams) => {
+    const queryParams = new URLSearchParams();
+
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.user_email) queryParams.append('user_email', params.user_email);
+    if (params?.action) queryParams.append('action', params.action);
+
+    const response = await api.get(`/logs?${queryParams.toString()}`);
+    return response.data as PaginatedResponse<ActivityLog>;
+  },
+
+  getUniqueUsers: async () => {
+    const response = await api.get('/logs/users');
+    return response.data as string[];
+  },
+};
+

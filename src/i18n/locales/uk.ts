@@ -196,7 +196,35 @@ export const uk = {
   },
   activityLog: {
     title: 'Журнал дій',
-    comingSoon: 'Ця функція скоро буде доступна',
+    date: 'Дата',
+    user: 'Користувач',
+    action: 'Дія',
+    entity: 'Проєкт',
+    details: 'Деталі',
+    filters: {
+      title: 'Фільтри',
+      user: 'Користувач',
+      action: 'Тип дії',
+      allUsers: 'Всі користувачі',
+      allActions: 'Всі дії'
+    },
+    actions: {
+      create: 'Створення',
+      update: 'Редагування',
+      delete: 'Видалення'
+    },
+    changes: {
+      fields: 'Змінено поля:',
+      mediaAdded: 'Додано медіа: {count}',
+      mediaRemoved: 'Видалено медіа: {count}',
+      mediaReordered: 'Змінено порядок медіа'
+    },
+    loading: 'Завантаження...',
+    noLogs: 'Журнал порожній',
+    showing: 'Показано',
+    of: 'з',
+    previous: 'Попередня',
+    next: 'Наступна',
     backToDashboard: 'Повернутися до панелі керування'
   },
   siteSettings: {

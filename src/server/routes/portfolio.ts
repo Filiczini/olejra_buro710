@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authMiddleware } from '../middleware/auth';
 import { projectService } from '../services/projectService';
 import { storageService } from '../services/storageService';
+import { activityLogService } from '../services/activityLogService';
 import { uploadProjectMedia } from '../middleware/multer';
 import type { Media } from '../../types/project';
 import { supabase } from '../config/supabase';
@@ -108,6 +109,19 @@ router.post('/', authMiddleware, uploadProjectMedia, async (req, res) => {
     });
 
     console.log('Project created successfully:', project.id);
+
+    // Log activity
+    await activityLogService.log({
+      user_email: (req as any).user?.email || 'unknown',
+      action: 'create',
+      entity_type: 'project',
+      entity_id: project.id,
+      entity_title: project.title,
+      changes: {
+        media_added: heroFiles.length + galleryFiles.length,
+      },
+    });
+
     res.status(201).json(project);
   } catch (error) {
     console.error('Error creating project:', error);
@@ -123,6 +137,7 @@ router.put('/:id', authMiddleware, uploadProjectMedia, async (req, res) => {
     const { title, description, tags, location, area, year, team, architects, concept_heading, concept_caption, concept_quote, heroMediaIdsOrdered, galleryMediaIdsOrdered } = req.body as any;
 
     const existing = await projectService.getById(req.params.id as string);
+    const existingProject = existing.project;
 
     const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
     const heroFiles = files?.['heroMedia'] || [];
@@ -146,7 +161,7 @@ router.put('/:id', authMiddleware, uploadProjectMedia, async (req, res) => {
       : [];
 
     // Handle hero media
-    await handleMediaUpdate(
+    const heroMediaChanges = await handleMediaUpdate(
       req.params.id as string,
       existing.heroMedia,
       heroIds as string[],
@@ -155,7 +170,7 @@ router.put('/:id', authMiddleware, uploadProjectMedia, async (req, res) => {
     );
 
     // Handle gallery media
-    await handleMediaUpdate(
+    const galleryMediaChanges = await handleMediaUpdate(
       req.params.id as string,
       existing.galleryMedia,
       galleryIds as string[],
@@ -171,6 +186,64 @@ router.put('/:id', authMiddleware, uploadProjectMedia, async (req, res) => {
         await storageService.deleteImage(existing.heroMedia[0].url);
       }
       imageUrl = await storageService.uploadImage(heroFiles[0]);
+    }
+
+    // Determine which fields changed
+    const changes: any = {};
+    const changedFields: string[] = [];
+
+    const newProjectData: any = {
+      title: title !== undefined ? title : existingProject.title,
+      description: description ? [description] : existingProject.description,
+      image_url: imageUrl,
+      tags: tags !== undefined ? JSON.parse(tags) : existingProject.tags,
+      location: location !== undefined ? location : existingProject.location,
+      area: area !== undefined ? area : existingProject.area,
+      year: year !== undefined ? year : existingProject.year,
+      team: team !== undefined ? team : existingProject.team,
+      architects: architects !== undefined ? architects : existingProject.architects,
+      concept_heading: concept_heading !== undefined ? concept_heading : existingProject.concept_heading,
+      concept_caption: concept_caption !== undefined ? concept_caption : existingProject.concept_caption,
+      concept_quote: concept_quote !== undefined ? concept_quote : existingProject.concept_quote,
+    };
+
+    // Compare fields
+    const fieldsToCompare = ['title', 'description', 'tags', 'location', 'area', 'year', 'team', 'architects', 'concept_heading', 'concept_caption', 'concept_quote'];
+    for (const field of fieldsToCompare) {
+      const existingValue = existingProject[field as keyof typeof existingProject];
+      const newValue = newProjectData[field];
+
+      // Special handling for arrays
+      if (Array.isArray(existingValue) && Array.isArray(newValue)) {
+        if (JSON.stringify(existingValue) !== JSON.stringify(newValue)) {
+          changedFields.push(field);
+        }
+      }
+      // Special handling for null/undefined
+      else if ((existingValue === undefined || existingValue === null) && newValue) {
+        changedFields.push(field);
+      }
+      // Normal comparison
+      else if (existingValue !== newValue) {
+        changedFields.push(field);
+      }
+    }
+
+    if (changedFields.length > 0) {
+      changes.fields = changedFields;
+    }
+
+    // Track media changes
+    if (heroMediaChanges.added > 0 || heroMediaChanges.removed > 0 || heroMediaChanges.reordered) {
+      changes.media_added = (changes.media_added || 0) + heroMediaChanges.added;
+      changes.media_removed = (changes.media_removed || 0) + heroMediaChanges.removed;
+      changes.media_reordered = changes.media_reordered || heroMediaChanges.reordered;
+    }
+
+    if (galleryMediaChanges.added > 0 || galleryMediaChanges.removed > 0 || galleryMediaChanges.reordered) {
+      changes.media_added = (changes.media_added || 0) + galleryMediaChanges.added;
+      changes.media_removed = (changes.media_removed || 0) + galleryMediaChanges.removed;
+      changes.media_reordered = changes.media_reordered || galleryMediaChanges.reordered;
     }
 
     // Update project fields
@@ -191,6 +264,16 @@ router.put('/:id', authMiddleware, uploadProjectMedia, async (req, res) => {
       galleryMediaIdsOrdered: galleryIds as string[],
     });
 
+    // Log activity
+    await activityLogService.log({
+      user_email: (req as any).user?.email || 'unknown',
+      action: 'update',
+      entity_type: 'project',
+      entity_id: req.params.id as string,
+      entity_title: project.title,
+      changes: Object.keys(changes).length > 0 ? changes : undefined,
+    });
+
     res.json(project);
   } catch (error) {
     console.error('Error updating project:', error);
@@ -201,6 +284,16 @@ router.put('/:id', authMiddleware, uploadProjectMedia, async (req, res) => {
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const result = await projectService.getById(req.params.id as string);
+
+    // Log activity before deletion
+    await activityLogService.log({
+      user_email: (req as any).user?.email || 'unknown',
+      action: 'delete',
+      entity_type: 'project',
+      entity_id: req.params.id as string,
+      entity_title: result.project.title,
+      changes: {},
+    });
 
     // Delete all media files from storage
     const allMediaUrls = [...result.heroMedia, ...result.galleryMedia].map(m => m.url);
@@ -218,6 +311,12 @@ router.delete('/:id', authMiddleware, async (req, res) => {
   }
 });
 
+interface MediaUpdateResult {
+  added: number;
+  removed: number;
+  reordered: boolean;
+}
+
 /**
  * Handle media updates for a project: upload new files, delete removed media, and reorder.
  * @param projectId - UUID of the project
@@ -225,6 +324,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
  * @param orderedIds - Ordered list of media IDs to keep
  * @param newFiles - New files to upload
  * @param role - Media role ('hero' or 'gallery')
+ * @returns Media update statistics
  */
 async function handleMediaUpdate(
   projectId: string,
@@ -232,12 +332,19 @@ async function handleMediaUpdate(
   orderedIds: string[],
   newFiles: Express.Multer.File[],
   role: 'hero' | 'gallery'
-): Promise<void> {
+): Promise<MediaUpdateResult> {
+  const result: MediaUpdateResult = {
+    added: 0,
+    removed: 0,
+    reordered: false,
+  };
+
   // Delete media not in the ordered list
   const idsToKeep = new Set(orderedIds);
   const mediaToDelete = existingMedia.filter(m => !idsToKeep.has(m.id));
 
   if (mediaToDelete.length > 0) {
+    result.removed = mediaToDelete.length;
     // Delete files from storage
     await storageService.deleteImages(mediaToDelete.map(m => m.url));
 
@@ -249,8 +356,17 @@ async function handleMediaUpdate(
       .in('id', idsToDelete);
   }
 
+  // Check if order changed
+  const existingIds = existingMedia.map(m => m.id);
+  const filteredExistingIds = existingIds.filter(id => idsToKeep.has(id));
+
+  if (JSON.stringify(filteredExistingIds) !== JSON.stringify(orderedIds)) {
+    result.reordered = true;
+  }
+
   // Upload new files and create media records
   if (newFiles.length > 0) {
+    result.added = newFiles.length;
     const uploadResult = await storageService.uploadImages(newFiles);
 
     if (uploadResult.errors.length > 0) {
@@ -274,6 +390,8 @@ async function handleMediaUpdate(
 
     if (error) throw error;
   }
+
+  return result;
 }
 
 export default router;
