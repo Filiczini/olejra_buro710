@@ -238,7 +238,35 @@ export const en = {
   },
   activityLog: {
     title: 'Activity Log',
-    comingSoon: 'This feature is coming soon',
+    date: 'Date',
+    user: 'User',
+    action: 'Action',
+    entity: 'Project',
+    details: 'Details',
+    filters: {
+      title: 'Filters',
+      user: 'User',
+      action: 'Action Type',
+      allUsers: 'All Users',
+      allActions: 'All Actions'
+    },
+    actions: {
+      create: 'Created',
+      update: 'Updated',
+      delete: 'Deleted'
+    },
+    changes: {
+      fields: 'Changed fields:',
+      mediaAdded: 'Added media: {count}',
+      mediaRemoved: 'Removed media: {count}',
+      mediaReordered: 'Media order changed'
+    },
+    loading: 'Loading...',
+    noLogs: 'Activity log is empty',
+    showing: 'Showing',
+    of: 'of',
+    previous: 'Previous',
+    next: 'Next',
     backToDashboard: 'Back to Dashboard'
   },
   siteSettings: {
