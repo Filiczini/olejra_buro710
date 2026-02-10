@@ -26,6 +26,7 @@ export default function EditProjectPage() {
     concept_heading: '',
     concept_caption: '',
     concept_quote: '',
+    hero_description: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -54,6 +55,7 @@ export default function EditProjectPage() {
           concept_heading: data.project.concept_heading || '',
           concept_caption: data.project.concept_caption || '',
           concept_quote: data.project.concept_quote || '',
+          hero_description: data.project.hero_description || '',
         });
         setHeroMedia(data.heroMedia || []);
         setGalleryMedia(data.galleryMedia || []);
@@ -130,6 +132,10 @@ export default function EditProjectPage() {
       }
       if (formData.concept_quote) {
         formDataToSend.append('concept_quote', formData.concept_quote);
+      }
+
+      if (formData.hero_description) {
+        formDataToSend.append('hero_description', formData.hero_description);
       }
 
       if (heroMedia.length > 0) {
@@ -233,6 +239,13 @@ export default function EditProjectPage() {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, title: e.target.value })}
                 error={errors.title}
                 required
+              />
+
+              <Input
+                label={(t as any).project.heroDescription || 'Photo description'}
+                placeholder={(t as any).createProject.heroDescriptionPlaceholder || 'Enter photo description'}
+                value={formData.hero_description || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, hero_description: e.target.value })}
               />
 
               <TagInput

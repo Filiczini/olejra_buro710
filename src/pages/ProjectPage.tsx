@@ -203,6 +203,11 @@ export default function ProjectPage() {
                 <h1 className="text-6xl md:text-8xl lg:text-9xl font-medium tracking-tighter text-white leading-[0.85] mb-4">
                   {project.title}
                 </h1>
+                {project.hero_description && (
+                  <p className="text-base md:text-lg font-normal text-zinc-200 max-w-2xl mb-6 leading-relaxed">
+                    {project.hero_description}
+                  </p>
+                )}
                 <p className="text-lg md:text-xl font-light text-zinc-300 max-w-2xl leading-relaxed">
                   {description}
                 </p>

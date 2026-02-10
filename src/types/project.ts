@@ -63,6 +63,7 @@ export interface Project {
   concept_heading?: string;
   concept_caption?: string;
   concept_quote?: string;
+  hero_description?: string;
 }
 
 export interface CreateProjectData {
@@ -79,6 +80,7 @@ export interface CreateProjectData {
   concept_heading?: string;
   concept_caption?: string;
   concept_quote?: string;
+  hero_description?: string;
 }
 
 export interface UpdateProjectData {
@@ -93,6 +95,7 @@ export interface UpdateProjectData {
   concept_heading?: string;
   concept_caption?: string;
   concept_quote?: string;
+  hero_description?: string;
 
   // Ordered media IDs for reordering
   heroMediaIdsOrdered?: string[];

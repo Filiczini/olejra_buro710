@@ -19,6 +19,7 @@ export default function CreateProjectPage() {
     concept_heading: '',
     concept_caption: '',
     concept_quote: '',
+    hero_description: '',
     heroMedia: [],
     galleryMedia: [],
   });
@@ -91,6 +92,10 @@ export default function CreateProjectPage() {
         formDataToSend.append('concept_quote', formData.concept_quote);
       }
 
+      if (formData.hero_description) {
+        formDataToSend.append('hero_description', formData.hero_description);
+      }
+
       if (formData.heroMedia && formData.heroMedia.length > 0) {
         formData.heroMedia.forEach((file) => {
           formDataToSend.append('heroMedia', file);
@@ -140,6 +145,13 @@ export default function CreateProjectPage() {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, title: e.target.value })}
                 error={errors.title}
                 required
+              />
+
+              <Input
+                label={(t as any).project.heroDescription || 'Photo description'}
+                placeholder={t.createProject.heroDescriptionPlaceholder}
+                value={formData.hero_description || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, hero_description: e.target.value })}
               />
 
               <TagInput

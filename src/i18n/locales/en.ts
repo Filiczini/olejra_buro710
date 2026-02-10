@@ -59,6 +59,7 @@ export const en = {
     noMoreProjects: 'No More Projects',
     designConcept: 'Design Concept',
     client: 'Client',
+    heroDescription: 'Photo description',
   },
   navigation: {
     projects: 'Projects',
@@ -126,6 +127,7 @@ export const en = {
     conceptCaptionPlaceholder: 'Enter concept caption (e.g., Design Concept)',
     conceptQuote: 'Concept Quote',
     conceptQuotePlaceholder: 'Enter concept quote (optional)',
+    heroDescriptionPlaceholder: 'Enter photo description',
     tags: 'Tags',
     tagsPlaceholder: 'Enter tags and press Enter',
     addTag: 'Add',
@@ -184,6 +186,7 @@ export const en = {
     conceptCaptionPlaceholder: 'Enter concept caption (e.g., Design Concept)',
     conceptQuote: 'Concept Quote',
     conceptQuotePlaceholder: 'Enter concept quote (optional)',
+    heroDescriptionPlaceholder: 'Enter photo description',
     tags: 'Tags',
     tagsPlaceholder: 'Enter tags and press Enter',
     addTag: 'Add',
