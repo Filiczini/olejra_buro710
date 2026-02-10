@@ -1,13 +1,12 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import type { Project } from '../types/project';
+import type { Project, Media } from '../types/project';
 import { portfolioService } from '../services/api';
 import { useTranslation } from '../hooks/useTranslation';
 import { Icon } from '@iconify-icon/react';
 
 export default function ProjectPage() {
   const t = useTranslation();
-  const projectTranslations = t.project || {} as any;
 
   const { id } = useParams<{ id: string }>();
   const [project, setProject] = useState<Project | null>(null);
@@ -21,6 +20,8 @@ export default function ProjectPage() {
   // Generate images to display in hero slider
   const getHeroImages = (project: Project): string[] => {
     const images: string[] = [];
+
+    if (!project) return images;
 
     // 1. Add heroMedia if available
     if (project.heroMedia && project.heroMedia.length > 0) {
@@ -51,9 +52,9 @@ export default function ProjectPage() {
     const loadProject = async () => {
       try {
         setLoading(true);
-        const data = await portfolioService.getById(id!);
-        setProject(data);
-        setTotalSlides(getHeroImages(data).length);
+        const data = await portfolioService.getById(id!) as unknown as { project: Project; heroMedia: Media[]; galleryMedia: Media[] };
+        setProject(data.project);
+        setTotalSlides(getHeroImages(data.project).length);
       } catch (err) {
         setError('Failed to load project');
         console.error('Error loading project:', err);
@@ -108,7 +109,7 @@ export default function ProjectPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-50">
-        <div className="text-lg text-zinc-600">{projectTranslations.loading || 'Loading...'}</div>
+        <div className="text-lg text-zinc-600">{t.project.loading || 'Loading...'}</div>
       </div>
     );
   }
@@ -116,7 +117,7 @@ export default function ProjectPage() {
   if (error || !project) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-50">
-        <div className="text-lg text-red-600">{error || (projectTranslations.notFound || 'Project not found')}</div>
+        <div className="text-lg text-red-600">{error || (t.project.notFound || 'Project not found')}</div>
       </div>
     );
   }
@@ -228,19 +229,19 @@ export default function ProjectPage() {
               <div className="lg:col-span-4 flex justify-start lg:justify-end gap-12 pb-2">
                 <div>
                   <span className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1">
-                    {(projectTranslations as any).client || 'Client'}
+                    {(t.project as any).client || 'Client'}
                   </span>
                   <span className="text-sm font-medium text-white">{project.location || 'TBD'}</span>
                 </div>
                 <div>
                   <span className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1">
-                    {projectTranslations.year || 'Year'}
+                    {t.project.year || 'Year'}
                   </span>
                   <span className="text-sm font-medium text-white">{project.year || 'TBD'}</span>
                 </div>
                 <div>
                   <span className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1">
-                    {projectTranslations.area || 'Area'}
+                    {t.project.area || 'Area'}
                   </span>
                   <span className="text-sm font-medium text-white">{project.area || 'TBD'}</span>
                 </div>
@@ -339,7 +340,7 @@ export default function ProjectPage() {
 
           {/* SECTION: Masonry Gallery */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 animate-fade-in" style={{ animationDelay: '0.5s' }}>
-            {project.project_images?.slice(0, 5).map((img: any, index: number) => (
+            {(project.galleryMedia?.slice(0, 5) || project.project_images?.slice(0, 5) || []).map((img: any, index: number) => (
               <div key={index} className="space-y-4 md:space-y-8">
                 <img
                   src={img.url}
