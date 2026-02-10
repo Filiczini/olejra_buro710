@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "seed": "tsx src/server/seed.ts",
+    "seed:random": "tsx src/server/seed.ts",
     "seed:clean": "tsx src/server/clear-projects.ts",
     "migrate:projects": "tsx src/server/migrate-projects.ts",
     "validate:i18n": "node scripts/validate-i18n.js"
