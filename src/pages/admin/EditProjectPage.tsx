@@ -6,6 +6,7 @@ import TagInput from '../../components/admin/TagInput';
 import DragDropMediaList from '../../components/admin/DragDropMediaList';
 import MultiImageUpload from '../../components/admin/MultiImageUpload';
 import SingleImageUpload from '../../components/admin/SingleImageUpload';
+import ProjectPreview from '../../components/admin/ProjectPreview';
 import type { UpdateProjectData, Project, Media } from '../../types/project';
 import { portfolioService } from '../../services/api';
 import { useTranslation } from '../../contexts/LanguageContext';
@@ -223,6 +224,11 @@ export default function EditProjectPage() {
     setGalleryMedia(prev => prev.map(m => m.id === id ? { ...m, alt } : m));
   };
 
+  // Get hero image for preview (existing URL or new File)
+  const heroImageForPreview = heroImageToUpload
+    ? heroImageToUpload
+    : (heroMedia.length > 0 ? heroMedia[0].url : undefined);
+
   if (fetching) {
     return (
       <div className="min-h-screen bg-zinc-50 p-8 flex items-center justify-center">
@@ -240,19 +246,21 @@ export default function EditProjectPage() {
   }
 
   return (
-    <div>
-      <div className="max-w-2xl">
-        <div className="flex items-center gap-4 mb-8">
-          <button
-            onClick={() => navigate('/admin/dashboard')}
-            className="text-zinc-600 hover:text-zinc-900"
-          >
-            ← {t.editProject.backToDashboard}
-          </button>
-          <h1 className="text-3xl font-bold text-zinc-900">{t.editProject.title}</h1>
-        </div>
+    <div className="max-w-7xl mx-auto w-full px-4 md:px-8 py-8">
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Left Column - Form */}
+        <div className="flex-1 max-w-2xl">
+          <div className="flex items-center gap-4 mb-8">
+            <button
+              onClick={() => navigate('/admin/dashboard')}
+              className="text-zinc-600 hover:text-zinc-900"
+            >
+              ← {t.editProject.backToDashboard}
+            </button>
+            <h1 className="text-3xl font-bold text-zinc-900">{t.editProject.title}</h1>
+          </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-8">
           {/* Hero Image Section */}
           <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
@@ -516,6 +524,23 @@ export default function EditProjectPage() {
             </div>
           </section>
         </form>
+        </div>
+
+        {/* Right Column - Preview - Desktop Only */}
+        <div className="hidden lg:block lg:w-[450px] lg:sticky lg:top-8 h-fit">
+          <ProjectPreview
+            heroImage={heroImageForPreview}
+            title={formData.title || ''}
+            subtitle={formData.subtitle}
+            shortDescription={formData.short_description}
+            category={formData.category}
+            tags={formData.tags || []}
+            location={formData.location}
+            year={formData.year}
+            area={formData.area}
+            photoCredits={formData.photo_credits}
+          />
+        </div>
       </div>
     </div>
   );
