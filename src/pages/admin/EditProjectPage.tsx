@@ -249,7 +249,7 @@ export default function EditProjectPage() {
     <div className="max-w-7xl mx-auto w-full px-4 md:px-8 py-8">
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Left Column - Form */}
-        <div className="flex-1 max-w-2xl">
+        <div className="flex-1">
           <div className="flex items-center gap-4 mb-8">
             <button
               onClick={() => navigate('/admin/dashboard')}
@@ -527,7 +527,7 @@ export default function EditProjectPage() {
         </div>
 
         {/* Right Column - Preview - Desktop Only */}
-        <div className="hidden lg:block lg:w-[450px] lg:sticky lg:top-8 h-fit">
+        <div className="hidden lg:block lg:w-[700px] lg:sticky lg:top-8 h-fit">
           <ProjectPreview
             heroImage={heroImageForPreview}
             title={formData.title || ''}
