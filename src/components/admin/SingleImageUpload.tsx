@@ -3,19 +3,21 @@ import { useState, useCallback, useEffect } from 'react';
 interface SingleImageUploadProps {
   image?: File;
   onImageChange: (image: File | null) => void;
+  initialImageUrl?: string | null;
   label?: string;
   placeholder?: string;
   error?: string;
 }
 
 interface ImagePreview {
-  file: File;
+  file?: File;
   previewUrl: string;
 }
 
 export default function SingleImageUpload({
   image,
   onImageChange,
+  initialImageUrl,
   label = 'Image',
   placeholder = 'Drag and drop image, or browse',
   error,
@@ -24,19 +26,20 @@ export default function SingleImageUpload({
   const [isDragging, setIsDragging] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Generate preview when image prop changes
   useEffect(() => {
     const generatePreview = async () => {
       if (image) {
         const previewUrl = await createPreview(image);
         setPreview({ file: image, previewUrl });
+      } else if (initialImageUrl) {
+        setPreview({ previewUrl: initialImageUrl });
       } else {
         setPreview(null);
       }
     };
 
     generatePreview();
-  }, [image]);
+  }, [image, initialImageUrl]);
 
   const createPreview = (file: File): Promise<string> => {
     return new Promise((resolve) => {

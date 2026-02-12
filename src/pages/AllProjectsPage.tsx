@@ -3,12 +3,10 @@ import { Icon } from '@iconify-icon/react';
 import { Link } from 'react-router-dom';
 import type { Project } from '../types/project';
 import { portfolioService } from '../services/api';
-import { useTranslation } from '../hooks/useTranslation';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 
 export default function AllProjectsPage() {
-  const t = useTranslation();
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +41,7 @@ export default function AllProjectsPage() {
         <Header />
         <div className="pt-20">
           <div className="max-w-[1800px] mx-auto px-6 py-24">
-            <div className="text-center text-zinc-600">{t.project.loading}</div>
+            <div className="text-center text-zinc-600">Завантаження...</div>
           </div>
         </div>
         <Footer />
@@ -59,17 +57,17 @@ export default function AllProjectsPage() {
           {/* Header */}
           <div className="mb-12">
             <h1 className="text-4xl md:text-5xl font-medium tracking-tight mb-4">
-              {t.navigation.projects}
+              Проєкти
             </h1>
             <p className="text-zinc-600 text-lg">
-              {total} {t.dashboard.projects}
+              {total} проєктів
             </p>
           </div>
 
           {/* Projects Grid */}
           {projects.length === 0 ? (
             <div className="text-center py-24 text-zinc-600">
-              {t.dashboard.noProjects}
+              Немає проєктів
             </div>
           ) : (
             <>
@@ -109,7 +107,7 @@ export default function AllProjectsPage() {
                     disabled={page === 1}
                     className="px-4 py-2 border border-zinc-200 rounded-full hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium text-zinc-700 hover:text-zinc-900"
                   >
-                    {t.dashboard.previous}
+                    Попередня
                   </button>
 
                   {/* Page Numbers */}
@@ -137,7 +135,7 @@ export default function AllProjectsPage() {
                     disabled={page === totalPages}
                     className="px-4 py-2 border border-zinc-200 rounded-full hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium text-zinc-700 hover:text-zinc-900"
                   >
-                    {t.dashboard.next}
+                    Наступна
                   </button>
                 </div>
               )}

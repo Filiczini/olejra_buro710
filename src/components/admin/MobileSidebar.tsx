@@ -1,4 +1,3 @@
-import { useTranslation } from '../../hooks/useTranslation';
 import SidebarMenuItem from './SidebarMenuItem';
 
 interface MobileSidebarProps {
@@ -7,8 +6,6 @@ interface MobileSidebarProps {
 }
 
 export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
-  const t = useTranslation();
-
   return (
     <>
       {/* Overlay */}
@@ -37,22 +34,17 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           <SidebarMenuItem
             icon="solar:folder-files-linear"
-            label={t.navigation.projects}
+            label="Проєкти"
             path="/admin/dashboard"
           />
           <SidebarMenuItem
             icon="solar:add-circle-linear"
-            label={t.navigation.createProject}
+            label="Створити проєкт"
             path="/admin/projects/create"
           />
           <SidebarMenuItem
-            icon="solar:settings-linear"
-            label={t.navigation.settings}
-            path="/admin/settings"
-          />
-          <SidebarMenuItem
             icon="solar:file-text-linear"
-            label={t.navigation.activityLog}
+            label="Журнал дій"
             path="/admin/logs"
           />
         </nav>
@@ -61,13 +53,13 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
         <div className="p-4 border-t border-zinc-800 space-y-2">
           <SidebarMenuItem
             icon="solar:globe-linear"
-            label={t.navigation.previewSite}
+            label="Перегляд сайту"
             path="/"
             isExternal
           />
           <SidebarMenuItem
             icon="solar:logout-linear"
-            label={t.navigation.logout}
+            label="Вийти"
             path="/admin/login"
           />
         </div>
