@@ -44,7 +44,7 @@ export const portfolioService = {
 
   getById: async (id: string) => {
     const response = await api.get(`/portfolio/${id}`);
-    return response.data as { project: Project, heroMedia: any[], galleryMedia: any[] };
+    return response.data as { project: Project, heroMedia: { id: string; url: string }[] };
   },
 
   create: async (data: FormData) => {
