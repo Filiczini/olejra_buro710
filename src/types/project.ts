@@ -1,149 +1,43 @@
-export interface DesignZone {
-  id: string;
-  name: string;
-  order: number;
-  title: string;
-  description: string;
-  image_url?: string;
-  layout?: 'full-width' | 'split' | 'centered' | 'split-reverse';
-  features?: string[];
-  alt?: string;
-}
-
-export interface ProjectImage {
-  url: string;
-  caption?: string;
-  alt?: string;
-}
-
 export interface Media {
   id: string;
   url: string;
-  role: 'hero' | 'gallery';
+  role: 'hero';
   sort_order: number;
   alt?: string;
-}
-
-export interface Material {
-  name: string;
-  color?: string;
-  type?: 'surface' | 'accent' | 'natural';
 }
 
 export interface Project {
   id: string;
   title: string;
-  description: string[];
+  subtitle?: string;
   image_url: string;
   tags: string[];
   location?: string;
-  area?: string;
   year?: string;
-  team?: string;
+  area?: string;
   created_at: string;
   updated_at: string;
-
-  // New optional fields for enhanced design
-  category?: string;
-  category_primary?: string;
-  category_secondary?: string;
-  short_description?: string;
-  subtitle?: string;
-  photo_credits?: string;
-  project_images?: ProjectImage[];
-  design_zones?: DesignZone[];
-  materials?: Material[];
-
-  // Media management
   heroMedia?: Media[];
-  galleryMedia?: Media[];
-
-  // Additional fields for hardcoded content removal
-  architects?: string;
-  concept_heading?: string;
-  concept_caption?: string;
-  concept_quote?: string;
-
-  // Section labels for dynamic control
-  challenge_title?: string;
-  materials_title?: string;
-  context_title?: string;
-  figure_number?: string;
-  figure_caption?: string;
-
-  // Section content (to avoid hardcoded and duplicated text)
-  challenge_description?: string;
-  quote_text?: string;
-  context_description?: string;
-
-  // Footer navigation (to avoid hardcoded text)
-  next_project_link_title?: string;
-  next_project_link_subtitle?: string;
-  other_projects_title?: string;
 }
 
 export interface CreateProjectData {
   title: string;
-  description: string;
-  tags: string[];
-  heroMedia?: File;
-  galleryMedia?: File[];
-  location?: string;
-  area?: string;
-  year?: string;
-  team?: string;
-  architects?: string;
-  concept_heading?: string;
-  concept_caption?: string;
-  concept_quote?: string;
-  short_description?: string;
-  category?: string;
   subtitle?: string;
-  photo_credits?: string;
-  challenge_title?: string;
-  materials_title?: string;
-  context_title?: string;
-  figure_number?: string;
-  figure_caption?: string;
-  challenge_description?: string;
-  quote_text?: string;
-  context_description?: string;
-  next_project_link_title?: string;
-  next_project_link_subtitle?: string;
-  other_projects_title?: string;
+  tags: string[];
+  location?: string;
+  year?: string;
+  area?: string;
+  heroMedia?: File;
 }
 
 export interface UpdateProjectData {
   title?: string;
-  description?: string;
+  subtitle?: string;
   tags?: string[];
   location?: string;
-  area?: string;
   year?: string;
-  team?: string;
-  architects?: string;
-  concept_heading?: string;
-  concept_caption?: string;
-  concept_quote?: string;
-  short_description?: string;
-  category?: string;
-  subtitle?: string;
-  photo_credits?: string;
-  challenge_title?: string;
-  materials_title?: string;
-  context_title?: string;
-  figure_number?: string;
-  figure_caption?: string;
-  challenge_description?: string;
-  quote_text?: string;
-  context_description?: string;
-  next_project_link_title?: string;
-  next_project_link_subtitle?: string;
-  other_projects_title?: string;
-
-  // Ordered media IDs for reordering
-  heroMediaIdsOrdered?: string[];
-  galleryMediaIdsOrdered?: string[];
+  area?: string;
+  heroMedia?: File;
 }
 
 export interface PaginationParams {
