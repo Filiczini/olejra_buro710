@@ -24,16 +24,6 @@ export default function Sidebar() {
           path="/admin/projects/create"
         />
         <SidebarMenuItem
-          icon="solar:home-smile-linear"
-          label="Налаштування сайту"
-          path="/admin/site-settings"
-        />
-        <SidebarMenuItem
-          icon="solar:settings-linear"
-          label="Налаштування"
-          path="/admin/settings"
-        />
-        <SidebarMenuItem
           icon="solar:file-text-linear"
           label="Журнал дій"
           path="/admin/logs"

@@ -43,11 +43,6 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
             path="/admin/projects/create"
           />
           <SidebarMenuItem
-            icon="solar:settings-linear"
-            label="Налаштування"
-            path="/admin/settings"
-          />
-          <SidebarMenuItem
             icon="solar:file-text-linear"
             label="Журнал дій"
             path="/admin/logs"

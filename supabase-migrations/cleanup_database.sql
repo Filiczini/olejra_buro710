@@ -1,13 +1,11 @@
 -- Migration: Cleanup database to match new minimal schema
 -- Run this in Supabase SQL Editor
 -- WARNING: This will DELETE ALL DATA!
+-- NOTE: To clean storage files, run: npx tsx scripts/cleanup-storage.ts
 
 -- ============================================
--- STEP 1: Delete all data
+-- STEP 1: Delete all data from tables
 -- ============================================
-
--- Delete all files from storage bucket
-DELETE FROM storage.objects WHERE bucket_id = 'projects';
 
 -- Truncate all tables (CASCADE to handle foreign keys)
 TRUNCATE TABLE media CASCADE;

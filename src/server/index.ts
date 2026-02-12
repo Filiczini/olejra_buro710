@@ -3,7 +3,6 @@ import cors from 'cors';
 import type { Request, Response } from 'express';
 import authRoutes from './routes/auth';
 import portfolioRoutes from './routes/portfolio';
-import siteSettingsRoutes from './routes/siteSettings';
 import activityLogsRoutes from './routes/activityLogs';
 
 const app = express();
@@ -14,7 +13,6 @@ app.use(express.json({ limit: '50mb' }));
 
 app.use('/api/admin', authRoutes);
 app.use('/api/portfolio', portfolioRoutes);
-app.use('/api/settings', siteSettingsRoutes);
 app.use('/api/logs', activityLogsRoutes);
 
 app.get('/health', (_req: Request, res: Response) => {
