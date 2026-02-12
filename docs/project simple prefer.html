@@ -1,0 +1,257 @@
+<html lang="uk"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kyiv Food Market - Bureau 710</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Hide scrollbar for slider but allow functionality */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Smooth fade transition for slider images */
+        .slide {
+            opacity: 0;
+            transition: opacity 0.7s ease-in-out;
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+        .slide.active {
+            opacity: 1;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="bg-white text-zinc-900 antialiased selection:bg-zinc-900 selection:text-white">
+
+    <!-- Navigation (Transparent fixed) -->
+    <nav class="fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b border-white/10 bg-gradient-to-b from-black/50 to-transparent hover:bg-black/80 group">
+        <div class="max-w-[1800px] mx-auto px-6 py-6 flex justify-between items-center text-white">
+            <a href="#" class="text-lg font-medium tracking-tight uppercase mix-blend-difference">Bureau 710</a>
+            
+            <div class="flex items-center gap-8">
+                <a href="#" class="hidden md:block text-sm font-medium hover:text-zinc-300 transition-colors">Проєкти</a>
+                <a href="#" class="hidden md:block text-sm font-medium hover:text-zinc-300 transition-colors">Бюро</a>
+                <button class="text-white hover:text-zinc-300 transition-colors">
+                    <iconify-icon icon="solar:hamburger-menu-linear" width="24" stroke-width="1.5"></iconify-icon>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        
+        <!-- 1. Hero Section (Slider) -->
+        <!-- CMS Mapping: List of Images, Title, Subtitle strings -->
+        <section class="relative h-screen w-full bg-zinc-900 overflow-hidden">
+            
+            <!-- Slider Images -->
+            <div id="hero-slider" class="absolute inset-0 w-full h-full">
+                <!-- Slide 1 -->
+                <div class="slide active w-full h-full">
+                    <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&amp;w=2400&amp;auto=format&amp;fit=crop" alt="Project Image 1" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/30"></div> <!-- Dimmer overlay -->
+                </div>
+                <!-- Slide 2 -->
+                <div class="slide w-full h-full">
+                    <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&amp;w=2400&amp;auto=format&amp;fit=crop" alt="Project Image 2" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/30"></div>
+                </div>
+                <!-- Slide 3 -->
+                <div class="slide w-full h-full">
+                    <img src="https://images.unsplash.com/photo-1504194921103-f8b80cadd5e4?q=80&amp;w=2400&amp;auto=format&amp;fit=crop" alt="Project Image 3" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/30"></div>
+                </div>
+            </div>
+
+            <!-- Content Overlay -->
+            <div class="absolute inset-0 z-20 flex flex-col justify-end pb-12 md:pb-16 px-6 max-w-[1800px] mx-auto pointer-events-none">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end w-full">
+                    
+                    <!-- Title & Subtitle -->
+                    <div class="col-span-1 md:col-span-8">
+                        <div class="flex flex-col gap-2">
+                            <span class="text-white/70 text-sm md:text-base tracking-wide uppercase font-medium">Kyiv, Ukraine — 2019</span>
+                            <h1 class="text-5xl md:text-7xl lg:text-8xl font-medium text-white tracking-tight uppercase leading-[0.9]">
+                                Kyiv Food Market
+                            </h1>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Controls (Pointer events enabled) -->
+                    <div class="col-span-1 md:col-span-4 flex justify-start md:justify-end gap-4 pointer-events-auto">
+                        <button onclick="prevSlide()" class="w-12 h-12 rounded-full border border-white/30 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-300 backdrop-blur-sm">
+                            <iconify-icon icon="solar:arrow-left-linear" width="24" stroke-width="1.5"></iconify-icon>
+                        </button>
+                        <button onclick="nextSlide()" class="w-12 h-12 rounded-full border border-white/30 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-300 backdrop-blur-sm">
+                            <iconify-icon icon="solar:arrow-right-linear" width="24" stroke-width="1.5"></iconify-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Metadata Block -->
+        <!-- CMS Mapping: Simple key-value fields -->
+        <section class="border-b border-zinc-100">
+            <div class="max-w-[1800px] mx-auto">
+                <div class="grid grid-cols-2 md:grid-cols-4 divide-x divide-zinc-100 border-x border-zinc-100">
+                    
+                    <div class="p-6 md:p-8 flex flex-col gap-2">
+                        <span class="text-xs text-zinc-400 uppercase tracking-wider font-medium">Локація</span>
+                        <span class="text-sm md:text-base text-zinc-900 font-medium">вул. Героїв Майдану 8, Чернівці </span>
+                    </div>
+
+                    <div class="p-6 md:p-8 flex flex-col gap-2">
+                        <span class="text-xs text-zinc-400 uppercase tracking-wider font-medium">Площа</span>
+                        <span class="text-sm md:text-base text-zinc-900 font-medium">100 </span>
+                    </div>
+
+                    <div class="p-6 md:p-8 flex flex-col gap-2">
+                        <span class="text-xs text-zinc-400 uppercase tracking-wider font-medium">Статус</span>
+                        <span class="text-sm md:text-base text-zinc-900 font-medium">Реалізовано, 2022</span>
+                    </div>
+
+                    <div class="p-6 md:p-8 flex flex-col gap-2">
+                        <span class="text-xs text-zinc-400 uppercase tracking-wider font-medium">Команда</span>
+                        <span class="text-sm md:text-base text-zinc-900 font-medium">Діана Архітектовна, Андрій Березинський</span>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Project Description -->
+        <!-- CMS Mapping: Rich Text Area -->
+        <section class="py-24 px-6">
+            <div class="max-w-[1800px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-12">
+                <div class="md:col-span-4">
+                    <h2 class="text-xl md:text-2xl font-medium tracking-tight text-zinc-900">Про проєкт</h2>
+                </div>
+                <div class="md:col-span-6 md:col-start-6">
+                    <div class="flex flex-col gap-6 text-zinc-500 leading-relaxed text-lg font-light">
+                        <p>
+                           Проект повної реконструкції занедбаної будівлі в самому серці старого міста. Бюро 710 перетворило складний простір на двоповерхову пекарню-кафе. Тут поєднано сучасні технології випікання з вінтажним декором та автентичними елементами стін. Ми не просто побудували, ми відродили затишок, що став новим досягненням для цілого району. </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Concept / Quote Block -->
+        <!-- CMS Mapping: Title field, Quote text field -->
+        <section class="py-24 px-6 bg-zinc-50 border-y border-zinc-100">
+            <div class="max-w-[1800px] mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
+                    <div class="md:col-span-4">
+                        <div class="flex items-center gap-3 text-zinc-400">
+                            <iconify-icon icon="solar:idea-linear" width="24" stroke-width="1.5"></iconify-icon>
+                            <span class="text-xs uppercase tracking-widest font-semibold">Концепція</span>
+                        </div>
+                    </div>
+                    <div class="md:col-span-8">
+                        <blockquote class="text-2xl md:text-4xl font-normal text-zinc-900 leading-tight tracking-tight">
+                            "Ми прагнули створити простір, де історія будівлі не конфліктує з її новою функцією, а підсилює її, створюючи унікальний гастрономічний досвід."
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Gallery Grid -->
+        <!-- CMS Mapping: Multi-image uploader. Rendered as a simple grid or masonry -->
+        <section class="py-24 px-6">
+            <div class="max-w-[1800px] mx-auto flex flex-col gap-6">
+                
+                <!-- Full Width Image -->
+                <div class="w-full h-[60vh] md:h-[80vh] bg-zinc-100 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1595846519845-68e298c2edd8?q=80&amp;w=2400&amp;auto=format&amp;fit=crop" alt="Interior Detail" class="w-full h-full object-cover hover:scale-105 transition-transform duration-1000">
+                </div>
+
+                <!-- 2 Column Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="aspect-[3/4] bg-zinc-100 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1615873968403-89e068629265?q=80&amp;w=1200&amp;auto=format&amp;fit=crop" alt="Detail Shot" class="w-full h-full object-cover hover:scale-105 transition-transform duration-1000">
+                    </div>
+                    <div class="aspect-[3/4] bg-zinc-100 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&amp;w=1200&amp;auto=format&amp;fit=crop" alt="Detail Shot" class="w-full h-full object-cover hover:scale-105 transition-transform duration-1000">
+                    </div>
+                </div>
+
+                <!-- Full Width Image -->
+                <div class="w-full h-[60vh] md:h-[80vh] bg-zinc-100 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1513161455079-7dc1de15ef3e?q=80&amp;w=2400&amp;auto=format&amp;fit=crop" alt="Atmosphere" class="w-full h-full object-cover hover:scale-105 transition-transform duration-1000">
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 6. Next Project CTA -->
+        <!-- CMS Mapping: Link to next project ID -->
+        <section class="border-t border-zinc-100 group">
+            <a href="#" class="block py-32 px-6 text-center hover:bg-zinc-50 transition-colors">
+                <span class="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4 block">Наступний Проєкт</span>
+                <h2 class="text-6xl md:text-8xl font-medium tracking-tight text-zinc-900 uppercase opacity-90 group-hover:opacity-100 transition-opacity">
+                    Markó Cafe
+                </h2>
+                <div class="mt-8 flex justify-center">
+                    <div class="w-16 h-16 rounded-full border border-zinc-200 flex items-center justify-center group-hover:bg-zinc-900 group-hover:border-zinc-900 group-hover:text-white transition-all duration-300">
+                        <iconify-icon icon="solar:arrow-right-linear" width="28" stroke-width="1.5"></iconify-icon>
+                    </div>
+                </div>
+            </a>
+        </section>
+
+    </main>
+
+    <!-- Footer (Minimalist) -->
+    <footer class="bg-zinc-900 text-white py-16">
+        <div class="max-w-[1800px] mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-end">
+                <div>
+                    <div class="text-xl font-medium tracking-tight uppercase mb-8">Bureau 710</div>
+                    <div class="flex flex-col gap-2 text-zinc-400 text-sm">
+                        <p>Київ, вул. Рейтарська, 21/13</p>
+                        <a href="mailto:hello@bureau710.com" class="hover:text-white transition-colors">hello@bureau710.com</a>
+                    </div>
+                </div>
+                <div class="flex flex-col md:items-end gap-6">
+                    <div class="flex gap-6">
+                        <a href="#" class="text-zinc-400 hover:text-white transition-colors text-sm uppercase tracking-wide">Instagram</a>
+                        <a href="#" class="text-zinc-400 hover:text-white transition-colors text-sm uppercase tracking-wide">Behance</a>
+                        <a href="#" class="text-zinc-400 hover:text-white transition-colors text-sm uppercase tracking-wide">Telegram</a>
+                    </div>
+                    <span class="text-zinc-600 text-xs">© 2024 BUREAU 710</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Simple Slider Logic (Vanilla JS, no dependencies) -->
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(index) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[index].classList.add('active');
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            showSlide(currentSlide);
+        }
+
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            showSlide(currentSlide);
+        }
+
+        // Auto advance every 6 seconds (optional)
+        setInterval(nextSlide, 6000);
+    </script>
+
+</body></html>
