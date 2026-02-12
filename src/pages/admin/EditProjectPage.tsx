@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Button from '../../components/ui/Button';
-import ProjectForm from '../../components/admin/ProjectForm';
 import HeroSectionForm, { type HeroSectionData } from '../../components/admin/HeroSectionForm';
 import HeroSectionPreview from '../../components/admin/HeroSectionPreview';
 import type { Media } from '../../types/project';
@@ -33,7 +32,6 @@ export default function EditProjectPage() {
           project: { 
             title: string; 
             subtitle?: string;
-            short_description?: string;
             tags: string[]; 
             location?: string; 
             year?: string; 
@@ -45,7 +43,7 @@ export default function EditProjectPage() {
         setHeroData({
           heroImage: undefined,
           title: data.project.title || '',
-          subtitle: data.project.subtitle || data.project.short_description || '',
+          subtitle: data.project.subtitle || '',
           tags: data.project.tags || [],
           location: data.project.location || '',
           year: data.project.year || '',
@@ -95,13 +93,12 @@ export default function EditProjectPage() {
     try {
       const formDataToSend = new FormData();
       formDataToSend.append('title', heroData.title);
-      formDataToSend.append('description', heroData.subtitle || heroData.title);
+      formDataToSend.append('subtitle', heroData.subtitle || '');
       formDataToSend.append('tags', JSON.stringify(heroData.tags));
       
       if (heroData.location) formDataToSend.append('location', heroData.location);
       if (heroData.year) formDataToSend.append('year', heroData.year);
       if (heroData.area) formDataToSend.append('area', heroData.area);
-      if (heroData.subtitle) formDataToSend.append('short_description', heroData.subtitle);
       if (heroData.heroImage) formDataToSend.append('heroMedia', heroData.heroImage);
 
       await portfolioService.update(id, formDataToSend);
@@ -136,30 +133,35 @@ export default function EditProjectPage() {
 
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="flex-1">
-          <ProjectForm
-            onSubmit={handleSubmit}
-            loading={loading}
-            submitLabel="Зберегти"
-            submitLoadingLabel="Збереження..."
-          >
+          <form onSubmit={handleSubmit} className="space-y-8">
             <HeroSectionForm
               data={heroData}
               onChange={setHeroData}
               errors={errors}
               initialImageUrl={existingHeroUrl}
             />
-          </ProjectForm>
 
-          <div className="mt-4">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => navigate('/admin/dashboard')}
-              className="w-full py-3"
-            >
-              Скасувати
-            </Button>
-          </div>
+            <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+              {errors.submit && (
+                <div className="text-sm text-red-500 bg-red-50 p-3 rounded-lg mb-4">
+                  {errors.submit}
+                </div>
+              )}
+              <div className="flex gap-4">
+                <Button type="submit" disabled={loading} className="flex-1 py-3">
+                  {loading ? 'Збереження...' : 'Зберегти'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => navigate('/admin/dashboard')}
+                  className="flex-1 py-3"
+                >
+                  Скасувати
+                </Button>
+              </div>
+            </section>
+          </form>
         </div>
 
         <div className="lg:w-[400px]">

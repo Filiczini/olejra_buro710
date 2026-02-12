@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ProjectForm from '../../components/admin/ProjectForm';
+import Button from '../../components/ui/Button';
 import HeroSectionForm, { type HeroSectionData } from '../../components/admin/HeroSectionForm';
 import HeroSectionPreview from '../../components/admin/HeroSectionPreview';
 import { portfolioService } from '../../services/api';
@@ -50,13 +50,12 @@ export default function CreateProjectPage() {
     try {
       const formDataToSend = new FormData();
       formDataToSend.append('title', heroData.title);
-      formDataToSend.append('description', heroData.subtitle || heroData.title);
+      formDataToSend.append('subtitle', heroData.subtitle || '');
       formDataToSend.append('tags', JSON.stringify(heroData.tags));
       
       if (heroData.location) formDataToSend.append('location', heroData.location);
       if (heroData.year) formDataToSend.append('year', heroData.year);
       if (heroData.area) formDataToSend.append('area', heroData.area);
-      if (heroData.subtitle) formDataToSend.append('short_description', heroData.subtitle);
       if (heroData.heroImage) formDataToSend.append('heroMedia', heroData.heroImage);
 
       await portfolioService.create(formDataToSend);
@@ -83,18 +82,24 @@ export default function CreateProjectPage() {
 
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="flex-1">
-          <ProjectForm
-            onSubmit={handleSubmit}
-            loading={loading}
-            submitLabel="Створити"
-            submitLoadingLabel="Створення..."
-          >
+          <form onSubmit={handleSubmit} className="space-y-8">
             <HeroSectionForm
               data={heroData}
               onChange={setHeroData}
               errors={errors}
             />
-          </ProjectForm>
+
+            <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+              {errors.submit && (
+                <div className="text-sm text-red-500 bg-red-50 p-3 rounded-lg mb-4">
+                  {errors.submit}
+                </div>
+              )}
+              <Button type="submit" disabled={loading} className="w-full py-3">
+                {loading ? 'Створення...' : 'Створити'}
+              </Button>
+            </section>
+          </form>
         </div>
 
         <div className="lg:w-[400px]">
