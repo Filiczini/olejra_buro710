@@ -9,11 +9,9 @@ import SingleImageUpload from '../../components/admin/SingleImageUpload';
 import ProjectPreview from '../../components/admin/ProjectPreview';
 import type { UpdateProjectData, Project, Media } from '../../types/project';
 import { portfolioService } from '../../services/api';
-import { useTranslation } from '../../contexts/LanguageContext';
 
 export default function EditProjectPage() {
   const navigate = useNavigate();
-  const t = useTranslation();
   const { id } = useParams<{ id: string }>();
   const [project, setProject] = useState<Project | null>(null);
   const [formData, setFormData] = useState<UpdateProjectData>({
@@ -104,15 +102,15 @@ export default function EditProjectPage() {
     const newErrors: Record<string, string> = {};
 
     if (formData.title && formData.title.length < 2) {
-      newErrors.title = t.editProject.requiredField;
+      newErrors.title = "Це поле обов'язкове";
     }
 
     if (formData.description && formData.description.length < 10) {
-      newErrors.description = t.editProject.requiredField;
+      newErrors.description = "Це поле обов'язкове";
     }
 
     if (formData.tags && formData.tags.length > 10) {
-      newErrors.tags = t.editProject.requiredField;
+      newErrors.tags = "Це поле обов'язкове";
     }
 
     setErrors(newErrors);
@@ -236,7 +234,7 @@ export default function EditProjectPage() {
 
       navigate('/admin/dashboard');
     } catch {
-      setErrors({ submit: t.editProject.error });
+      setErrors({ submit: "Помилка оновлення проєкту" });
     } finally {
       setLoading(false);
     }
@@ -262,7 +260,7 @@ export default function EditProjectPage() {
   if (fetching) {
     return (
       <div className="min-h-screen bg-zinc-50 p-8 flex items-center justify-center">
-        <div className="text-lg text-zinc-600">{t.dashboard.loading}</div>
+        <div className="text-lg text-zinc-600">Завантаження...</div>
       </div>
     );
   }
@@ -270,7 +268,7 @@ export default function EditProjectPage() {
   if (!project) {
     return (
       <div className="min-h-screen bg-zinc-50 p-8 flex items-center justify-center">
-        <div className="text-lg text-zinc-600">{t.dashboard.noProjects}</div>
+        <div className="text-lg text-zinc-600">Проекти не знайдено</div>
       </div>
     );
   }
@@ -285,19 +283,19 @@ export default function EditProjectPage() {
               onClick={() => navigate('/admin/dashboard')}
               className="text-zinc-600 hover:text-zinc-900"
             >
-              ← {t.editProject.backToDashboard}
+              ← Повернутися до панелі керування
             </button>
-            <h1 className="text-3xl font-bold text-zinc-900">{t.editProject.title}</h1>
+            <h1 className="text-3xl font-bold text-zinc-900">Редагувати проєкт</h1>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
           {/* Hero Image Section */}
           <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
-              {(t as any).editProject.heroImage || 'Hero Image'}
+              Головне зображення
             </h2>
             <div className="mb-4">
-              <p className="text-sm text-zinc-600">            {(t as any).editProject.heroImagesDescription || 'Add hero image that will be displayed prominently at the top of the project page.'}</p>
+              <p className="text-sm text-zinc-600">Додайте головне зображення.</p>
             </div>
 
             {/* Existing Hero Image */}
@@ -327,20 +325,20 @@ export default function EditProjectPage() {
             <SingleImageUpload
               image={heroImageToUpload}
               onImageChange={(img) => setHeroImageToUpload(img || undefined)}
-              label={(t as any).editProject.addHeroImages || 'Add Hero Image'}
-              placeholder={(t as any).editProject.heroImagesPlaceholder || 'Drag and drop hero image, or browse'}
+              label="Додати головне зображення"
+              placeholder="Перетягніть головне зображення або перегляньте"
             />
           </section>
 
           {/* Main Info Section */}
           <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
-              {(t as any).createProject.sections.mainInfo || 'Main Info'}
+              Основна інформація
             </h2>
             <div className="flex flex-col gap-6">
               <Input
-                label={(t as any).createProject.titleLabel || 'Title'}
-                placeholder={(t as any).createProject.titlePlaceholder || 'Project title'}
+                label="Назва"
+                placeholder="Введіть назву проєкту"
                 value={formData.title}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, title: e.target.value })}
                 error={errors.title}
@@ -348,29 +346,29 @@ export default function EditProjectPage() {
               />
 
               <Input
-                label={(t as any).createProject.shortDescription || 'Short Description'}
-                placeholder={(t as any).createProject.shortDescriptionPlaceholder || 'Brief project description for hero section'}
+                label="Короткий опис"
+                placeholder="Короткий опис проекту"
                 value={formData.short_description || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, short_description: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.category || 'Category'}
-                placeholder={(t as any).createProject.categoryPlaceholder || 'Project category (e.g., Residential / Modern)'}
+                label="Категорія"
+                placeholder="Категорія проекту"
                 value={formData.category || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, category: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.subtitle || 'Subtitle'}
-                placeholder={(t as any).createProject.subtitlePlaceholder || 'Project subtitle'}
+                label="Підзаголовок"
+                placeholder="Підзаголовок проекту"
                 value={formData.subtitle || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, subtitle: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.photoCredits || 'Photo Credits'}
-                placeholder={(t as any).createProject.photoCreditsPlaceholder || 'Photographer name'}
+                label="Фотограф"
+                placeholder="Ім'я фотографа"
                 value={formData.photo_credits || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, photo_credits: e.target.value })}
               />
@@ -382,36 +380,36 @@ export default function EditProjectPage() {
               {errors.tags && <span className="text-sm text-red-500">{errors.tags}</span>}
 
               <Input
-                label={(t as any).createProject.location || 'Location'}
-                placeholder={(t as any).createProject.locationPlaceholder || 'Location'}
+                label="Локація"
+                placeholder="Введіть локацію"
                 value={formData.location || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, location: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.area || 'Area'}
-                placeholder={(t as any).createProject.areaPlaceholder || 'Area'}
+                label="Площа (м²)"
+                placeholder="Введіть площу"
                 value={formData.area || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, area: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.year || 'Year'}
-                placeholder={(t as any).createProject.yearPlaceholder || 'Year'}
+                label="Рік"
+                placeholder="Введіть рік"
                 value={formData.year || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, year: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.team || 'Team'}
-                placeholder={(t as any).createProject.teamPlaceholder || 'Team'}
+                label="Команда"
+                placeholder="Введіть учасників команди"
                 value={formData.team || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, team: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.architects || 'Architects'}
-                placeholder={(t as any).createProject.architectsPlaceholder || 'Architects'}
+                label="Архітектори"
+                placeholder="Введіть назву архітектора або бюро"
                 value={formData.architects || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, architects: e.target.value })}
               />
@@ -421,14 +419,14 @@ export default function EditProjectPage() {
           {/* Description Section */}
           <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
-              {(t as any).createProject.sections.description || 'Description'}
+              Опис
             </h2>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-zinc-700">{(t as any).createProject.description || 'Description'}</label>
+                <label className="text-sm font-medium text-zinc-700">Опис</label>
                 <textarea
                   className="w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent min-h-[120px]"
-                  placeholder={(t as any).createProject.descriptionPlaceholder || 'Project description'}
+                  placeholder="Введіть детальний опис проєкту"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   required
@@ -437,22 +435,22 @@ export default function EditProjectPage() {
               </div>
 
               <Input
-                label={(t as any).createProject.conceptHeading || 'Concept Heading'}
-                placeholder={(t as any).createProject.conceptHeadingPlaceholder || 'Concept heading'}
+                label="Заголовок концепції"
+                placeholder="Введіть заголовок концепції"
                 value={formData.concept_heading || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_heading: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.conceptCaption || 'Concept Caption'}
-                placeholder={(t as any).createProject.conceptCaptionPlaceholder || 'Concept caption'}
+                label="Підпис концепції"
+                placeholder="Введіть підпис концепції"
                 value={formData.concept_caption || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_caption: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.conceptQuote || 'Concept Quote'}
-                placeholder={(t as any).createProject.conceptQuotePlaceholder || 'Concept quote'}
+                label="Цитата концепції"
+                placeholder="Введіть цитату концепції"
                 value={formData.concept_quote || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_quote: e.target.value })}
               />
@@ -462,40 +460,40 @@ export default function EditProjectPage() {
           {/* Section Labels Section */}
           <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
-              {(t as any).createProject.sections.sectionLabels || 'Section Labels'}
+              Заголовки секцій
             </h2>
             <div className="flex flex-col gap-6">
               <Input
-                label={(t as any).createProject.challengeTitle || 'Challenge Section Title'}
-                placeholder={(t as any).createProject.challengeTitlePlaceholder || 'The Challenge'}
+                label="Заголовок секції виклику"
+                placeholder="Виклик"
                 value={formData.challenge_title || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, challenge_title: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.materialsTitle || 'Materials Section Title'}
-                placeholder={(t as any).createProject.materialsTitlePlaceholder || 'Materials'}
+                label="Заголовок секції матеріалів"
+                placeholder="Матеріали"
                 value={formData.materials_title || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, materials_title: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.contextTitle || 'Context Section Title'}
-                placeholder={(t as any).createProject.contextTitlePlaceholder || 'Context'}
+                label="Заголовок секції контексту"
+                placeholder="Контекст"
                 value={formData.context_title || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, context_title: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.figureNumber || 'Figure Number'}
-                placeholder={(t as any).createProject.figureNumberPlaceholder || 'Figure 01'}
+                label="Номер ілюстрації"
+                placeholder="Ілюстрація 01"
                 value={formData.figure_number || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, figure_number: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.figureCaption || 'Figure Caption'}
-                placeholder={(t as any).createProject.figureCaptionPlaceholder || 'Main Dining Hall'}
+                label="Підпис ілюстрації"
+                placeholder="Основна їдальня"
                 value={formData.figure_caption || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, figure_caption: e.target.value })}
               />
@@ -505,34 +503,34 @@ export default function EditProjectPage() {
           {/* Additional Section Content Section */}
           <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
-              {(t as any).createProject.sections.additionalContent || 'Additional Section Content'}
+              Додатковий контент секцій
             </h2>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-zinc-700">{(t as any).createProject.challengeDescription || 'Challenge Description'}</label>
+                <label className="text-sm font-medium text-zinc-700">Опис виклику</label>
                 <textarea
                   className="w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent min-h-[100px]"
-                  placeholder={(t as any).createProject.challengeDescriptionPlaceholder || 'Enter detailed challenge description...'}
+                  placeholder="Введіть детальний опис виклику..."
                   value={formData.challenge_description || ''}
                   onChange={(e) => setFormData({ ...formData, challenge_description: e.target.value })}
                 />
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-zinc-700">{(t as any).createProject.quoteText || 'Quote Text'}</label>
+                <label className="text-sm font-medium text-zinc-700">Текст цитати</label>
                 <textarea
                   className="w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent min-h-[80px]"
-                  placeholder={(t as any).createProject.quoteTextPlaceholder || 'Enter quote text for quote block...'}
+                  placeholder="Введіть текст цитати..."
                   value={formData.quote_text || ''}
                   onChange={(e) => setFormData({ ...formData, quote_text: e.target.value })}
                 />
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-zinc-700">{(t as any).createProject.contextDescription || 'Context Description'}</label>
+                <label className="text-sm font-medium text-zinc-700">Опис контексту</label>
                 <textarea
                   className="w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent min-h-[100px]"
-                  placeholder={(t as any).createProject.contextDescriptionPlaceholder || 'Enter project context description...'}
+                  placeholder="Введіть опис контексту проекту..."
                   value={formData.context_description || ''}
                   onChange={(e) => setFormData({ ...formData, context_description: e.target.value })}
                 />
@@ -543,26 +541,26 @@ export default function EditProjectPage() {
           {/* Footer Navigation Section */}
           <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
-              {(t as any).createProject.sections.footerNavigation || 'Footer Navigation'}
+              Навігація футера
             </h2>
             <div className="flex flex-col gap-6">
               <Input
-                label={(t as any).createProject.nextProjectLinkTitle || 'Next Project Link Title'}
-                placeholder={(t as any).createProject.nextProjectLinkTitlePlaceholder || 'Back to Portfolio'}
+                label="Заголовок посилання наступного проекту"
+                placeholder="Повернутися до портфоліо"
                 value={formData.next_project_link_title || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, next_project_link_title: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.nextProjectLinkSubtitle || 'Next Project Link Subtitle'}
-                placeholder={(t as any).createProject.nextProjectLinkSubtitlePlaceholder || 'View All Projects'}
+                label="Підзаголовок посилання"
+                placeholder="Переглянути всі проекти"
                 value={formData.next_project_link_subtitle || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, next_project_link_subtitle: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.otherProjectsTitle || 'Other Projects Title'}
-                placeholder={(t as any).createProject.otherProjectsTitlePlaceholder || 'Other Projects'}
+                label="Заголовок інших проектів"
+                placeholder="Інші проекти"
                 value={formData.other_projects_title || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, other_projects_title: e.target.value })}
               />
@@ -572,10 +570,10 @@ export default function EditProjectPage() {
           {/* Gallery Images Section */}
           <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
-              {(t as any).createProject.sections.galleryImages || 'Gallery Images'}
+              Зображення галереї
             </h2>
             <div className="mb-4">
-              <p className="text-sm text-zinc-600">{(t as any).createProject.galleryImagesDescription || 'Manage gallery images'}</p>
+              <p className="text-sm text-zinc-600">Додайте зображення галереї проєкту.</p>
             </div>
 
             {/* Existing Gallery Media */}
@@ -593,8 +591,8 @@ export default function EditProjectPage() {
               images={galleryImagesToUpload}
               onImagesChange={setGalleryImagesToUpload}
               maxCount={10}
-              label={(t as any).createProject.galleryImages || 'Gallery Images'}
-              placeholder={(t as any).createProject.galleryImagesPlaceholder || 'Upload gallery images'}
+              label="Зображення галереї"
+              placeholder="Перетягніть зображення галереї або перегляньте"
             />
           </section>
 
@@ -608,7 +606,7 @@ export default function EditProjectPage() {
 
             <div className="flex gap-4">
               <Button type="submit" disabled={loading} className="flex-1 py-3">
-                {loading ? (t as any).editProject.saving : (t as any).editProject.save}
+                {loading ? 'Збереження...' : 'Зберегти'}
               </Button>
               <Button
                 type="button"
@@ -616,7 +614,7 @@ export default function EditProjectPage() {
                 onClick={() => navigate('/admin/dashboard')}
                 className="flex-1 py-3"
               >
-                {(t as any).editProject.cancel || 'Cancel'}
+                Скасувати
               </Button>
             </div>
           </section>

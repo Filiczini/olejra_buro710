@@ -4,11 +4,9 @@ import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import { authService } from '../../services/api';
 import type { LoginCredentials } from '../../types/auth';
-import { useTranslation } from '../../hooks/useTranslation';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const t = useTranslation();
   const [credentials, setCredentials] = useState<LoginCredentials>({
     email: '',
     password: '',
@@ -34,7 +32,7 @@ export default function LoginPage() {
       navigate('/admin/dashboard');
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || t.login.loginFailed);
+      setError(error.response?.data?.error || 'Невірний email або пароль');
     } finally {
       setLoading(false);
     }
@@ -43,13 +41,13 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-50">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-        <h1 className="text-2xl font-bold text-zinc-900 mb-6">{t.login.title}</h1>
+        <h1 className="text-2xl font-bold text-zinc-900 mb-6">Вхід адміністратора</h1>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <Input
             type="email"
-            label={t.login.email}
-            placeholder={t.login.emailPlaceholder}
+            label="Email"
+            placeholder="Введіть ваш email"
             value={credentials.email}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCredentials({ ...credentials, email: e.target.value })}
             required
@@ -57,8 +55,8 @@ export default function LoginPage() {
 
           <Input
             type="password"
-            label={t.login.password}
-            placeholder={t.login.passwordPlaceholder}
+            label="Пароль"
+            placeholder="Введіть ваш пароль"
             value={credentials.password}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCredentials({ ...credentials, password: e.target.value })}
             required
@@ -71,7 +69,7 @@ export default function LoginPage() {
           )}
 
           <Button type="submit" disabled={loading} className="w-full py-3">
-            {loading ? t.login.loggingIn : t.login.login}
+            {loading ? 'Вхід...' : 'Увійти'}
           </Button>
         </form>
       </div>

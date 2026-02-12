@@ -1,12 +1,10 @@
 import { Icon } from '@iconify-icon/react';
 import { Link } from 'react-router-dom';
-import { useTranslation } from '../../contexts/LanguageContext';
 import { useEffect, useState } from 'react';
 import { portfolioService } from '../../services/api';
 import type { Project } from '../../types/project';
 
 export default function HeroSlider() {
-  const t = useTranslation();
   const [projects, setProjects] = useState<Project[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -78,7 +76,7 @@ export default function HeroSlider() {
                     {project.title}
                   </h1>
                   <div className="flex items-center gap-4 text-sm md:text-base font-medium text-white/80">
-                    <span>{project.location || t.hero.location}</span>
+                    <span>{project.location || 'Локація'}</span>
                     {project.area && (
                       <>
                         <span className="w-1 h-1 bg-white/60 rounded-full"></span>
@@ -111,7 +109,7 @@ export default function HeroSlider() {
                 to={`/project/${currentProject.id}`}
                 className="group hidden md:flex items-center gap-2 text-sm font-medium text-white hover:text-white transition-all duration-300 hover:opacity-80 cursor-pointer"
               >
-                {t.hero.viewProject}
+Переглянути проект
                 <Icon icon="solar:arrow-right-linear" width={16} className="transition-transform duration-300 group-hover:translate-x-3 group-hover:scale-110" />
               </Link>
               <div className="flex gap-2 ml-4">
@@ -133,7 +131,7 @@ export default function HeroSlider() {
               to={`/project/${currentProject.id}`}
               className="md:hidden flex items-center gap-2 text-sm font-medium text-white/90 hover:text-white transition-all duration-300 hover:opacity-80 cursor-pointer"
             >
-              {t.hero.viewProject} <Icon icon="solar:arrow-right-linear" width={16} className="transition-transform duration-300 group-hover:translate-x-1 group-hover:scale-110" />
+              Переглянути проект <Icon icon="solar:arrow-right-linear" width={16} className="transition-transform duration-300 group-hover:translate-x-1 group-hover:scale-110" />
             </Link>
           </div>
         </div>

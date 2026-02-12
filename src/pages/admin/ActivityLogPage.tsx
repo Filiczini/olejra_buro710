@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useTranslation } from '../../contexts/LanguageContext';
 import Button from '../../components/ui/Button';
 import { activityLogService } from '../../services/api';
 import type { ActivityLog, ActivityLogsParams } from '../../types/activityLog';
 
 export default function ActivityLogPage() {
-  const t = useTranslation();
 
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(false);
@@ -58,19 +56,19 @@ export default function ActivityLogPage() {
     const parts: string[] = [];
 
     if (changes.fields && changes.fields.length > 0) {
-      parts.push(`${t.activityLog.changes.fields} ${changes.fields.join(', ')}`);
+      parts.push(`Змінено поля: ${changes.fields.join(', ')}`);
     }
 
     if (changes.media_added > 0) {
-      parts.push(t.activityLog.changes.mediaAdded.replace('{count}', String(changes.media_added)));
+      parts.push(`Додано медіа: ${changes.media_added}`);
     }
 
     if (changes.media_removed > 0) {
-      parts.push(t.activityLog.changes.mediaRemoved.replace('{count}', String(changes.media_removed)));
+      parts.push(`Видалено медіа: ${changes.media_removed}`);
     }
 
     if (changes.media_reordered) {
-      parts.push(t.activityLog.changes.mediaReordered);
+      parts.push('Змінено порядок медіа');
     }
 
     return parts.length > 0 ? parts.join(' | ') : '-';
@@ -92,11 +90,11 @@ export default function ActivityLogPage() {
   const getActionText = (action: string) => {
     switch (action) {
       case 'create':
-        return t.activityLog.actions.create;
+        return 'Створення';
       case 'update':
-        return t.activityLog.actions.update;
+        return 'Редагування';
       case 'delete':
-        return t.activityLog.actions.delete;
+        return 'Видалення';
       default:
         return action;
     }
@@ -105,20 +103,19 @@ export default function ActivityLogPage() {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-        <h1 className="text-3xl font-bold text-zinc-900 mb-6">{t.activityLog.title}</h1>
+        <h1 className="text-3xl font-bold text-zinc-900 mb-6">Журнал дій</h1>
 
-        {/* Filters */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-4 bg-zinc-50 rounded-lg">
           <div>
             <label className="block text-sm font-medium text-zinc-700 mb-1">
-              {t.activityLog.filters.user}
+              Користувач
             </label>
             <select
               className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900"
               value={filters.user_email || ''}
               onChange={(e) => handleFilterChange('user_email', e.target.value)}
             >
-              <option value="">{t.activityLog.filters.allUsers}</option>
+              <option value="">Всі користувачі</option>
               {uniqueUsers.map((user) => (
                 <option key={user} value={user}>
                   {user}
@@ -129,17 +126,17 @@ export default function ActivityLogPage() {
 
           <div>
             <label className="block text-sm font-medium text-zinc-700 mb-1">
-              {t.activityLog.filters.action}
+              Тип дії
             </label>
             <select
               className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900"
               value={filters.action || ''}
               onChange={(e) => handleFilterChange('action', e.target.value)}
             >
-              <option value="">{t.activityLog.filters.allActions}</option>
-              <option value="create">{t.activityLog.actions.create}</option>
-              <option value="update">{t.activityLog.actions.update}</option>
-              <option value="delete">{t.activityLog.actions.delete}</option>
+              <option value="">Всі дії</option>
+              <option value="create">Створення</option>
+              <option value="update">Редагування</option>
+              <option value="delete">Видалення</option>
             </select>
           </div>
 
@@ -149,30 +146,29 @@ export default function ActivityLogPage() {
               variant="secondary"
               className="w-full"
             >
-              {(t as any).editProject.cancel || 'Clear Filters'}
+              Очистити фільтри
             </Button>
           </div>
         </div>
 
-        {/* Table */}
         <div className="overflow-x-auto">
           {loading ? (
             <div className="text-center py-8 text-zinc-600">
-              {t.activityLog.loading}
+              Завантаження...
             </div>
           ) : logs.length === 0 ? (
             <div className="text-center py-8 text-zinc-600">
-              {t.activityLog.noLogs}
+              Журнал порожній
             </div>
           ) : (
             <table className="w-full">
               <thead>
                 <tr className="border-b border-zinc-200">
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">{t.activityLog.date}</th>
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">{t.activityLog.user}</th>
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">{t.activityLog.action}</th>
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">{t.activityLog.entity}</th>
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">{t.activityLog.details}</th>
+                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Дата</th>
+                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Користувач</th>
+                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Дія</th>
+                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Проєкт</th>
+                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Деталі</th>
                 </tr>
               </thead>
               <tbody>
@@ -202,11 +198,10 @@ export default function ActivityLogPage() {
           )}
         </div>
 
-        {/* Pagination */}
         {pagination.totalPages > 1 && (
           <div className="flex justify-between items-center mt-4 pt-4 border-t border-zinc-200">
             <div className="text-sm text-zinc-600">
-              {t.activityLog.showing} {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}-{Math.min(pagination.page * pagination.limit, pagination.total)} {t.activityLog.of} {pagination.total}
+              Показано {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}-{Math.min(pagination.page * pagination.limit, pagination.total)} з {pagination.total}
             </div>
             <div className="flex gap-2">
               <button
@@ -214,7 +209,7 @@ export default function ActivityLogPage() {
                 disabled={pagination.page === 1}
                 className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {t.activityLog.previous}
+                Попередня
               </button>
               {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
                 const page = Math.max(1, pagination.page - 2) + i;
@@ -236,7 +231,7 @@ export default function ActivityLogPage() {
                 disabled={pagination.page === pagination.totalPages}
                 className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {t.activityLog.next}
+                Наступна
               </button>
             </div>
           </div>

@@ -2,12 +2,10 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import type { Project, Media } from '../types/project';
 import { portfolioService } from '../services/api';
-import { useTranslation } from '../hooks/useTranslation';
 import { Icon } from '@iconify-icon/react';
 import Header from '../components/layout/Header';
 
 export default function ProjectPage() {
-  const t = useTranslation();
 
   const { id } = useParams<{ id: string }>();
   const [project, setProject] = useState<Project | null>(null);
@@ -109,7 +107,7 @@ export default function ProjectPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-50">
-        <div className="text-lg text-zinc-600">{t.project.loading || 'Loading...'}</div>
+        <div className="text-lg text-zinc-600">Завантаження...</div>
       </div>
     );
   }
@@ -117,7 +115,7 @@ export default function ProjectPage() {
   if (error || !project) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-50">
-        <div className="text-lg text-red-600">{error || (t.project.notFound || 'Project not found')}</div>
+        <div className="text-lg text-red-600">{error || 'Проект не знайдено'}</div>
       </div>
     );
   }
@@ -221,31 +219,31 @@ export default function ProjectPage() {
               {/* Meta Data Columns */}
               <div className="lg:col-span-4 flex justify-start lg:justify-end gap-12 pb-2">
                 <div>
-                  <span className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1">
-                    {t.project.location || 'Location'}
+                   <span className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1">
+                    Локація
                   </span>
-                  <span className="text-sm font-medium text-white">{project.location || 'TBD'}</span>
-                </div>
-                <div>
-                  <span className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1">
-                    {t.project.year || 'Year'}
+                   <span className="text-sm font-medium text-white">{project.location || 'TBD'}</span>
+                 </div>
+                 <div>
+                   <span className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1">
+                    Рік
                   </span>
-                  <span className="text-sm font-medium text-white">{project.year || 'TBD'}</span>
-                </div>
-                <div>
-                  <span className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1">
-                    {t.project.area || 'Area'}
+                   <span className="text-sm font-medium text-white">{project.year || 'TBD'}</span>
+                 </div>
+                 <div>
+                   <span className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1">
+                    Площа
                   </span>
-                  <span className="text-sm font-medium text-white">{project.area || 'TBD'}</span>
-                </div>
-                {project.photo_credits && (
-                  <div>
-                    <span className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1">
-                      {t.project.photoCredits || 'Photo Credits'}
+                   <span className="text-sm font-medium text-white">{project.area || 'TBD'}</span>
+                 </div>
+                 {project.photo_credits && (
+                   <div>
+                     <span className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1">
+                      Фотограф
                     </span>
-                    <span className="text-sm font-medium text-white">{project.photo_credits}</span>
-                  </div>
-                )}
+                     <span className="text-sm font-medium text-white">{project.photo_credits}</span>
+                   </div>
+                 )}
               </div>
             </div>
           </div>

@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useTranslation } from '../../hooks/useTranslation';
 import { portfolioService } from '../../services/api';
 import type { Project } from '../../types/project';
 import ProjectCard from '../project/ProjectCard';
 
 export default function FeaturedProjectsSection() {
-  const t = useTranslation();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -33,12 +31,12 @@ export default function FeaturedProjectsSection() {
     return (
       <section className="max-w-[1600px] mx-auto px-6 mb-40">
         <div className="flex justify-between items-end mb-16 pb-6">
-          <h2 className="text-4xl font-medium tracking-tight uppercase text-zinc-900">
-            {t.home.featuredProjects}
+<h2 className="text-4xl font-medium tracking-tight uppercase text-zinc-900">
+            Вибрані проєкти
           </h2>
         </div>
         <div className="text-center py-24 text-zinc-500">
-          {t.home.loading}
+          Завантаження проєктів...
         </div>
       </section>
     );
@@ -48,12 +46,12 @@ export default function FeaturedProjectsSection() {
     return (
       <section className="max-w-[1600px] mx-auto px-6 mb-40">
         <div className="flex justify-between items-end mb-16 pb-6">
-          <h2 className="text-4xl font-medium tracking-tight uppercase text-zinc-900">
-            {t.home.featuredProjects}
+<h2 className="text-4xl font-medium tracking-tight uppercase text-zinc-900">
+            Вибрані проєкти
           </h2>
         </div>
         <div className="text-center py-24 text-zinc-500">
-          {t.home.error}
+          Не вдалося завантажити проєкти
         </div>
       </section>
     );
@@ -63,12 +61,12 @@ export default function FeaturedProjectsSection() {
     return (
       <section className="max-w-[1600px] mx-auto px-6 mb-40">
         <div className="flex justify-between items-end mb-16 pb-6">
-          <h2 className="text-4xl font-medium tracking-tight uppercase text-zinc-900">
-            {t.home.featuredProjects}
+<h2 className="text-4xl font-medium tracking-tight uppercase text-zinc-900">
+            Вибрані проєкти
           </h2>
         </div>
         <div className="text-center py-24 text-zinc-500">
-          {t.home.noProjects}
+          Немає проєктів
         </div>
       </section>
     );
@@ -78,14 +76,14 @@ export default function FeaturedProjectsSection() {
     <section className="max-w-[1600px] mx-auto px-6 mb-40">
       {/* Section Header */}
       <div className="flex justify-between items-end mb-16 pb-6 gap-12">
-        <h2 className="text-4xl font-medium tracking-tight uppercase text-zinc-900">
-          {t.home.featuredProjects}
+<h2 className="text-4xl font-medium tracking-tight uppercase text-zinc-900">
+          Вибрані проєкти
         </h2>
         <Link
           to="/projects"
           className="hidden md:flex items-center gap-2 text-sm font-medium uppercase tracking-wide text-zinc-500 hover:text-zinc-900 transition-colors"
         >
-          {t.home.viewAll}
+          Всі проєкти
         </Link>
       </div>
 

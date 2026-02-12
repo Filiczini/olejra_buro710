@@ -1,9 +1,6 @@
-import { useTranslation } from '../../contexts/LanguageContext';
 import SidebarMenuItem from './SidebarMenuItem';
 
 export default function Sidebar() {
-  const t = useTranslation();
-
   return (
     <aside className="fixed left-0 top-0 h-full w-64 bg-zinc-900 text-white flex flex-col z-40">
       {/* Logo Section */}
@@ -18,27 +15,27 @@ export default function Sidebar() {
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         <SidebarMenuItem
           icon="solar:folder-files-linear"
-          label={t.navigation.projects}
+          label="Проєкти"
           path="/admin/dashboard"
         />
         <SidebarMenuItem
           icon="solar:add-circle-linear"
-          label={t.navigation.createProject}
+          label="Створити проєкт"
           path="/admin/projects/create"
         />
         <SidebarMenuItem
           icon="solar:home-smile-linear"
-          label={t.navigation.siteSettings}
+          label="Налаштування сайту"
           path="/admin/site-settings"
         />
         <SidebarMenuItem
           icon="solar:settings-linear"
-          label={t.navigation.settings}
+          label="Налаштування"
           path="/admin/settings"
         />
         <SidebarMenuItem
           icon="solar:file-text-linear"
-          label={t.navigation.activityLog}
+          label="Журнал дій"
           path="/admin/logs"
         />
       </nav>
@@ -47,13 +44,13 @@ export default function Sidebar() {
       <div className="p-4 border-t border-zinc-800 space-y-2">
         <SidebarMenuItem
           icon="solar:globe-linear"
-          label={t.navigation.previewSite}
+          label="Перегляд сайту"
           path="/"
           isExternal
         />
         <SidebarMenuItem
           icon="solar:logout-linear"
-          label={t.navigation.logout}
+          label="Вийти"
           path="/admin/login"
         />
       </div>

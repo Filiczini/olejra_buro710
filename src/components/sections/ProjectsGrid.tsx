@@ -3,10 +3,8 @@ import { Icon } from '@iconify-icon/react';
 import { Link } from 'react-router-dom';
 import type { Project } from '../../types/project';
 import { portfolioService } from '../../services/api';
-import { useTranslation } from '../../hooks/useTranslation';
 
 export default function ProjectsGrid() {
-  const t = useTranslation();
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +30,7 @@ export default function ProjectsGrid() {
   if (loading) {
     return (
       <section className="max-w-[1800px] mx-auto px-6 py-24">
-        <div className="text-center text-zinc-600">{t.project.loading}</div>
+        <div className="text-center text-zinc-600">Завантаження...</div>
       </section>
     );
   }
@@ -44,14 +42,14 @@ export default function ProjectsGrid() {
   return (
     <section className="max-w-[1800px] mx-auto px-6 py-24">
       <div className="flex justify-between items-end mb-16">
-        <h3 className="text-xl font-medium tracking-tight">
-          {t.home.featuredProjects}
+<h3 className="text-xl font-medium tracking-tight">
+          Вибрані проєкти
         </h3>
-        <Link
+<Link
           to="/projects"
           className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors hidden md:inline-flex items-center gap-2"
         >
-          {t.home.viewAll} ({total})
+          Всі проєкти ({total})
           <Icon icon="solar:arrow-right-linear" width={18} />
         </Link>
       </div>
@@ -89,7 +87,7 @@ export default function ProjectsGrid() {
           to="/projects"
           className="inline-flex items-center gap-2 px-8 py-3 border border-zinc-200 rounded-full text-sm font-medium hover:bg-zinc-900 hover:text-white transition-colors"
         >
-          {t.home.viewAll} ({total})
+Всі проєкти ({total})
           <Icon icon="solar:arrow-right-linear" width={18} />
         </Link>
       </div>

@@ -1,5 +1,4 @@
 import { Icon } from '@iconify-icon/react';
-import { useTranslation } from '../../contexts/LanguageContext';
 
 interface Value {
   id: number;
@@ -10,35 +9,33 @@ interface Value {
 }
 
 export default function PhilosophySection() {
-  const t = useTranslation();
-
   const values: Value[] = [
     {
       id: 1,
       icon: 'solar:soundwave-square-linear',
-      title: t.philosophy.value01Title,
-      description: t.philosophy.value01Description,
+      title: 'Звук',
+      description: 'Враховуємо акустичні сценарії для створення комфортних просторів.',
       delay: 'delay-100',
     },
     {
       id: 2,
       icon: 'solar:ruler-pen-linear',
-      title: t.philosophy.value02Title,
-      description: t.philosophy.value02Description,
+      title: 'Пропорції',
+      description: 'Працюємо з золотим перетином для гармонійних композицій.',
       delay: 'delay-200',
     },
     {
       id: 3,
       icon: 'solar:layers-minimalistic-linear',
-      title: t.philosophy.value03Title,
-      description: t.philosophy.value03Description,
+      title: 'Шари',
+      description: 'Створюємо глибину через багатошаровість матеріалів та текстур.',
       delay: 'delay-300',
     },
     {
       id: 4,
       icon: 'solar:sun-2-linear',
-      title: t.philosophy.value04Title,
-      description: t.philosophy.value04Description,
+      title: 'Світло',
+      description: 'Проектуємо світлотіньові сценарії для розкриття простору.',
       delay: 'delay-100',
     },
   ];

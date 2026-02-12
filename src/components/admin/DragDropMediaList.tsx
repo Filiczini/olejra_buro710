@@ -1,6 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
 import { Icon } from '@iconify-icon/react';
-import { useTranslation } from '../../contexts/LanguageContext';
 import type { Media } from '../../types/project';
 
 interface DragDropMediaListProps {
@@ -21,7 +20,6 @@ export default function DragDropMediaList({
   onRemove,
   onAltTextChange,
 }: DragDropMediaListProps) {
-  const t = useTranslation();
   const [dragState, setDragState] = useState<DragState>({
     draggedIndex: null,
     draggedOverIndex: null,
@@ -144,7 +142,7 @@ export default function DragDropMediaList({
       {/* Title */}
       <div className="flex items-center gap-2 text-sm text-zinc-600">
         <Icon icon="solar:gallery-linear" width={16} />
-        <span>{t.mediaList.title}</span>
+        <span>Медіа елементи</span>
         <span className="text-zinc-400">({mediaItems.length})</span>
       </div>
 
@@ -152,7 +150,7 @@ export default function DragDropMediaList({
       {mediaItems.length === 0 ? (
         <div className="text-center py-12 border-2 border-dashed border-zinc-200 rounded-lg">
           <Icon icon="solar:gallery-add-linear" width={48} className="mx-auto text-zinc-300 mb-3" />
-          <p className="text-sm text-zinc-500">{t.mediaList.noMedia}</p>
+          <p className="text-sm text-zinc-500">Медіа елементів поки немає</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -211,14 +209,14 @@ export default function DragDropMediaList({
                         htmlFor={`alt-${media.id}`}
                         className="block text-xs font-medium text-zinc-600 mb-1"
                       >
-                        {t.mediaList.altText}
+                        Alt текст
                       </label>
                       <input
                         id={`alt-${media.id}`}
                         type="text"
                         value={media.alt || ''}
                         onChange={(e) => handleAltTextChange(media.id, e.target.value)}
-                        placeholder={t.mediaList.altTextPlaceholder}
+                        placeholder="Введіть alt текст для доступності"
                         className="w-full px-2.5 py-1.5 text-sm border border-zinc-200 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-900/20 focus:border-zinc-900 transition-all"
                         onClick={(e) => e.stopPropagation()}
                       />
@@ -233,10 +231,10 @@ export default function DragDropMediaList({
                           handleRemove(media.id);
                         }}
                         className="flex items-center gap-1 text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 px-2 py-1.5 rounded transition-colors"
-                        aria-label={`Remove ${t.mediaList.title}`}
+                        aria-label="Видалити медіа елемент"
                       >
                         <Icon icon="solar:trash-bin-trash-linear" width={14} />
-                        <span>{t.mediaList.remove}</span>
+                        <span>Видалити</span>
                       </button>
                     </div>
                   </div>
@@ -263,7 +261,7 @@ export default function DragDropMediaList({
       {mediaItems.length > 0 && (
         <p className="text-xs text-zinc-500 text-center flex items-center justify-center gap-1">
           <Icon icon="solar:info-circle-linear" width={14} />
-          {t.mediaList.dragToReorder}
+          Перетягніть для зміни порядку
         </p>
       )}
 
@@ -282,8 +280,8 @@ export default function DragDropMediaList({
                 <Icon icon="solar:danger-triangle-linear" width={24} className="text-red-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-zinc-900 mb-1">{t.mediaList.remove}</h3>
-                <p className="text-sm text-zinc-600">{t.mediaList.removeConfirm}</p>
+                <h3 className="text-lg font-semibold text-zinc-900 mb-1">Видалити медіа</h3>
+                <p className="text-sm text-zinc-600">Ви впевнені, що хочете видалити цей медіа елемент?</p>
               </div>
             </div>
 
@@ -293,14 +291,14 @@ export default function DragDropMediaList({
                 onClick={() => setItemToRemove(null)}
                 className="px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 rounded-lg transition-colors"
               >
-                {t.mediaList.cancel}
+                Скасувати
               </button>
               <button
                 type="button"
                 onClick={confirmRemove}
                 className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
               >
-                {t.mediaList.confirm}
+                Підтвердити
               </button>
             </div>
           </div>
