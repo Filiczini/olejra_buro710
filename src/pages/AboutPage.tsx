@@ -1,75 +1,73 @@
 import { Icon } from '@iconify-icon/react';
-import { useTranslation } from '../hooks/useTranslation';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 
 export default function AboutPage() {
-  const t = useTranslation();
 
   const values = [
     {
       id: 1,
       icon: 'solar:soundwave-square-linear',
-      title: t.about.value01Title,
-      description: t.about.value01Description,
+      title: 'Звук',
+      description: 'Враховуємо акустичні сценарії.',
     },
     {
       id: 2,
       icon: 'solar:ruler-pen-linear',
-      title: t.about.value02Title,
-      description: t.about.value02Description,
+      title: 'Пропорції',
+      description: 'Працюємо з золотим перетином.',
     },
     {
       id: 3,
       icon: 'solar:layers-minimalistic-linear',
-      title: t.about.value03Title,
-      description: t.about.value03Description,
+      title: 'Шари',
+      description: 'Створюємо глибину через багатошаровість.',
     },
     {
       id: 4,
       icon: 'solar:sun-2-linear',
-      title: t.about.value04Title,
-      description: t.about.value04Description,
+      title: 'Світло',
+      description: 'Проектуємо світлотіньові сценарії.',
     },
   ];
 
   const steps = [
     {
       id: '01',
-      name: t.about.step01Name,
-      description: t.about.step01Description,
+      name: 'Концепція',
+      description: 'Вивчення контексту.',
     },
     {
       id: '02',
-      name: t.about.step02Name,
-      description: t.about.step02Description,
+      name: 'Дизайн',
+      description: 'Створення детальних проектів.',
     },
     {
       id: '03',
-      name: t.about.step03Name,
-      description: t.about.step03Description,
+      name: 'Реалізація',
+      description: 'Координація будівельних процесів.',
     },
     {
       id: '04',
-      name: t.about.step04Name,
-      description: t.about.step04Description,
+      name: 'Здача',
+      description: 'Фіналізація проекту.',
     },
   ];
 
   const team = [
     {
-      name: t.about.team01Name,
-      role: t.about.team01Role,
+      name: 'Олена Коваленко',
+      role: 'Головний архітектор',
       image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&fit=crop',
     },
     {
-      name: t.about.team02Name,
-      role: t.about.team02Role,
+      name: 'Андрій Петренко',
+      role: 'Інтер\'єрний дизайнер',
       image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=800&fit=crop',
     },
     {
-      name: t.about.team03Name,
-      role: t.about.team03Role,
+      name: 'Марія Сидоренко',
+      role: 'Архітектор',
       image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&fit=crop',
     },
   ];
@@ -84,19 +82,19 @@ export default function AboutPage() {
           <div>
             <h1 className="text-5xl md:text-7xl font-medium tracking-tight leading-tight animate-reveal-up">
               <>
-                {t.about.heroLine1} <br className="hidden md:block" />
-                {t.about.heroLine2} <br className="hidden md:block" />
-                {t.about.heroLine3}
+                Ми створюємо простори, <br className="hidden md:block" />
+                де архітектура зустрічається <br className="hidden md:block" />
+                з тишею.
               </>
             </h1>
           </div>
           <div className="space-y-8 flex flex-col justify-between">
             <div className="space-y-6 text-lg text-zinc-500 font-light leading-relaxed max-w-xl">
               <p>
-                <>{t.about.description1}</>
+                <>Buro 710 — інтер'єрна студія.</>
               </p>
               <p>
-                <>{t.about.description2}</>
+                <>Наш підхід базується на чистоті ліній.</>
               </p>
             </div>
             <div className="flex gap-6">
@@ -105,14 +103,14 @@ export default function AboutPage() {
                 className="inline-flex items-center gap-2 px-8 py-3 bg-zinc-900 text-white rounded-full text-sm font-medium hover:bg-zinc-800 transition-colors"
               >
                 <Icon icon="solar:letter-linear" width={18} />
-                {t.about.contactUs}
+                Написати нам
               </a>
               <a
                 href="#team"
                 className="inline-flex items-center gap-2 px-8 py-3 border border-zinc-200 rounded-full text-sm font-medium hover:bg-zinc-900 hover:text-white hover:border-zinc-900 transition-colors"
               >
                 <Icon icon="solar:users-group-rounded-linear" width={18} />
-                {t.about.team}
+                Наша команда
               </a>
             </div>
           </div>
@@ -124,10 +122,10 @@ export default function AboutPage() {
         <div className="max-w-[1800px] mx-auto">
           <div className="mb-16">
             <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-4">
-              {t.about.valuesTitle}
+              Наші цінності
             </h2>
             <p className="text-zinc-400 text-lg max-w-2xl">
-              {t.about.valuesDescription}
+              Ми віримо в силу простоти.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
@@ -153,10 +151,10 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           <div className="lg:col-span-4">
             <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-4">
-              {t.about.processTitle}
+              Наш процес
             </h2>
             <p className="text-zinc-500 text-lg">
-              {t.about.processDescription}
+              Як ми працюємо з клієнтами.
             </p>
           </div>
           <div className="lg:col-span-8">
@@ -184,10 +182,10 @@ export default function AboutPage() {
       <section id="team" className="max-w-[1800px] mx-auto px-6 py-24 md:py-32">
         <div className="mb-16">
           <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-4">
-            {t.about.teamSectionTitle}
+            Познайомтеся з командою
           </h2>
           <p className="text-zinc-500 text-lg max-w-2xl">
-            {t.about.teamSectionDescription}
+            Люди, які стоять за кожним проектом.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -216,17 +214,17 @@ export default function AboutPage() {
       <section className="bg-zinc-900 text-white py-24 md:py-32 px-6">
         <div className="max-w-[1800px] mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-6">
-            {t.about.contactCTATitle}
+            Готові розпочати?
           </h2>
           <p className="text-zinc-400 text-lg max-w-2xl mx-auto mb-12">
-            {t.about.contactCTADescription}
+            Дозвольте нам допомогти вам.
           </p>
           <a
             href="mailto:hello@buro710.com"
             className="inline-flex items-center gap-2 px-10 py-4 bg-white text-zinc-900 rounded-full text-sm font-medium hover:bg-zinc-100 transition-colors"
           >
             <Icon icon="solar:letter-linear" width={18} />
-            {t.about.contactUs}
+            Написати нам
           </a>
         </div>
       </section>

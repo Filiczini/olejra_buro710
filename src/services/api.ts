@@ -20,13 +20,6 @@ export const authService = {
   },
 };
 
-export const siteSettingsService = {
-  getAll: async () => {
-    const response = await api.get('/settings');
-    return response.data;
-  },
-};
-
 export const portfolioService = {
   getAll: async (params?: PaginationParams) => {
     const queryParams = new URLSearchParams();
@@ -51,7 +44,7 @@ export const portfolioService = {
 
   getById: async (id: string) => {
     const response = await api.get(`/portfolio/${id}`);
-    return response.data as { project: Project, heroMedia: any[], galleryMedia: any[] };
+    return response.data as { project: Project, heroMedia: { id: string; url: string }[] };
   },
 
   create: async (data: FormData) => {

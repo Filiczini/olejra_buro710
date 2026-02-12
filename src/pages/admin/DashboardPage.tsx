@@ -1,13 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { portfolioService } from '../../services/api';
 import type { Project, FilterOptions, PaginationParams } from '../../types/project';
-import { useTranslation } from '../../contexts/LanguageContext';
 import Button from '../../components/ui/Button';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const t = useTranslation();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
@@ -16,6 +14,9 @@ export default function DashboardPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({ tags: [], locations: [], years: [] });
   const [showFilters, setShowFilters] = useState(false);
+  
+  const previousProjectsRef = useRef<Project[]>([]);
+  const previousPaginationRef = useRef(pagination);
 
   const loadProjects = async () => {
     setLoading(true);
@@ -54,13 +55,20 @@ export default function DashboardPage() {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t.dashboard.deleteConfirm)) return;
+    if (!confirm('Ви впевнені, що хочете видалити цей проєкт?')) return;
+
+    previousProjectsRef.current = projects;
+    previousPaginationRef.current = pagination;
+
+    setProjects(prev => prev.filter(p => p.id !== id));
+    setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));
 
     try {
       await portfolioService.delete(id);
-      loadProjects();
     } catch (error) {
       console.error('Error deleting project:', error);
+      setProjects(previousProjectsRef.current);
+      setPagination(previousPaginationRef.current);
     }
   };
 
@@ -87,24 +95,24 @@ export default function DashboardPage() {
                 onClick={() => setShowFilters(!showFilters)}
                 className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors"
               >
-                {t.dashboard.filters} {showFilters ? '▼' : '▶'}
+                Фільтри {showFilters ? '▼' : '▶'}
               </button>
               <span className="text-zinc-600">
-                {t.dashboard.totalProjects}: {pagination.total}
+                Всього проєктів: {pagination.total}
               </span>
             </div>
             <Button onClick={() => navigate('/admin/projects/create')}>
-              {t.dashboard.addProject}
+              Додати проєкт
             </Button>
           </div>
 
           {showFilters && (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 p-4 bg-zinc-50 rounded-lg">
               <div>
-                <label className="block text-sm font-medium text-zinc-700 mb-1">{t.dashboard.search}</label>
+                <label className="block text-sm font-medium text-zinc-700 mb-1">Пошук</label>
                 <input
                   type="text"
-                  placeholder={t.dashboard.searchPlaceholder}
+                  placeholder="Пошук проєктів..."
                   className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900"
                   value={filters.search || ''}
                   onChange={(e) => handleFilterChange('search', e.target.value)}
@@ -112,13 +120,13 @@ export default function DashboardPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-700 mb-1">{t.dashboard.location}</label>
+                <label className="block text-sm font-medium text-zinc-700 mb-1">Локація</label>
                 <select
                   className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900"
                   value={filters.location || ''}
                   onChange={(e) => handleFilterChange('location', e.target.value || undefined)}
                 >
-                  <option value="">{t.dashboard.allLocations}</option>
+                  <option value="">Всі локації</option>
                   {filterOptions.locations.map((loc) => (
                     <option key={loc} value={loc}>{loc}</option>
                   ))}
@@ -126,13 +134,13 @@ export default function DashboardPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-700 mb-1">{t.dashboard.year}</label>
+                <label className="block text-sm font-medium text-zinc-700 mb-1">Рік</label>
                 <select
                   className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900"
                   value={filters.year || ''}
                   onChange={(e) => handleFilterChange('year', e.target.value || undefined)}
                 >
-                  <option value="">{t.dashboard.allYears}</option>
+                  <option value="">Всі роки</option>
                   {filterOptions.years.map((year) => (
                     <option key={year} value={year}>{year}</option>
                   ))}
@@ -140,13 +148,13 @@ export default function DashboardPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-700 mb-1">{t.dashboard.tags}</label>
+                <label className="block text-sm font-medium text-zinc-700 mb-1">Теги</label>
                 <select
                   className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900"
                   value={(filters.tags && filters.tags[0]) || ''}
                   onChange={(e) => handleFilterChange('tags', e.target.value ? [e.target.value] : undefined)}
                 >
-                  <option value="">{t.dashboard.allTags}</option>
+                  <option value="">Всі теги</option>
                   {filterOptions.tags.map((tag) => (
                     <option key={tag} value={tag}>{tag}</option>
                   ))}
@@ -159,38 +167,38 @@ export default function DashboardPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-zinc-200">
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">{t.dashboard.image}</th>
+                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Зображення</th>
                   <th
                     className="text-left py-3 px-4 font-medium text-zinc-700 cursor-pointer hover:text-zinc-900"
                     onClick={() => handleSort('title')}
                   >
-                    {t.dashboard.titleLabel} {sortBy === 'title' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    Назва {sortBy === 'title' && (sortOrder === 'asc' ? '↑' : '↓')}
                   </th>
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">{t.dashboard.location}</th>
+                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Локація</th>
                   <th
                     className="text-left py-3 px-4 font-medium text-zinc-700 cursor-pointer hover:text-zinc-900"
                     onClick={() => handleSort('year')}
                   >
-                    {t.dashboard.year} {sortBy === 'year' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    Рік {sortBy === 'year' && (sortOrder === 'asc' ? '↑' : '↓')}
                   </th>
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">{t.dashboard.tags}</th>
+                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Теги</th>
                   <th
                     className="text-left py-3 px-4 font-medium text-zinc-700 cursor-pointer hover:text-zinc-900"
                     onClick={() => handleSort('created_at')}
                   >
-                    {t.dashboard.created} {sortBy === 'created_at' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    Створено {sortBy === 'created_at' && (sortOrder === 'asc' ? '↑' : '↓')}
                   </th>
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">{t.dashboard.actions}</th>
+                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Дії</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-8 text-zinc-600">{t.dashboard.loading}</td>
+                    <td colSpan={7} className="text-center py-8 text-zinc-600">Завантаження...</td>
                   </tr>
                 ) : projects.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-8 text-zinc-600">{t.dashboard.noProjects}</td>
+                    <td colSpan={7} className="text-center py-8 text-zinc-600">Проєктів не знайдено</td>
                   </tr>
                 ) : (
                   projects.map((project) => (
@@ -228,13 +236,13 @@ export default function DashboardPage() {
                             onClick={() => navigate(`/admin/projects/edit/${project.id}`)}
                             className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
                           >
-                            {t.dashboard.edit}
+                            Редагувати
                           </button>
                           <button
                             onClick={() => handleDelete(project.id)}
                             className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
                           >
-                            {t.dashboard.delete}
+                            Видалити
                           </button>
                         </div>
                       </td>
@@ -248,7 +256,7 @@ export default function DashboardPage() {
           {pagination.totalPages > 1 && (
             <div className="flex justify-between items-center mt-4 pt-4 border-t border-zinc-200">
               <div className="text-sm text-zinc-600">
-                {t.dashboard.showing} {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}-{Math.min(pagination.page * pagination.limit, pagination.total)} {t.dashboard.of} {pagination.total}
+                Показано {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}-{Math.min(pagination.page * pagination.limit, pagination.total)} з {pagination.total}
               </div>
               <div className="flex gap-2">
                 <button
@@ -256,7 +264,7 @@ export default function DashboardPage() {
                   disabled={pagination.page === 1}
                   className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {t.dashboard.previous}
+                  Попередня
                 </button>
                 {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
                   const page = Math.max(1, pagination.page - 2) + i;
@@ -278,7 +286,7 @@ export default function DashboardPage() {
                   disabled={pagination.page === pagination.totalPages}
                   className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {t.dashboard.next}
+                  Наступна
                 </button>
               </div>
             </div>
