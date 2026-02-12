@@ -37,6 +37,12 @@ export default function EditProjectPage() {
     context_title: '',
     figure_number: '',
     figure_caption: '',
+    challenge_description: '',
+    quote_text: '',
+    context_description: '',
+    next_project_link_title: '',
+    next_project_link_subtitle: '',
+    other_projects_title: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -74,6 +80,12 @@ export default function EditProjectPage() {
           context_title: data.project.context_title || '',
           figure_number: data.project.figure_number || '',
           figure_caption: data.project.figure_caption || '',
+          challenge_description: data.project.challenge_description || '',
+          quote_text: data.project.quote_text || '',
+          context_description: data.project.context_description || '',
+          next_project_link_title: data.project.next_project_link_title || '',
+          next_project_link_subtitle: data.project.next_project_link_subtitle || '',
+          other_projects_title: data.project.other_projects_title || '',
         });
         setHeroMedia(data.heroMedia || []);
         setGalleryMedia(data.galleryMedia || []);
@@ -178,6 +190,24 @@ export default function EditProjectPage() {
       }
       if (formData.figure_caption) {
         formDataToSend.append('figure_caption', formData.figure_caption);
+      }
+      if (formData.challenge_description) {
+        formDataToSend.append('challenge_description', formData.challenge_description);
+      }
+      if (formData.quote_text) {
+        formDataToSend.append('quote_text', formData.quote_text);
+      }
+      if (formData.context_description) {
+        formDataToSend.append('context_description', formData.context_description);
+      }
+      if (formData.next_project_link_title) {
+        formDataToSend.append('next_project_link_title', formData.next_project_link_title);
+      }
+      if (formData.next_project_link_subtitle) {
+        formDataToSend.append('next_project_link_subtitle', formData.next_project_link_subtitle);
+      }
+      if (formData.other_projects_title) {
+        formDataToSend.append('other_projects_title', formData.other_projects_title);
       }
 
       if (heroMedia.length > 0) {
@@ -472,6 +502,73 @@ export default function EditProjectPage() {
             </div>
           </section>
 
+          {/* Additional Section Content Section */}
+          <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
+              {(t as any).createProject.sections.additionalContent || 'Additional Section Content'}
+            </h2>
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-zinc-700">{(t as any).createProject.challengeDescription || 'Challenge Description'}</label>
+                <textarea
+                  className="w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent min-h-[100px]"
+                  placeholder={(t as any).createProject.challengeDescriptionPlaceholder || 'Enter detailed challenge description...'}
+                  value={formData.challenge_description || ''}
+                  onChange={(e) => setFormData({ ...formData, challenge_description: e.target.value })}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-zinc-700">{(t as any).createProject.quoteText || 'Quote Text'}</label>
+                <textarea
+                  className="w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent min-h-[80px]"
+                  placeholder={(t as any).createProject.quoteTextPlaceholder || 'Enter quote text for quote block...'}
+                  value={formData.quote_text || ''}
+                  onChange={(e) => setFormData({ ...formData, quote_text: e.target.value })}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-zinc-700">{(t as any).createProject.contextDescription || 'Context Description'}</label>
+                <textarea
+                  className="w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent min-h-[100px]"
+                  placeholder={(t as any).createProject.contextDescriptionPlaceholder || 'Enter project context description...'}
+                  value={formData.context_description || ''}
+                  onChange={(e) => setFormData({ ...formData, context_description: e.target.value })}
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* Footer Navigation Section */}
+          <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
+              {(t as any).createProject.sections.footerNavigation || 'Footer Navigation'}
+            </h2>
+            <div className="flex flex-col gap-6">
+              <Input
+                label={(t as any).createProject.nextProjectLinkTitle || 'Next Project Link Title'}
+                placeholder={(t as any).createProject.nextProjectLinkTitlePlaceholder || 'Back to Portfolio'}
+                value={formData.next_project_link_title || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, next_project_link_title: e.target.value })}
+              />
+
+              <Input
+                label={(t as any).createProject.nextProjectLinkSubtitle || 'Next Project Link Subtitle'}
+                placeholder={(t as any).createProject.nextProjectLinkSubtitlePlaceholder || 'View All Projects'}
+                value={formData.next_project_link_subtitle || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, next_project_link_subtitle: e.target.value })}
+              />
+
+              <Input
+                label={(t as any).createProject.otherProjectsTitle || 'Other Projects Title'}
+                placeholder={(t as any).createProject.otherProjectsTitlePlaceholder || 'Other Projects'}
+                value={formData.other_projects_title || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, other_projects_title: e.target.value })}
+              />
+            </div>
+          </section>
+
           {/* Gallery Images Section */}
           <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
@@ -527,7 +624,7 @@ export default function EditProjectPage() {
         </div>
 
         {/* Right Column - Preview - Desktop Only */}
-        <div className="hidden lg:block lg:w-[700px] lg:sticky lg:top-8 h-fit">
+        <div className="hidden lg:block lg:w-[80%] lg:sticky lg:top-8 h-fit">
           <ProjectPreview
             heroImage={heroImageForPreview}
             title={formData.title || ''}
@@ -539,6 +636,22 @@ export default function EditProjectPage() {
             year={formData.year}
             area={formData.area}
             photoCredits={formData.photo_credits}
+            description={formData.description ? [formData.description] : []}
+            challengeTitle={formData.challenge_title}
+            challengeDescription={formData.challenge_description}
+            quoteText={formData.quote_text}
+            contextTitle={formData.context_title}
+            contextDescription={formData.context_description}
+            materialsTitle={formData.materials_title}
+            materials={[]}
+            team={formData.team}
+            architects={formData.architects}
+            figureNumber={formData.figure_number}
+            figureCaption={formData.figure_caption}
+            galleryMedia={galleryImagesToUpload.length > 0 ? galleryImagesToUpload : galleryMedia.map(m => m.url)}
+            nextProjectLinkTitle={formData.next_project_link_title}
+            nextProjectLinkSubtitle={formData.next_project_link_subtitle}
+            otherProjectsTitle={formData.other_projects_title}
           />
         </div>
       </div>

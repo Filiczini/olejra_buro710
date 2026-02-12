@@ -265,7 +265,7 @@ export default function ProjectPage() {
                   {project.challenge_title || 'The Challenge'}
                 </h3>
                 <p className="text-sm text-zinc-500 leading-6">
-                  {description}
+                  {project.challenge_description || description}
                 </p>
               </div>
             </div>
@@ -281,12 +281,14 @@ export default function ProjectPage() {
               </article>
 
               {/* Quote Block */}
-              <blockquote className="relative pl-8 mb-16 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-                <span className="absolute left-0 top-0 text-4xl text-zinc-300">"</span>
-                <p className="text-3xl font-medium tracking-tight leading-tight text-zinc-900">
-                  {description}
-                </p>
-              </blockquote>
+              {project.quote_text && (
+                <blockquote className="relative pl-8 mb-16 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                  <span className="absolute left-0 top-0 text-4xl text-zinc-300">"</span>
+                  <p className="text-3xl font-medium tracking-tight leading-tight text-zinc-900">
+                    {project.quote_text}
+                  </p>
+                </blockquote>
+              )}
             </div>
           </div>
 
@@ -337,10 +339,10 @@ export default function ProjectPage() {
                 {project.context_title || 'Context'}
               </h2>
               <p className="text-base text-zinc-600 leading-7 font-light mb-8">
-                {description}
+                {project.context_description || description}
               </p>
               <p className="text-base text-zinc-600 leading-7 font-light mb-8">
-                {description}
+                {project.description[1] || ''}
               </p>
             </div>
           </div>
@@ -370,7 +372,7 @@ export default function ProjectPage() {
       <footer className="bg-zinc-950 text-white py-32 px-6 border-t border-white/10">
         <div className="max-w-screen-xl mx-auto">
           <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-4 block">
-            Other Projects
+            {project.other_projects_title || 'Other Projects'}
           </span>
 
           <div className="relative group border-t border-white/10 pt-12">
@@ -378,10 +380,10 @@ export default function ProjectPage() {
               <Icon icon="solar:arrow-right-linear" width={48} className="text-white" />
             </div>
             <h2 className="text-5xl md:text-8xl font-medium tracking-tighter text-zinc-400 group-hover:text-white transition-colors duration-300">
-              Back to Portfolio
+              {project.next_project_link_title || 'Back to Portfolio'}
             </h2>
             <div className="mt-8 flex gap-4 text-sm text-zinc-500 font-normal">
-              <span>View All Projects</span>
+              <span>{project.next_project_link_subtitle || 'View All Projects'}</span>
               <span>•</span>
               <span>Portfolio</span>
             </div>

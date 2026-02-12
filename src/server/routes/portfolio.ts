@@ -65,7 +65,7 @@ router.post('/', authMiddleware, uploadProjectMedia, async (req, res) => {
     console.log('Hero files:', heroFiles.map(f => f.originalname));
     console.log('Gallery files:', galleryFiles.map(f => f.originalname));
 
-    const { title, description, tags, location, area, year, team, architects, concept_heading, concept_caption, concept_quote, short_description, category, subtitle, photo_credits, challenge_title, materials_title, context_title, figure_number, figure_caption } = req.body as any;
+    const { title, description, tags, location, area, year, team, architects, concept_heading, concept_caption, concept_quote, short_description, category, subtitle, photo_credits, challenge_title, materials_title, context_title, figure_number, figure_caption, challenge_description, quote_text, context_description, next_project_link_title, next_project_link_subtitle, other_projects_title } = req.body as any;
 
     if (!title || !description) {
       console.log('Validation failed: Title or description missing');
@@ -113,6 +113,12 @@ router.post('/', authMiddleware, uploadProjectMedia, async (req, res) => {
       context_title,
       figure_number,
       figure_caption,
+      challenge_description,
+      quote_text,
+      context_description,
+      next_project_link_title,
+      next_project_link_subtitle,
+      other_projects_title,
       heroMedia,
       galleryMedia,
     });
@@ -143,10 +149,7 @@ router.put('/:id', authMiddleware, uploadProjectMedia, async (req, res) => {
     console.log('=== PUT /portfolio/:id ===');
     console.log('Body:', req.body);
 
-    const { title, description, tags, location, area, year, team, architects,       concept_heading,
-      concept_caption,
-      concept_quote,
-      short_description, category, subtitle, photo_credits, challenge_title, materials_title, context_title, figure_number, figure_caption, heroMediaIdsOrdered, galleryMediaIdsOrdered } = req.body as any;
+    const { title, description, tags, location, area, year, team, architects, concept_heading, concept_caption, concept_quote, short_description, category, subtitle, photo_credits, challenge_title, materials_title, context_title, figure_number, figure_caption, challenge_description, quote_text, context_description, next_project_link_title, next_project_link_subtitle, other_projects_title, heroMediaIdsOrdered, galleryMediaIdsOrdered } = req.body as any;
 
     const existing = await projectService.getById(req.params.id as string);
     const existingProject = existing.project;
@@ -226,10 +229,16 @@ router.put('/:id', authMiddleware, uploadProjectMedia, async (req, res) => {
       context_title: context_title !== undefined ? context_title : existingProject.context_title,
       figure_number: figure_number !== undefined ? figure_number : existingProject.figure_number,
       figure_caption: figure_caption !== undefined ? figure_caption : existingProject.figure_caption,
+      challenge_description: challenge_description !== undefined ? challenge_description : existingProject.challenge_description,
+      quote_text: quote_text !== undefined ? quote_text : existingProject.quote_text,
+      context_description: context_description !== undefined ? context_description : existingProject.context_description,
+      next_project_link_title: next_project_link_title !== undefined ? next_project_link_title : existingProject.next_project_link_title,
+      next_project_link_subtitle: next_project_link_subtitle !== undefined ? next_project_link_subtitle : existingProject.next_project_link_subtitle,
+      other_projects_title: other_projects_title !== undefined ? other_projects_title : existingProject.other_projects_title,
     };
 
     // Compare fields
-    const fieldsToCompare = ['title', 'description', 'tags', 'location', 'area', 'year', 'team', 'architects', 'concept_heading', 'concept_caption', 'concept_quote', 'short_description', 'category', 'subtitle', 'photo_credits', 'challenge_title', 'materials_title', 'context_title', 'figure_number', 'figure_caption'];
+    const fieldsToCompare = ['title', 'description', 'tags', 'location', 'area', 'year', 'team', 'architects', 'concept_heading', 'concept_caption', 'concept_quote', 'short_description', 'category', 'subtitle', 'photo_credits', 'challenge_title', 'materials_title', 'context_title', 'figure_number', 'figure_caption', 'challenge_description', 'quote_text', 'context_description', 'next_project_link_title', 'next_project_link_subtitle', 'other_projects_title'];
     for (const field of fieldsToCompare) {
       const existingValue = existingProject[field as keyof typeof existingProject];
       const newValue = newProjectData[field];
@@ -290,6 +299,12 @@ router.put('/:id', authMiddleware, uploadProjectMedia, async (req, res) => {
       context_title,
       figure_number,
       figure_caption,
+      challenge_description,
+      quote_text,
+      context_description,
+      next_project_link_title,
+      next_project_link_subtitle,
+      other_projects_title,
       heroMediaIdsOrdered: heroIds as string[],
       galleryMediaIdsOrdered: galleryIds as string[],
     });

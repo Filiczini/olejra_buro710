@@ -70,6 +70,16 @@ export interface Project {
   context_title?: string;
   figure_number?: string;
   figure_caption?: string;
+
+  // Section content (to avoid hardcoded and duplicated text)
+  challenge_description?: string;
+  quote_text?: string;
+  context_description?: string;
+
+  // Footer navigation (to avoid hardcoded text)
+  next_project_link_title?: string;
+  next_project_link_subtitle?: string;
+  other_projects_title?: string;
 }
 
 export interface CreateProjectData {
@@ -95,6 +105,12 @@ export interface CreateProjectData {
   context_title?: string;
   figure_number?: string;
   figure_caption?: string;
+  challenge_description?: string;
+  quote_text?: string;
+  context_description?: string;
+  next_project_link_title?: string;
+  next_project_link_subtitle?: string;
+  other_projects_title?: string;
 }
 
 export interface UpdateProjectData {
@@ -118,6 +134,12 @@ export interface UpdateProjectData {
   context_title?: string;
   figure_number?: string;
   figure_caption?: string;
+  challenge_description?: string;
+  quote_text?: string;
+  context_description?: string;
+  next_project_link_title?: string;
+  next_project_link_subtitle?: string;
+  other_projects_title?: string;
 
   // Ordered media IDs for reordering
   heroMediaIdsOrdered?: string[];

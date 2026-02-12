@@ -171,12 +171,26 @@ export const uk = {
     galleryImagesPlaceholder: 'Перетягніть зображення галереї або перегляньте',
     galleryImagesDescription: 'Додайте зображення галереї проєкту. Вони будуть відображатися у секції галереї.',
     galleryImagesMax: 'Максимум 10 зображень галереї',
+    challengeDescription: 'Опис виклику',
+    challengeDescriptionPlaceholder: 'Введіть детальний опис виклику проекту...',
+    quoteText: 'Текст цитати',
+    quoteTextPlaceholder: 'Введіть текст цитати для блоку з цитатою...',
+    contextDescription: 'Опис контексту',
+    contextDescriptionPlaceholder: 'Введіть опис контексту проекту...',
+    nextProjectLinkTitle: 'Заголовок посилання наступного проекту',
+    nextProjectLinkTitlePlaceholder: 'Повернутися до портфоліо',
+    nextProjectLinkSubtitle: 'Підзаголовок посилання',
+    nextProjectLinkSubtitlePlaceholder: 'Переглянути всі проекти',
+    otherProjectsTitle: 'Заголовок інших проектів',
+    otherProjectsTitlePlaceholder: 'Інші проекти',
     sections: {
       mainInfo: 'Основна інформація',
       description: 'Опис',
       heroImage: 'Головне зображення',
       galleryImages: 'Зображення галереї',
-      sectionLabels: 'Заголовки секцій'
+      sectionLabels: 'Заголовки секцій',
+      additionalContent: 'Додатковий контент секцій',
+      footerNavigation: 'Навігація футера'
     }
   },
   editProject: {
@@ -190,11 +204,29 @@ export const uk = {
     galleryImagesPlaceholder: 'Перетягніть зображення галереї або перегляньте',
     galleryImagesDescription: 'Додайте зображення галереї проєкту. Вони будуть відображатися у секції галереї.',
     galleryImagesMax: 'Максимум 10 зображень галереї',
+    challengeDescription: 'Опис виклику',
+    challengeDescriptionPlaceholder: 'Введіть детальний опис виклику проекту...',
+    quoteText: 'Текст цитати',
+    quoteTextPlaceholder: 'Введіть текст цитати для блоку з цитатою...',
+    contextDescription: 'Опис контексту',
+    contextDescriptionPlaceholder: 'Введіть опис контексту проекту...',
+    nextProjectLinkTitle: 'Заголовок посилання наступного проекту',
+    nextProjectLinkTitlePlaceholder: 'Повернутися до портфоліо',
+    nextProjectLinkSubtitle: 'Підзаголовок посилання',
+    nextProjectLinkSubtitlePlaceholder: 'Переглянути всі проекти',
+    otherProjectsTitle: 'Заголовок інших проектів',
+    otherProjectsTitlePlaceholder: 'Інші проекти',
+    saving: 'Збереження...',
+    save: 'Зберегти',
+    cancel: 'Скасувати',
     sections: {
       mainInfo: 'Основна інформація',
       description: 'Опис',
       heroImage: 'Головне зображення',
-      galleryImages: 'Зображення галереї'
+      galleryImages: 'Зображення галереї',
+      sectionLabels: 'Заголовки секцій',
+      additionalContent: 'Додатковий контент секцій',
+      footerNavigation: 'Навігація футера'
     }
   },
   login: {
