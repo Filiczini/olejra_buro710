@@ -1,21 +1,17 @@
-import { useTranslation } from '../../contexts/LanguageContext';
-
 export default function ProcessSection() {
-  const t = useTranslation();
-
   const steps = [
-    { id: '01', name: t.process.step01 },
-    { id: '02', name: t.process.step02 },
-    { id: '03', name: t.process.step03 },
-    { id: '04', name: t.process.step04 },
+    { id: '01', name: 'Концепція' },
+    { id: '02', name: 'Дизайн' },
+    { id: '03', name: 'Реалізація' },
+    { id: '04', name: 'Здача' },
   ];
 
   return (
     <section className="max-w-[1800px] mx-auto px-6 py-24 border-b border-zinc-200">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
         <div className="lg:col-span-4">
-          <h3 className="text-2xl font-medium tracking-tight mb-4">{t.process.title}</h3>
-          <p className="text-zinc-500">{t.process.description}</p>
+          <h3 className="text-2xl font-medium tracking-tight mb-4">Процес</h3>
+          <p className="text-zinc-500">Як ми працюємо</p>
         </div>
         <div className="lg:col-span-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

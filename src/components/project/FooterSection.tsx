@@ -1,6 +1,5 @@
 import { Icon } from '@iconify-icon/react';
 import type { Project } from '../../types/project';
-import { useTranslation } from '../../hooks/useTranslation';
 
 interface FooterSectionProps {
   nextProject?: Project;
@@ -17,9 +16,6 @@ export default function FooterSection({
   companyTagline = 'Architecture & Consulting',
   companyLocation = 'Kyiv, Ukraine'
 }: FooterSectionProps) {
-  const t = useTranslation();
-  const project = t.project || {};
-
   return (
     <footer className="bg-zinc-900 text-white py-24 border-t border-zinc-800">
       <div className="max-w-[1800px] mx-auto px-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-12">
@@ -33,12 +29,12 @@ export default function FooterSection({
         </div>
 
         <div className="flex flex-col items-start md:items-end gap-4">
-          <span className="text-xs uppercase tracking-widest text-zinc-500">
-            {project.nextProject || 'Next Project'}
+<span className="text-xs uppercase tracking-widest text-zinc-500">
+            Наступний проект
           </span>
           {loadingNext ? (
-            <span className="text-2xl md:text-3xl font-light uppercase tracking-tight text-zinc-600">
-              {project.loading || 'Loading...'}
+<span className="text-2xl md:text-3xl font-light uppercase tracking-tight text-zinc-600">
+              Завантаження...
             </span>
           ) : nextProject ? (
             <a
@@ -54,8 +50,8 @@ export default function FooterSection({
               />
             </a>
           ) : (
-            <span className="text-2xl md:text-3xl font-light uppercase tracking-tight text-zinc-600">
-              {project.noMoreProjects || 'No More Projects'}
+<span className="text-2xl md:text-3xl font-light uppercase tracking-tight text-zinc-600">
+              Більше проектів немає
             </span>
           )}
         </div>

@@ -8,11 +8,9 @@ import SingleImageUpload from '../../components/admin/SingleImageUpload';
 import ProjectPreview from '../../components/admin/ProjectPreview';
 import type { CreateProjectData } from '../../types/project';
 import { portfolioService } from '../../services/api';
-import { useTranslation } from '../../contexts/LanguageContext';
 
 export default function CreateProjectPage() {
   const navigate = useNavigate();
-  const t = useTranslation();
   const [formData, setFormData] = useState<CreateProjectData>({
     title: '',
     description: '',
@@ -46,19 +44,19 @@ export default function CreateProjectPage() {
     const newErrors: Record<string, string> = {};
 
     if (formData.title.length < 2) {
-      newErrors.title = t.createProject.requiredField;
+      newErrors.title = "Це поле обов'язкове";
     }
 
     if (formData.description.length < 10) {
-      newErrors.description = t.createProject.requiredField;
+      newErrors.description = "Це поле обов'язкове";
     }
 
     if (!formData.heroMedia) {
-      newErrors.heroMedia = t.createProject.heroImagesRequired;
+      newErrors.heroMedia = "Головне зображення є обов'язковим";
     }
 
     if (formData.tags.length > 10) {
-      newErrors.tags = t.createProject.requiredField;
+      newErrors.tags = "Це поле обов'язкове";
     }
 
     setErrors(newErrors);
@@ -164,7 +162,7 @@ export default function CreateProjectPage() {
 
       navigate('/admin/dashboard');
     } catch {
-      setErrors({ submit: t.createProject.error });
+      setErrors({ submit: "Помилка створення проєкту" });
     } finally {
       setLoading(false);
     }
@@ -180,25 +178,25 @@ export default function CreateProjectPage() {
               onClick={() => navigate('/admin/dashboard')}
               className="text-zinc-600 hover:text-zinc-900"
             >
-              ← {t.createProject.backToDashboard}
+              ← Повернутися до панелі керування
             </button>
-            <h1 className="text-3xl font-bold text-zinc-900">{t.createProject.title}</h1>
+            <h1 className="text-3xl font-bold text-zinc-900">Створити проєкт</h1>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
           {/* Hero Image Section */}
           <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
-              {t.createProject.sections.heroImage}
+              Головне зображення
             </h2>
             <div className="mb-4">
-              <p className="text-sm text-zinc-600">{t.createProject.heroImagesDescription}</p>
+              <p className="text-sm text-zinc-600">Додайте головне зображення.</p>
             </div>
             <SingleImageUpload
               image={formData.heroMedia}
               onImageChange={(img) => setFormData({ ...formData, heroMedia: img || undefined })}
-              label={t.createProject.heroImage}
-              placeholder={t.createProject.heroImagesPlaceholder}
+              label="Головне зображення"
+              placeholder="Перетягніть головне зображення або перегляньте"
               error={errors.heroMedia}
             />
           </section>
@@ -206,12 +204,12 @@ export default function CreateProjectPage() {
           {/* Main Info Section */}
           <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
-              {t.createProject.sections.mainInfo}
+              Основна інформація
             </h2>
             <div className="flex flex-col gap-6">
               <Input
-                label={t.createProject.titleLabel}
-                placeholder={t.createProject.titlePlaceholder}
+                label="Назва"
+                placeholder="Введіть назву проєкту"
                 value={formData.title}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, title: e.target.value })}
                 error={errors.title}
@@ -219,29 +217,29 @@ export default function CreateProjectPage() {
               />
 
               <Input
-                label={(t as any).createProject.shortDescription || 'Short Description'}
-                placeholder={(t as any).createProject.shortDescriptionPlaceholder || 'Brief project description for hero section'}
+                label="Короткий опис"
+                placeholder="Короткий опис проекту"
                 value={formData.short_description || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, short_description: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.category || 'Category'}
-                placeholder={(t as any).createProject.categoryPlaceholder || 'Project category (e.g., Residential / Modern)'}
+                label="Категорія"
+                placeholder="Категорія проекту"
                 value={formData.category || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, category: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.subtitle || 'Subtitle'}
-                placeholder={(t as any).createProject.subtitlePlaceholder || 'Project subtitle'}
+                label="Підзаголовок"
+                placeholder="Підзаголовок проекту"
                 value={formData.subtitle || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, subtitle: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.photoCredits || 'Photo Credits'}
-                placeholder={(t as any).createProject.photoCreditsPlaceholder || 'Photographer name'}
+                label="Фотограф"
+                placeholder="Ім'я фотографа"
                 value={formData.photo_credits || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, photo_credits: e.target.value })}
               />
@@ -253,36 +251,36 @@ export default function CreateProjectPage() {
               {errors.tags && <span className="text-sm text-red-500">{errors.tags}</span>}
 
               <Input
-                label={t.createProject.location}
-                placeholder={t.createProject.locationPlaceholder}
+                label="Локація"
+                placeholder="Введіть локацію"
                 value={formData.location || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, location: e.target.value })}
               />
 
               <Input
-                label={t.createProject.area}
-                placeholder={t.createProject.areaPlaceholder}
+                label="Площа (м²)"
+                placeholder="Введіть площу"
                 value={formData.area || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, area: e.target.value })}
               />
 
               <Input
-                label={t.createProject.year}
-                placeholder={t.createProject.yearPlaceholder}
+                label="Рік"
+                placeholder="Введіть рік"
                 value={formData.year || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, year: e.target.value })}
               />
 
               <Input
-                label={t.createProject.team}
-                placeholder={t.createProject.teamPlaceholder}
+                label="Команда"
+                placeholder="Введіть учасників команди"
                 value={formData.team || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, team: e.target.value })}
               />
 
               <Input
-                label={t.createProject.architects}
-                placeholder={t.createProject.architectsPlaceholder}
+                label="Архітектори"
+                placeholder="Введіть назву архітектора або бюро"
                 value={formData.architects || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, architects: e.target.value })}
               />
@@ -292,14 +290,14 @@ export default function CreateProjectPage() {
           {/* Description Section */}
           <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
-              {t.createProject.sections.description}
+              Опис
             </h2>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-zinc-700">{t.createProject.description}</label>
+                <label className="text-sm font-medium text-zinc-700">Опис</label>
                 <textarea
                   className="w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent min-h-[120px]"
-                  placeholder={t.createProject.descriptionPlaceholder}
+                  placeholder="Введіть детальний опис проєкту"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   required
@@ -308,22 +306,22 @@ export default function CreateProjectPage() {
               </div>
 
               <Input
-                label={t.createProject.conceptHeading}
-                placeholder={t.createProject.conceptHeadingPlaceholder}
+                label="Заголовок концепції"
+                placeholder="Введіть заголовок концепції"
                 value={formData.concept_heading || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_heading: e.target.value })}
               />
 
               <Input
-                label={t.createProject.conceptCaption}
-                placeholder={t.createProject.conceptCaptionPlaceholder}
+                label="Підпис концепції"
+                placeholder="Введіть підпис концепції"
                 value={formData.concept_caption || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_caption: e.target.value })}
               />
 
               <Input
-                label={t.createProject.conceptQuote}
-                placeholder={t.createProject.conceptQuotePlaceholder}
+                label="Цитата концепції"
+                placeholder="Введіть цитату концепції"
                 value={formData.concept_quote || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, concept_quote: e.target.value })}
               />
@@ -333,40 +331,40 @@ export default function CreateProjectPage() {
           {/* Section Labels Section */}
           <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
-              {(t as any).createProject.sections.sectionLabels || 'Section Labels'}
+              Заголовки секцій
             </h2>
             <div className="flex flex-col gap-6">
               <Input
-                label={(t as any).createProject.challengeTitle || 'Challenge Section Title'}
-                placeholder={(t as any).createProject.challengeTitlePlaceholder || 'The Challenge'}
+                label="Заголовок секції виклику"
+                placeholder="Виклик"
                 value={formData.challenge_title || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, challenge_title: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.materialsTitle || 'Materials Section Title'}
-                placeholder={(t as any).createProject.materialsTitlePlaceholder || 'Materials'}
+                label="Заголовок секції матеріалів"
+                placeholder="Матеріали"
                 value={formData.materials_title || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, materials_title: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.contextTitle || 'Context Section Title'}
-                placeholder={(t as any).createProject.contextTitlePlaceholder || 'Context'}
+                label="Заголовок секції контексту"
+                placeholder="Контекст"
                 value={formData.context_title || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, context_title: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.figureNumber || 'Figure Number'}
-                placeholder={(t as any).createProject.figureNumberPlaceholder || 'Figure 01'}
+                label="Номер ілюстрації"
+                placeholder="Ілюстрація 01"
                 value={formData.figure_number || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, figure_number: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.figureCaption || 'Figure Caption'}
-                placeholder={(t as any).createProject.figureCaptionPlaceholder || 'Main Dining Hall'}
+                label="Підпис ілюстрації"
+                placeholder="Основна їдальня"
                 value={formData.figure_caption || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, figure_caption: e.target.value })}
               />
@@ -376,34 +374,34 @@ export default function CreateProjectPage() {
           {/* Additional Section Content Section */}
           <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
-              {(t as any).createProject.sections.additionalContent || 'Additional Section Content'}
+              Додатковий контент секцій
             </h2>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-zinc-700">{(t as any).createProject.challengeDescription || 'Challenge Description'}</label>
+                <label className="text-sm font-medium text-zinc-700">Опис виклику</label>
                 <textarea
                   className="w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent min-h-[100px]"
-                  placeholder={(t as any).createProject.challengeDescriptionPlaceholder || 'Enter detailed challenge description...'}
+                  placeholder="Введіть детальний опис виклику..."
                   value={formData.challenge_description || ''}
                   onChange={(e) => setFormData({ ...formData, challenge_description: e.target.value })}
                 />
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-zinc-700">{(t as any).createProject.quoteText || 'Quote Text'}</label>
+                <label className="text-sm font-medium text-zinc-700">Текст цитати</label>
                 <textarea
                   className="w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent min-h-[80px]"
-                  placeholder={(t as any).createProject.quoteTextPlaceholder || 'Enter quote text for quote block...'}
+                  placeholder="Введіть текст цитати..."
                   value={formData.quote_text || ''}
                   onChange={(e) => setFormData({ ...formData, quote_text: e.target.value })}
                 />
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-zinc-700">{(t as any).createProject.contextDescription || 'Context Description'}</label>
+                <label className="text-sm font-medium text-zinc-700">Опис контексту</label>
                 <textarea
                   className="w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent min-h-[100px]"
-                  placeholder={(t as any).createProject.contextDescriptionPlaceholder || 'Enter project context description...'}
+                  placeholder="Введіть опис контексту проекту..."
                   value={formData.context_description || ''}
                   onChange={(e) => setFormData({ ...formData, context_description: e.target.value })}
                 />
@@ -414,26 +412,26 @@ export default function CreateProjectPage() {
           {/* Footer Navigation Section */}
           <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
-              {(t as any).createProject.sections.footerNavigation || 'Footer Navigation'}
+              Навігація футера
             </h2>
             <div className="flex flex-col gap-6">
               <Input
-                label={(t as any).createProject.nextProjectLinkTitle || 'Next Project Link Title'}
-                placeholder={(t as any).createProject.nextProjectLinkTitlePlaceholder || 'Back to Portfolio'}
+                label="Заголовок посилання наступного проекту"
+                placeholder="Повернутися до портфоліо"
                 value={formData.next_project_link_title || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, next_project_link_title: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.nextProjectLinkSubtitle || 'Next Project Link Subtitle'}
-                placeholder={(t as any).createProject.nextProjectLinkSubtitlePlaceholder || 'View All Projects'}
+                label="Підзаголовок посилання"
+                placeholder="Переглянути всі проекти"
                 value={formData.next_project_link_subtitle || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, next_project_link_subtitle: e.target.value })}
               />
 
               <Input
-                label={(t as any).createProject.otherProjectsTitle || 'Other Projects Title'}
-                placeholder={(t as any).createProject.otherProjectsTitlePlaceholder || 'Other Projects'}
+                label="Заголовок інших проектів"
+                placeholder="Інші проекти"
                 value={formData.other_projects_title || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, other_projects_title: e.target.value })}
               />
@@ -443,17 +441,17 @@ export default function CreateProjectPage() {
           {/* Gallery Images Section */}
           <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
-              {t.createProject.sections.galleryImages}
+              Зображення галереї
             </h2>
             <div className="mb-4">
-              <p className="text-sm text-zinc-600">{t.createProject.galleryImagesDescription}</p>
+              <p className="text-sm text-zinc-600">Додайте зображення галереї проєкту.</p>
             </div>
             <MultiImageUpload
               images={formData.galleryMedia || []}
               onImagesChange={(images) => setFormData({ ...formData, galleryMedia: images })}
               maxCount={10}
-              label={t.createProject.galleryImages}
-              placeholder={t.createProject.galleryImagesPlaceholder}
+              label="Зображення галереї"
+              placeholder="Перетягніть зображення галереї або перегляньте"
             />
           </section>
 
@@ -466,7 +464,7 @@ export default function CreateProjectPage() {
             )}
 
             <Button type="submit" disabled={loading} className="w-full py-3">
-              {loading ? t.createProject.creating : t.createProject.create}
+              {loading ? 'Створення...' : 'Створити'}
             </Button>
           </section>
         </form>

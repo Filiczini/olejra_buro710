@@ -1,7 +1,6 @@
 import { Icon } from '@iconify-icon/react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { useTranslation } from '../../contexts/LanguageContext';
 import { useEffect, useState } from 'react';
 
 interface HeaderProps {
@@ -11,7 +10,6 @@ interface HeaderProps {
 export default function Header({ transparent = false }: HeaderProps) {
   const { isAuthenticated, handleLogout } = useAuth();
   const navigate = useNavigate();
-  const t = useTranslation();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -33,16 +31,16 @@ export default function Header({ transparent = false }: HeaderProps) {
           Buro 710
         </a>
         <nav className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 gap-10">
-          <a href="/projects" className={`nav-link text-xs font-medium uppercase tracking-wide transition-all duration-300 ${isTransparent ? 'text-white/80 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'} hover:scale-105`}>{t.navigation.projects}</a>
-          <a href="/about" className={`nav-link text-xs font-medium uppercase tracking-wide transition-all duration-300 ${isTransparent ? 'text-white/80 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'} hover:scale-105`}>{t.home.about}</a>
-          <a href="/contact" className={`nav-link text-xs font-medium uppercase tracking-wide transition-all duration-300 ${isTransparent ? 'text-white/80 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'} hover:scale-105`}>{t.home.contact}</a>
+          <a href="/projects" className={`nav-link text-xs font-medium uppercase tracking-wide transition-all duration-300 ${isTransparent ? 'text-white/80 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'} hover:scale-105`}>Проєкти</a>
+          <a href="/about" className={`nav-link text-xs font-medium uppercase tracking-wide transition-all duration-300 ${isTransparent ? 'text-white/80 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'} hover:scale-105`}>Про бюро</a>
+          <a href="/contact" className={`nav-link text-xs font-medium uppercase tracking-wide transition-all duration-300 ${isTransparent ? 'text-white/80 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'} hover:scale-105`}>Контакти</a>
         </nav>
         <div className="flex items-center gap-6 md:gap-8">
           {isAuthenticated ? (
             <>
               <a href="/admin/dashboard" className={`hidden md:flex items-center gap-2 text-xs font-medium transition-all duration-300 ${isTransparent ? 'text-white/80 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'} hover:scale-105`}>
                 <Icon icon="solar:user-circle-linear" width={16} />
-                <span>{t.header.admin}</span>
+                <span>Адмін</span>
               </a>
               <button
                 onClick={() => {
@@ -51,7 +49,7 @@ export default function Header({ transparent = false }: HeaderProps) {
                 }}
                 className={`text-xs font-medium px-6 py-2.5 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-xl cursor-pointer ${isTransparent ? 'bg-white text-zinc-900 hover:bg-zinc-200 hover:shadow-zinc-900/20' : 'bg-zinc-900 text-white hover:bg-zinc-800 hover:shadow-zinc-900/20'}`}
               >
-                {t.header.logout}
+                Вийти
               </button>
             </>
           ) : null}

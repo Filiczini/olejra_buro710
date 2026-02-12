@@ -1,5 +1,4 @@
 import type { ProjectImage } from '../../types/project';
-import { useTranslation } from '../../hooks/useTranslation';
 
 interface ConceptSectionProps {
   title?: string;
@@ -20,9 +19,6 @@ export default function ConceptSection({
   caption,
   quote
 }: ConceptSectionProps) {
-  const t = useTranslation();
-  const project = t.project || {};
-
   const conceptDescription = description.slice(0, 2);
 
   return (
@@ -31,7 +27,7 @@ export default function ConceptSection({
         <div className="lg:col-span-5 sticky top-32">
           <span className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-6 block">{title}</span>
           <h3 className="text-4xl md:text-6xl font-normal uppercase tracking-tight text-zinc-900 mb-8 leading-[0.9]">
-            {heading || project.designConcept || t.project.designConcept}
+            {heading || 'Концепція дизайну'}
           </h3>
           <div className="w-12 h-[1px] bg-zinc-900 mb-8" />
 
@@ -63,7 +59,7 @@ export default function ConceptSection({
               />
             )}
             <div className="absolute bottom-6 left-6 text-white bg-black/50 backdrop-blur-sm px-4 py-2 text-xs uppercase tracking-wide">
-              {caption || project.designConcept || t.project.designConcept}
+              {caption || 'Концепція дизайну'}
             </div>
           </div>
 
@@ -79,7 +75,7 @@ export default function ConceptSection({
             </div>
             <div className="aspect-square bg-zinc-100 overflow-hidden flex items-center justify-center p-8 bg-zinc-50">
               <p className="text-zinc-400 text-xs uppercase tracking-widest text-center leading-loose">
-                {quote || t.createProject.conceptQuote}
+                {quote}
               </p>
             </div>
           </div>
