@@ -171,12 +171,26 @@ export const en = {
     galleryImagesPlaceholder: 'Drag and drop gallery images, or browse',
     galleryImagesDescription: 'Add project gallery images. These will appear in project gallery section.',
     galleryImagesMax: 'Maximum 10 gallery images allowed',
+    challengeDescription: 'Challenge Description',
+    challengeDescriptionPlaceholder: 'Enter detailed challenge description...',
+    quoteText: 'Quote Text',
+    quoteTextPlaceholder: 'Enter quote text for quote block...',
+    contextDescription: 'Context Description',
+    contextDescriptionPlaceholder: 'Enter project context description...',
+    nextProjectLinkTitle: 'Next Project Link Title',
+    nextProjectLinkTitlePlaceholder: 'Back to Portfolio',
+    nextProjectLinkSubtitle: 'Link Subtitle',
+    nextProjectLinkSubtitlePlaceholder: 'View All Projects',
+    otherProjectsTitle: 'Other Projects Title',
+    otherProjectsTitlePlaceholder: 'Other Projects',
     sections: {
       mainInfo: 'Main Information',
       description: 'Description',
       heroImage: 'Hero Image',
       galleryImages: 'Gallery Images',
-      sectionLabels: 'Section Labels'
+      sectionLabels: 'Section Labels',
+      additionalContent: 'Additional Section Content',
+      footerNavigation: 'Footer Navigation'
     }
   },
   editProject: {
@@ -231,13 +245,28 @@ export const en = {
     heroImagesRequired: 'Hero image is required',
     addGalleryImages: 'Add Gallery Images',
     galleryImagesPlaceholder: 'Drag and drop gallery images, or browse',
-    galleryImagesDescription: 'Add project gallery images. These will appear in the project gallery section.',
+    galleryImagesDescription: 'Add project gallery images. These will appear in project gallery section.',
     galleryImagesMax: 'Maximum 10 gallery images allowed',
+    challengeDescription: 'Challenge Description',
+    challengeDescriptionPlaceholder: 'Enter detailed challenge description...',
+    quoteText: 'Quote Text',
+    quoteTextPlaceholder: 'Enter quote text for quote block...',
+    contextDescription: 'Context Description',
+    contextDescriptionPlaceholder: 'Enter project context description...',
+    nextProjectLinkTitle: 'Next Project Link Title',
+    nextProjectLinkTitlePlaceholder: 'Back to Portfolio',
+    nextProjectLinkSubtitle: 'Link Subtitle',
+    nextProjectLinkSubtitlePlaceholder: 'View All Projects',
+    otherProjectsTitle: 'Other Projects Title',
+    otherProjectsTitlePlaceholder: 'Other Projects',
     sections: {
       mainInfo: 'Main Information',
       description: 'Description',
       heroImage: 'Hero Image',
-      galleryImages: 'Gallery Images'
+      galleryImages: 'Gallery Images',
+      sectionLabels: 'Section Labels',
+      additionalContent: 'Additional Section Content',
+      footerNavigation: 'Footer Navigation'
     }
   },
   login: {
