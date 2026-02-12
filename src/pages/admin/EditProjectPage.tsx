@@ -2,11 +2,25 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Button from '../../components/ui/Button';
 import ProjectForm from '../../components/admin/ProjectForm';
+import HeroSectionForm, { type HeroSectionData } from '../../components/admin/HeroSectionForm';
+import HeroSectionPreview from '../../components/admin/HeroSectionPreview';
+import type { Media } from '../../types/project';
 import { portfolioService } from '../../services/api';
 
 export default function EditProjectPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const [heroData, setHeroData] = useState<HeroSectionData>({
+    heroImage: undefined,
+    title: '',
+    subtitle: '',
+    tags: [],
+    location: '',
+    year: '',
+    area: '',
+  });
+  const [existingHeroUrl, setExistingHeroUrl] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
@@ -15,7 +29,32 @@ export default function EditProjectPage() {
 
     const loadProject = async () => {
       try {
-        await portfolioService.getById(id);
+        const data = await portfolioService.getById(id) as unknown as { 
+          project: { 
+            title: string; 
+            subtitle?: string;
+            short_description?: string;
+            tags: string[]; 
+            location?: string; 
+            year?: string; 
+            area?: string; 
+          }; 
+          heroMedia: Media[]; 
+        };
+        
+        setHeroData({
+          heroImage: undefined,
+          title: data.project.title || '',
+          subtitle: data.project.subtitle || data.project.short_description || '',
+          tags: data.project.tags || [],
+          location: data.project.location || '',
+          year: data.project.year || '',
+          area: data.project.area || '',
+        });
+
+        if (data.heroMedia && data.heroMedia.length > 0) {
+          setExistingHeroUrl(data.heroMedia[0].url);
+        }
       } catch (error) {
         console.error('Error loading project:', error);
         navigate('/admin/dashboard');
@@ -27,18 +66,49 @@ export default function EditProjectPage() {
     loadProject();
   }, [id, navigate]);
 
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!heroData.heroImage && !existingHeroUrl) {
+      newErrors.heroImage = 'Додайте головне зображення';
+    }
+
+    if (!heroData.title.trim()) {
+      newErrors.title = 'Введіть назву проєкту';
+    } else if (heroData.title.trim().length < 2) {
+      newErrors.title = 'Назва має містити мінімум 2 символи';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!id) return;
+    if (!id || !validateForm()) {
+      return;
+    }
+
     setLoading(true);
 
     try {
       const formDataToSend = new FormData();
+      formDataToSend.append('title', heroData.title);
+      formDataToSend.append('description', heroData.subtitle || heroData.title);
+      formDataToSend.append('tags', JSON.stringify(heroData.tags));
+      
+      if (heroData.location) formDataToSend.append('location', heroData.location);
+      if (heroData.year) formDataToSend.append('year', heroData.year);
+      if (heroData.area) formDataToSend.append('area', heroData.area);
+      if (heroData.subtitle) formDataToSend.append('short_description', heroData.subtitle);
+      if (heroData.heroImage) formDataToSend.append('heroMedia', heroData.heroImage);
+
       await portfolioService.update(id, formDataToSend);
       navigate('/admin/dashboard');
     } catch (error) {
       console.error('Error updating project:', error);
+      setErrors({ submit: 'Помилка оновлення проєкту' });
     } finally {
       setLoading(false);
     }
@@ -64,7 +134,7 @@ export default function EditProjectPage() {
         <h1 className="text-3xl font-bold text-zinc-900">Редагувати проєкт</h1>
       </div>
 
-      <div className="flex gap-8">
+      <div className="flex flex-col lg:flex-row gap-8">
         <div className="flex-1">
           <ProjectForm
             onSubmit={handleSubmit}
@@ -72,9 +142,12 @@ export default function EditProjectPage() {
             submitLabel="Зберегти"
             submitLoadingLabel="Збереження..."
           >
-            <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
-              <p className="text-zinc-600">Форма в розробці...</p>
-            </section>
+            <HeroSectionForm
+              data={heroData}
+              onChange={setHeroData}
+              errors={errors}
+              initialImageUrl={existingHeroUrl}
+            />
           </ProjectForm>
 
           <div className="mt-4">
@@ -89,11 +162,8 @@ export default function EditProjectPage() {
           </div>
         </div>
 
-        <div className="hidden lg:block lg:w-[400px]">
-          <div className="bg-white rounded-xl shadow-lg p-6 sticky top-8">
-            <h3 className="text-lg font-semibold text-zinc-900 mb-4">Прев'ю</h3>
-            <p className="text-zinc-600 text-sm">Прев'ю буде доступне після заповнення форми</p>
-          </div>
+        <div className="lg:w-[400px]">
+          <HeroSectionPreview data={heroData} existingImageUrl={existingHeroUrl} />
         </div>
       </div>
     </div>
