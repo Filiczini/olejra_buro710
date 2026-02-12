@@ -54,26 +54,17 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', authMiddleware, uploadProjectMedia, async (req, res) => {
   try {
-    console.log('=== POST /portfolio ===');
-    console.log('Headers:', req.headers.authorization ? 'Token present' : 'No token');
-    console.log('Body:', req.body);
-
     const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
     const heroFiles = files?.['heroMedia'] || [];
     const galleryFiles = files?.['galleryMedia'] || [];
 
-    console.log('Hero files:', heroFiles.map(f => f.originalname));
-    console.log('Gallery files:', galleryFiles.map(f => f.originalname));
-
     const { title, description, tags, location, area, year, team, architects, concept_heading, concept_caption, concept_quote, short_description, category, subtitle, photo_credits, challenge_title, materials_title, context_title, figure_number, figure_caption, challenge_description, quote_text, context_description, next_project_link_title, next_project_link_subtitle, other_projects_title } = req.body as any;
 
     if (!title || !description) {
-      console.log('Validation failed: Title or description missing');
       return res.status(400).json({ error: 'Title and description are required' });
     }
 
     if (heroFiles.length === 0 && galleryFiles.length === 0) {
-      console.log('Validation failed: No media files provided');
       return res.status(400).json({ error: 'At least one media file (hero or gallery) is required' });
     }
 
@@ -88,8 +79,6 @@ router.post('/', authMiddleware, uploadProjectMedia, async (req, res) => {
     } else if (galleryFiles.length > 0) {
       imageUrl = await storageService.uploadImage(galleryFiles[0]);
     }
-
-    console.log('Creating project in database...');
 
     const project = await projectService.create({
       title,
@@ -123,9 +112,6 @@ router.post('/', authMiddleware, uploadProjectMedia, async (req, res) => {
       galleryMedia,
     });
 
-    console.log('Project created successfully:', project.id);
-
-    // Log activity
     await activityLogService.log({
       user_email: (req as any).user?.email || 'unknown',
       action: 'create',
@@ -146,9 +132,6 @@ router.post('/', authMiddleware, uploadProjectMedia, async (req, res) => {
 
 router.put('/:id', authMiddleware, uploadProjectMedia, async (req, res) => {
   try {
-    console.log('=== PUT /portfolio/:id ===');
-    console.log('Body:', req.body);
-
     const { title, description, tags, location, area, year, team, architects, concept_heading, concept_caption, concept_quote, short_description, category, subtitle, photo_credits, challenge_title, materials_title, context_title, figure_number, figure_caption, challenge_description, quote_text, context_description, next_project_link_title, next_project_link_subtitle, other_projects_title, heroMediaIdsOrdered, galleryMediaIdsOrdered } = req.body as any;
 
     const existing = await projectService.getById(req.params.id as string);
@@ -158,12 +141,6 @@ router.put('/:id', authMiddleware, uploadProjectMedia, async (req, res) => {
     const heroFiles = files?.['heroMedia'] || [];
     const galleryFiles = files?.['galleryMedia'] || [];
 
-    console.log('New hero files:', heroFiles.map(f => f.originalname));
-    console.log('New gallery files:', galleryFiles.map(f => f.originalname));
-    console.log('Hero media IDs ordered:', heroMediaIdsOrdered);
-    console.log('Gallery media IDs ordered:', galleryMediaIdsOrdered);
-
-    // Parse ordered IDs arrays, ensuring they are string arrays
     const heroIds: string[] = heroMediaIdsOrdered
       ? Array.isArray(heroMediaIdsOrdered)
         ? heroMediaIdsOrdered
