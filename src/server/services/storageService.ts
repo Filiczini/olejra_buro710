@@ -24,12 +24,22 @@ interface BulkDeleteResult {
 
 export const storageService = {
   /**
+   * Generate a safe filename with latin characters only
+   */
+  generateSafeFileName: (originalName: string): string => {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 8);
+    const ext = originalName.split('.').pop()?.toLowerCase() || 'jpg';
+    return `${timestamp}-${random}.${ext}`;
+  },
+
+  /**
    * Upload a single image to Supabase storage
    * @param file - Express.Multer.File object
    * @returns Public URL of uploaded image
    */
   uploadImage: async (file: Express.Multer.File): Promise<string> => {
-    const fileName = `${Date.now()}-${file.originalname}`;
+    const fileName = storageService.generateSafeFileName(file.originalname);
     const filePath = `projects/media/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
