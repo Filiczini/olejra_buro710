@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { portfolioService } from '../../services/api';
 import type { Project, FilterOptions, PaginationParams } from '../../types/project';
@@ -14,6 +14,9 @@ export default function DashboardPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({ tags: [], locations: [], years: [] });
   const [showFilters, setShowFilters] = useState(false);
+  
+  const previousProjectsRef = useRef<Project[]>([]);
+  const previousPaginationRef = useRef(pagination);
 
   const loadProjects = async () => {
     setLoading(true);
@@ -54,11 +57,18 @@ export default function DashboardPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Ви впевнені, що хочете видалити цей проєкт?')) return;
 
+    previousProjectsRef.current = projects;
+    previousPaginationRef.current = pagination;
+
+    setProjects(prev => prev.filter(p => p.id !== id));
+    setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));
+
     try {
       await portfolioService.delete(id);
-      loadProjects();
     } catch (error) {
       console.error('Error deleting project:', error);
+      setProjects(previousProjectsRef.current);
+      setPagination(previousPaginationRef.current);
     }
   };
 
