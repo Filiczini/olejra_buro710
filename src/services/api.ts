@@ -11,6 +11,7 @@ import type {
 } from '../types/activityLog';
 import type { Post, PostPaginationParams } from '../types/post';
 import type { Block } from '../types/block';
+import type { PortfolioAllParams, PortfolioAllResponse } from '../types/portfolio';
 
 export const authService = {
   login: async (email: string, password: string) => {
@@ -99,6 +100,18 @@ export const portfolioService = {
       console.error('Error getting next project:', error);
       return null;
     }
+  },
+
+  getAllWithPosts: async (params?: PortfolioAllParams): Promise<PortfolioAllResponse> => {
+    const queryParams = new URLSearchParams();
+    
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.tags && params.tags.length > 0) queryParams.append('tags', params.tags.join(','));
+    if (params?.search) queryParams.append('search', params.search);
+
+    const response = await api.get(`/portfolio/all?${queryParams.toString()}`);
+    return response.data as PortfolioAllResponse;
   },
 };
 
