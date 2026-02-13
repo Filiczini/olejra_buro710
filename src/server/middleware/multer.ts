@@ -36,4 +36,7 @@ export const uploadBlockMedia = uploadMiddleware.fields([
   { name: 'heroImage', maxCount: 1 },
   { name: 'ogImage', maxCount: 1 },
   { name: 'blockImages', maxCount: 20 },
+  { name: 'galleryImages', maxCount: 20 },
 ]);
+
+export const uploadGalleryImages = uploadMiddleware.array('galleryImages', 20);

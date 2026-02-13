@@ -5,6 +5,7 @@ import { postService } from '../services/api';
 import Header from '../components/layout/Header';
 import PostHeroBlock from '../components/blocks/PostHeroBlock';
 import BlockRenderer from '../components/blocks/BlockRenderer';
+import PostGalleryBlock from '../components/blocks/PostGalleryBlock';
 import type { Post } from '../types/post';
 import type { Block } from '../types/block';
 
@@ -92,7 +93,11 @@ export default function PostPage() {
       <main className={hasHero ? '' : 'pt-16'}>
         {blocks.length > 0 && <BlockRenderer blocks={blocks} />}
         
-        {!hasHero && blocks.length === 0 && (
+        {post.gallery_images && post.gallery_images.length > 0 && (
+          <PostGalleryBlock images={post.gallery_images} />
+        )}
+        
+        {!hasHero && blocks.length === 0 && !(post.gallery_images && post.gallery_images.length > 0) && (
           <div className="max-w-5xl mx-auto px-4 py-24">
             <div className="text-center text-zinc-400">
               <Icon icon="solar:document-text-linear" width={48} className="mx-auto mb-4" />

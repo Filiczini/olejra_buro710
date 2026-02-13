@@ -8,6 +8,7 @@ import SeoFields from '../../components/admin/SeoFields';
 import PostHeroForm, { type PostHeroFormData } from '../../components/admin/PostHeroForm';
 import PostHeroPreview from '../../components/admin/PostHeroPreview';
 import PageBuilder from '../../components/admin/page-builder/PageBuilder';
+import GalleryUploader from '../../components/admin/GalleryUploader';
 import type { PostStatus } from '../../types/post';
 import type { Block, BlockType, BlockData } from '../../types/block';
 
@@ -46,6 +47,8 @@ export default function EditPostPage() {
   const [heroData, setHeroData] = useState<PostHeroFormData>(INITIAL_HERO_DATA);
   const [initialBlocks, setInitialBlocks] = useState<Block[]>([]);
   const [blockFiles, setBlockFiles] = useState<BlockWithFile[]>([]);
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [galleryNewFiles, setGalleryNewFiles] = useState<File[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   
   const blocksDataRef = useRef<BlocksDataRef>({ blocks: [] });
@@ -78,6 +81,8 @@ export default function EditPostPage() {
         hero_year: post.hero_year || '',
         heroImage: undefined,
       });
+      
+      setGalleryImages(post.gallery_images || []);
       
       blocksDataRef.current.blocks = loadedBlocks.map((b, index) => ({
         id: b.id,
@@ -189,18 +194,20 @@ export default function EditPostPage() {
         formData.append('heroImage', heroData.heroImage);
       }
 
-      const blocksData = blocksDataRef.current.blocks.map((block) => {
-        const blockFile = blockFiles.find(bf => bf.id === block.id);
-        return {
-          id: block.id?.startsWith('temp-') ? undefined : block.id,
-          type: block.type,
-          data: {
-            ...block.data,
-            _hasNewImage: !!blockFile?.file,
-          },
-          sort_order: block.sort_order,
-        };
-      });
+const blocksData = blocksDataRef.current.blocks.map((block) => {
+      const blockId = block.id || (block as any)._tempId;
+      const blockFile = blockFiles.find(bf => bf.id === blockId);
+      return {
+        id: block.id?.startsWith('temp-') ? undefined : block.id,
+        _tempId: (block as any)._tempId,
+        type: block.type,
+        data: {
+          ...block.data,
+          _hasNewImage: !!blockFile?.file,
+        },
+        sort_order: block.sort_order,
+      };
+    });
       formData.append('blocks', JSON.stringify(blocksData));
 
       if (ogImageFile) {
@@ -212,6 +219,12 @@ export default function EditPostPage() {
         if (bf.file) {
           formData.append('blockImages', bf.file);
         }
+      });
+
+      formData.append('gallery_images', JSON.stringify(galleryImages));
+      
+      galleryNewFiles.forEach((file) => {
+        formData.append('galleryImages', file);
       });
 
       if (isEditing && id) {
@@ -331,6 +344,13 @@ export default function EditPostPage() {
             onImageChange={handleBlockImageChange}
           />
         </div>
+
+        <GalleryUploader
+          images={galleryImages}
+          onImagesChange={setGalleryImages}
+          newFiles={galleryNewFiles}
+          onNewFilesChange={setGalleryNewFiles}
+        />
 
         <div className="flex gap-4 justify-end">
           <Button
