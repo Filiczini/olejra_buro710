@@ -8,6 +8,7 @@ import LoginPage from './pages/admin/LoginPage';
 import DashboardPage from './pages/admin/DashboardPage';
 import CreateProjectPage from './pages/admin/CreateProjectPage';
 import EditProjectPage from './pages/admin/EditProjectPage';
+import PostsPage from './pages/admin/PostsPage';
 import ActivityLogPage from './pages/admin/ActivityLogPage';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 import AdminLayout from './layouts/AdminLayout';
@@ -39,6 +40,7 @@ function App() {
           <Route path="/admin/dashboard" element={<DashboardPage />} />
           <Route path="/admin/projects/create" element={<CreateProjectPage />} />
           <Route path="/admin/projects/edit/:id" element={<EditProjectPage />} />
+          <Route path="/admin/posts" element={<PostsPage />} />
           <Route path="/admin/logs" element={<ActivityLogPage />} />
         </Route>
       </Routes>
