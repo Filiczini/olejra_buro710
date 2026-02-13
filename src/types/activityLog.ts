@@ -17,6 +17,8 @@ export interface ActivityChanges {
   media_removed?: number;
   media_reordered?: boolean;
   blocks_count?: number;
+  hero_updated?: boolean;
+  hero_fields?: string[];
 }
 
 export interface ActivityLogsParams {
