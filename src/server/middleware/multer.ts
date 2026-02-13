@@ -31,3 +31,8 @@ export const uploadProjectMedia = uploadMiddleware.fields([
   { name: 'heroMedia', maxCount: 5 },
   { name: 'galleryMedia', maxCount: 10 },
 ]);
+
+export const uploadBlockMedia = uploadMiddleware.fields([
+  { name: 'ogImage', maxCount: 1 },
+  { name: 'blockImages', maxCount: 20 },
+]);

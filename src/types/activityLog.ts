@@ -16,6 +16,7 @@ export interface ActivityChanges {
   media_added?: number;
   media_removed?: number;
   media_reordered?: boolean;
+  blocks_count?: number;
 }
 
 export interface ActivityLogsParams {
