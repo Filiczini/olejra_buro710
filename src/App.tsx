@@ -4,6 +4,7 @@ import AllProjectsPage from './pages/AllProjectsPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import ProjectPage from './pages/ProjectPage';
+import PublicPostPage from './pages/PublicPostPage';
 import LoginPage from './pages/admin/LoginPage';
 import DashboardPage from './pages/admin/DashboardPage';
 import CreateProjectPage from './pages/admin/CreateProjectPage';
@@ -34,6 +35,7 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/project/:id" element={<ProjectPage />} />
+        <Route path="/page/:slug" element={<PublicPostPage />} />
         <Route path="/admin/login" element={<LoginPage />} />
 
         {/* Admin routes with AdminLayout */}
