@@ -5,6 +5,8 @@ import { postService } from '../../services/api';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import SeoFields from '../../components/admin/SeoFields';
+import PostHeroForm, { type PostHeroFormData } from '../../components/admin/PostHeroForm';
+import PostHeroPreview from '../../components/admin/PostHeroPreview';
 import PageBuilder from '../../components/admin/page-builder/PageBuilder';
 import type { PostStatus } from '../../types/post';
 import type { Block, BlockType, BlockData } from '../../types/block';
@@ -17,6 +19,16 @@ interface BlockWithFile {
 interface BlocksDataRef {
   blocks: { id?: string; type: BlockType; data: BlockData; sort_order: number }[];
 }
+
+const INITIAL_HERO_DATA: PostHeroFormData = {
+  hero_image_url: '',
+  hero_title: '',
+  hero_subtitle: '',
+  hero_tags: [],
+  hero_location: '',
+  hero_year: '',
+  heroImage: undefined,
+};
 
 export default function EditPostPage() {
   const navigate = useNavigate();
@@ -31,6 +43,7 @@ export default function EditPostPage() {
   const [seoTitle, setSeoTitle] = useState('');
   const [seoDescription, setSeoDescription] = useState('');
   const [ogImageFile, setOgImageFile] = useState<File | null>(null);
+  const [heroData, setHeroData] = useState<PostHeroFormData>(INITIAL_HERO_DATA);
   const [initialBlocks, setInitialBlocks] = useState<Block[]>([]);
   const [blockFiles, setBlockFiles] = useState<BlockWithFile[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -55,6 +68,16 @@ export default function EditPostPage() {
       setSeoTitle(post.seo_title || '');
       setSeoDescription(post.seo_description || '');
       setInitialBlocks(loadedBlocks);
+      
+      setHeroData({
+        hero_image_url: post.hero_image_url || '',
+        hero_title: post.hero_title || '',
+        hero_subtitle: post.hero_subtitle || '',
+        hero_tags: post.hero_tags || [],
+        hero_location: post.hero_location || '',
+        hero_year: post.hero_year || '',
+        heroImage: undefined,
+      });
       
       blocksDataRef.current.blocks = loadedBlocks.map((b, index) => ({
         id: b.id,
@@ -134,6 +157,10 @@ export default function EditPostPage() {
       newErrors.seo_description = 'SEO description не може бути довшим за 160 символів';
     }
 
+    if (heroData.hero_title && heroData.hero_title.length > 200) {
+      newErrors.hero_title = 'Hero title не може бути довшим за 200 символів';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -151,6 +178,16 @@ export default function EditPostPage() {
       formData.append('status', status);
       formData.append('seo_title', seoTitle);
       formData.append('seo_description', seoDescription);
+
+      formData.append('hero_title', heroData.hero_title || '');
+      formData.append('hero_subtitle', heroData.hero_subtitle || '');
+      formData.append('hero_tags', JSON.stringify(heroData.hero_tags || []));
+      formData.append('hero_location', heroData.hero_location || '');
+      formData.append('hero_year', heroData.hero_year || '');
+
+      if (heroData.heroImage) {
+        formData.append('heroImage', heroData.heroImage);
+      }
 
       const blocksData = blocksDataRef.current.blocks.map((block) => {
         const blockFile = blockFiles.find(bf => bf.id === block.id);
@@ -201,7 +238,7 @@ export default function EditPostPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-zinc-900">
           {isEditing ? 'Редагувати сторінку' : 'Нова сторінка'}
@@ -260,6 +297,19 @@ export default function EditPostPage() {
                 <span className="text-zinc-700">Опубліковано</span>
               </label>
             </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          <div className="lg:col-span-3">
+            <PostHeroForm
+              data={heroData}
+              onChange={setHeroData}
+              errors={errors}
+            />
+          </div>
+          <div className="lg:col-span-2">
+            <PostHeroPreview data={heroData} />
           </div>
         </div>
 

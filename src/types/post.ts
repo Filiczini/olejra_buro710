@@ -2,7 +2,16 @@ import type { Block, BlockType, BlockData } from './block';
 
 export type PostStatus = 'draft' | 'published';
 
-export interface Post {
+export interface PostHero {
+  hero_image_url?: string;
+  hero_title?: string;
+  hero_subtitle?: string;
+  hero_tags?: string[];
+  hero_location?: string;
+  hero_year?: string;
+}
+
+export interface Post extends PostHero {
   id: string;
   title: string;
   slug: string;
@@ -15,7 +24,7 @@ export interface Post {
   blocks?: Block[];
 }
 
-export interface CreatePostData {
+export interface CreatePostData extends PostHero {
   title: string;
   slug: string;
   status?: PostStatus;
@@ -29,7 +38,7 @@ export interface CreatePostData {
   }[];
 }
 
-export interface UpdatePostData {
+export interface UpdatePostData extends Partial<PostHero> {
   title?: string;
   slug?: string;
   status?: PostStatus;

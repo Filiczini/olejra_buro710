@@ -1,10 +1,10 @@
 import { supabase } from '../config/supabase';
 import { blockService } from './blockService';
 import { storageService } from './storageService';
-import type { Post, PostStatus, PaginatedResponse, PostPaginationParams } from '../../types/post';
+import type { Post, PostStatus, PaginatedResponse, PostPaginationParams, PostHero } from '../../types/post';
 import type { Block } from '../../types/block';
 
-interface CreatePostParams {
+interface CreatePostParams extends PostHero {
   title: string;
   slug: string;
   status?: PostStatus;
@@ -18,7 +18,7 @@ interface CreatePostParams {
   }[];
 }
 
-interface UpdatePostParams {
+interface UpdatePostParams extends Partial<PostHero> {
   title?: string;
   slug?: string;
   status?: PostStatus;
@@ -194,9 +194,20 @@ export const postService = {
   },
 
   delete: async (id: string): Promise<void> => {
+    const { data: post } = await supabase
+      .from('posts')
+      .select('hero_image_url')
+      .eq('id', id)
+      .single();
+
     const blocks = await blockService.getByPostId(id);
 
     const imageUrls: string[] = [];
+    
+    if (post?.hero_image_url) {
+      imageUrls.push(post.hero_image_url);
+    }
+    
     for (const block of blocks) {
       if ('image_url' in block.data && block.data.image_url) {
         imageUrls.push(block.data.image_url);
