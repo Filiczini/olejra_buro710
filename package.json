@@ -13,10 +13,14 @@
     "seed": "tsx src/server/seed.ts",
     "seed:random": "tsx src/server/seed.ts",
     "seed:clean": "tsx src/server/clear-projects.ts",
+    "seed:admin": "tsx src/server/seed-admin.ts",
     "migrate:projects": "tsx src/server/migrate-projects.ts",
     "validate:i18n": "node scripts/validate-i18n.js"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@supabase/supabase-js": "^2.95.2",
     "axios": "^1.13.4",
     "bcryptjs": "^3.0.3",
