@@ -212,13 +212,25 @@ router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequ
       }
     }
 
+    const heroFields: string[] = [];
+    if (heroImageUrl) heroFields.push('hero_image');
+    if (hero_title) heroFields.push('hero_title');
+    if (hero_subtitle) heroFields.push('hero_subtitle');
+    if (hero_tags) heroFields.push('hero_tags');
+    if (hero_location) heroFields.push('hero_location');
+    if (hero_year) heroFields.push('hero_year');
+
     await activityLogService.log({
       user_email: req.user?.email || 'unknown',
       action: 'create',
       entity_type: 'post',
       entity_id: post.id,
       entity_title: post.title,
-      changes: { blocks_count: parsedBlocks.length },
+      changes: { 
+        blocks_count: parsedBlocks.length,
+        hero_updated: heroFields.length > 0,
+        hero_fields: heroFields.length > 0 ? heroFields : undefined,
+      },
     });
 
     res.status(201).json(post);
@@ -300,8 +312,16 @@ router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRe
     if (title !== undefined && title !== existing.post.title) changedFields.push('title');
     if (slug !== undefined && slug !== existing.post.slug) changedFields.push('slug');
     if (status !== undefined && status !== existing.post.status) changedFields.push('status');
-    if (heroImageUrl !== existing.post.hero_image_url) changedFields.push('hero_image');
-    if (hero_title !== existing.post.hero_title) changedFields.push('hero_title');
+
+    const heroFields: string[] = [];
+    if (heroImageUrl !== existing.post.hero_image_url) heroFields.push('hero_image');
+    if (hero_title !== existing.post.hero_title) heroFields.push('hero_title');
+    if (hero_subtitle !== existing.post.hero_subtitle) heroFields.push('hero_subtitle');
+    const newHeroTags = hero_tags ? JSON.parse(hero_tags) : [];
+    const oldHeroTags = existing.post.hero_tags || [];
+    if (JSON.stringify(newHeroTags) !== JSON.stringify(oldHeroTags)) heroFields.push('hero_tags');
+    if (hero_location !== existing.post.hero_location) heroFields.push('hero_location');
+    if (hero_year !== existing.post.hero_year) heroFields.push('hero_year');
 
     const post = await postService.update(id, {
       title,
@@ -325,7 +345,12 @@ router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRe
       entity_type: 'post',
       entity_id: id,
       entity_title: post.title,
-      changes: { fields: changedFields.length > 0 ? changedFields : undefined, blocks_count: parsedBlocks?.length },
+      changes: { 
+        fields: changedFields.length > 0 ? changedFields : undefined, 
+        blocks_count: parsedBlocks?.length,
+        hero_updated: heroFields.length > 0,
+        hero_fields: heroFields.length > 0 ? heroFields : undefined,
+      },
     });
 
     res.json(post);

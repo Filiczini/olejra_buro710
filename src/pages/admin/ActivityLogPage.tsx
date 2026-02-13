@@ -45,30 +45,64 @@ export default function ActivityLogPage() {
     loadUniqueUsers();
   }, []);
 
-  const handleFilterChange = (key: keyof ActivityLogsParams, value: any) => {
+  const handleFilterChange = (key: keyof ActivityLogsParams, value: string | undefined) => {
     setFilters({ ...filters, [key]: value === '' ? undefined : value });
     setPagination({ ...pagination, page: 1 });
   };
 
-  const formatChanges = (changes: any) => {
+  const getEntityTypeBadge = (type: string) => {
+    switch (type) {
+      case 'project':
+        return 'bg-purple-100 text-purple-700';
+      case 'post':
+        return 'bg-orange-100 text-orange-700';
+      default:
+        return 'bg-zinc-100 text-zinc-700';
+    }
+  };
+
+  const getEntityTypeText = (type: string) => {
+    switch (type) {
+      case 'project':
+        return 'Проєкт';
+      case 'post':
+        return 'Сторінка';
+      default:
+        return type;
+    }
+  };
+
+  const formatChanges = (changes: Record<string, unknown>) => {
     if (!changes || Object.keys(changes).length === 0) return '-';
 
     const parts: string[] = [];
 
-    if (changes.fields && changes.fields.length > 0) {
-      parts.push(`Змінено поля: ${changes.fields.join(', ')}`);
+    if (changes.fields && Array.isArray(changes.fields) && changes.fields.length > 0) {
+      parts.push(`Поля: ${changes.fields.join(', ')}`);
     }
 
-    if (changes.media_added > 0) {
-      parts.push(`Додано медіа: ${changes.media_added}`);
+    if (changes.hero_updated) {
+      if (changes.hero_fields && Array.isArray(changes.hero_fields) && changes.hero_fields.length > 0) {
+        parts.push(`Hero: ${changes.hero_fields.join(', ')}`);
+      } else {
+        parts.push('Hero оновлено');
+      }
     }
 
-    if (changes.media_removed > 0) {
-      parts.push(`Видалено медіа: ${changes.media_removed}`);
+    if (changes.blocks_count !== undefined) {
+      parts.push(`Блоків: ${changes.blocks_count}`);
+    }
+
+    if (typeof changes.media_added === 'number' && changes.media_added > 0) {
+      parts.push(`Медіа+: ${changes.media_added}`);
+    }
+
+    if (typeof changes.media_removed === 'number' && changes.media_removed > 0) {
+      parts.push(`Медіа-: ${changes.media_removed}`);
     }
 
     if (changes.media_reordered) {
-      parts.push('Змінено порядок медіа');
+      parts.push('Порядок медіа');
     }
 
     return parts.length > 0 ? parts.join(' | ') : '-';
@@ -83,7 +117,7 @@ export default function ActivityLogPage() {
       case 'delete':
         return 'bg-red-100 text-red-700';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-zinc-100 text-zinc-700';
     }
   };
 
@@ -167,7 +201,7 @@ export default function ActivityLogPage() {
                   <th className="text-left py-3 px-4 font-medium text-zinc-700">Дата</th>
                   <th className="text-left py-3 px-4 font-medium text-zinc-700">Користувач</th>
                   <th className="text-left py-3 px-4 font-medium text-zinc-700">Дія</th>
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Проєкт</th>
+                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Об'єкт</th>
                   <th className="text-left py-3 px-4 font-medium text-zinc-700">Деталі</th>
                 </tr>
               </thead>
@@ -185,11 +219,16 @@ export default function ActivityLogPage() {
                         {getActionText(log.action)}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-zinc-900">
-                      {log.entity_title}
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider ${getEntityTypeBadge(log.entity_type)}`}>
+                          {getEntityTypeText(log.entity_type)}
+                        </span>
+                        <span className="text-zinc-900">{log.entity_title}</span>
+                      </div>
                     </td>
                     <td className="py-3 px-4 text-zinc-600 text-sm">
-                      {formatChanges(log.changes)}
+                      {formatChanges(log.changes as Record<string, unknown>)}
                     </td>
                   </tr>
                 ))}
