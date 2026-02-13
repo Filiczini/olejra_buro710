@@ -19,6 +19,7 @@ export default function PageBuilder({ initialBlocks, onChange, onImageChange }: 
   const notifyChange = useCallback((updatedBlocks: Block[]) => {
     const blocksData = updatedBlocks.map((block, index) => ({
       id: block.id.startsWith('temp-') ? undefined : block.id,
+      _tempId: block.id.startsWith('temp-') ? block.id : undefined,
       type: block.type,
       data: block.data,
       sort_order: index,

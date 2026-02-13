@@ -4,7 +4,7 @@ import { authMiddleware } from '../middleware/auth';
 import { postService } from '../services/postService';
 import { storageService } from '../services/storageService';
 import { activityLogService } from '../services/activityLogService';
-import { uploadBlockMedia } from '../middleware/multer';
+import { uploadBlockMedia, uploadGalleryImages } from '../middleware/multer';
 import { supabase } from '../config/supabase';
 import type { BlockType, BlockData } from '../../types/block';
 
@@ -26,6 +26,7 @@ interface PostBody {
   hero_tags?: string;
   hero_location?: string;
   hero_year?: string;
+  gallery_images?: string;
   blocks?: string;
 }
 
@@ -123,7 +124,7 @@ router.get('/:id', async (req, res) => {
 router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequest, res) => {
   try {
     const body = req.body as PostBody;
-    const { title, slug, status, seo_title, seo_description, hero_title, hero_subtitle, hero_tags, hero_location, hero_year, blocks } = body;
+    const { title, slug, status, seo_title, seo_description, hero_title, hero_subtitle, hero_tags, hero_location, hero_year, gallery_images, blocks } = body;
 
     const validationErrors = validatePostInput(body);
     if (validationErrors.length > 0) {
@@ -146,7 +147,7 @@ router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequ
       ogImageUrl = await storageService.uploadImage(files['ogImage'][0], 'blocks');
     }
 
-    let parsedBlocks: { type: BlockType; data: Record<string, unknown>; sort_order?: number }[] = [];
+    let parsedBlocks: { id?: string; _tempId?: string; type: BlockType; data: Record<string, unknown>; sort_order?: number }[] = [];
     if (blocks) {
       try {
         parsedBlocks = JSON.parse(blocks);
@@ -171,11 +172,23 @@ router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequ
       delete data._hasNewImage;
       
       return {
+        id: block.id,
         type: block.type,
         data,
         sort_order: block.sort_order ?? index,
       };
     });
+
+    const galleryImageFiles = files?.['galleryImages'] || [];
+    const existingGalleryUrls = gallery_images ? JSON.parse(gallery_images) : [];
+    const newGalleryUrls: string[] = [];
+    
+    for (const file of galleryImageFiles) {
+      const url = await storageService.uploadImage(file, 'blocks');
+      newGalleryUrls.push(url);
+    }
+    
+    const finalGalleryImages = [...existingGalleryUrls, ...newGalleryUrls];
 
     const post = await postService.create({
       title,
@@ -190,6 +203,7 @@ router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequ
       hero_tags: hero_tags ? JSON.parse(hero_tags) : [],
       hero_location,
       hero_year,
+      gallery_images: finalGalleryImages,
       blocks: processedBlocks as unknown as { type: BlockType; data: BlockData; sort_order: number }[],
     });
 
@@ -244,7 +258,7 @@ router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRe
   try {
     const id = req.params.id as string;
     const body = req.body as PostBody;
-    const { title, slug, status, seo_title, seo_description, hero_title, hero_subtitle, hero_tags, hero_location, hero_year, blocks } = body;
+    const { title, slug, status, seo_title, seo_description, hero_title, hero_subtitle, hero_tags, hero_location, hero_year, gallery_images, blocks } = body;
 
     const validationErrors = validatePostInput(body);
     if (validationErrors.length > 0) {
@@ -270,7 +284,7 @@ router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRe
       ogImageUrl = await storageService.uploadImage(files['ogImage'][0], 'blocks');
     }
 
-    let parsedBlocks: { id?: string; type: BlockType; data: Record<string, unknown>; sort_order: number }[] | undefined;
+    let parsedBlocks: { id?: string; _tempId?: string; type: BlockType; data: Record<string, unknown>; sort_order: number }[] | undefined;
     if (blocks) {
       try {
         parsedBlocks = JSON.parse(blocks);
@@ -308,6 +322,17 @@ router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRe
       });
     }
 
+    const galleryImageFiles = files?.['galleryImages'] || [];
+    const existingGalleryUrls = gallery_images ? JSON.parse(gallery_images) : existing.post.gallery_images || [];
+    const newGalleryUrls: string[] = [];
+    
+    for (const file of galleryImageFiles) {
+      const url = await storageService.uploadImage(file, 'blocks');
+      newGalleryUrls.push(url);
+    }
+    
+    const finalGalleryImages = [...existingGalleryUrls, ...newGalleryUrls];
+
     const changedFields: string[] = [];
     if (title !== undefined && title !== existing.post.title) changedFields.push('title');
     if (slug !== undefined && slug !== existing.post.slug) changedFields.push('slug');
@@ -336,6 +361,7 @@ router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRe
       hero_tags: hero_tags ? JSON.parse(hero_tags) : undefined,
       hero_location,
       hero_year,
+      gallery_images: finalGalleryImages,
       blocks: parsedBlocks as unknown as { id?: string; type: BlockType; data: BlockData; sort_order: number }[],
     });
 
@@ -380,6 +406,82 @@ router.delete('/:id', authMiddleware, async (req: AuthenticatedRequest, res) => 
   } catch (error) {
     console.error('Error deleting post:', error);
     res.status(500).json({ error: 'Failed to delete post' });
+  }
+});
+
+router.post('/:id/gallery', authMiddleware, uploadGalleryImages, async (req: AuthenticatedRequest, res) => {
+  try {
+    const id = req.params.id as string;
+    const files = req.files as Express.Multer.File[] | undefined;
+
+    if (!files || files.length === 0) {
+      return res.status(400).json({ error: 'No files uploaded' });
+    }
+
+    const existing = await postService.getById(id);
+    const currentGallery = existing.post.gallery_images || [];
+
+    const uploadPromises = files.map(file => storageService.uploadImage(file, 'blocks'));
+    const newUrls = await Promise.all(uploadPromises);
+
+    const updatedGallery = [...currentGallery, ...newUrls];
+
+    await postService.update(id, { gallery_images: updatedGallery });
+
+    await activityLogService.log({
+      user_email: req.user?.email || 'unknown',
+      action: 'update',
+      entity_type: 'post',
+      entity_id: id,
+      entity_title: existing.post.title,
+      changes: { 
+        gallery_updated: true,
+        gallery_count: updatedGallery.length,
+      },
+    });
+
+    res.json({ gallery_images: updatedGallery, new_images: newUrls });
+  } catch (error) {
+    console.error('Error uploading gallery images:', error);
+    res.status(500).json({ error: 'Failed to upload gallery images' });
+  }
+});
+
+router.delete('/:id/gallery', authMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    const id = req.params.id as string;
+    const { image_url } = req.body as { image_url?: string };
+
+    if (!image_url) {
+      return res.status(400).json({ error: 'Image URL is required' });
+    }
+
+    const existing = await postService.getById(id);
+    const currentGallery = existing.post.gallery_images || [];
+
+    const updatedGallery = currentGallery.filter(url => url !== image_url);
+
+    if (updatedGallery.length !== currentGallery.length) {
+      await storageService.deleteImage(image_url);
+      await postService.update(id, { gallery_images: updatedGallery });
+
+      await activityLogService.log({
+        user_email: req.user?.email || 'unknown',
+        action: 'update',
+        entity_type: 'post',
+        entity_id: id,
+        entity_title: existing.post.title,
+        changes: { 
+          gallery_updated: true,
+          gallery_count: updatedGallery.length,
+        },
+      });
+    }
+
+    res.json({ gallery_images: updatedGallery });
+  } catch (error) {
+    console.error('Error deleting gallery image:', error);
+    res.status(500).json({ error: 'Failed to delete gallery image' });
   }
 });
 

@@ -15,7 +15,7 @@ export default function TextImageBlock({ data, mirrored }: TextImageBlockProps) 
   const textOrder = mirrored ? 'md:order-2' : 'md:order-1';
 
   return (
-    <section className="group w-full bg-zinc-50">
+    <section className="group w-full">
       <div className="grid grid-cols-1 md:grid-cols-2 h-auto md:min-h-[700px]">
         <div className={`relative h-96 md:h-auto ${order} overflow-hidden`}>
           <img
@@ -26,7 +26,7 @@ export default function TextImageBlock({ data, mirrored }: TextImageBlockProps) 
           />
         </div>
         
-        <div className={`flex flex-col justify-center p-12 md:p-24 bg-zinc-50 ${textOrder}`}>
+        <div className={`flex flex-col justify-center p-12 md:p-24 ${textOrder}`}>
           <div className={mirrored ? 'max-w-md ml-auto' : 'max-w-md'}>
             {(icon || label) && (
               <div className="flex items-center gap-2 mb-6">

@@ -11,6 +11,7 @@ interface CreatePostParams extends PostHero {
   seo_title?: string;
   seo_description?: string;
   og_image_url?: string;
+  gallery_images?: string[];
   blocks?: {
     type: Block['type'];
     data: Block['data'];
@@ -25,6 +26,7 @@ interface UpdatePostParams extends Partial<PostHero> {
   seo_title?: string;
   seo_description?: string;
   og_image_url?: string;
+  gallery_images?: string[];
   blocks?: {
     id?: string;
     type: Block['type'];
@@ -196,7 +198,7 @@ export const postService = {
   delete: async (id: string): Promise<void> => {
     const { data: post } = await supabase
       .from('posts')
-      .select('hero_image_url')
+      .select('hero_image_url, gallery_images')
       .eq('id', id)
       .single();
 
@@ -206,6 +208,10 @@ export const postService = {
     
     if (post?.hero_image_url) {
       imageUrls.push(post.hero_image_url);
+    }
+
+    if (post?.gallery_images && Array.isArray(post.gallery_images)) {
+      imageUrls.push(...post.gallery_images.filter((url): url is string => !!url));
     }
     
     for (const block of blocks) {

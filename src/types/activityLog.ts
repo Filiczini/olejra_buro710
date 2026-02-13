@@ -19,6 +19,8 @@ export interface ActivityChanges {
   blocks_count?: number;
   hero_updated?: boolean;
   hero_fields?: string[];
+  gallery_updated?: boolean;
+  gallery_count?: number;
 }
 
 export interface ActivityLogsParams {

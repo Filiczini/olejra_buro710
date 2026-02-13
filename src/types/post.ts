@@ -19,6 +19,7 @@ export interface Post extends PostHero {
   seo_title?: string;
   seo_description?: string;
   og_image_url?: string;
+  gallery_images?: string[];
   created_at: string;
   updated_at: string;
   blocks?: Block[];
@@ -31,6 +32,7 @@ export interface CreatePostData extends PostHero {
   seo_title?: string;
   seo_description?: string;
   og_image_url?: string;
+  gallery_images?: string[];
   blocks?: {
     type: BlockType;
     data: BlockData;
@@ -45,6 +47,7 @@ export interface UpdatePostData extends Partial<PostHero> {
   seo_title?: string;
   seo_description?: string;
   og_image_url?: string;
+  gallery_images?: string[];
   blocks?: {
     id?: string;
     type: BlockType;
