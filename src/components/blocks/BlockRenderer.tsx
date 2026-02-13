@@ -1,4 +1,4 @@
-import type { Block } from '../../types/block';
+import type { Block, TextFullData, ImageFullData, TextImageData } from '../../types/block';
 import TextFullBlock from './TextFullBlock';
 import ImageFullBlock from './ImageFullBlock';
 import TextImageBlock from './TextImageBlock';
@@ -18,24 +18,21 @@ export default function BlockRenderer({ blocks }: BlockRendererProps) {
             return (
               <TextFullBlock
                 key={block.id}
-                content={(block.data as { content: string }).content}
+                data={block.data as TextFullData}
               />
             );
           case 'image_full':
             return (
               <ImageFullBlock
                 key={block.id}
-                image_url={(block.data as { image_url: string }).image_url}
-                alt={(block.data as { alt?: string }).alt}
+                data={block.data as ImageFullData}
               />
             );
           case 'text_image':
             return (
               <TextImageBlock
                 key={block.id}
-                text={(block.data as { text: string }).text}
-                image_url={(block.data as { image_url: string }).image_url}
-                image_alt={(block.data as { image_alt?: string }).image_alt}
+                data={block.data as TextImageData}
                 mirrored={false}
               />
             );
@@ -43,9 +40,7 @@ export default function BlockRenderer({ blocks }: BlockRendererProps) {
             return (
               <TextImageBlock
                 key={block.id}
-                text={(block.data as { text: string }).text}
-                image_url={(block.data as { image_url: string }).image_url}
-                image_alt={(block.data as { image_alt?: string }).image_alt}
+                data={block.data as TextImageData}
                 mirrored
               />
             );

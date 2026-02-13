@@ -1,7 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Icon } from '@iconify-icon/react';
-import type { Block, BlockType, BlockData } from '../../../types/block';
+import type { Block, BlockType, BlockData, TextFullData, ImageFullData, TextImageData } from '../../../types/block';
 import TextFullEditor from './editors/TextFullEditor';
 import ImageFullEditor from './editors/ImageFullEditor';
 import TextImageEditor from './editors/TextImageEditor';
@@ -21,7 +21,7 @@ const BLOCK_LABELS: Record<BlockType, string> = {
   image_text: 'Зображення + Текст',
 };
 
-const BLOCK_ICONS: Record<BlockType, string> = {
+const BLOCK_ICONS_MAP: Record<BlockType, string> = {
   text_full: 'solar:text-linear',
   image_full: 'solar:gallery-wide-linear',
   text_image: 'solar:layout-left-linear',
@@ -54,14 +54,14 @@ export default function BlockItem({ block, index, onUpdate, onDelete, onImageCha
       case 'text_full':
         return (
           <TextFullEditor
-            data={block.data as { content: string }}
+            data={block.data as TextFullData}
             onChange={(data) => onUpdate(block.id, data)}
           />
         );
       case 'image_full':
         return (
           <ImageFullEditor
-            data={block.data as { image_url: string; alt?: string }}
+            data={block.data as ImageFullData}
             onChange={(data) => onUpdate(block.id, data)}
             onImageChange={(file) => onImageChange(block.id, file)}
           />
@@ -69,7 +69,7 @@ export default function BlockItem({ block, index, onUpdate, onDelete, onImageCha
       case 'text_image':
         return (
           <TextImageEditor
-            data={block.data as { text: string; image_url: string; image_alt?: string }}
+            data={block.data as TextImageData}
             onChange={(data) => onUpdate(block.id, data)}
             onImageChange={(file) => onImageChange(block.id, file)}
             mirrored={false}
@@ -78,7 +78,7 @@ export default function BlockItem({ block, index, onUpdate, onDelete, onImageCha
       case 'image_text':
         return (
           <TextImageEditor
-            data={block.data as { text: string; image_url: string; image_alt?: string }}
+            data={block.data as TextImageData}
             onChange={(data) => onUpdate(block.id, data)}
             onImageChange={(file) => onImageChange(block.id, file)}
             mirrored
@@ -108,7 +108,7 @@ export default function BlockItem({ block, index, onUpdate, onDelete, onImageCha
             <Icon icon="solar:hamburger-menu-linear" width={20} />
           </button>
           <div className="flex items-center gap-2">
-            <Icon icon={BLOCK_ICONS[block.type]} width={18} className="text-zinc-500" />
+            <Icon icon={BLOCK_ICONS_MAP[block.type]} width={18} className="text-zinc-500" />
             <span className="font-medium text-zinc-700">{BLOCK_LABELS[block.type]}</span>
             <span className="text-xs text-zinc-400">#{index + 1}</span>
           </div>

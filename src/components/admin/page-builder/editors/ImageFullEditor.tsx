@@ -1,9 +1,9 @@
 import { useState, useRef } from 'react';
 import { Icon } from '@iconify-icon/react';
-import type { BlockData } from '../../../../types/block';
+import type { BlockData, ImageFullData } from '../../../../types/block';
 
 interface ImageFullEditorProps {
-  data: { image_url: string; alt?: string };
+  data: ImageFullData;
   onChange: (data: BlockData) => void;
   onImageChange: (file: File | null) => void;
 }
@@ -32,14 +32,14 @@ export default function ImageFullEditor({ data, onChange, onImageChange }: Image
     setPreviewUrl(null);
     setHasNewImage(false);
     onImageChange(null);
-    onChange({ image_url: '', alt: '' });
+    onChange({ image_url: '', alt: '', caption: '' });
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
-  const handleAltChange = (value: string) => {
-    onChange({ image_url: data.image_url, alt: value });
+  const updateField = (field: keyof ImageFullData, value: string) => {
+    onChange({ ...data, [field]: value });
   };
 
   return (
@@ -87,13 +87,26 @@ export default function ImageFullEditor({ data, onChange, onImageChange }: Image
 
       <div>
         <label className="block text-sm font-medium text-zinc-700 mb-2">
-          Alt-текст (опис зображення)
+          Підпис (caption)
+        </label>
+        <input
+          type="text"
+          value={data.caption || ''}
+          onChange={(e) => updateField('caption', e.target.value)}
+          placeholder="Living Space"
+          className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-zinc-700 mb-2">
+          Alt-текст (опис для SEO)
         </label>
         <input
           type="text"
           value={data.alt || ''}
-          onChange={(e) => handleAltChange(e.target.value)}
-          placeholder="Опис зображення для SEO"
+          onChange={(e) => updateField('alt', e.target.value)}
+          placeholder="Опис зображення"
           className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900"
         />
       </div>
