@@ -81,7 +81,7 @@ export default function HeroSectionForm({ data, onChange, errors, initialImageUr
 
           <Input
             label="Площа"
-            placeholder="250 м²"
+            placeholder="250"
             value={data.area}
             onChange={(e) => handleChange('area', e.target.value)}
           />

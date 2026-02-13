@@ -10,7 +10,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
   const metadataParts = [
     category,
-    project.area,
+    project.area ? `${project.area} м²` : null,
     project.location,
     project.year
   ].filter(Boolean);

@@ -7,6 +7,78 @@ import { uploadProjectMedia } from '../middleware/multer';
 
 const router = Router();
 
+const VALIDATION_LIMITS = {
+  title: { minLength: 1, maxLength: 200 },
+  subtitle: { maxLength: 300 },
+  location: { maxLength: 200 },
+  area: { maxLength: 50 },
+  year: { maxLength: 20 },
+  tags: { maxItems: 15 },
+};
+
+interface ValidationError {
+  field: string;
+  message: string;
+}
+
+const validateProjectInput = (data: {
+  title?: string;
+  subtitle?: string;
+  location?: string;
+  area?: string;
+  year?: string;
+  tags?: string;
+}): ValidationError[] => {
+  const errors: ValidationError[] = [];
+  const { title, subtitle, location, area, year, tags } = data;
+
+  if (title !== undefined) {
+    if (title.length < VALIDATION_LIMITS.title.minLength) {
+      errors.push({ field: 'title', message: 'Title is required' });
+    } else if (title.length > VALIDATION_LIMITS.title.maxLength) {
+      errors.push({ field: 'title', message: `Title must be at most ${VALIDATION_LIMITS.title.maxLength} characters` });
+    }
+  }
+
+  if (subtitle && subtitle.length > VALIDATION_LIMITS.subtitle.maxLength) {
+    errors.push({ field: 'subtitle', message: `Subtitle must be at most ${VALIDATION_LIMITS.subtitle.maxLength} characters` });
+  }
+
+  if (location && location.length > VALIDATION_LIMITS.location.maxLength) {
+    errors.push({ field: 'location', message: `Location must be at most ${VALIDATION_LIMITS.location.maxLength} characters` });
+  }
+
+  if (area && area.length > VALIDATION_LIMITS.area.maxLength) {
+    errors.push({ field: 'area', message: `Area must be at most ${VALIDATION_LIMITS.area.maxLength} characters` });
+  }
+
+  if (year && year.length > VALIDATION_LIMITS.year.maxLength) {
+    errors.push({ field: 'year', message: `Year must be at most ${VALIDATION_LIMITS.year.maxLength} characters` });
+  }
+
+  if (tags) {
+    try {
+      const parsedTags = JSON.parse(tags);
+      if (!Array.isArray(parsedTags)) {
+        errors.push({ field: 'tags', message: 'Tags must be an array' });
+      } else if (parsedTags.length > VALIDATION_LIMITS.tags.maxItems) {
+        errors.push({ field: 'tags', message: `Maximum ${VALIDATION_LIMITS.tags.maxItems} tags allowed` });
+      } else {
+        for (const tag of parsedTags) {
+          if (typeof tag !== 'string') {
+            errors.push({ field: 'tags', message: 'Each tag must be a string' });
+            break;
+          }
+        }
+      }
+    } catch {
+      errors.push({ field: 'tags', message: 'Invalid tags format' });
+    }
+  }
+
+  return errors;
+};
+
 router.get('/', async (req, res) => {
   try {
     const { page, limit, tags, location, year, search, sortBy, sortOrder } = req.query;
@@ -64,6 +136,11 @@ router.post('/', authMiddleware, uploadProjectMedia, async (req, res) => {
       year?: string;
     };
 
+    const validationErrors = validateProjectInput({ title, subtitle, location, area, year, tags });
+    if (validationErrors.length > 0) {
+      return res.status(400).json({ errors: validationErrors });
+    }
+
     if (!title) {
       return res.status(400).json({ error: 'Title is required' });
     }
@@ -111,6 +188,11 @@ router.put('/:id', authMiddleware, uploadProjectMedia, async (req, res) => {
       area?: string;
       year?: string;
     };
+
+    const validationErrors = validateProjectInput({ title, subtitle, location, area, year, tags });
+    if (validationErrors.length > 0) {
+      return res.status(400).json({ errors: validationErrors });
+    }
 
     const existing = await projectService.getById(id);
     const existingProject = existing.project;
