@@ -171,7 +171,7 @@ export default function PostsPage() {
                           </button>
                           {post.status === 'published' && (
                             <a
-                              href={`/${post.slug}`}
+                              href={`/page/${post.slug}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="px-3 py-1 bg-zinc-100 text-zinc-700 rounded hover:bg-zinc-200 transition-colors"
