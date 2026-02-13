@@ -80,7 +80,7 @@ export default function HeroSlider() {
                     {project.area && (
                       <>
                         <span className="w-1 h-1 bg-white/60 rounded-full"></span>
-                        <span>{project.area}</span>
+                        <span>{project.area} м²</span>
                       </>
                     )}
                     {project.year && (

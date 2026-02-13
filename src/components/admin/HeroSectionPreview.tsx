@@ -83,7 +83,7 @@ export default function HeroSectionPreview({ data, existingImageUrl }: HeroSecti
                     <span className="block text-[8px] uppercase tracking-widest text-zinc-500 mb-0.5">
                       Площа
                     </span>
-                    <span className="text-[10px] font-medium text-white">{data.area}</span>
+                    <span className="text-[10px] font-medium text-white">{data.area} м²</span>
                   </div>
                 )}
               </div>
