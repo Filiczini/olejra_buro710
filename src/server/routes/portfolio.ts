@@ -1,9 +1,11 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middleware/auth';
 import { projectService } from '../services/projectService';
+import { postService } from '../services/postService';
 import { storageService } from '../services/storageService';
 import { activityLogService } from '../services/activityLogService';
 import { uploadProjectMedia } from '../middleware/multer';
+import type { PortfolioItem } from '../../types/portfolio';
 
 const router = Router();
 
@@ -98,6 +100,89 @@ router.get('/', async (req, res) => {
   } catch (error) {
     console.error('Error fetching projects:', error);
     res.status(500).json({ error: 'Failed to fetch projects' });
+  }
+});
+
+router.get('/all', async (req, res) => {
+  try {
+    const { page = '1', limit = '12', tags, search } = req.query;
+    
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+    
+    const [projectsResult, postsResult] = await Promise.all([
+      projectService.getAll({ limit: 1000 }),
+      postService.getAll({ status: 'published', limit: 1000 }),
+    ]);
+    
+    let allItems: PortfolioItem[] = [
+      ...projectsResult.data.map(p => ({
+        id: p.id,
+        type: 'project' as const,
+        title: p.title,
+        subtitle: p.subtitle,
+        image_url: p.image_url,
+        tags: p.tags || [],
+        location: p.location,
+        year: p.year,
+        created_at: p.created_at,
+      })),
+      ...postsResult.data.map(p => ({
+        id: p.id,
+        type: 'post' as const,
+        title: p.hero_title || p.title,
+        subtitle: p.hero_subtitle,
+        image_url: p.hero_image_url || '',
+        tags: p.hero_tags || [],
+        location: p.hero_location,
+        year: p.hero_year,
+        slug: p.slug,
+        created_at: p.created_at,
+      })),
+    ];
+    
+    if (tags) {
+      const tagFilters = (tags as string).split(',').map(t => t.toLowerCase().trim());
+      allItems = allItems.filter(item => 
+        item.tags.some(tag => tagFilters.includes(tag.toLowerCase()))
+      );
+    }
+    
+    if (search) {
+      const searchLower = (search as string).toLowerCase();
+      allItems = allItems.filter(item =>
+        item.title.toLowerCase().includes(searchLower) ||
+        (item.subtitle && item.subtitle.toLowerCase().includes(searchLower))
+      );
+    }
+    
+    allItems.sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+    
+    const total = allItems.length;
+    const totalPages = Math.ceil(total / limitNum);
+    const offset = (pageNum - 1) * limitNum;
+    const paginatedItems = allItems.slice(offset, offset + limitNum);
+    
+    const allTags = new Set<string>();
+    allItems.forEach(item => item.tags.forEach(tag => allTags.add(tag)));
+    
+    res.json({
+      data: paginatedItems,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages,
+      },
+      filters: {
+        tags: Array.from(allTags).sort(),
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching all portfolio items:', error);
+    res.status(500).json({ error: 'Failed to fetch portfolio items' });
   }
 });
 
