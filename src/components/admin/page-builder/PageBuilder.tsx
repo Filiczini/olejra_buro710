@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import type { Block, BlockType, BlockData, TextFullData, ImageFullData, TextImageData } from '../../../types/block';
 import BlocksList from './BlocksList';
 import AddBlockMenu from './AddBlockMenu';
@@ -15,10 +15,6 @@ function generateTempId(): string {
 
 export default function PageBuilder({ initialBlocks, onChange, onImageChange }: PageBuilderProps) {
   const [blocks, setBlocks] = useState<Block[]>(initialBlocks);
-
-  useEffect(() => {
-    setBlocks(initialBlocks);
-  }, [initialBlocks]);
 
   const notifyChange = useCallback((updatedBlocks: Block[]) => {
     const blocksData = updatedBlocks.map((block, index) => ({

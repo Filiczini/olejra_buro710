@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
 import { postService } from '../../services/api';
@@ -14,6 +14,10 @@ interface BlockWithFile {
   file: File | null;
 }
 
+interface BlocksDataRef {
+  blocks: { id?: string; type: BlockType; data: BlockData; sort_order: number }[];
+}
+
 export default function EditPostPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -27,9 +31,11 @@ export default function EditPostPage() {
   const [seoTitle, setSeoTitle] = useState('');
   const [seoDescription, setSeoDescription] = useState('');
   const [ogImageFile, setOgImageFile] = useState<File | null>(null);
-  const [blocks, setBlocks] = useState<Block[]>([]);
+  const [initialBlocks, setInitialBlocks] = useState<Block[]>([]);
   const [blockFiles, setBlockFiles] = useState<BlockWithFile[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  const blocksDataRef = useRef<BlocksDataRef>({ blocks: [] });
 
   useEffect(() => {
     if (id) {
@@ -48,7 +54,14 @@ export default function EditPostPage() {
       setStatus(post.status);
       setSeoTitle(post.seo_title || '');
       setSeoDescription(post.seo_description || '');
-      setBlocks(loadedBlocks);
+      setInitialBlocks(loadedBlocks);
+      
+      blocksDataRef.current.blocks = loadedBlocks.map((b, index) => ({
+        id: b.id,
+        type: b.type,
+        data: b.data,
+        sort_order: index,
+      }));
     } catch (error) {
       console.error('Error loading post:', error);
       navigate('/admin/posts');
@@ -86,17 +99,9 @@ export default function EditPostPage() {
     }
   };
 
-  const handleBlocksChange = useCallback((updatedBlocks: { id?: string; type: BlockType; data: BlockData; sort_order: number }[]) => {
-    const newBlocks: Block[] = updatedBlocks.map((b, index) => ({
-      id: b.id || `temp-${index}-${Date.now()}`,
-      post_id: id || '',
-      type: b.type,
-      data: b.data,
-      sort_order: b.sort_order,
-      created_at: new Date().toISOString(),
-    }));
-    setBlocks(newBlocks);
-  }, [id]);
+  const handleBlocksChange = (updatedBlocks: { id?: string; type: BlockType; data: BlockData; sort_order: number }[]) => {
+    blocksDataRef.current.blocks = updatedBlocks;
+  };
 
   const handleBlockImageChange = (blockId: string, file: File | null) => {
     setBlockFiles(prev => {
@@ -147,16 +152,16 @@ export default function EditPostPage() {
       formData.append('seo_title', seoTitle);
       formData.append('seo_description', seoDescription);
 
-      const blocksData = blocks.map((block, index) => {
+      const blocksData = blocksDataRef.current.blocks.map((block) => {
         const blockFile = blockFiles.find(bf => bf.id === block.id);
         return {
-          id: block.id.startsWith('temp-') ? undefined : block.id,
+          id: block.id?.startsWith('temp-') ? undefined : block.id,
           type: block.type,
           data: {
             ...block.data,
             _hasNewImage: !!blockFile?.file,
           },
-          sort_order: index,
+          sort_order: block.sort_order,
         };
       });
       formData.append('blocks', JSON.stringify(blocksData));
@@ -270,7 +275,8 @@ export default function EditPostPage() {
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-lg font-medium text-zinc-900 mb-4">Блоки контенту</h2>
           <PageBuilder
-            initialBlocks={blocks}
+            key={`${id || 'new'}-${initialBlocks.length}`}
+            initialBlocks={initialBlocks}
             onChange={handleBlocksChange}
             onImageChange={handleBlockImageChange}
           />
