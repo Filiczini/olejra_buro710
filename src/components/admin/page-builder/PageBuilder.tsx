@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { Block, BlockType, BlockData } from '../../../types/block';
+import type { Block, BlockType, BlockData, TextFullData, ImageFullData, TextImageData } from '../../../types/block';
 import BlocksList from './BlocksList';
 import AddBlockMenu from './AddBlockMenu';
 
@@ -89,11 +89,11 @@ export default function PageBuilder({ initialBlocks, onChange, onImageChange }: 
 function getDefaultBlockData(type: BlockType): BlockData {
   switch (type) {
     case 'text_full':
-      return { content: '' };
+      return { content: '', label: '', area: '', months: '', year: '' } as TextFullData;
     case 'image_full':
-      return { image_url: '', alt: '' };
+      return { image_url: '', alt: '', caption: '' } as ImageFullData;
     case 'text_image':
     case 'image_text':
-      return { text: '', image_url: '', image_alt: '' };
+      return { text: '', image_url: '', image_alt: '', icon: '', label: '', title: '', features: [] } as TextImageData;
   }
 }

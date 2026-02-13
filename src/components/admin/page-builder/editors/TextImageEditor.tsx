@@ -1,9 +1,10 @@
 import { useState, useRef } from 'react';
 import { Icon } from '@iconify-icon/react';
-import type { BlockData } from '../../../../types/block';
+import type { BlockData, TextImageData } from '../../../../types/block';
+import { BLOCK_ICONS } from '../../../../types/block';
 
 interface TextImageEditorProps {
-  data: { text: string; image_url: string; image_alt?: string };
+  data: TextImageData;
   onChange: (data: BlockData) => void;
   onImageChange: (file: File | null) => void;
   mirrored: boolean;
@@ -12,6 +13,7 @@ interface TextImageEditorProps {
 export default function TextImageEditor({ data, onChange, onImageChange, mirrored }: TextImageEditorProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [hasNewImage, setHasNewImage] = useState(false);
+  const [newFeature, setNewFeature] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const displayUrl = hasNewImage ? previewUrl : data.image_url;
@@ -33,18 +35,27 @@ export default function TextImageEditor({ data, onChange, onImageChange, mirrore
     setPreviewUrl(null);
     setHasNewImage(false);
     onImageChange(null);
-    onChange({ text: data.text, image_url: '', image_alt: '' });
+    onChange({ ...data, image_url: '', image_alt: '' });
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
-  const handleTextChange = (value: string) => {
-    onChange({ text: value, image_url: data.image_url, image_alt: data.image_alt });
+  const updateField = (field: keyof TextImageData, value: string | string[]) => {
+    onChange({ ...data, [field]: value });
   };
 
-  const handleAltChange = (value: string) => {
-    onChange({ text: data.text, image_url: data.image_url, image_alt: value });
+  const addFeature = () => {
+    if (newFeature.trim()) {
+      const features = data.features || [];
+      updateField('features', [...features, newFeature.trim()]);
+      setNewFeature('');
+    }
+  };
+
+  const removeFeature = (index: number) => {
+    const features = data.features || [];
+    updateField('features', features.filter((_, i) => i !== index));
   };
 
   const gridCols = 'md:grid-cols-[1fr_1fr]';
@@ -52,17 +63,92 @@ export default function TextImageEditor({ data, onChange, onImageChange, mirrore
 
   return (
     <div className={`grid ${gridCols} gap-4`}>
-      <div className={order.text}>
-        <label className="block text-sm font-medium text-zinc-700 mb-2">
-          Текст
-        </label>
-        <textarea
-          value={data.text || ''}
-          onChange={(e) => handleTextChange(e.target.value)}
-          placeholder="Введіть текст..."
-          rows={6}
-          className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 resize-none"
-        />
+      <div className={`${order.text} space-y-3`}>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="block text-xs font-medium text-zinc-600 mb-1">Іконка</label>
+            <select
+              value={data.icon || ''}
+              onChange={(e) => updateField('icon', e.target.value)}
+              className="w-full px-2 py-1.5 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+            >
+              <option value="">Без іконки</option>
+              {BLOCK_ICONS.map((icon) => (
+                <option key={icon.value} value={icon.value}>{icon.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-zinc-600 mb-1">Мітка</label>
+            <input
+              type="text"
+              value={data.label || ''}
+              onChange={(e) => updateField('label', e.target.value)}
+              placeholder="Interior"
+              className="w-full px-2 py-1.5 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-zinc-600 mb-1">Заголовок</label>
+          <input
+            type="text"
+            value={data.title || ''}
+            onChange={(e) => updateField('title', e.target.value)}
+            placeholder="Organic Textures"
+            className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-zinc-600 mb-1">Текст</label>
+          <textarea
+            value={data.text || ''}
+            onChange={(e) => updateField('text', e.target.value)}
+            placeholder="Введіть текст..."
+            rows={4}
+            className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 resize-none text-sm"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-zinc-600 mb-1">Особливості (features)</label>
+          <div className="flex gap-2 mb-2">
+            <input
+              type="text"
+              value={newFeature}
+              onChange={(e) => setNewFeature(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
+              placeholder="Додати особливість"
+              className="flex-1 px-2 py-1.5 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+            />
+            <button
+              type="button"
+              onClick={addFeature}
+              className="px-3 py-1.5 bg-zinc-100 text-zinc-700 rounded-lg hover:bg-zinc-200 text-sm"
+            >
+              +
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {(data.features || []).map((feature, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center gap-1 px-2 py-1 bg-zinc-100 text-zinc-700 rounded text-xs"
+              >
+                {feature}
+                <button
+                  type="button"
+                  onClick={() => removeFeature(index)}
+                  className="text-zinc-400 hover:text-red-500"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className={order.image}>
@@ -107,7 +193,7 @@ export default function TextImageEditor({ data, onChange, onImageChange, mirrore
         <input
           type="text"
           value={data.image_alt || ''}
-          onChange={(e) => handleAltChange(e.target.value)}
+          onChange={(e) => updateField('image_alt', e.target.value)}
           placeholder="Alt-текст"
           className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
         />
