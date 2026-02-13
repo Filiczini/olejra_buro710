@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
 import { postService } from '../services/api';
+import Header from '../components/layout/Header';
+import PostHeroBlock from '../components/blocks/PostHeroBlock';
 import BlockRenderer from '../components/blocks/BlockRenderer';
 import type { Post } from '../types/post';
 import type { Block } from '../types/block';
@@ -27,14 +29,17 @@ export default function PostPage() {
       setPost(result.post);
       setBlocks(result.blocks);
       
-      if (result.post.seo_title || result.post.seo_description) {
-        document.title = result.post.seo_title || result.post.title;
-        updateMetaTag('description', result.post.seo_description || '');
-        updateMetaTag('og:title', result.post.seo_title || result.post.title);
-        updateMetaTag('og:description', result.post.seo_description || '');
-        if (result.post.og_image_url) {
-          updateMetaTag('og:image', result.post.og_image_url);
-        }
+      const seoTitle = result.post.seo_title || result.post.hero_title || result.post.title;
+      const seoDescription = result.post.seo_description || result.post.hero_subtitle || '';
+      
+      document.title = seoTitle;
+      updateMetaTag('description', seoDescription);
+      updateMetaTag('og:title', seoTitle);
+      updateMetaTag('og:description', seoDescription);
+      
+      const ogImage = result.post.og_image_url || result.post.hero_image_url;
+      if (ogImage) {
+        updateMetaTag('og:image', ogImage);
       }
     } catch (err) {
       console.error('Error loading post:', err);
@@ -60,7 +65,7 @@ export default function PostPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <Icon icon="solar:spinner-linear" width={32} className="animate-spin text-zinc-400" />
       </div>
     );
@@ -68,7 +73,7 @@ export default function PostPage() {
 
   if (error || !post) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white">
         <Icon icon="solar:file-remove-linear" width={64} className="text-zinc-300 mb-4" />
         <h1 className="text-2xl font-bold text-zinc-700 mb-2">Сторінку не знайдено</h1>
         <p className="text-zinc-500">Запитана сторінка не існує або була видалена.</p>
@@ -76,26 +81,26 @@ export default function PostPage() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-5xl mx-auto px-4 pt-16 pb-24">
-        <header className="mb-12 border-b border-zinc-200 pb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-zinc-900 tracking-tight mb-4">
-            {post.title}
-          </h1>
-          <time className="text-sm text-zinc-500">
-            {new Date(post.created_at).toLocaleDateString('uk-UA', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </time>
-        </header>
+  const hasHero = Boolean(post.hero_image_url || post.hero_title);
 
-        <main>
-          <BlockRenderer blocks={blocks} />
-        </main>
-      </div>
+  return (
+    <div className="bg-white text-zinc-900 antialiased">
+      <Header transparent={hasHero} />
+
+      {hasHero && <PostHeroBlock post={post} />}
+
+      <main className={hasHero ? '' : 'pt-16'}>
+        {blocks.length > 0 && <BlockRenderer blocks={blocks} />}
+        
+        {!hasHero && blocks.length === 0 && (
+          <div className="max-w-5xl mx-auto px-4 py-24">
+            <div className="text-center text-zinc-400">
+              <Icon icon="solar:document-text-linear" width={48} className="mx-auto mb-4" />
+              <p>Контент сторінки буде додано пізніше...</p>
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 }

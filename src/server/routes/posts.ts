@@ -15,6 +15,20 @@ interface AuthenticatedRequest extends Request {
   };
 }
 
+interface PostBody {
+  title?: string;
+  slug?: string;
+  status?: 'draft' | 'published';
+  seo_title?: string;
+  seo_description?: string;
+  hero_title?: string;
+  hero_subtitle?: string;
+  hero_tags?: string;
+  hero_location?: string;
+  hero_year?: string;
+  blocks?: string;
+}
+
 const router = Router();
 
 const VALIDATION_LIMITS = {
@@ -22,6 +36,8 @@ const VALIDATION_LIMITS = {
   slug: { maxLength: 200 },
   seoTitle: { maxLength: 60 },
   seoDescription: { maxLength: 160 },
+  heroTitle: { maxLength: 200 },
+  heroSubtitle: { maxLength: 300 },
 };
 
 interface ValidationError {
@@ -29,14 +45,9 @@ interface ValidationError {
   message: string;
 }
 
-const validatePostInput = (data: {
-  title?: string;
-  slug?: string;
-  seo_title?: string;
-  seo_description?: string;
-}): ValidationError[] => {
+const validatePostInput = (data: PostBody): ValidationError[] => {
   const errors: ValidationError[] = [];
-  const { title, slug, seo_title, seo_description } = data;
+  const { title, slug, seo_title, seo_description, hero_title, hero_subtitle } = data;
 
   if (title !== undefined) {
     if (title.length < VALIDATION_LIMITS.title.minLength) {
@@ -56,6 +67,14 @@ const validatePostInput = (data: {
 
   if (seo_description && seo_description.length > VALIDATION_LIMITS.seoDescription.maxLength) {
     errors.push({ field: 'seo_description', message: `SEO description must be at most ${VALIDATION_LIMITS.seoDescription.maxLength} characters` });
+  }
+
+  if (hero_title && hero_title.length > VALIDATION_LIMITS.heroTitle.maxLength) {
+    errors.push({ field: 'hero_title', message: `Hero title must be at most ${VALIDATION_LIMITS.heroTitle.maxLength} characters` });
+  }
+
+  if (hero_subtitle && hero_subtitle.length > VALIDATION_LIMITS.heroSubtitle.maxLength) {
+    errors.push({ field: 'hero_subtitle', message: `Hero subtitle must be at most ${VALIDATION_LIMITS.heroSubtitle.maxLength} characters` });
   }
 
   return errors;
@@ -103,16 +122,10 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequest, res) => {
   try {
-    const { title, slug, status, seo_title, seo_description, blocks } = req.body as {
-      title?: string;
-      slug?: string;
-      status?: 'draft' | 'published';
-      seo_title?: string;
-      seo_description?: string;
-      blocks?: string;
-    };
+    const body = req.body as PostBody;
+    const { title, slug, status, seo_title, seo_description, hero_title, hero_subtitle, hero_tags, hero_location, hero_year, blocks } = body;
 
-    const validationErrors = validatePostInput({ title, slug, seo_title, seo_description });
+    const validationErrors = validatePostInput(body);
     if (validationErrors.length > 0) {
       return res.status(400).json({ errors: validationErrors });
     }
@@ -121,8 +134,14 @@ router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequ
       return res.status(400).json({ error: 'Title is required' });
     }
 
-    let ogImageUrl: string | undefined;
     const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+
+    let heroImageUrl: string | undefined;
+    if (files?.['heroImage']?.[0]) {
+      heroImageUrl = await storageService.uploadImage(files['heroImage'][0], 'blocks');
+    }
+
+    let ogImageUrl: string | undefined;
     if (files?.['ogImage']?.[0]) {
       ogImageUrl = await storageService.uploadImage(files['ogImage'][0], 'blocks');
     }
@@ -165,6 +184,12 @@ router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequ
       seo_title,
       seo_description,
       og_image_url: ogImageUrl,
+      hero_image_url: heroImageUrl,
+      hero_title,
+      hero_subtitle,
+      hero_tags: hero_tags ? JSON.parse(hero_tags) : [],
+      hero_location,
+      hero_year,
       blocks: processedBlocks as unknown as { type: BlockType; data: BlockData; sort_order: number }[],
     });
 
@@ -206,22 +231,24 @@ router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequ
 router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequest, res) => {
   try {
     const id = req.params.id as string;
-    const { title, slug, status, seo_title, seo_description, blocks } = req.body as {
-      title?: string;
-      slug?: string;
-      status?: 'draft' | 'published';
-      seo_title?: string;
-      seo_description?: string;
-      blocks?: string;
-    };
+    const body = req.body as PostBody;
+    const { title, slug, status, seo_title, seo_description, hero_title, hero_subtitle, hero_tags, hero_location, hero_year, blocks } = body;
 
-    const validationErrors = validatePostInput({ title, slug, seo_title, seo_description });
+    const validationErrors = validatePostInput(body);
     if (validationErrors.length > 0) {
       return res.status(400).json({ errors: validationErrors });
     }
 
     const existing = await postService.getById(id);
     const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+
+    let heroImageUrl = existing.post.hero_image_url;
+    if (files?.['heroImage']?.[0]) {
+      if (heroImageUrl) {
+        await storageService.deleteImage(heroImageUrl);
+      }
+      heroImageUrl = await storageService.uploadImage(files['heroImage'][0], 'blocks');
+    }
 
     let ogImageUrl = existing.post.og_image_url;
     if (files?.['ogImage']?.[0]) {
@@ -273,7 +300,8 @@ router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRe
     if (title !== undefined && title !== existing.post.title) changedFields.push('title');
     if (slug !== undefined && slug !== existing.post.slug) changedFields.push('slug');
     if (status !== undefined && status !== existing.post.status) changedFields.push('status');
-    if (ogImageUrl !== existing.post.og_image_url) changedFields.push('og_image');
+    if (heroImageUrl !== existing.post.hero_image_url) changedFields.push('hero_image');
+    if (hero_title !== existing.post.hero_title) changedFields.push('hero_title');
 
     const post = await postService.update(id, {
       title,
@@ -282,6 +310,12 @@ router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRe
       seo_title,
       seo_description,
       og_image_url: ogImageUrl,
+      hero_image_url: heroImageUrl,
+      hero_title,
+      hero_subtitle,
+      hero_tags: hero_tags ? JSON.parse(hero_tags) : undefined,
+      hero_location,
+      hero_year,
       blocks: parsedBlocks as unknown as { id?: string; type: BlockType; data: BlockData; sort_order: number }[],
     });
 
