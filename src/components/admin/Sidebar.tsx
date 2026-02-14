@@ -25,7 +25,7 @@ export default function Sidebar() {
         />
         <SidebarMenuItem
           icon="solar:document-text-linear"
-          label="Сторінки"
+          label="Пости"
           path="/admin/posts"
         />
         <SidebarMenuItem
