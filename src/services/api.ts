@@ -9,6 +9,9 @@ import type {
   ActivityLog,
   ActivityLogsParams,
 } from '../types/activityLog';
+import type { Post, PostPaginationParams } from '../types/post';
+import type { Block } from '../types/block';
+import type { PortfolioAllParams, PortfolioAllResponse } from '../types/portfolio';
 
 export const authService = {
   login: async (email: string, password: string) => {
@@ -98,6 +101,18 @@ export const portfolioService = {
       return null;
     }
   },
+
+  getAllWithPosts: async (params?: PortfolioAllParams): Promise<PortfolioAllResponse> => {
+    const queryParams = new URLSearchParams();
+    
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.tags && params.tags.length > 0) queryParams.append('tags', params.tags.join(','));
+    if (params?.search) queryParams.append('search', params.search);
+
+    const response = await api.get(`/portfolio/all?${queryParams.toString()}`);
+    return response.data as PortfolioAllResponse;
+  },
 };
 
 export const activityLogService = {
@@ -116,6 +131,45 @@ export const activityLogService = {
   getUniqueUsers: async () => {
     const response = await api.get('/logs/users');
     return response.data as string[];
+  },
+};
+
+export const postService = {
+  getAll: async (params?: PostPaginationParams) => {
+    const queryParams = new URLSearchParams();
+
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.search) queryParams.append('search', params.search);
+
+    const response = await api.get(`/posts?${queryParams.toString()}`);
+    return response.data as PaginatedResponse<Post>;
+  },
+
+  getById: async (id: string) => {
+    const response = await api.get(`/posts/${id}`);
+    return response.data as { post: Post; blocks: Block[] };
+  },
+
+  getBySlug: async (slug: string) => {
+    const response = await api.get(`/posts/public/${slug}`);
+    return response.data as { post: Post; blocks: Block[] };
+  },
+
+  create: async (data: FormData) => {
+    const response = await api.post('/posts', data);
+    return response.data as Post;
+  },
+
+  update: async (id: string, data: FormData) => {
+    const response = await api.put(`/posts/${id}`, data);
+    return response.data as Post;
+  },
+
+  delete: async (id: string) => {
+    const response = await api.delete(`/posts/${id}`);
+    return response.data;
   },
 };
 

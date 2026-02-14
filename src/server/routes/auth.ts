@@ -3,23 +3,9 @@ import type { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { authMiddleware } from '../middleware/auth';
 import { generateToken } from '../config/jwt';
+import { userService } from '../services/userService';
 
 const router = Router();
-
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@example.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
-
-const generatePasswordHash = async (password: string): Promise<string> => {
-  return await bcrypt.hash(password, 10);
-};
-
-let adminPasswordHash: string;
-
-const initializeAdmin = async () => {
-  adminPasswordHash = await generatePasswordHash(ADMIN_PASSWORD);
-};
-
-initializeAdmin();
 
 router.post('/login', async (req: Request, res: Response) => {
   const { email, password } = req.body;
@@ -28,28 +14,60 @@ router.post('/login', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Email and password are required' });
   }
 
-  if (email !== ADMIN_EMAIL) {
-    return res.status(401).json({ error: 'Invalid credentials' });
+  try {
+    const user = await userService.findByEmail(email);
+
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const isValid = await bcrypt.compare(password, user.password_hash);
+
+    if (!isValid) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const token = generateToken({ userId: user.id, email: user.email, role: user.role });
+
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
-
-  const isValid = await bcrypt.compare(password, adminPasswordHash);
-
-  if (!isValid) {
-    return res.status(401).json({ error: 'Invalid credentials' });
-  }
-
-  const token = generateToken({ email });
-
-  res.json({
-    token,
-    user: {
-      email,
-    },
-  });
 });
 
 router.post('/logout', authMiddleware, (_req: Request, res: Response) => {
   res.json({ message: 'Logged out successfully' });
+});
+
+router.get('/me', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const user = await userService.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 export default router;

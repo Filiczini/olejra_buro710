@@ -38,12 +38,14 @@ export const storageService = {
    * @param file - Express.Multer.File object
    * @returns Public URL of uploaded image
    */
-  uploadImage: async (file: Express.Multer.File): Promise<string> => {
+  uploadImage: async (file: Express.Multer.File, bucket?: string): Promise<string> => {
+    const targetBucket = bucket || 'projects';
     const fileName = storageService.generateSafeFileName(file.originalname);
-    const filePath = `projects/media/${fileName}`;
+    const folder = bucket === 'blocks' ? 'blocks' : 'projects/media';
+    const filePath = `${folder}/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
-      .from('projects')
+      .from(targetBucket)
       .upload(filePath, file.buffer, {
         contentType: file.mimetype,
       });
@@ -51,7 +53,7 @@ export const storageService = {
     if (uploadError) throw uploadError;
 
     const { data } = supabase.storage
-      .from('projects')
+      .from(targetBucket)
       .getPublicUrl(filePath);
 
     return data.publicUrl;
@@ -97,14 +99,23 @@ export const storageService = {
    */
   deleteImage: async (imageUrl: string): Promise<DeleteResult> => {
     try {
-      const filePath = imageUrl.split('/projects/')[1];
+      let bucket = 'projects';
+      let filePath: string | null = null;
+
+      if (imageUrl.includes('/blocks/')) {
+        bucket = 'blocks';
+        filePath = imageUrl.split('/blocks/')[1];
+      } else if (imageUrl.includes('/projects/')) {
+        filePath = imageUrl.split('/projects/')[1];
+      }
+
       if (!filePath) {
         return { success: false, error: 'Invalid image URL format' };
       }
 
       const { error: deleteError } = await supabase.storage
-        .from('projects')
-        .remove([`projects/${filePath}`]);
+        .from(bucket)
+        .remove([filePath]);
 
       if (deleteError) {
         return { success: false, error: deleteError.message };

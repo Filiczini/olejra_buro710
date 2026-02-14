@@ -24,6 +24,11 @@ export default function Sidebar() {
           path="/admin/projects/create"
         />
         <SidebarMenuItem
+          icon="solar:document-text-linear"
+          label="Пости"
+          path="/admin/posts"
+        />
+        <SidebarMenuItem
           icon="solar:file-text-linear"
           label="Журнал дій"
           path="/admin/logs"
