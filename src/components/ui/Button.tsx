@@ -6,7 +6,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export default function Button({ variant = 'primary', children, className = '', ...props }: ButtonProps) {
-  const baseStyles = 'rounded-full font-medium transition-all';
+  const baseStyles = 'rounded-full font-medium transition-all cursor-pointer';
   
   const variants = {
     primary: 'bg-zinc-900 text-white hover:bg-zinc-800',
