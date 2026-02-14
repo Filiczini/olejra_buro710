@@ -109,7 +109,7 @@ export default function PostsPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as 'draft' | 'published' | '')}
-                className="px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900"
+                className="px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 cursor-pointer"
               >
                 <option value="">Всі статуси</option>
                 <option value="published">Опубліковані</option>
@@ -167,7 +167,7 @@ export default function PostsPage() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => navigate(`/admin/posts/edit/${post.id}`)}
-                            className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+                            className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors cursor-pointer"
                           >
                             Редагувати
                           </button>
@@ -176,14 +176,14 @@ export default function PostsPage() {
                               href={`/page/${post.slug}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="px-3 py-1 bg-zinc-100 text-zinc-700 rounded hover:bg-zinc-200 transition-colors"
+                              className="px-3 py-1 bg-zinc-100 text-zinc-700 rounded hover:bg-zinc-200 transition-colors cursor-pointer"
                             >
                               Перегляд
                             </a>
                           )}
                           <button
                             onClick={() => handleDelete(post.id)}
-                            className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+                            className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors cursor-pointer"
                           >
                             Видалити
                           </button>
@@ -205,7 +205,7 @@ export default function PostsPage() {
                 <button
                   onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
                   disabled={pagination.page === 1}
-                  className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 >
                   Попередня
                 </button>
@@ -216,7 +216,7 @@ export default function PostsPage() {
                     <button
                       key={page}
                       onClick={() => setPagination(prev => ({ ...prev, page }))}
-                      className={`px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors ${
+                      className={`px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors cursor-pointer ${
                         page === pagination.page ? 'bg-zinc-900 text-white' : ''
                       }`}
                     >
@@ -227,7 +227,7 @@ export default function PostsPage() {
                 <button
                   onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
                   disabled={pagination.page === pagination.totalPages}
-                  className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 >
                   Наступна
                 </button>
