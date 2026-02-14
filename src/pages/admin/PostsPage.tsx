@@ -120,8 +120,8 @@ export default function PostsPage() {
                 Всього постів: {pagination.total}
               </span>
             </div>
-            <Button onClick={() => navigate('/admin/posts/create')} className="flex items-center gap-2">
-              <Icon icon="solar:add-circle-linear" width={18} />
+            <Button onClick={() => navigate('/admin/posts/create')} className="flex items-center gap-2 px-4 py-2 text-sm">
+              <Icon icon="solar:add-circle-linear" width={16} />
               Додати пост
             </Button>
           </div>
