@@ -211,7 +211,7 @@ export default function ProjectPage() {
                     <span className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1">
                       Площа
                     </span>
-                    <span className="text-sm font-medium text-white">{project.area}</span>
+                    <span className="text-sm font-medium text-white">{project.area} м²</span>
                   </div>
                 )}
               </div>

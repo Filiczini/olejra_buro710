@@ -16,6 +16,11 @@ export interface ActivityChanges {
   media_added?: number;
   media_removed?: number;
   media_reordered?: boolean;
+  blocks_count?: number;
+  hero_updated?: boolean;
+  hero_fields?: string[];
+  gallery_updated?: boolean;
+  gallery_count?: number;
 }
 
 export interface ActivityLogsParams {
