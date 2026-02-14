@@ -12,6 +12,7 @@ import type {
 import type { Post, PostPaginationParams } from '../types/post';
 import type { Block } from '../types/block';
 import type { PortfolioAllParams, PortfolioAllResponse } from '../types/portfolio';
+import type { ContactFormData, ContactSubmitResponse } from '../types/contact';
 
 export const authService = {
   login: async (email: string, password: string) => {
@@ -170,6 +171,13 @@ export const postService = {
   delete: async (id: string) => {
     const response = await api.delete(`/posts/${id}`);
     return response.data;
+  },
+};
+
+export const contactService = {
+  submit: async (data: ContactFormData): Promise<ContactSubmitResponse> => {
+    const response = await api.post('/contact', data);
+    return response.data as ContactSubmitResponse;
   },
 };
 

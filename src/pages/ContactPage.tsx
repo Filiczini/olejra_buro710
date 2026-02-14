@@ -4,6 +4,7 @@ import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import { contactService } from '../services/api';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -12,9 +13,28 @@ export default function ContactPage() {
     subject: '',
     message: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await contactService.submit(formData);
+      if (result.success) {
+        setSuccess(true);
+        setFormData({ name: '', email: '', subject: '', message: '' });
+      } else {
+        setError(result.message || 'Помилка при відправці');
+      }
+    } catch {
+      setError('Помилка при відправці повідомлення. Спробуйте пізніше.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -70,20 +90,17 @@ export default function ContactPage() {
     <div className="min-h-screen bg-zinc-50">
       <Header />
       <div className="pt-20">
-        {/* Hero Section */}
         <section className="max-w-[1800px] mx-auto px-6 py-24 md:py-32">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
             <div>
               <h1 className="text-5xl md:text-7xl font-medium tracking-tight leading-tight animate-reveal-up">
-                <>
-                  Зв'яжіться з нами
-                </>
+                Зв'яжіться з нами
               </h1>
             </div>
             <div className="space-y-8 flex flex-col justify-between">
               <div className="space-y-6 text-lg text-zinc-500 font-light leading-relaxed max-w-xl">
                 <p>
-                  <>Ми раді допомогти вам втілити ваш дизайн-проект у життя.</>
+                  Ми раді допомогти вам втілити ваш дизайн-проект у життя.
                 </p>
               </div>
               <div className="flex gap-6">
@@ -106,7 +123,6 @@ export default function ContactPage() {
           </div>
         </section>
 
-        {/* Contact Info Section */}
         <section className="max-w-[1800px] mx-auto px-6 py-24 md:py-32 border-b border-zinc-200">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
             <div>
@@ -164,7 +180,6 @@ export default function ContactPage() {
           </div>
         </section>
 
-        {/* Contact Form Section */}
         <section id="contact-form" className="max-w-[1800px] mx-auto px-6 py-24 md:py-32">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-16">
@@ -175,62 +190,98 @@ export default function ContactPage() {
                 Розкажіть про свій проект.
               </p>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
-                  label="Ім'я"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Ваше ім'я"
-                  required
-                />
-                <Input
-                  label="Email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Введіть ваш email"
-                  required
-                />
-              </div>
-              <Input
-                label="Тема"
-                name="subject"
-                value={formData.subject}
-                onChange={handleChange}
-                placeholder="Тема вашого повідомлення"
-                required
-              />
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-zinc-700">
-                  Повідомлення
-                </label>
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  placeholder="Ваше повідомлення..."
-                  rows={6}
-                  className="w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent resize-none"
-                  required
-                />
-              </div>
-              <div className="text-center">
+
+            {success ? (
+              <div className="text-center py-12">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-6">
+                  <Icon icon="solar:check-circle-linear" width={32} className="text-green-600" />
+                </div>
+                <h3 className="text-2xl font-medium mb-2">Повідомлення надіслано!</h3>
+                <p className="text-zinc-500 mb-6">
+                  Ми зв'яжемося з вами найближчим часом.
+                </p>
                 <Button
-                  type="submit"
-                  variant="primary"
-                  className="px-12 py-4"
+                  variant="secondary"
+                  onClick={() => setSuccess(false)}
                 >
-                  Надіслати повідомлення
+                  Надіслати ще одне повідомлення
                 </Button>
               </div>
-            </form>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {error && (
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                    {error}
+                  </div>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Input
+                    label="Ім'я"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Ваше ім'я"
+                    required
+                    disabled={loading}
+                  />
+                  <Input
+                    label="Email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Введіть ваш email"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+                <Input
+                  label="Тема"
+                  name="subject"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  placeholder="Тема вашого повідомлення"
+                  required
+                  disabled={loading}
+                />
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-zinc-700">
+                    Повідомлення
+                  </label>
+                  <textarea
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    placeholder="Ваше повідомлення..."
+                    rows={6}
+                    className="w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent resize-none disabled:bg-zinc-100 disabled:cursor-not-allowed"
+                    required
+                    disabled={loading}
+                    minLength={10}
+                  />
+                </div>
+                <div className="text-center">
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    className="px-12 py-4"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <span className="flex items-center gap-2">
+                        <Icon icon="solar:spinner-linear" width={18} className="animate-spin" />
+                        Відправка...
+                      </span>
+                    ) : (
+                      'Надіслати повідомлення'
+                    )}
+                  </Button>
+                </div>
+              </form>
+            )}
           </div>
         </section>
 
-        {/* Map/Location Section */}
         <section className="bg-zinc-900 text-white py-24 md:py-32 px-6">
           <div className="max-w-[1800px] mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">

@@ -64,7 +64,7 @@ export default function PostHeroPreview({ data }: PostHeroPreviewProps) {
             )}
 
             <div className="mt-4 flex items-center gap-4">
-              <div className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center cursor-pointer hover:scale-110 transition-transform duration-300">
                 <Icon icon="solar:arrow-down-linear" width={16} />
               </div>
               <span className="text-white/60 text-xs">Scroll to explore</span>
