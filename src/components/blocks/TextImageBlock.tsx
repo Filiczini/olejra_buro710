@@ -17,7 +17,7 @@ export default function TextImageBlock({ data, mirrored }: TextImageBlockProps) 
   return (
     <section className="group w-full">
       <div className="grid grid-cols-1 md:grid-cols-2 h-auto md:min-h-[700px]">
-        <div className={`relative h-96 md:h-auto ${order} overflow-hidden`}>
+        <div className={`m-6 relative h-96 md:h-auto ${order} overflow-hidden`}>
           <img
             src={image_url}
             alt={image_alt || title || ''}
@@ -27,7 +27,7 @@ export default function TextImageBlock({ data, mirrored }: TextImageBlockProps) 
         </div>
         
         <div className={`flex flex-col justify-center p-12 md:p-24 ${textOrder}`}>
-          <div className={mirrored ? 'max-w-md ml-auto' : 'max-w-md'}>
+          <div className={mirrored ? 'max-w-md' : 'max-w-md ml-auto'}>
             {(icon || label) && (
               <div className="flex items-center gap-2 mb-6">
                 {icon && <Icon icon={icon} className="text-zinc-400" width={20} />}

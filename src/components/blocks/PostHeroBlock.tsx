@@ -19,6 +19,13 @@ export default function PostHeroBlock({ post }: PostHeroBlockProps) {
   const displayTitle = hero_title || title;
   const hasHeroContent = hero_image_url || displayTitle;
 
+  const handleScrollToContent = () => {
+    window.scrollBy({
+      top: window.innerHeight,
+      behavior: 'smooth'
+    });
+  };
+
   if (!hasHeroContent) return null;
 
   return (
@@ -67,7 +74,10 @@ export default function PostHeroBlock({ post }: PostHeroBlockProps) {
               {hero_subtitle}
             </p>
             <div className="mt-6 flex items-center gap-4">
-              <button className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-110 transition-transform duration-300">
+              <button 
+                onClick={handleScrollToContent}
+                className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-110 transition-transform duration-300"
+              >
                 <Icon icon="solar:arrow-down-linear" width={20} />
               </button>
               <span className="text-white/60 text-xs">Scroll to explore</span>
