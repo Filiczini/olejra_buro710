@@ -65,3 +65,6 @@ src/types/activityLog.js
 
 # Documentation
 docs/
+
+# Database migrations (managed separately)
+src/server/migrations/
