@@ -32,3 +32,10 @@ export interface PortfolioAllResponse {
     tags: string[];
   };
 }
+
+export interface NextItem {
+  type: PortfolioItemType;
+  id: string;
+  slug?: string;
+  title: string;
+}

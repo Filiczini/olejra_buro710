@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Icon } from '@iconify-icon/react';
 import { postService } from '../../services/api';
 import type { Post } from '../../types/post';
 import Button from '../../components/ui/Button';
@@ -119,7 +120,8 @@ export default function PostsPage() {
                 Всього постів: {pagination.total}
               </span>
             </div>
-            <Button onClick={() => navigate('/admin/posts/create')}>
+            <Button onClick={() => navigate('/admin/posts/create')} className="flex items-center gap-2">
+              <Icon icon="solar:add-circle-linear" width={18} />
               Додати пост
             </Button>
           </div>

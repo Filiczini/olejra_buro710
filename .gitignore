@@ -62,3 +62,6 @@ src/types/activityLog.js
 
 # TypeScript build info
 *.tsbuildinfo
+
+# Documentation
+docs/
