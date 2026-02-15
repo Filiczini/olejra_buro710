@@ -75,7 +75,7 @@ export default function HeroSlider() {
                   <h1 className="text-5xl md:text-7xl lg:text-[88px] font-semibold tracking-tight leading-[0.9] mb-6">
                     {project.title}
                   </h1>
-                  <div className="flex items-center gap-4 text-sm md:text-base font-medium text-white/80">
+                  <div className="hidden md:flex items-center gap-4 text-sm md:text-base font-medium text-white/80">
                     <span>{project.location || 'Локація'}</span>
                     {project.area && (
                       <>
