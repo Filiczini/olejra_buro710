@@ -54,17 +54,16 @@ cache/
 .vite/
 *.js.map
 
-# TypeScript compiled files (when .ts exists)
-src/server/**/*.js
-src/types/project.js
-src/types/activityLog.js
-!src/server/index.js
+# TypeScript compiled files
+backend/**/*.js
+!backend/src/index.js
 
 # TypeScript build info
 *.tsbuildinfo
+node_modules/.tmp/
 
 # Documentation
 docs/
 
-# Database migrations (managed separately)
-src/server/migrations/
+# Frontend build
+frontend/dist/
