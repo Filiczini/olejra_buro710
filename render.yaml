@@ -7,11 +7,10 @@ services:
     startCommand: npm run start
     healthCheckPath: /health
     envVars:
-    envVars:
       - key: NODE_ENV
         value: production
       - key: FRONTEND_URL
-        value: https://buro710.vercel.app
+        value: https://olejra-buro710.vercel.app/
       - key: VITE_API_URL
         value: ""
       - key: SUPABASE_URL
