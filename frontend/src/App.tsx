@@ -1,0 +1,57 @@
+import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import AllProjectsPage from './pages/AllProjectsPage';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
+import ProjectPage from './pages/ProjectPage';
+import PublicPostPage from './pages/PublicPostPage';
+import LoginPage from './pages/admin/LoginPage';
+import DashboardPage from './pages/admin/DashboardPage';
+import CreateProjectPage from './pages/admin/CreateProjectPage';
+import EditProjectPage from './pages/admin/EditProjectPage';
+import PostsPage from './pages/admin/PostsPage';
+import EditPostPage from './pages/admin/EditPostPage';
+import ActivityLogPage from './pages/admin/ActivityLogPage';
+import ProtectedRoute from './components/admin/ProtectedRoute';
+import AdminLayout from './layouts/AdminLayout';
+
+function AdminWrapper() {
+  return (
+    <ProtectedRoute>
+      <AdminLayout>
+        <Outlet />
+      </AdminLayout>
+    </ProtectedRoute>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/projects" element={<AllProjectsPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/project/:id" element={<ProjectPage />} />
+        <Route path="/page/:slug" element={<PublicPostPage />} />
+        <Route path="/admin/login" element={<LoginPage />} />
+
+        {/* Admin routes with AdminLayout */}
+        <Route element={<AdminWrapper />}>
+          <Route path="/admin/dashboard" element={<DashboardPage />} />
+          <Route path="/admin/projects/create" element={<CreateProjectPage />} />
+          <Route path="/admin/projects/edit/:id" element={<EditProjectPage />} />
+          <Route path="/admin/posts" element={<PostsPage />} />
+          <Route path="/admin/posts/create" element={<EditPostPage />} />
+          <Route path="/admin/posts/edit/:id" element={<EditPostPage />} />
+          <Route path="/admin/logs" element={<ActivityLogPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;
+
