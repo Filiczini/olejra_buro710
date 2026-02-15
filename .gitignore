@@ -65,5 +65,5 @@ node_modules/.tmp/
 # Documentation
 docs/
 
-# Frontend build
-frontend/dist/
+# Database migrations (managed separately)
+src/server/migrations/src/types/*.js

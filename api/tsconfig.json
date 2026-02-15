@@ -5,7 +5,6 @@
     "lib": ["ES2022"],
     "types": ["node"],
     "moduleResolution": "node",
-    "outDir": "./dist/server",
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -13,7 +12,10 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true
   },
-  "include": ["src/server/**/*", "src/types/**/*"]
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules"]
 }
