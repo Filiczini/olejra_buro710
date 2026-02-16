@@ -23,6 +23,9 @@ interface BulkDeleteResult {
 }
 
 export const storageService = {
+  /**
+   * Generate a safe filename with latin characters only
+   */
   generateSafeFileName: (originalName: string): string => {
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 8);
@@ -30,6 +33,11 @@ export const storageService = {
     return `${timestamp}-${random}.${ext}`;
   },
 
+  /**
+   * Upload a single image to Supabase storage
+   * @param file - Express.Multer.File object
+   * @returns Public URL of uploaded image
+   */
   uploadImage: async (file: Express.Multer.File, bucket?: string): Promise<string> => {
     const targetBucket = bucket || 'projects';
     const fileName = storageService.generateSafeFileName(file.originalname);
@@ -51,6 +59,11 @@ export const storageService = {
     return data.publicUrl;
   },
 
+  /**
+   * Upload multiple images to Supabase storage
+   * @param files - Array of Express.Multer.File objects
+   * @returns Object with success status, array of URLs, and array of errors
+   */
   uploadImages: async (files: Express.Multer.File[]): Promise<BulkUploadResult> => {
     const uploadPromises = files.map(async (file): Promise<UploadResult> => {
       try {
@@ -79,6 +92,11 @@ export const storageService = {
     };
   },
 
+  /**
+   * Delete a single image from Supabase storage
+   * @param imageUrl - Public URL of image to delete
+   * @returns Object with success status and optional error
+   */
   deleteImage: async (imageUrl: string): Promise<DeleteResult> => {
     try {
       let bucket = 'projects';
@@ -110,6 +128,11 @@ export const storageService = {
     }
   },
 
+  /**
+   * Delete multiple images from Supabase storage
+   * @param imageUrls - Array of public URLs to delete
+   * @returns Object with success status and array of failed URLs
+   */
   deleteImages: async (imageUrls: string[]): Promise<BulkDeleteResult> => {
     const deletePromises = imageUrls.map(async (url): Promise<{ url: string; success: boolean }> => {
       const result = await storageService.deleteImage(url);

@@ -4,6 +4,7 @@ import { authMiddleware } from '../middleware/auth';
 import { postService } from '../services/postService';
 import { storageService } from '../services/storageService';
 import { activityLogService } from '../services/activityLogService';
+import { uploadBlockMedia, uploadGalleryImages } from '../middleware/multer';
 import { supabase } from '../config/supabase';
 import type { BlockType, BlockData } from '../types/block';
 
@@ -120,7 +121,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', authMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequest, res) => {
   try {
     const body = req.body as PostBody;
     const { title, slug, status, seo_title, seo_description, hero_title, hero_subtitle, hero_tags, hero_location, hero_year, gallery_images, blocks } = body;
@@ -253,7 +254,7 @@ router.post('/', authMiddleware, async (req: AuthenticatedRequest, res) => {
   }
 });
 
-router.put('/:id', authMiddleware, async (req: AuthenticatedRequest, res) => {
+router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequest, res) => {
   try {
     const id = req.params.id as string;
     const body = req.body as PostBody;
@@ -408,7 +409,7 @@ router.delete('/:id', authMiddleware, async (req: AuthenticatedRequest, res) => 
   }
 });
 
-router.post('/:id/gallery', authMiddleware, async (req: AuthenticatedRequest, res) => {
+router.post('/:id/gallery', authMiddleware, uploadGalleryImages, async (req: AuthenticatedRequest, res) => {
   try {
     const id = req.params.id as string;
     const files = req.files as Express.Multer.File[] | undefined;
