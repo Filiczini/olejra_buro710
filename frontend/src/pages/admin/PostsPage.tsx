@@ -87,14 +87,14 @@ export default function PostsPage() {
       <div className="max-w-7xl">
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
           <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-4">
               <div className="relative">
                 <input
                   type="text"
                   placeholder="Пошук постів..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 w-64"
+                  className="max-w-[110px] lg:max-w-[180px] pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 w-64"
                 />
                 <svg
                   className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400"
@@ -109,7 +109,7 @@ export default function PostsPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as 'draft' | 'published' | '')}
-                className="px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 cursor-pointer"
+                className="max-w-[134px] lg:max-w-[150px] px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 cursor-pointer"
               >
                 <option value="">Всі статуси</option>
                 <option value="published">Опубліковані</option>

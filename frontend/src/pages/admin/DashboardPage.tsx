@@ -90,7 +90,7 @@ export default function DashboardPage() {
       <div className="max-w-7xl">
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
           <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center gap-4">
+            <div className="hidden items-center gap-4">
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors"
