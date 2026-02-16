@@ -62,8 +62,5 @@ backend/**/*.js
 *.tsbuildinfo
 node_modules/.tmp/
 
-# Documentation
-docs/
-
 # Database migrations (managed separately)
-src/server/migrations/src/types/*.js
+backend/src/migrations/
