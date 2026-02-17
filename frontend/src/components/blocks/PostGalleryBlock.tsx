@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Icon } from '@iconify-icon/react';
+import ImageLightbox from '../ui/ImageLightbox';
 
 interface PostGalleryBlockProps {
   images: string[];
@@ -9,6 +10,8 @@ export default function PostGalleryBlock({ images }: PostGalleryBlockProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const checkScrollButtons = () => {
     const container = scrollContainerRef.current;
@@ -38,6 +41,17 @@ export default function PostGalleryBlock({ images }: PostGalleryBlockProps) {
       behavior: 'smooth',
     });
   };
+
+  const openLightbox = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
+
+  const closeLightbox = () => setLightboxOpen(false);
+  
+  const goPrev = () => setLightboxIndex(prev => (prev > 0 ? prev - 1 : images.length - 1));
+  
+  const goNext = () => setLightboxIndex(prev => (prev < images.length - 1 ? prev + 1 : 0));
 
   if (!images || images.length === 0) {
     return null;
@@ -80,6 +94,7 @@ export default function PostGalleryBlock({ images }: PostGalleryBlockProps) {
         {images.map((image, index) => (
           <div
             key={index}
+            onClick={() => openLightbox(index)}
             className="gallery-item aspect-[2/3] min-w-[200px] md:min-w-[240px] md:max-w-[400px] bg-zinc-100 overflow-hidden group cursor-pointer flex-shrink-0"
           >
             <img
@@ -90,6 +105,16 @@ export default function PostGalleryBlock({ images }: PostGalleryBlockProps) {
           </div>
         ))}
       </div>
+
+      {lightboxOpen && (
+        <ImageLightbox
+          images={images}
+          currentIndex={lightboxIndex}
+          onClose={closeLightbox}
+          onPrev={goPrev}
+          onNext={goNext}
+        />
+      )}
 
       <style>{`
         .scrollbar-hide::-webkit-scrollbar { display: none; }
