@@ -12,6 +12,7 @@ export default function PostGalleryBlock({ images }: PostGalleryBlockProps) {
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
 
   const checkScrollButtons = () => {
     const container = scrollContainerRef.current;
@@ -21,6 +22,13 @@ export default function PostGalleryBlock({ images }: PostGalleryBlockProps) {
     setCanScrollLeft(scrollLeft > 0);
     setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
   };
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     checkScrollButtons();
@@ -34,7 +42,9 @@ export default function PostGalleryBlock({ images }: PostGalleryBlockProps) {
 
     const cardWidth = container.querySelector('.gallery-item')?.clientWidth || 0;
     const gap = 24;
-    const scrollAmount = (cardWidth + gap) * 3;
+    const scrollAmount = isMobile 
+      ? cardWidth + gap 
+      : (cardWidth + gap) * 3;
 
     container.scrollBy({
       left: direction === 'left' ? -scrollAmount : scrollAmount,
@@ -88,14 +98,14 @@ export default function PostGalleryBlock({ images }: PostGalleryBlockProps) {
       <div
         ref={scrollContainerRef}
         onScroll={checkScrollButtons}
-        className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth"
+        className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory md:snap-none"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {images.map((image, index) => (
           <div
             key={index}
             onClick={() => openLightbox(index)}
-            className="gallery-item aspect-[2/3] min-w-[200px] md:min-w-[240px] md:max-w-[400px] bg-zinc-100 overflow-hidden group cursor-pointer flex-shrink-0"
+            className="gallery-item aspect-[2/3] w-[calc(100vw-48px)] md:w-auto md:min-w-[240px] md:max-w-[400px] bg-zinc-100 overflow-hidden group cursor-pointer flex-shrink-0 snap-center md:snap-none"
           >
             <img
               src={image}
