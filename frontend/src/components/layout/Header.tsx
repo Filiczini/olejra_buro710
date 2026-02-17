@@ -12,6 +12,18 @@ export default function Header({ transparent = false }: HeaderProps) {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+
+  const handleClose = () => {
+    setIsClosing(true);
+  };
+
+  const handleAnimationEnd = () => {
+    if (isClosing) {
+      setMobileMenuOpen(false);
+      setIsClosing(false);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -59,25 +71,34 @@ export default function Header({ transparent = false }: HeaderProps) {
           <a href="/about" className={`nav-link text-xs font-medium uppercase tracking-wide transition-all duration-300 ${isTransparent ? 'text-white/80 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'} hover:scale-105`}>Про бюро</a>
           <a href="/contact" className={`nav-link text-xs font-medium uppercase tracking-wide transition-all duration-300 ${isTransparent ? 'text-white/80 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'} hover:scale-105`}>Контакти</a>
         </nav>
-        <div className="flex items-center gap-6 md:gap-8">
-          {isAuthenticated ? (
-            <>
-              <a href="/admin/dashboard" className={`hidden md:flex items-center gap-2 text-xs font-medium transition-all duration-300 ${isTransparent ? 'text-white/80 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'} hover:scale-105`}>
-                <Icon icon="solar:user-circle-linear" width={16} />
-                <span>Адмін</span>
-              </a>
-              <button
-                onClick={() => {
-                  handleLogout();
-                  navigate('/');
-                }}
-                className={`text-xs font-medium px-6 py-2.5 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-xl cursor-pointer ${isTransparent ? 'bg-white text-zinc-900 hover:bg-zinc-200 hover:shadow-zinc-900/20' : 'bg-zinc-900 text-white hover:bg-zinc-800 hover:shadow-zinc-900/20'}`}
-              >
-                Вийти
-              </button>
-            </>
-          ) : null}
-        </div>
+        {isAuthenticated && (
+  <div className="flex items-center gap-6 md:gap-8">
+    <a
+      href="/admin/dashboard"
+      className={`hidden md:flex items-center gap-2 text-xs font-medium transition-all duration-300 ${
+        isTransparent ? "text-white/80 hover:text-white" : "text-zinc-500 hover:text-zinc-900"
+      } hover:scale-105`}
+    >
+      <Icon icon="solar:user-circle-linear" width={16} />
+      <span>Адмін</span>
+    </a>
+
+    <button
+      type="button"
+      onClick={() => {
+        handleLogout();
+        navigate("/");
+      }}
+      className={`text-xs font-medium px-6 py-2.5 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-xl cursor-pointer ${
+        isTransparent
+          ? "bg-white text-zinc-900 hover:bg-zinc-200 hover:shadow-zinc-900/20"
+          : "bg-zinc-900 text-white hover:bg-zinc-800 hover:shadow-zinc-900/20"
+      }`}
+    >
+      Вийти
+    </button>
+  </div>
+)}
       </div>
     </header>
 
@@ -85,13 +106,22 @@ export default function Header({ transparent = false }: HeaderProps) {
       <div className="fixed inset-0 z-[60] md:hidden">
         <div
           className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-          onClick={() => setMobileMenuOpen(false)}
+          onClick={handleClose}
         />
-        <div className="absolute inset-0 bg-white flex flex-col animate-slide-in">
+        <div 
+          className={`absolute inset-0 bg-white flex flex-col ${isClosing ? 'animate-slide-out' : 'animate-slide-in'}`}
+          onAnimationEnd={handleAnimationEnd}
+        >
           <div className="flex items-center justify-between px-6 h-20 border-b border-zinc-100">
-            <span className="text-lg font-medium tracking-tight uppercase">Buro 710</span>
+            <a 
+              href="/" 
+              onClick={handleClose}
+              className="text-lg font-medium tracking-tight uppercase text-zinc-900 hover:text-zinc-600"
+            >
+              Buro 710
+            </a>
             <button
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={handleClose}
               className="p-2 -mr-2"
               aria-label="Закрити меню"
             >
@@ -101,21 +131,21 @@ export default function Header({ transparent = false }: HeaderProps) {
           <nav className="flex-1 flex flex-col items-center justify-center gap-8">
             <a
               href="/projects"
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={handleClose}
               className="text-2xl font-medium text-zinc-900 hover:text-zinc-600"
             >
               Проєкти
             </a>
             <a
               href="/about"
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={handleClose}
               className="text-2xl font-medium text-zinc-900 hover:text-zinc-600"
             >
               Про бюро
             </a>
             <a
               href="/contact"
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={handleClose}
               className="text-2xl font-medium text-zinc-900 hover:text-zinc-600"
             >
               Контакти
@@ -124,7 +154,7 @@ export default function Header({ transparent = false }: HeaderProps) {
               <>
                 <a
                   href="/admin/dashboard"
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={handleClose}
                   className="text-lg text-zinc-500 hover:text-zinc-900"
                 >
                   Адмін панель
@@ -132,7 +162,7 @@ export default function Header({ transparent = false }: HeaderProps) {
                 <button
                   onClick={() => {
                     handleLogout();
-                    setMobileMenuOpen(false);
+                    handleClose();
                     navigate('/');
                   }}
                   className="text-sm font-medium px-8 py-3 bg-zinc-900 text-white rounded-full"
