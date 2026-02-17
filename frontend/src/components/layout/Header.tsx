@@ -113,7 +113,13 @@ export default function Header({ transparent = false }: HeaderProps) {
           onAnimationEnd={handleAnimationEnd}
         >
           <div className="flex items-center justify-between px-6 h-20 border-b border-zinc-100">
-            <span className="text-lg font-medium tracking-tight uppercase">Buro 710</span>
+            <a 
+              href="/" 
+              onClick={handleClose}
+              className="text-lg font-medium tracking-tight uppercase text-zinc-900 hover:text-zinc-600"
+            >
+              Buro 710
+            </a>
             <button
               onClick={handleClose}
               className="p-2 -mr-2"
