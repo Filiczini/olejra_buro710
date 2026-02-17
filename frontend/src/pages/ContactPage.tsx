@@ -57,7 +57,7 @@ export default function ContactPage() {
     {
       icon: 'solar:map-point-linear',
       label: 'Адреса',
-      value: 'Київ, вул. Хрещатик, 10',
+      value: 'Чернівці, вул. Рівненська, 5А',
       link: null
     },
     {
@@ -290,27 +290,26 @@ export default function ContactPage() {
                   Знайти нас
                 </h2>
                 <p className="text-zinc-400 text-lg mb-8">
-                  Наш офіс знаходиться в центрі Києва.
+                  Наш офіс знаходиться в районі Майдану.
                 </p>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-4">
-                    <Icon icon="solar:map-point-linear" width={24} className="text-zinc-500" />
-                    <div>
-                      <p className="text-zinc-400 text-sm">Адреса</p>
-                      <p className="text-lg">Київ, вул. Хрещатик, 10</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <Icon icon="solar:train-linear" width={24} className="text-zinc-500" />
-                    <div>
-                      <p className="text-zinc-400 text-sm">Метро</p>
-                      <p className="text-lg">Золоті ворота</p>
-                    </div>
+                <div className="flex items-start gap-4">
+                  <Icon icon="solar:map-point-linear" width={24} className="text-zinc-500" />
+                  <div>
+                    <p className="text-zinc-400 text-sm">Адреса</p>
+                    <p className="text-lg">Чернівці, вул. Рівненська, 5А</p>
                   </div>
                 </div>
               </div>
-              <div className="h-[400px] bg-zinc-800 rounded-lg flex items-center justify-center">
-                <p className="text-zinc-500">Відкрити інтерактивну карту</p>
+              <div className="h-[400px] rounded-lg overflow-hidden">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2679.46!2d25.9351!3d48.2922!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x473408f6b1d5d5d1%3A0x7d6b7e1f0a5b3c9d!2sRivnenska%20St%2C%205%D0%90%2C%20Chernivtsi%2C%20Chernivtsi%20Oblast%2C%20Ukraine!5e0!3m2!1suk!2sua!4v1700000000000"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
               </div>
             </div>
           </div>

@@ -42,6 +42,7 @@ tmp/
 cache/
 *.tmp
 .cache/
+docs
 
 # Backup files
 *.bak
