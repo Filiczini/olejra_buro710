@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Icon } from '@iconify-icon/react';
+import { User, LogOut, Menu } from 'lucide-react';
 
 interface TopBarProps {
   onMobileMenuClick?: () => void;
@@ -8,7 +7,6 @@ interface TopBarProps {
 
 export default function TopBar({ onMobileMenuClick }: TopBarProps) {
   const navigate = useNavigate();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -16,40 +14,34 @@ export default function TopBar({ onMobileMenuClick }: TopBarProps) {
   };
 
   return (
-    <header className="fixed top-0 right-0 left-0 md:left-64 h-16 bg-white border-b border-zinc-200 flex items-center justify-between px-4 md:px-6 z-30">
+    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-8 flex-shrink-0">
       {/* Left Section */}
       <div className="flex items-center gap-4">
         {/* Hamburger Menu - Mobile only */}
         <button
-          onClick={() => {
-            setIsMobileMenuOpen(!isMobileMenuOpen);
-            if (onMobileMenuClick) onMobileMenuClick();
-          }}
-          className="md:hidden p-2 hover:bg-zinc-100 rounded-lg transition-colors"
+          onClick={onMobileMenuClick}
+          className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
           aria-label="Toggle menu"
         >
-          <Icon icon="solar:hamburger-menu-linear" width={24} />
+          <Menu className="h-5 w-5" />
         </button>
 
         {/* User Info */}
-        <div className="flex items-center gap-2">
-          <Icon icon="solar:user-circle-linear" width={20} className="text-zinc-600" />
-          <span className="text-sm text-zinc-600">admin</span>
+        <div className="flex items-center text-gray-500">
+          <User className="h-5 w-5 mr-2" />
+          <span className="text-base font-medium">admin</span>
         </div>
       </div>
 
       {/* Right Section */}
-      <div className="flex items-center gap-3">
-        {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 px-3 py-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
-          aria-label="Logout"
-        >
-          <Icon icon="solar:logout-linear" width={20} />
-          <span className="text-sm font-medium hidden sm:inline">Вийти</span>
-        </button>
-      </div>
+      <button
+        onClick={handleLogout}
+        className="flex items-center text-gray-500 hover:text-red-600 transition-colors text-sm font-medium"
+        aria-label="Logout"
+      >
+        <LogOut className="h-4 w-4 mr-2" />
+        Вийти
+      </button>
     </header>
   );
 }

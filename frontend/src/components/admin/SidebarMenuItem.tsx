@@ -1,26 +1,27 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Icon } from '@iconify-icon/react';
 
 interface SidebarMenuItemProps {
-  icon: string;
+  icon: React.ComponentType<{ className?: string }>;
   label: string;
   path: string;
   isExternal?: boolean;
 }
 
-export default function SidebarMenuItem({ icon, label, path, isExternal }: SidebarMenuItemProps) {
+export default function SidebarMenuItem({ icon: Icon, label, path, isExternal }: SidebarMenuItemProps) {
   const location = useLocation();
   const isActive = location.pathname === path || location.pathname.startsWith(path + '/');
 
-  const activeClasses = 'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out bg-white/10 text-white border-l-4 border-white';
-  const inactiveClasses = 'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out text-zinc-400 hover:bg-zinc-800 hover:text-white border-l-4 border-transparent';
+  const baseClasses = 'group flex items-center px-3 py-2.5 text-base font-medium transition-colors rounded-md';
+  const activeClasses = 'bg-zinc-900 text-white';
+  const inactiveClasses = 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/50';
 
-  const linkClasses = isActive ? activeClasses : inactiveClasses;
+  const linkClasses = `${baseClasses} ${isActive ? activeClasses : inactiveClasses}`;
+  const iconClasses = `mr-3 h-5 w-5 stroke-[1.5] ${isActive ? 'text-white' : ''}`;
 
   const content = (
     <>
-      <Icon icon={icon} width={20} />
-      <span className="font-medium">{label}</span>
+      <Icon className={iconClasses} />
+      <span>{label}</span>
     </>
   );
 
