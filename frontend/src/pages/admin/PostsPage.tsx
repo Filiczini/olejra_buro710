@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Icon } from '@iconify-icon/react';
+import { Search, ChevronDown, PlusCircle, Pencil, Eye, Trash2, CheckCircle } from 'lucide-react';
 import { postService } from '../../services/api';
 import type { Post } from '../../types/post';
-import Button from '../../components/ui/Button';
 
 export default function PostsPage() {
   const navigate = useNavigate();
@@ -70,122 +69,146 @@ export default function PostsPage() {
   const getStatusBadge = (status: string) => {
     if (status === 'published') {
       return (
-        <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
           Опубліковано
         </span>
       );
     }
     return (
-      <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20">
         Чернетка
       </span>
     );
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('uk-UA');
+  };
+
   return (
     <div>
-      <div className="max-w-7xl">
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <div className="hidden lg:flex items-center gap-4">
-              <div className="relative">
+      <div className="mx-auto max-w-7xl ">
+        {/* Toolbar */}
+        <div className="mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              {/* Search */}
+              <div className="relative group w-full sm:w-80">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400 group-focus-within:text-gray-600 stroke-[1.5]" />
+                </div>
                 <input
                   type="text"
                   placeholder="Пошук постів..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 w-64"
+                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 transition-all bg-white"
                 />
-                <svg
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
               </div>
 
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as 'draft' | 'published' | '')}
-                className="px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 cursor-pointer"
-              >
-                <option value="">Всі статуси</option>
-                <option value="published">Опубліковані</option>
-                <option value="draft">Чернетки</option>
-              </select>
+              {/* Filter Dropdown */}
+              <div className="relative">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as 'draft' | 'published' | '')}
+                  className="appearance-none bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 cursor-pointer hover:border-gray-300 transition-colors"
+                >
+                  <option value="">Всі статуси</option>
+                  <option value="published">Опубліковано</option>
+                  <option value="draft">Чернетка</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                  <ChevronDown className="h-4 w-4 stroke-[1.5]" />
+                </div>
+              </div>
 
-              <span className="text-zinc-600">
-                Всього постів: {pagination.total}
-              </span>
+              <span className="text-sm text-gray-500 ml-2 font-medium">Всього: {pagination.total}</span>
             </div>
-            <Button onClick={() => navigate('/admin/posts/create')} className="flex items-center gap-2 px-4 py-2 text-sm">
-              <Icon icon="solar:add-circle-linear" width={16} />
-              Додати пост
-            </Button>
-          </div>
 
+            <button
+              onClick={() => navigate('/admin/posts/create')}
+              className="flex items-center justify-center px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-base font-medium rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 cursor-pointer"
+            >
+              <PlusCircle className="h-5 w-5 mr-2 stroke-[1.5]" />
+              Додати пост
+            </button>
+          </div>
+        </div>
+
+        {/* Table Card */}
+        <div className="bg-white border border-gray-200 rounded-xl shadow-[0px_2px_4px_rgba(0,0,0,0.02)] overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-zinc-200">
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Назва</th>
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Slug</th>
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Статус</th>
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">SEO</th>
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Створено</th>
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Дії</th>
+                <tr className="border-b border-gray-100 bg-gray-50/50">
+                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">Назва</th>
+                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">Slug</th>
+                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">Статус</th>
+                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">SEO</th>
+                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">Створено</th>
+                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide text-right">Дії</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-gray-100">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-8 text-zinc-600">Завантаження...</td>
+                    <td colSpan={6} className="text-center py-8 text-gray-500">Завантаження...</td>
                   </tr>
                 ) : posts.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-8 text-zinc-600">Постів не знайдено</td>
+                    <td colSpan={6} className="text-center py-8 text-gray-500">Постів не знайдено</td>
                   </tr>
                 ) : (
                   posts.map((post) => (
-                    <tr key={post.id} className="border-b border-zinc-100 hover:bg-zinc-50 transition-colors">
-                      <td className="py-3 px-4 font-medium text-zinc-900">{post.title}</td>
-                      <td className="py-3 px-4 text-zinc-500 font-mono text-sm">/{post.slug}</td>
-                      <td className="py-3 px-4">{getStatusBadge(post.status)}</td>
-                      <td className="py-3 px-4">
+                    <tr key={post.id} className="group hover:bg-gray-50/80 transition-colors">
+                      <td className="py-4 px-6">
+                        <p className="text-base font-medium text-gray-900">{post.title}</p>
+                      </td>
+                      <td className="py-4 px-6">
+                        <code className="text-sm font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">/{post.slug}</code>
+                      </td>
+                      <td className="py-4 px-6">
+                        {getStatusBadge(post.status)}
+                      </td>
+                      <td className="py-4 px-6">
                         {post.seo_title || post.seo_description ? (
-                          <span className="text-green-600 text-sm">Налаштовано</span>
+                          <div className="flex items-center text-emerald-600 text-sm font-medium">
+                            <CheckCircle className="h-4 w-4 mr-1.5 stroke-[1.5]" />
+                            Налаштовано
+                          </div>
                         ) : (
-                          <span className="text-zinc-400 text-sm">Не налаштовано</span>
+                          <span className="text-gray-400 text-sm">Не налаштовано</span>
                         )}
                       </td>
-                      <td className="py-3 px-4 text-zinc-600">
-                        {new Date(post.created_at).toLocaleDateString('uk-UA')}
+                      <td className="py-4 px-6 text-base text-gray-500 tabular-nums">
+                        {formatDate(post.created_at)}
                       </td>
-                      <td className="py-3 px-4">
-                        <div className="flex gap-2">
+                      <td className="py-4 px-6 text-right">
+                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => navigate(`/admin/posts/edit/${post.id}`)}
-                            className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors cursor-pointer"
+                            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors cursor-pointer"
+                            title="Редагувати"
                           >
-                            Редагувати
+                            <Pencil className="h-5 w-5 stroke-[1.5]" />
                           </button>
                           {post.status === 'published' && (
                             <a
                               href={`/page/${post.slug}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="px-3 py-1 bg-zinc-100 text-zinc-700 rounded hover:bg-zinc-200 transition-colors cursor-pointer"
+                              className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+                              title="Перегляд"
                             >
-                              Перегляд
+                              <Eye className="h-5 w-5 stroke-[1.5]" />
                             </a>
                           )}
                           <button
                             onClick={() => handleDelete(post.id)}
-                            className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors cursor-pointer"
+                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
+                            title="Видалити"
                           >
-                            Видалити
+                            <Trash2 className="h-5 w-5 stroke-[1.5]" />
                           </button>
                         </div>
                       </td>
@@ -196,16 +219,17 @@ export default function PostsPage() {
             </table>
           </div>
 
+          {/* Pagination */}
           {pagination.totalPages > 1 && (
-            <div className="flex justify-between items-center mt-4 pt-4 border-t border-zinc-200">
-              <div className="text-sm text-zinc-600">
+            <div className="flex justify-between items-center px-6 py-4 border-t border-gray-100">
+              <div className="text-sm text-gray-500">
                 Показано {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}-{Math.min(pagination.page * pagination.limit, pagination.total)} з {pagination.total}
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
                   disabled={pagination.page === 1}
-                  className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                  className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer text-sm"
                 >
                   Попередня
                 </button>
@@ -216,8 +240,8 @@ export default function PostsPage() {
                     <button
                       key={page}
                       onClick={() => setPagination(prev => ({ ...prev, page }))}
-                      className={`px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors cursor-pointer ${
-                        page === pagination.page ? 'bg-zinc-900 text-white' : ''
+                      className={`px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer text-sm ${
+                        page === pagination.page ? 'bg-gray-900 text-white border-gray-900 hover:bg-gray-800' : ''
                       }`}
                     >
                       {page}
@@ -227,7 +251,7 @@ export default function PostsPage() {
                 <button
                   onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
                   disabled={pagination.page === pagination.totalPages}
-                  className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                  className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer text-sm"
                 >
                   Наступна
                 </button>

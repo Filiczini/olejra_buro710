@@ -35,9 +35,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="flex h-screen w-full bg-gray-50 overflow-hidden">
       {/* Desktop Sidebar */}
-      <div className="hidden md:block">
+      <div className="hidden md:block flex-shrink-0">
         <Sidebar />
       </div>
 
@@ -49,14 +49,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         />
       </div>
 
-      {/* TopBar */}
-      <TopBar
-        onMobileMenuClick={isMobile ? toggleMobileSidebar : undefined}
-      />
-
       {/* Main Content */}
-      <main className="pt-16 md:pl-64 min-h-screen">
-        <div className="p-6 md:p-8">
+      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+        {/* TopBar */}
+        <TopBar onMobileMenuClick={isMobile ? toggleMobileSidebar : undefined} />
+
+        {/* Page Content */}
+        <div className="flex-1 overflow-auto p-8">
           {children}
         </div>
       </main>

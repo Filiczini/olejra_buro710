@@ -75,7 +75,7 @@ export default function PostGalleryBlock({ images }: PostGalleryBlockProps) {
           <button
             onClick={() => scroll('left')}
             disabled={!canScrollLeft}
-            className={`w-10 h-10 border border-zinc-200 rounded-full flex items-center justify-center transition-colors ${
+            className={`w-10 h-10 border border-zinc-200 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
               canScrollLeft ? 'hover:bg-zinc-100' : 'opacity-30 cursor-not-allowed'
             }`}
             aria-label="Previous images"
@@ -85,7 +85,7 @@ export default function PostGalleryBlock({ images }: PostGalleryBlockProps) {
           <button
             onClick={() => scroll('right')}
             disabled={!canScrollRight}
-            className={`w-10 h-10 border border-zinc-200 rounded-full flex items-center justify-center transition-colors ${
+            className={`w-10 h-10 border border-zinc-200 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
               canScrollRight ? 'hover:bg-zinc-100' : 'opacity-30 cursor-not-allowed'
             }`}
             aria-label="Next images"
