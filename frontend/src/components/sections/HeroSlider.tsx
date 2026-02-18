@@ -1,46 +1,46 @@
 import { Icon } from '@iconify-icon/react';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { portfolioService } from '../../services/api';
-import type { Project } from '../../types/project';
+import { postService } from '../../services/api';
+import type { Post } from '../../types/post';
 
 export default function HeroSlider() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProjects = async () => {
+    const fetchPosts = async () => {
       try {
-        const response = await portfolioService.getAll({ limit: 10, sortBy: 'created_at', sortOrder: 'desc' });
-        const featuredProjects = response.data.filter(p => p.image_url).slice(0, 5);
-        setProjects(featuredProjects);
+        const response = await postService.getAll({ status: 'published', limit: 10 });
+        const featuredPosts = response.data.filter(p => p.hero_image_url).slice(0, 5);
+        setPosts(featuredPosts);
       } catch (error) {
-        console.error('Failed to fetch projects:', error);
+        console.error('Failed to fetch posts:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchProjects();
+    fetchPosts();
   }, []);
 
   useEffect(() => {
-    if (projects.length <= 1) return;
+    if (posts.length <= 1) return;
     const interval = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % projects.length);
+      setCurrentSlide(prev => (prev + 1) % posts.length);
     }, 6000);
     return () => clearInterval(interval);
-  }, [projects.length]);
+  }, [posts.length]);
 
   const nextSlide = () => {
-    setCurrentSlide(prev => (prev + 1) % projects.length);
+    setCurrentSlide(prev => (prev + 1) % posts.length);
   };
 
   const prevSlide = () => {
-    setCurrentSlide(prev => (prev - 1 + projects.length) % projects.length);
+    setCurrentSlide(prev => (prev - 1 + posts.length) % posts.length);
   };
 
-  if (loading || projects.length === 0) {
+  if (loading || posts.length === 0) {
     return (
       <section className="relative w-full h-screen overflow-hidden bg-zinc-900 text-white">
         <div className="flex items-center justify-center h-full">
@@ -50,21 +50,21 @@ export default function HeroSlider() {
     );
   }
 
-  const currentProject = projects[currentSlide];
+  const currentPost = posts[currentSlide];
 
   return (
     <header className="relative w-full h-screen overflow-hidden bg-zinc-900 text-white">
       <div className="relative w-full h-full">
-        {projects.map((project, index) => (
+        {posts.map((post, index) => (
           <div
-            key={project.id}
+            key={post.id}
             className={`slide absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
             data-index={index}
           >
             <div className="absolute inset-0 bg-zinc-800">
               <img
-                src={project.image_url}
-                alt={project.title}
+                src={post.hero_image_url}
+                alt={post.hero_title || post.title}
                 className={`w-full h-full object-cover opacity-90 transition-transform duration-[6000ms] ease-out ${index === currentSlide ? 'scale-105' : 'scale-100'}`}
               />
             </div>
@@ -73,20 +73,14 @@ export default function HeroSlider() {
               <div className="max-w-[1800px] mx-auto w-full flex flex-col md:flex-row items-end justify-between gap-10">
                 <div className="w-full md:max-w-4xl">
                   <h1 className="text-5xl md:text-7xl lg:text-[88px] font-semibold tracking-tight leading-[0.9] mb-6">
-                    {project.title}
+                    {post.hero_title || post.title}
                   </h1>
                   <div className="hidden md:flex items-center gap-4 text-sm md:text-base font-medium text-white/80">
-                    <span>{project.location || 'Локація'}</span>
-                    {project.area && (
+                    <span>{post.hero_location || 'Локація'}</span>
+                    {post.hero_year && (
                       <>
                         <span className="w-1 h-1 bg-white/60 rounded-full"></span>
-                        <span>{project.area} м²</span>
-                      </>
-                    )}
-                    {project.year && (
-                      <>
-                        <span className="w-1 h-1 bg-white/60 rounded-full"></span>
-                        <span>{project.year}</span>
+                        <span>{post.hero_year}</span>
                       </>
                     )}
                   </div>
@@ -106,10 +100,10 @@ export default function HeroSlider() {
               </span>
               <div className="hidden md:block w-12 h-[1px] bg-white/30"></div>
               <Link
-                to={`/project/${currentProject.id}`}
+                to={`/page/${currentPost.slug}`}
                 className="group hidden md:flex items-center gap-2 text-sm font-medium text-white hover:text-white transition-all duration-300 hover:opacity-80 cursor-pointer"
               >
-Переглянути проект
+                Переглянути пост
                 <Icon icon="solar:arrow-right-linear" width={16} className="transition-transform duration-300 group-hover:translate-x-3 group-hover:scale-110" />
               </Link>
               <div className="flex gap-2 ml-4">
@@ -128,10 +122,10 @@ export default function HeroSlider() {
               </div>
             </div>
             <Link
-              to={`/project/${currentProject.id}`}
+              to={`/page/${currentPost.slug}`}
               className="md:hidden flex items-center gap-2 text-sm font-medium text-white/90 hover:text-white transition-all duration-300 hover:opacity-80 cursor-pointer"
             >
-              Переглянути проект <Icon icon="solar:arrow-right-linear" width={16} className="transition-transform duration-300 group-hover:translate-x-1 group-hover:scale-110" />
+              Переглянути пост <Icon icon="solar:arrow-right-linear" width={16} className="transition-transform duration-300 group-hover:translate-x-1 group-hover:scale-110" />
             </Link>
           </div>
         </div>

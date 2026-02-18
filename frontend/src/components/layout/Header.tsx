@@ -74,7 +74,7 @@ export default function Header({ transparent = false }: HeaderProps) {
         {isAuthenticated && (
   <div className="flex items-center gap-6 md:gap-8">
     <a
-      href="/admin/dashboard"
+      href="/admin/posts"
       className={`hidden md:flex items-center gap-2 text-xs font-medium transition-all duration-300 ${
         isTransparent ? "text-white/80 hover:text-white" : "text-zinc-500 hover:text-zinc-900"
       } hover:scale-105`}
@@ -153,7 +153,7 @@ export default function Header({ transparent = false }: HeaderProps) {
             {isAuthenticated && (
               <>
                 <a
-                  href="/admin/dashboard"
+                  href="/admin/posts"
                   onClick={handleClose}
                   className="text-lg text-zinc-500 hover:text-zinc-900"
                 >
