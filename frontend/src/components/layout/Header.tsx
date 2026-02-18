@@ -56,7 +56,7 @@ export default function Header({ transparent = false }: HeaderProps) {
           Buro 710
         </a>
         <button
-          className="md:hidden p-2 -mr-2"
+          className="md:hidden p-2 -mr-2 cursor-pointer"
           onClick={() => setMobileMenuOpen(true)}
           aria-label="Відкрити меню"
         >
@@ -74,7 +74,7 @@ export default function Header({ transparent = false }: HeaderProps) {
         {isAuthenticated && (
   <div className="flex items-center gap-6 md:gap-8">
     <a
-      href="/admin/dashboard"
+      href="/admin/posts"
       className={`hidden md:flex items-center gap-2 text-xs font-medium transition-all duration-300 ${
         isTransparent ? "text-white/80 hover:text-white" : "text-zinc-500 hover:text-zinc-900"
       } hover:scale-105`}
@@ -122,7 +122,7 @@ export default function Header({ transparent = false }: HeaderProps) {
             </a>
             <button
               onClick={handleClose}
-              className="p-2 -mr-2"
+              className="p-2 -mr-2 cursor-pointer"
               aria-label="Закрити меню"
             >
               <Icon icon="solar:close-circle-linear" width={24} className="text-zinc-900" />
@@ -153,7 +153,7 @@ export default function Header({ transparent = false }: HeaderProps) {
             {isAuthenticated && (
               <>
                 <a
-                  href="/admin/dashboard"
+                  href="/admin/posts"
                   onClick={handleClose}
                   className="text-lg text-zinc-500 hover:text-zinc-900"
                 >
@@ -165,7 +165,7 @@ export default function Header({ transparent = false }: HeaderProps) {
                     handleClose();
                     navigate('/');
                   }}
-                  className="text-sm font-medium px-8 py-3 bg-zinc-900 text-white rounded-full"
+                  className="text-sm font-medium px-8 py-3 bg-zinc-900 text-white rounded-full cursor-pointer"
                 >
                   Вийти
                 </button>

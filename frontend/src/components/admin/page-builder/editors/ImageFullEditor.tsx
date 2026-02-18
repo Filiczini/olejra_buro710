@@ -59,7 +59,7 @@ export default function ImageFullEditor({ data, onChange, onImageChange }: Image
             <button
               type="button"
               onClick={handleRemove}
-              className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
             >
               <Icon icon="solar:close-circle-linear" width={20} />
             </button>

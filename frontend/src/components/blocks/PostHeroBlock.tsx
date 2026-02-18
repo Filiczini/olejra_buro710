@@ -74,9 +74,9 @@ export default function PostHeroBlock({ post }: PostHeroBlockProps) {
               {hero_subtitle}
             </p>
             <div className="mt-6 flex items-center gap-4">
-              <button 
+              <button
                 onClick={handleScrollToContent}
-                className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-110 transition-transform duration-300"
+                className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-110 transition-transform duration-300 cursor-pointer"
               >
                 <Icon icon="solar:arrow-down-linear" width={20} />
               </button>

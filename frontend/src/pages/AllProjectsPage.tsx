@@ -87,7 +87,7 @@ export default function AllProjectsPage() {
                 <button
                   key={tag}
                   onClick={() => toggleTag(tag)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
                     selectedTags.includes(tag)
                       ? 'bg-zinc-900 text-white'
                       : 'bg-white border border-zinc-200 text-zinc-600 hover:border-zinc-400'
@@ -99,7 +99,7 @@ export default function AllProjectsPage() {
               {selectedTags.length > 0 && (
                 <button
                   onClick={() => setSelectedTags([])}
-                  className="px-4 py-2 rounded-full text-sm font-medium text-zinc-500 hover:text-zinc-700"
+                  className="px-4 py-2 rounded-full text-sm font-medium text-zinc-500 hover:text-zinc-700 cursor-pointer"
                 >
                   Скинути
                 </button>
@@ -156,7 +156,7 @@ export default function AllProjectsPage() {
                   <button
                     onClick={() => setPage(page - 1)}
                     disabled={page === 1}
-                    className="px-4 py-2 border border-zinc-200 rounded-full hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium text-zinc-700 hover:text-zinc-900"
+                    className="px-4 py-2 border border-zinc-200 rounded-full hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium text-zinc-700 hover:text-zinc-900 cursor-pointer"
                   >
                     Попередня
                   </button>
@@ -165,15 +165,15 @@ export default function AllProjectsPage() {
                     const pageNum = Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
                     if (pageNum > totalPages) return null;
                     return (
-                      <button
-                        key={pageNum}
-                        onClick={() => setPage(pageNum)}
-                        className={`w-10 h-10 rounded-full transition-all duration-200 text-sm font-medium ${
-                          page === pageNum
-                            ? 'bg-zinc-900 text-white hover:bg-zinc-800'
-                            : 'border border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900'
-                        }`}
-                      >
+                       <button
+                         key={pageNum}
+                         onClick={() => setPage(pageNum)}
+                         className={`w-10 h-10 rounded-full transition-all duration-200 text-sm font-medium cursor-pointer ${
+                           page === pageNum
+                             ? 'bg-zinc-900 text-white hover:bg-zinc-800'
+                             : 'border border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900'
+                         }`}
+                       >
                         {pageNum}
                       </button>
                     );
@@ -182,7 +182,7 @@ export default function AllProjectsPage() {
                   <button
                     onClick={() => setPage(page + 1)}
                     disabled={page === totalPages}
-                    className="px-4 py-2 border border-zinc-200 rounded-full hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium text-zinc-700 hover:text-zinc-900"
+                    className="px-4 py-2 border border-zinc-200 rounded-full hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium text-zinc-700 hover:text-zinc-900 cursor-pointer"
                   >
                     Наступна
                   </button>

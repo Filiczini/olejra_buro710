@@ -73,8 +73,8 @@ export default function CreateProjectPage() {
       <div className="flex items-center gap-4 mb-8">
         <button
           onClick={() => navigate('/admin/dashboard')}
-          className="text-zinc-600 hover:text-zinc-900"
-        >
+className="text-zinc-600 hover:text-zinc-900 cursor-pointer"
+>
           ← Повернутися до панелі керування
         </button>
         <h1 className="text-3xl font-bold text-zinc-900">Створити проєкт</h1>

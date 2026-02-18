@@ -12,6 +12,8 @@ import EditProjectPage from './pages/admin/EditProjectPage';
 import PostsPage from './pages/admin/PostsPage';
 import EditPostPage from './pages/admin/EditPostPage';
 import ActivityLogPage from './pages/admin/ActivityLogPage';
+import UsersPage from './pages/admin/UsersPage';
+import SettingsPage from './pages/admin/SettingsPage';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 import AdminLayout from './layouts/AdminLayout';
 
@@ -47,6 +49,8 @@ function App() {
           <Route path="/admin/posts/create" element={<EditPostPage />} />
           <Route path="/admin/posts/edit/:id" element={<EditPostPage />} />
           <Route path="/admin/logs" element={<ActivityLogPage />} />
+          <Route path="/admin/users" element={<UsersPage />} />
+          <Route path="/admin/settings" element={<SettingsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
