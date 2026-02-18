@@ -13,7 +13,7 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-        <SidebarMenuItem
+        {/* <SidebarMenuItem
           icon="solar:folder-files-linear"
           label="Проєкти"
           path="/admin/dashboard"
@@ -22,7 +22,7 @@ export default function Sidebar() {
           icon="solar:add-circle-linear"
           label="Створити проєкт"
           path="/admin/projects/create"
-        />
+        /> */}
         <SidebarMenuItem
           icon="solar:document-text-linear"
           label="Пости"
