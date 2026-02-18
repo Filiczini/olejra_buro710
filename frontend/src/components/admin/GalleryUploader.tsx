@@ -170,7 +170,7 @@ export default function GalleryUploader({
                 <button
                   type="button"
                   onClick={() => handleRemoveImage(item)}
-                  className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                  className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 cursor-pointer"
                   title="Видалити"
                 >
                   <Icon icon="solar:close-circle-linear" width={16} />

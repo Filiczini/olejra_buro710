@@ -31,7 +31,7 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
           </h1>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
             aria-label="Закрити меню"
           >
             <X size={20} />

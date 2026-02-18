@@ -54,7 +54,7 @@ export default function TagInput({
             <button
               type="button"
               onClick={() => handleRemoveTag(index)}
-              className="text-zinc-500 hover:text-zinc-900"
+              className="text-zinc-500 hover:text-zinc-900 cursor-pointer"
             >
               ✕
             </button>

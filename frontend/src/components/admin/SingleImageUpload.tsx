@@ -135,7 +135,7 @@ export default function SingleImageUpload({
           <button
             type="button"
             onClick={handleRemove}
-            className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+            className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors cursor-pointer"
             title="Remove image"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +145,7 @@ export default function SingleImageUpload({
           <button
             type="button"
             onClick={handleReplace}
-            className="absolute bottom-2 right-2 bg-zinc-900 text-white px-3 py-1.5 rounded-md hover:bg-zinc-800 transition-colors text-sm font-medium"
+            className="absolute bottom-2 right-2 bg-zinc-900 text-white px-3 py-1.5 rounded-md hover:bg-zinc-800 transition-colors text-sm font-medium cursor-pointer"
             title="Replace image"
           >
             Replace

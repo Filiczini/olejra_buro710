@@ -56,7 +56,7 @@ export default function Header({ transparent = false }: HeaderProps) {
           Buro 710
         </a>
         <button
-          className="md:hidden p-2 -mr-2"
+          className="md:hidden p-2 -mr-2 cursor-pointer"
           onClick={() => setMobileMenuOpen(true)}
           aria-label="Відкрити меню"
         >
@@ -122,7 +122,7 @@ export default function Header({ transparent = false }: HeaderProps) {
             </a>
             <button
               onClick={handleClose}
-              className="p-2 -mr-2"
+              className="p-2 -mr-2 cursor-pointer"
               aria-label="Закрити меню"
             >
               <Icon icon="solar:close-circle-linear" width={24} className="text-zinc-900" />
@@ -165,7 +165,7 @@ export default function Header({ transparent = false }: HeaderProps) {
                     handleClose();
                     navigate('/');
                   }}
-                  className="text-sm font-medium px-8 py-3 bg-zinc-900 text-white rounded-full"
+                  className="text-sm font-medium px-8 py-3 bg-zinc-900 text-white rounded-full cursor-pointer"
                 >
                   Вийти
                 </button>

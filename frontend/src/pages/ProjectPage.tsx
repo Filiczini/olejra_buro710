@@ -134,14 +134,14 @@ export default function ProjectPage() {
           <>
             <button
               onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/30 backdrop-blur-md text-white mix-blend-difference hover:bg-black/50 transition-all duration-300 hidden md:block"
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/30 backdrop-blur-md text-white mix-blend-difference hover:bg-black/50 transition-all duration-300 hidden md:block cursor-pointer"
               aria-label="Previous slide"
             >
               <Icon icon="solar:arrow-left-linear" width={24} />
             </button>
             <button
               onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/30 backdrop-blur-md text-white mix-blend-difference hover:bg-black/50 transition-all duration-300 hidden md:block"
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/30 backdrop-blur-md text-white mix-blend-difference hover:bg-black/50 transition-all duration-300 hidden md:block cursor-pointer"
               aria-label="Next slide"
             >
               <Icon icon="solar:arrow-right-linear" width={24} />
@@ -155,7 +155,7 @@ export default function ProjectPage() {
               <button
                 key={index}
                 onClick={() => scrollToSlide(index)}
-                className={`h-1 rounded-full transition-all duration-300 ${
+                className={`h-1 rounded-full transition-all duration-300 cursor-pointer ${
                   index === currentSlide ? 'w-8 bg-white' : 'w-2 bg-white/30'
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
