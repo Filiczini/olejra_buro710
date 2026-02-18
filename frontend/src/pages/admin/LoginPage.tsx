@@ -17,7 +17,7 @@ export default function LoginPage() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      navigate('/admin/dashboard', { replace: true });
+      navigate('/admin/posts', { replace: true });
     }
   }, [navigate]);
 
@@ -29,7 +29,7 @@ export default function LoginPage() {
     try {
       const response = await authService.login(credentials.email, credentials.password);
       localStorage.setItem('token', response.token);
-      navigate('/admin/dashboard');
+      navigate('/admin/posts');
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
       setError(error.response?.data?.error || 'Невірний email або пароль');
