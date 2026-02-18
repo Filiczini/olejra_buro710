@@ -53,7 +53,7 @@ export default function SeoFields({
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-zinc-50 transition-colors"
+        className="w-full flex items-center justify-between p-4 hover:bg-zinc-50 transition-colors cursor-pointer"
       >
         <div className="flex items-center gap-3">
           <Icon icon="solar:magnifer-linear" width={20} className="text-zinc-500" />
@@ -137,7 +137,7 @@ export default function SeoFields({
                   <button
                     type="button"
                     onClick={handleRemoveImage}
-                    className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                   >
                     <Icon icon="solar:close-circle-linear" width={20} />
                   </button>

@@ -46,7 +46,7 @@ export default function AddBlockMenu({ onAddBlock }: AddBlockMenuProps) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-zinc-300 rounded-lg text-zinc-600 hover:border-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
+        className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-zinc-300 rounded-lg text-zinc-600 hover:border-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-colors cursor-pointer"
       >
         <Icon icon="solar:add-circle-linear" width={20} />
         <span>Додати блок</span>
@@ -65,7 +65,7 @@ export default function AddBlockMenu({ onAddBlock }: AddBlockMenuProps) {
                 key={blockType.type}
                 type="button"
                 onClick={() => handleSelect(blockType.type)}
-                className="w-full flex items-center gap-4 p-4 hover:bg-zinc-50 transition-colors text-left border-b border-zinc-100 last:border-b-0"
+                className="w-full flex items-center gap-4 p-4 hover:bg-zinc-50 transition-colors text-left border-b border-zinc-100 last:border-b-0 cursor-pointer"
               >
                 <div className="flex-shrink-0 w-10 h-10 bg-zinc-100 rounded-lg flex items-center justify-center">
                   <Icon icon={blockType.icon} width={24} className="text-zinc-600" />

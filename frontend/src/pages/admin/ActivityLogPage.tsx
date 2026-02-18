@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import Button from '../../components/ui/Button';
+import { ChevronDown } from 'lucide-react';
 import { activityLogService } from '../../services/api';
 import type { ActivityLog, ActivityLogsParams } from '../../types/activityLog';
 
@@ -53,11 +53,11 @@ export default function ActivityLogPage() {
   const getEntityTypeBadge = (type: string) => {
     switch (type) {
       case 'project':
-        return 'bg-purple-100 text-purple-700';
+        return 'bg-purple-50 text-purple-700 ring-1 ring-inset ring-purple-600/20';
       case 'post':
-        return 'bg-orange-100 text-orange-700';
+        return 'bg-orange-50 text-orange-700 ring-1 ring-inset ring-orange-600/20';
       default:
-        return 'bg-zinc-100 text-zinc-700';
+        return 'bg-gray-100 text-gray-700';
     }
   };
 
@@ -111,13 +111,13 @@ export default function ActivityLogPage() {
   const getActionBadge = (action: string) => {
     switch (action) {
       case 'create':
-        return 'bg-green-100 text-green-700';
+        return 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-700/10';
       case 'update':
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/10';
       case 'delete':
-        return 'bg-red-100 text-red-700';
+        return 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-700/10';
       default:
-        return 'bg-zinc-100 text-zinc-700';
+        return 'bg-gray-100 text-gray-700';
     }
   };
 
@@ -135,147 +135,165 @@ export default function ActivityLogPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-        <h1 className="text-3xl font-bold text-zinc-900 mb-6">Журнал дій</h1>
+    <div className="bg-white border border-gray-200/75 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden max-w-7xl mx-auto">
+      <div className="p-8 pb-4">
+        <h2 className="text-3xl font-semibold tracking-tight text-gray-900 mb-8">Журнал дій</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-4 bg-zinc-50 rounded-lg">
-          <div>
-            <label className="block text-sm font-medium text-zinc-700 mb-1">
-              Користувач
-            </label>
-            <select
-              className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900"
-              value={filters.user_email || ''}
-              onChange={(e) => handleFilterChange('user_email', e.target.value)}
-            >
-              <option value="">Всі користувачі</option>
-              {uniqueUsers.map((user) => (
-                <option key={user} value={user}>
-                  {user}
-                </option>
-              ))}
-            </select>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end pb-6 border-b border-gray-100">
+          <div className="md:col-span-3">
+            <label className="block text-xs font-medium text-gray-500 mb-2">Користувач</label>
+            <div className="relative">
+              <select
+                className="appearance-none w-full bg-gray-50 border border-gray-200 text-gray-900 py-2.5 pl-4 pr-10 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-900/5 focus:border-gray-300 transition-all cursor-pointer"
+                value={filters.user_email || ''}
+                onChange={(e) => handleFilterChange('user_email', e.target.value)}
+              >
+                <option value="">Всі користувачі</option>
+                {uniqueUsers.map((user) => (
+                  <option key={user} value={user}>
+                    {user}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                <ChevronDown className="h-4 w-4 stroke-[1.5]" />
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-zinc-700 mb-1">
-              Тип дії
-            </label>
-            <select
-              className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900"
-              value={filters.action || ''}
-              onChange={(e) => handleFilterChange('action', e.target.value)}
-            >
-              <option value="">Всі дії</option>
-              <option value="create">Створення</option>
-              <option value="update">Редагування</option>
-              <option value="delete">Видалення</option>
-            </select>
+          <div className="md:col-span-3">
+            <label className="block text-xs font-medium text-gray-500 mb-2">Тип дії</label>
+            <div className="relative">
+              <select
+                className="appearance-none w-full bg-gray-50 border border-gray-200 text-gray-900 py-2.5 pl-4 pr-10 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-900/5 focus:border-gray-300 transition-all cursor-pointer"
+                value={filters.action || ''}
+                onChange={(e) => handleFilterChange('action', e.target.value)}
+              >
+                <option value="">Всі дії</option>
+                <option value="create">Створення</option>
+                <option value="update">Редагування</option>
+                <option value="delete">Видалення</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                <ChevronDown className="h-4 w-4 stroke-[1.5]" />
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-end">
-            <Button
+          <div className="md:col-span-3 md:col-start-10 flex justify-end">
+            <button
               onClick={() => setFilters({ user_email: undefined, action: undefined })}
-              variant="secondary"
-              className="w-full"
+              className="w-full md:w-auto px-6 py-2.5 border border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-full text-sm font-medium transition-all focus:ring-2 focus:ring-offset-1 focus:ring-gray-100 cursor-pointer"
             >
               Очистити фільтри
-            </Button>
+            </button>
           </div>
         </div>
-
-        <div className="overflow-x-auto">
-          {loading ? (
-            <div className="text-center py-8 text-zinc-600">
-              Завантаження...
-            </div>
-          ) : logs.length === 0 ? (
-            <div className="text-center py-8 text-zinc-600">
-              Журнал порожній
-            </div>
-          ) : (
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-zinc-200">
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Дата</th>
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Користувач</th>
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Дія</th>
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Об'єкт</th>
-                  <th className="text-left py-3 px-4 font-medium text-zinc-700">Деталі</th>
-                </tr>
-              </thead>
-              <tbody>
-                {logs.map((log) => (
-                  <tr key={log.id} className="border-b border-zinc-100 hover:bg-zinc-50 transition-colors">
-                    <td className="py-3 px-4 text-zinc-600">
-                      {new Date(log.created_at).toLocaleString()}
-                    </td>
-                    <td className="py-3 px-4 text-zinc-900 font-medium">
-                      {log.user_email}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getActionBadge(log.action)}`}>
-                        {getActionText(log.action)}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider ${getEntityTypeBadge(log.entity_type)}`}>
-                          {getEntityTypeText(log.entity_type)}
-                        </span>
-                        <span className="text-zinc-900">{log.entity_title}</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-zinc-600 text-sm">
-                      {formatChanges(log.changes as Record<string, unknown>)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-
-        {pagination.totalPages > 1 && (
-          <div className="flex justify-between items-center mt-4 pt-4 border-t border-zinc-200">
-            <div className="text-sm text-zinc-600">
-              Показано {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}-{Math.min(pagination.page * pagination.limit, pagination.total)} з {pagination.total}
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
-                disabled={pagination.page === 1}
-                className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Попередня
-              </button>
-              {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
-                const page = Math.max(1, pagination.page - 2) + i;
-                if (page > pagination.totalPages) return null;
-                return (
-                  <button
-                    key={page}
-                    onClick={() => setPagination({ ...pagination, page })}
-                    className={`px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors ${
-                      page === pagination.page ? 'bg-zinc-900 text-white' : ''
-                    }`}
-                  >
-                    {page}
-                  </button>
-                );
-              })}
-              <button
-                onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
-                disabled={pagination.page === pagination.totalPages}
-                className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Наступна
-              </button>
-            </div>
-          </div>
-        )}
       </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="border-b border-gray-100">
+              <th className="py-4 pl-8 pr-4 text-sm font-medium text-gray-500 w-[180px]">Дата</th>
+              <th className="py-4 px-4 text-sm font-medium text-gray-500 w-[220px]">Користувач</th>
+              <th className="py-4 px-4 text-sm font-medium text-gray-500 w-[140px]">Дія</th>
+              <th className="py-4 px-4 text-sm font-medium text-gray-500">Об'єкт</th>
+              <th className="py-4 pl-4 pr-8 text-sm font-medium text-gray-500">Деталі</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50">
+            {loading ? (
+              <tr>
+                <td colSpan={5} className="text-center py-8 text-gray-500">
+                  Завантаження...
+                </td>
+              </tr>
+            ) : logs.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="text-center py-8 text-gray-500">
+                  Журнал порожній
+                </td>
+              </tr>
+            ) : (
+              logs.map((log) => (
+                <tr key={log.id} className="group hover:bg-gray-50/50 transition-colors">
+                  <td className="py-5 pl-8 pr-4">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-gray-900">
+                        {new Date(log.created_at).toLocaleDateString('uk-UA')}
+                      </span>
+                      <span className="text-sm text-gray-400 mt-0.5">
+                        {new Date(log.created_at).toLocaleTimeString('uk-UA')}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="py-5 px-4">
+                    <span className="text-sm font-medium text-gray-900">{log.user_email}</span>
+                  </td>
+                  <td className="py-5 px-4">
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${getActionBadge(log.action)}`}>
+                      {getActionText(log.action)}
+                    </span>
+                  </td>
+                  <td className="py-5 px-4">
+                    <div className="flex flex-col items-start gap-1.5">
+                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider font-semibold ${getEntityTypeBadge(log.entity_type)}`}>
+                        {getEntityTypeText(log.entity_type)}
+                      </span>
+                      <span className="text-sm font-medium text-gray-900">{log.entity_title}</span>
+                    </div>
+                  </td>
+                  <td className="py-5 pl-4 pr-8">
+                    <span className="text-sm text-gray-500">{formatChanges(log.changes as Record<string, unknown>)}</span>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {pagination.totalPages > 1 && (
+        <div className="flex justify-between items-center px-8 py-4 border-t border-gray-100">
+          <div className="text-sm text-gray-500">
+            Показано {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}-{Math.min(pagination.page * pagination.limit, pagination.total)} з {pagination.total}
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
+              disabled={pagination.page === 1}
+className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+>
+              Попередня
+            </button>
+            {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
+              const page = Math.max(1, pagination.page - 2) + i;
+              if (page > pagination.totalPages) return null;
+              return (
+                <button
+                  key={page}
+                  onClick={() => setPagination({ ...pagination, page })}
+                  className={`px-4 py-2 border rounded-lg transition-colors cursor-pointer ${
+                    page === pagination.page
+                      ? 'bg-gray-900 text-white border-gray-900'
+                      : 'border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  {page}
+                </button>
+              );
+            })}
+            <button
+              onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
+              disabled={pagination.page === pagination.totalPages}
+className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+>
+              Наступна
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

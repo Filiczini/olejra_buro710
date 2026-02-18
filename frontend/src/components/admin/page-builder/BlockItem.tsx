@@ -103,7 +103,7 @@ export default function BlockItem({ block, index, onUpdate, onDelete, onImageCha
             type="button"
             {...attributes}
             {...listeners}
-            className="cursor-grab active:cursor-grabbing text-zinc-400 hover:text-zinc-600 transition-colors"
+            className="cursor-pointer cursor-grab active:cursor-grabbing text-zinc-400 hover:text-zinc-600 transition-colors"
           >
             <Icon icon="solar:hamburger-menu-linear" width={20} />
           </button>
@@ -116,7 +116,7 @@ export default function BlockItem({ block, index, onUpdate, onDelete, onImageCha
         <button
           type="button"
           onClick={handleDelete}
-          className="p-1 text-zinc-400 hover:text-red-500 transition-colors"
+          className="p-1 text-zinc-400 hover:text-red-500 transition-colors cursor-pointer"
         >
           <Icon icon="solar:trash-bin-trash-linear" width={20} />
         </button>

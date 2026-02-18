@@ -79,7 +79,7 @@ export default function ImageLightbox({
       
       <button
         onClick={(e) => { e.stopPropagation(); handleClose(); }}
-        className="absolute top-6 right-6 z-10 w-10 h-10 flex items-center justify-center text-white/80 hover:text-white transition-colors"
+        className="absolute top-6 right-6 z-10 w-10 h-10 flex items-center justify-center text-white/80 hover:text-white transition-colors cursor-pointer"
         aria-label="Закрити"
       >
         <Icon icon="solar:close-circle-linear" width={32} />
@@ -91,7 +91,7 @@ export default function ImageLightbox({
 
       <button
         onClick={handlePrev}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center text-white/80 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center text-white/80 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
         aria-label="Попереднє"
       >
         <Icon icon="solar:arrow-left-linear" width={32} />
@@ -99,7 +99,7 @@ export default function ImageLightbox({
 
       <button
         onClick={handleNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center text-white/80 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center text-white/80 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
         aria-label="Наступне"
       >
         <Icon icon="solar:arrow-right-linear" width={32} />

@@ -126,7 +126,7 @@ export default function TextImageEditor({ data, onChange, onImageChange, mirrore
             <button
               type="button"
               onClick={addFeature}
-              className="px-3 py-1.5 bg-zinc-100 text-zinc-700 rounded-lg hover:bg-zinc-200 text-sm"
+              className="px-3 py-1.5 bg-zinc-100 text-zinc-700 rounded-lg hover:bg-zinc-200 text-sm cursor-pointer"
             >
               +
             </button>
@@ -141,7 +141,7 @@ export default function TextImageEditor({ data, onChange, onImageChange, mirrore
                 <button
                   type="button"
                   onClick={() => removeFeature(index)}
-                  className="text-zinc-400 hover:text-red-500"
+                  className="text-zinc-400 hover:text-red-500 cursor-pointer"
                 >
                   ×
                 </button>
@@ -166,7 +166,7 @@ export default function TextImageEditor({ data, onChange, onImageChange, mirrore
             <button
               type="button"
               onClick={handleRemove}
-              className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
             >
               <Icon icon="solar:close-circle-linear" width={18} />
             </button>

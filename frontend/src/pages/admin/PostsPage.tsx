@@ -87,7 +87,7 @@ export default function PostsPage() {
 
   return (
     <div>
-      <div className="max-w-7xl">
+      <div className="mx-auto max-w-7xl ">
         {/* Toolbar */}
         <div className="mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
