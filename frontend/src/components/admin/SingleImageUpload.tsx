@@ -127,11 +127,7 @@ export default function SingleImageUpload({
       {/* Image Preview */}
       {preview ? (
         <div className="relative w-full aspect-video bg-zinc-100 rounded-lg overflow-hidden">
-          <img
-            src={preview.previewUrl}
-            alt="Preview"
-            className="w-full h-full object-cover"
-          />
+          <img src={preview.previewUrl} alt="Preview" className="w-full h-full object-cover" />
           <button
             type="button"
             onClick={handleRemove}
@@ -139,7 +135,12 @@ export default function SingleImageUpload({
             title="Remove image"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
           <button
@@ -187,12 +188,9 @@ export default function SingleImageUpload({
             </svg>
             <div className="flex flex-col gap-1">
               <p className="text-sm text-zinc-600">
-                {placeholder}, or{' '}
-                <span className="text-zinc-900 font-medium">browse</span>
+                {placeholder}, or <span className="text-zinc-900 font-medium">browse</span>
               </p>
-              <p className="text-xs text-zinc-400">
-                JPEG, PNG up to 5MB
-              </p>
+              <p className="text-xs text-zinc-400">JPEG, PNG up to 5MB</p>
             </div>
           </label>
         </div>
@@ -201,11 +199,7 @@ export default function SingleImageUpload({
       {/* Error message */}
       {displayError && (
         <div className="flex items-start gap-2 text-sm text-red-500 mt-1">
-          <svg
-            className="w-4 h-4 mt-0.5 flex-shrink-0"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
+          <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"
               d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"

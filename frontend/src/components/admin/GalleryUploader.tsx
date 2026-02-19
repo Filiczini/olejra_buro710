@@ -28,34 +28,35 @@ export default function GalleryUploader({
   const [reorderedItems, setReorderedItems] = useState<ImageItem[] | null>(null);
   const prevBlobUrlsRef = useRef<Set<string>>(new Set());
 
-  const computedItems: ImageItem[] = useMemo(() => [
-    ...images.map((url, index) => ({
-      id: `existing-${index}-${url}`,
-      url,
-      isNew: false,
-    })),
-    ...newFiles.map((file, index) => ({
-      id: `new-${index}-${file.name}`,
-      url: URL.createObjectURL(file),
-      isNew: true,
-      file,
-    })),
-  ], [images, newFiles]);
+  const computedItems: ImageItem[] = useMemo(
+    () => [
+      ...images.map((url, index) => ({
+        id: `existing-${index}-${url}`,
+        url,
+        isNew: false,
+      })),
+      ...newFiles.map((file, index) => ({
+        id: `new-${index}-${file.name}`,
+        url: URL.createObjectURL(file),
+        isNew: true,
+        file,
+      })),
+    ],
+    [images, newFiles]
+  );
 
   useEffect(() => {
     const currentBlobUrls = new Set(
-      computedItems.filter(item => item.isNew).map(item => item.url)
+      computedItems.filter((item) => item.isNew).map((item) => item.url)
     );
-    
-    const urlsToRevoke = [...prevBlobUrlsRef.current].filter(
-      url => !currentBlobUrls.has(url)
-    );
-    urlsToRevoke.forEach(url => URL.revokeObjectURL(url));
-    
+
+    const urlsToRevoke = [...prevBlobUrlsRef.current].filter((url) => !currentBlobUrls.has(url));
+    urlsToRevoke.forEach((url) => URL.revokeObjectURL(url));
+
     prevBlobUrlsRef.current = currentBlobUrls;
-    
+
     return () => {
-      prevBlobUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+      prevBlobUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [computedItems]);
 
@@ -106,9 +107,9 @@ export default function GalleryUploader({
   const handleRemoveImage = useCallback(
     (item: ImageItem) => {
       if (item.isNew) {
-        onNewFilesChange(newFiles.filter(f => f !== item.file));
+        onNewFilesChange(newFiles.filter((f) => f !== item.file));
       } else {
-        onImagesChange(images.filter(url => url !== item.url));
+        onImagesChange(images.filter((url) => url !== item.url));
       }
     },
     [images, newFiles, onImagesChange, onNewFilesChange]
@@ -118,28 +119,29 @@ export default function GalleryUploader({
     setDraggedIndex(index);
   }, []);
 
-  const handleDragOverItem = useCallback((e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    if (draggedIndex === null || draggedIndex === index) return;
+  const handleDragOverItem = useCallback(
+    (e: React.DragEvent, index: number) => {
+      e.preventDefault();
+      if (draggedIndex === null || draggedIndex === index) return;
 
-    const newItems = [...imageItems];
-    const draggedItem = newItems[draggedIndex];
-    newItems.splice(draggedIndex, 1);
-    newItems.splice(index, 0, draggedItem);
-    setReorderedItems(newItems);
-    setDraggedIndex(index);
-  }, [draggedIndex, imageItems]);
+      const newItems = [...imageItems];
+      const draggedItem = newItems[draggedIndex];
+      newItems.splice(draggedIndex, 1);
+      newItems.splice(index, 0, draggedItem);
+      setReorderedItems(newItems);
+      setDraggedIndex(index);
+    },
+    [draggedIndex, imageItems]
+  );
 
   const handleDragEnd = useCallback(() => {
     if (draggedIndex === null) return;
 
-    const existingUrls = imageItems
-      .filter(item => !item.isNew)
-      .map(item => item.url);
-    
+    const existingUrls = imageItems.filter((item) => !item.isNew).map((item) => item.url);
+
     const newFilesOrdered = imageItems
-      .filter(item => item.isNew && item.file)
-      .map(item => item.file!);
+      .filter((item) => item.isNew && item.file)
+      .map((item) => item.file!);
 
     onImagesChange(existingUrls);
     onNewFilesChange(newFilesOrdered);
@@ -220,9 +222,7 @@ export default function GalleryUploader({
                 Перетягніть зображення або{' '}
                 <span className="text-zinc-900 font-medium">виберіть файли</span>
               </p>
-              <p className="text-xs text-zinc-400">
-                JPEG, PNG до 5MB кожне
-              </p>
+              <p className="text-xs text-zinc-400">JPEG, PNG до 5MB кожне</p>
             </div>
           </label>
         </div>

@@ -7,22 +7,16 @@ interface HeroSectionPreviewProps {
 }
 
 export default function HeroSectionPreview({ data, existingImageUrl }: HeroSectionPreviewProps) {
-  const imageUrl = data.heroImage 
-    ? URL.createObjectURL(data.heroImage) 
-    : existingImageUrl;
+  const imageUrl = data.heroImage ? URL.createObjectURL(data.heroImage) : existingImageUrl;
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-4 sticky top-8">
       <h3 className="text-lg font-semibold text-zinc-900 mb-4">Прев'ю hero секції</h3>
-      
+
       <div className="relative w-full aspect-[16/9] bg-zinc-100 rounded-lg overflow-hidden">
         {imageUrl ? (
           <>
-            <img
-              src={imageUrl}
-              alt="Hero preview"
-              className="w-full h-full object-cover"
-            />
+            <img src={imageUrl} alt="Hero preview" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
           </>
         ) : (

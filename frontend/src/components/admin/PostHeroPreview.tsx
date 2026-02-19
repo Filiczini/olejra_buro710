@@ -6,14 +6,12 @@ interface PostHeroPreviewProps {
 }
 
 export default function PostHeroPreview({ data }: PostHeroPreviewProps) {
-  const imageUrl = data.heroImage 
-    ? URL.createObjectURL(data.heroImage) 
-    : data.hero_image_url;
+  const imageUrl = data.heroImage ? URL.createObjectURL(data.heroImage) : data.hero_image_url;
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-4 sticky top-8">
       <h3 className="text-lg font-semibold text-zinc-900 mb-4">Прев'ю hero секції</h3>
-      
+
       <div className="relative w-full aspect-[16/9] bg-zinc-100 rounded-lg overflow-hidden">
         {imageUrl ? (
           <>
@@ -47,7 +45,8 @@ export default function PostHeroPreview({ data }: PostHeroPreviewProps) {
                 ))}
                 {data.hero_location && (
                   <span className="text-white/70 text-[10px] uppercase tracking-widest">
-                    {data.hero_location}{data.hero_year ? `, ${data.hero_year}` : ''}
+                    {data.hero_location}
+                    {data.hero_year ? `, ${data.hero_year}` : ''}
                   </span>
                 )}
               </div>
@@ -56,7 +55,7 @@ export default function PostHeroPreview({ data }: PostHeroPreviewProps) {
             <h4 className="text-xl md:text-2xl lg:text-3xl font-medium text-white tracking-tight leading-tight">
               {data.hero_title || 'Заголовок сторінки'}
             </h4>
-            
+
             {data.hero_subtitle && (
               <p className="text-white/80 text-sm font-light leading-relaxed mt-2 line-clamp-2">
                 {data.hero_subtitle}

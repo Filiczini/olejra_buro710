@@ -28,18 +28,18 @@ export default function EditProjectPage() {
 
     const loadProject = async () => {
       try {
-        const data = await portfolioService.getById(id) as unknown as { 
-          project: { 
-            title: string; 
+        const data = (await portfolioService.getById(id)) as unknown as {
+          project: {
+            title: string;
             subtitle?: string;
-            tags: string[]; 
-            location?: string; 
-            year?: string; 
-            area?: string; 
-          }; 
-          heroMedia: Media[]; 
+            tags: string[];
+            location?: string;
+            year?: string;
+            area?: string;
+          };
+          heroMedia: Media[];
         };
-        
+
         setHeroData({
           heroImage: undefined,
           title: data.project.title || '',
@@ -95,7 +95,7 @@ export default function EditProjectPage() {
       formDataToSend.append('title', heroData.title);
       formDataToSend.append('subtitle', heroData.subtitle || '');
       formDataToSend.append('tags', JSON.stringify(heroData.tags));
-      
+
       if (heroData.location) formDataToSend.append('location', heroData.location);
       if (heroData.year) formDataToSend.append('year', heroData.year);
       if (heroData.area) formDataToSend.append('area', heroData.area);
@@ -124,8 +124,8 @@ export default function EditProjectPage() {
       <div className="flex items-center gap-4 mb-8">
         <button
           onClick={() => navigate('/admin/dashboard')}
-className="text-zinc-600 hover:text-zinc-900 cursor-pointer"
->
+          className="text-zinc-600 hover:text-zinc-900 cursor-pointer"
+        >
           ← Повернутися до панелі керування
         </button>
         <h1 className="text-3xl font-bold text-zinc-900">Редагувати проєкт</h1>

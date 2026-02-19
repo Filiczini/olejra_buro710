@@ -7,11 +7,17 @@ interface SidebarMenuItemProps {
   isExternal?: boolean;
 }
 
-export default function SidebarMenuItem({ icon: Icon, label, path, isExternal }: SidebarMenuItemProps) {
+export default function SidebarMenuItem({
+  icon: Icon,
+  label,
+  path,
+  isExternal,
+}: SidebarMenuItemProps) {
   const location = useLocation();
   const isActive = location.pathname === path || location.pathname.startsWith(path + '/');
 
-  const baseClasses = 'group flex items-center px-3 py-2.5 text-base font-medium transition-colors rounded-md';
+  const baseClasses =
+    'group flex items-center px-3 py-2.5 text-base font-medium transition-colors rounded-md';
   const activeClasses = 'bg-zinc-900 text-white';
   const inactiveClasses = 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/50';
 
@@ -27,12 +33,7 @@ export default function SidebarMenuItem({ icon: Icon, label, path, isExternal }:
 
   if (isExternal) {
     return (
-      <a
-        href={path}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={linkClasses}
-      >
+      <a href={path} target="_blank" rel="noopener noreferrer" className={linkClasses}>
         {content}
       </a>
     );

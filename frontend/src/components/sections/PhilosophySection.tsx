@@ -49,8 +49,14 @@ export default function PhilosophySection() {
               key={value.id}
               className={`space-y-4 animate-reveal-up ${value.delay} group p-6 -mx-6 rounded-lg hover:bg-zinc-800/50 transition-all duration-300`}
             >
-              <Icon icon={value.icon} width={32} className="text-zinc-500 group-hover:text-zinc-300 transition-colors duration-300" />
-              <h4 className="text-xl font-medium group-hover:text-white transition-colors duration-300">{value.title}</h4>
+              <Icon
+                icon={value.icon}
+                width={32}
+                className="text-zinc-500 group-hover:text-zinc-300 transition-colors duration-300"
+              />
+              <h4 className="text-xl font-medium group-hover:text-white transition-colors duration-300">
+                {value.title}
+              </h4>
               <p className="text-zinc-400 text-sm leading-relaxed group-hover:text-zinc-300 transition-colors duration-300">
                 {value.description}
               </p>

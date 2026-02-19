@@ -45,10 +45,8 @@ export default function ImageFullEditor({ data, onChange, onImageChange }: Image
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-2">
-          Зображення
-        </label>
-        
+        <label className="block text-sm font-medium text-zinc-700 mb-2">Зображення</label>
+
         {displayUrl ? (
           <div className="relative group">
             <img
@@ -86,9 +84,7 @@ export default function ImageFullEditor({ data, onChange, onImageChange }: Image
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-2">
-          Підпис (caption)
-        </label>
+        <label className="block text-sm font-medium text-zinc-700 mb-2">Підпис (caption)</label>
         <input
           type="text"
           value={data.caption || ''}

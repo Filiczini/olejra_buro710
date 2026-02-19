@@ -29,15 +29,15 @@ export default function PostPage() {
       const result = await postService.getBySlug(postSlug);
       setPost(result.post);
       setBlocks(result.blocks);
-      
+
       const seoTitle = result.post.seo_title || result.post.hero_title || result.post.title;
       const seoDescription = result.post.seo_description || result.post.hero_subtitle || '';
-      
+
       document.title = seoTitle;
       updateMetaTag('description', seoDescription);
       updateMetaTag('og:title', seoTitle);
       updateMetaTag('og:description', seoDescription);
-      
+
       const ogImage = result.post.og_image_url || result.post.hero_image_url;
       if (ogImage) {
         updateMetaTag('og:image', ogImage);
@@ -92,19 +92,21 @@ export default function PostPage() {
 
       <main className={hasHero ? '' : 'pt-16'}>
         {blocks.length > 0 && <BlockRenderer blocks={blocks} />}
-        
+
         {post.gallery_images && post.gallery_images.length > 0 && (
           <PostGalleryBlock images={post.gallery_images} />
         )}
-        
-        {!hasHero && blocks.length === 0 && !(post.gallery_images && post.gallery_images.length > 0) && (
-          <div className="max-w-5xl mx-auto px-4 py-24">
-            <div className="text-center text-zinc-400">
-              <Icon icon="solar:document-text-linear" width={48} className="mx-auto mb-4" />
-              <p>Контент сторінки буде додано пізніше...</p>
+
+        {!hasHero &&
+          blocks.length === 0 &&
+          !(post.gallery_images && post.gallery_images.length > 0) && (
+            <div className="max-w-5xl mx-auto px-4 py-24">
+              <div className="text-center text-zinc-400">
+                <Icon icon="solar:document-text-linear" width={48} className="mx-auto mb-4" />
+                <p>Контент сторінки буде додано пізніше...</p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
       </main>
     </div>
   );

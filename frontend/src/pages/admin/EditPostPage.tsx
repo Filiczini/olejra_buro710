@@ -50,7 +50,7 @@ export default function EditPostPage() {
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [galleryNewFiles, setGalleryNewFiles] = useState<File[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  
+
   const blocksDataRef = useRef<BlocksDataRef>({ blocks: [] });
 
   useEffect(() => {
@@ -64,14 +64,14 @@ export default function EditPostPage() {
     try {
       const result = await postService.getById(postId);
       const { post, blocks: loadedBlocks } = result;
-      
+
       setTitle(post.title);
       setSlug(post.slug);
       setStatus(post.status);
       setSeoTitle(post.seo_title || '');
       setSeoDescription(post.seo_description || '');
       setInitialBlocks(loadedBlocks);
-      
+
       setHeroData({
         hero_image_url: post.hero_image_url || '',
         hero_title: post.hero_title || '',
@@ -81,9 +81,9 @@ export default function EditPostPage() {
         hero_year: post.hero_year || '',
         heroImage: undefined,
       });
-      
+
       setGalleryImages(post.gallery_images || []);
-      
+
       blocksDataRef.current.blocks = loadedBlocks.map((b, index) => ({
         id: b.id,
         type: b.type,
@@ -101,16 +101,44 @@ export default function EditPostPage() {
   const generateSlug = (titleValue: string) => {
     const transliterate = (str: string): string => {
       const map: Record<string, string> = {
-        'а': 'a', 'б': 'b', 'в': 'v', 'г': 'h', 'ґ': 'g', 'д': 'd', 'е': 'e', 'є': 'ye',
-        'ж': 'zh', 'з': 'z', 'и': 'y', 'і': 'i', 'ї': 'yi', 'й': 'y', 'к': 'k', 'л': 'l',
-        'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
-        'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'shch', 'ь': '', 'ю': 'yu',
-        'я': 'ya',
+        а: 'a',
+        б: 'b',
+        в: 'v',
+        г: 'h',
+        ґ: 'g',
+        д: 'd',
+        е: 'e',
+        є: 'ye',
+        ж: 'zh',
+        з: 'z',
+        и: 'y',
+        і: 'i',
+        ї: 'yi',
+        й: 'y',
+        к: 'k',
+        л: 'l',
+        м: 'm',
+        н: 'n',
+        о: 'o',
+        п: 'p',
+        р: 'r',
+        с: 's',
+        т: 't',
+        у: 'u',
+        ф: 'f',
+        х: 'kh',
+        ц: 'ts',
+        ч: 'ch',
+        ш: 'sh',
+        щ: 'shch',
+        ь: '',
+        ю: 'yu',
+        я: 'ya',
       };
       return str
         .toLowerCase()
         .split('')
-        .map(char => map[char] || char)
+        .map((char) => map[char] || char)
         .join('');
     };
 
@@ -127,15 +155,17 @@ export default function EditPostPage() {
     }
   };
 
-  const handleBlocksChange = (updatedBlocks: { id?: string; type: BlockType; data: BlockData; sort_order: number }[]) => {
+  const handleBlocksChange = (
+    updatedBlocks: { id?: string; type: BlockType; data: BlockData; sort_order: number }[]
+  ) => {
     blocksDataRef.current.blocks = updatedBlocks;
   };
 
   const handleBlockImageChange = (blockId: string, file: File | null) => {
-    setBlockFiles(prev => {
-      const existing = prev.find(bf => bf.id === blockId);
+    setBlockFiles((prev) => {
+      const existing = prev.find((bf) => bf.id === blockId);
       if (existing) {
-        return prev.map(bf => bf.id === blockId ? { ...bf, file } : bf);
+        return prev.map((bf) => (bf.id === blockId ? { ...bf, file } : bf));
       }
       return [...prev, { id: blockId, file }];
     });
@@ -145,11 +175,11 @@ export default function EditPostPage() {
     const newErrors: Record<string, string> = {};
 
     if (!title.trim()) {
-      newErrors.title = 'Назва обов\'язкова';
+      newErrors.title = "Назва обов'язкова";
     }
 
     if (!slug.trim()) {
-      newErrors.slug = 'Slug обов\'язковий';
+      newErrors.slug = "Slug обов'язковий";
     } else if (!/^[a-z0-9-]+$/.test(slug)) {
       newErrors.slug = 'Slug може містити лише латинські літери, цифри та дефіси';
     }
@@ -194,27 +224,27 @@ export default function EditPostPage() {
         formData.append('heroImage', heroData.heroImage);
       }
 
-const blocksData = blocksDataRef.current.blocks.map((block) => {
-      const blockId = block.id || block._tempId;
-      const blockFile = blockFiles.find(bf => bf.id === blockId);
-      return {
-        id: block.id?.startsWith('temp-') ? undefined : block.id,
-        _tempId: block._tempId,
-        type: block.type,
-        data: {
-          ...block.data,
-          _hasNewImage: !!blockFile?.file,
-        },
-        sort_order: block.sort_order,
-      };
-    });
+      const blocksData = blocksDataRef.current.blocks.map((block) => {
+        const blockId = block.id || block._tempId;
+        const blockFile = blockFiles.find((bf) => bf.id === blockId);
+        return {
+          id: block.id?.startsWith('temp-') ? undefined : block.id,
+          _tempId: block._tempId,
+          type: block.type,
+          data: {
+            ...block.data,
+            _hasNewImage: !!blockFile?.file,
+          },
+          sort_order: block.sort_order,
+        };
+      });
       formData.append('blocks', JSON.stringify(blocksData));
 
       if (ogImageFile) {
         formData.append('ogImage', ogImageFile);
       }
 
-      const imageBlocks = blockFiles.filter(bf => bf.file);
+      const imageBlocks = blockFiles.filter((bf) => bf.file);
       imageBlocks.forEach((bf) => {
         if (bf.file) {
           formData.append('blockImages', bf.file);
@@ -222,7 +252,7 @@ const blocksData = blocksDataRef.current.blocks.map((block) => {
       });
 
       formData.append('gallery_images', JSON.stringify(galleryImages));
-      
+
       galleryNewFiles.forEach((file) => {
         formData.append('galleryImages', file);
       });
@@ -283,9 +313,7 @@ const blocksData = blocksDataRef.current.blocks.map((block) => {
           />
 
           <div>
-            <label className="block text-sm font-medium text-zinc-700 mb-2">
-              Статус
-            </label>
+            <label className="block text-sm font-medium text-zinc-700 mb-2">Статус</label>
             <div className="flex gap-4">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -315,11 +343,7 @@ const blocksData = blocksDataRef.current.blocks.map((block) => {
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           <div className="lg:col-span-3">
-            <PostHeroForm
-              data={heroData}
-              onChange={setHeroData}
-              errors={errors}
-            />
+            <PostHeroForm data={heroData} onChange={setHeroData} errors={errors} />
           </div>
           <div className="lg:col-span-2">
             <PostHeroPreview data={heroData} />
@@ -353,11 +377,7 @@ const blocksData = blocksDataRef.current.blocks.map((block) => {
         />
 
         <div className="flex gap-4 justify-end">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => navigate('/admin/posts')}
-          >
+          <Button type="button" variant="secondary" onClick={() => navigate('/admin/posts')}>
             Скасувати
           </Button>
           <Button type="submit" disabled={saving}>

@@ -50,15 +50,15 @@ export default function AddBlockMenu({ onAddBlock }: AddBlockMenuProps) {
       >
         <Icon icon="solar:add-circle-linear" width={20} />
         <span>Додати блок</span>
-        <Icon icon={isOpen ? 'solar:alt-arrow-up-linear' : 'solar:alt-arrow-down-linear'} width={16} />
+        <Icon
+          icon={isOpen ? 'solar:alt-arrow-up-linear' : 'solar:alt-arrow-down-linear'}
+          width={16}
+        />
       </button>
 
       {isOpen && (
         <>
-          <div
-            className="fixed inset-0 z-10"
-            onClick={() => setIsOpen(false)}
-          />
+          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
           <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-zinc-200 z-20 overflow-hidden">
             {BLOCK_TYPES.map((blockType) => (
               <button
