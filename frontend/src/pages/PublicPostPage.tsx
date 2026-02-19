@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
 import { postService } from '../services/api';
+import { logger } from '../lib/logger';
 import Header from '../components/layout/Header';
 import PostHeroBlock from '../components/blocks/PostHeroBlock';
 import BlockRenderer from '../components/blocks/BlockRenderer';
@@ -16,13 +17,7 @@ export default function PostPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  useEffect(() => {
-    if (slug) {
-      loadPost(slug);
-    }
-  }, [slug]);
-
-  const loadPost = async (postSlug: string) => {
+  const loadPost = useCallback(async (postSlug: string) => {
     setLoading(true);
     setError(false);
     try {
@@ -43,12 +38,18 @@ export default function PostPage() {
         updateMetaTag('og:image', ogImage);
       }
     } catch (err) {
-      console.error('Error loading post:', err);
+      logger.error('Error loading post', err);
       setError(true);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (slug) {
+      loadPost(slug);
+    }
+  }, [slug, loadPost]);
 
   const updateMetaTag = (name: string, content: string) => {
     let meta = document.querySelector(`meta[name="${name}"], meta[property="${name}"]`);

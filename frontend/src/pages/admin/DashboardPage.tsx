@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { logger } from '../../lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { portfolioService } from '../../services/api';
 import type { Project, FilterOptions, PaginationParams } from '../../types/project';
@@ -22,7 +23,7 @@ export default function DashboardPage() {
   const previousProjectsRef = useRef<Project[]>([]);
   const previousPaginationRef = useRef(pagination);
 
-  const loadProjects = async () => {
+  const loadProjects = useCallback(async () => {
     setLoading(true);
     try {
       const result = await portfolioService.getAll({
@@ -35,28 +36,28 @@ export default function DashboardPage() {
       setProjects(result.data);
       setPagination(result.pagination);
     } catch (error) {
-      console.error('Error loading projects:', error);
+      logger.error('Error loading projects', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [pagination.page, pagination.limit, sortBy, sortOrder, filters]);
 
-  const loadFilters = async () => {
+  const loadFilters = useCallback(async () => {
     try {
       const options = await portfolioService.getFilters();
       setFilterOptions(options);
     } catch (error) {
-      console.error('Error loading filters:', error);
+      logger.error('Error loading filters', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadProjects();
-  }, [pagination.page, filters, sortBy, sortOrder]);
+  }, [loadProjects]);
 
   useEffect(() => {
     loadFilters();
-  }, []);
+  }, [loadFilters]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Ви впевнені, що хочете видалити цей проєкт?')) return;
@@ -70,7 +71,7 @@ export default function DashboardPage() {
     try {
       await portfolioService.delete(id);
     } catch (error) {
-      console.error('Error deleting project:', error);
+      logger.error('Error deleting project', error);
       setProjects(previousProjectsRef.current);
       setPagination(previousPaginationRef.current);
     }

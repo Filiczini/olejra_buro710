@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { logger } from '../../lib/logger';
 import { ChevronDown } from 'lucide-react';
 import { activityLogService } from '../../services/api';
 import type { ActivityLog, ActivityLogsParams } from '../../types/activityLog';
@@ -10,7 +11,7 @@ export default function ActivityLogPage() {
   const [filters, setFilters] = useState<ActivityLogsParams>({});
   const [uniqueUsers, setUniqueUsers] = useState<string[]>([]);
 
-  const loadLogs = async () => {
+  const loadLogs = useCallback(async () => {
     setLoading(true);
     try {
       const result = await activityLogService.getAll({
@@ -21,28 +22,28 @@ export default function ActivityLogPage() {
       setLogs(result.data);
       setPagination(result.pagination);
     } catch (error) {
-      console.error('Error loading logs:', error);
+      logger.error('Error loading logs', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [pagination.page, pagination.limit, filters]);
 
-  const loadUniqueUsers = async () => {
+  const loadUniqueUsers = useCallback(async () => {
     try {
       const users = await activityLogService.getUniqueUsers();
       setUniqueUsers(users);
     } catch (error) {
-      console.error('Error loading users:', error);
+      logger.error('Error loading users', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadLogs();
-  }, [pagination.page, filters.user_email, filters.action]);
+  }, [loadLogs]);
 
   useEffect(() => {
     loadUniqueUsers();
-  }, []);
+  }, [loadUniqueUsers]);
 
   const handleFilterChange = (key: keyof ActivityLogsParams, value: string | undefined) => {
     setFilters({ ...filters, [key]: value === '' ? undefined : value });

@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { logger } from '../../lib/logger';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
 import { postService } from '../../services/api';
@@ -57,9 +58,9 @@ export default function EditPostPage() {
     if (id) {
       loadPost(id);
     }
-  }, [id]);
+  }, [id, loadPost]);
 
-  const loadPost = async (postId: string) => {
+  const loadPost = useCallback(async (postId: string) => {
     setLoading(true);
     try {
       const result = await postService.getById(postId);
@@ -91,12 +92,12 @@ export default function EditPostPage() {
         sort_order: index,
       }));
     } catch (error) {
-      console.error('Error loading post:', error);
+      logger.error('Error loading post', error);
       navigate('/admin/posts');
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
 
   const generateSlug = (titleValue: string) => {
     const transliterate = (str: string): string => {
