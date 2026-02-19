@@ -49,7 +49,7 @@ router.post('/logout', authMiddleware, (_req: Request, res: Response) => {
 
 router.get('/me', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user?.userId;
+    const userId = req.user?.userId;
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }

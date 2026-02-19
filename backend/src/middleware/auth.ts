@@ -1,12 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../config/jwt';
 
-declare module 'express' {
-  interface Request {
-    user?: Record<string, unknown>;
-  }
-}
-
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
