@@ -7,99 +7,12 @@ import { postService } from '../services/postService';
 import { storageService } from '../services/storageService';
 import { activityLogService } from '../services/activityLogService';
 import { uploadProjectMedia } from '../middleware/multer';
+import { portfolioCreateSchema, portfolioUpdateSchema } from '../schemas/index.js';
+import { validateFormData } from '../middleware/validate.js';
+import { logger } from '../lib/logger.js';
 import type { PortfolioItem } from '../types/portfolio';
 
 const router = Router();
-
-const VALIDATION_LIMITS = {
-  title: { minLength: 1, maxLength: 200 },
-  subtitle: { maxLength: 300 },
-  location: { maxLength: 200 },
-  area: { maxLength: 50 },
-  year: { maxLength: 20 },
-  tags: { maxItems: 15 },
-};
-
-interface ValidationError {
-  field: string;
-  message: string;
-}
-
-const validateProjectInput = (data: {
-  title?: string;
-  subtitle?: string;
-  location?: string;
-  area?: string;
-  year?: string;
-  tags?: string;
-}): ValidationError[] => {
-  const errors: ValidationError[] = [];
-  const { title, subtitle, location, area, year, tags } = data;
-
-  if (title !== undefined) {
-    if (title.length < VALIDATION_LIMITS.title.minLength) {
-      errors.push({ field: 'title', message: 'Title is required' });
-    } else if (title.length > VALIDATION_LIMITS.title.maxLength) {
-      errors.push({
-        field: 'title',
-        message: `Title must be at most ${VALIDATION_LIMITS.title.maxLength} characters`,
-      });
-    }
-  }
-
-  if (subtitle && subtitle.length > VALIDATION_LIMITS.subtitle.maxLength) {
-    errors.push({
-      field: 'subtitle',
-      message: `Subtitle must be at most ${VALIDATION_LIMITS.subtitle.maxLength} characters`,
-    });
-  }
-
-  if (location && location.length > VALIDATION_LIMITS.location.maxLength) {
-    errors.push({
-      field: 'location',
-      message: `Location must be at most ${VALIDATION_LIMITS.location.maxLength} characters`,
-    });
-  }
-
-  if (area && area.length > VALIDATION_LIMITS.area.maxLength) {
-    errors.push({
-      field: 'area',
-      message: `Area must be at most ${VALIDATION_LIMITS.area.maxLength} characters`,
-    });
-  }
-
-  if (year && year.length > VALIDATION_LIMITS.year.maxLength) {
-    errors.push({
-      field: 'year',
-      message: `Year must be at most ${VALIDATION_LIMITS.year.maxLength} characters`,
-    });
-  }
-
-  if (tags) {
-    try {
-      const parsedTags = JSON.parse(tags);
-      if (!Array.isArray(parsedTags)) {
-        errors.push({ field: 'tags', message: 'Tags must be an array' });
-      } else if (parsedTags.length > VALIDATION_LIMITS.tags.maxItems) {
-        errors.push({
-          field: 'tags',
-          message: `Maximum ${VALIDATION_LIMITS.tags.maxItems} tags allowed`,
-        });
-      } else {
-        for (const tag of parsedTags) {
-          if (typeof tag !== 'string') {
-            errors.push({ field: 'tags', message: 'Each tag must be a string' });
-            break;
-          }
-        }
-      }
-    } catch {
-      errors.push({ field: 'tags', message: 'Invalid tags format' });
-    }
-  }
-
-  return errors;
-};
 
 router.get('/', async (req, res) => {
   try {
@@ -118,7 +31,7 @@ router.get('/', async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error('Error fetching projects:', error);
+    logger.error('Error fetching projects', error);
     res.status(500).json({ error: 'Failed to fetch projects' });
   }
 });
@@ -200,7 +113,7 @@ router.get('/all', async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Error fetching all portfolio items:', error);
+    logger.error('Error fetching all portfolio items', error);
     res.status(500).json({ error: 'Failed to fetch portfolio items' });
   }
 });
@@ -210,7 +123,7 @@ router.get('/filters', async (_req, res) => {
     const filters = await projectService.getFiltersOptions();
     res.json(filters);
   } catch (error) {
-    console.error('Error fetching filters:', error);
+    logger.error('Error fetching filters', error);
     res.status(500).json({ error: 'Failed to fetch filters' });
   }
 });
@@ -221,7 +134,7 @@ router.get('/:id', async (req, res) => {
     const result = await projectService.getById(id);
     res.json(result);
   } catch (error) {
-    console.error('Error fetching project:', error);
+    logger.error('Error fetching project', error);
     res.status(404).json({ error: 'Project not found' });
   }
 });
@@ -230,35 +143,13 @@ router.post(
   '/',
   authMiddleware,
   uploadProjectMedia,
+  validateFormData(portfolioCreateSchema),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
       const heroFiles = files?.['heroMedia'] || [];
 
-      const { title, subtitle, tags, location, area, year } = req.body as {
-        title?: string;
-        subtitle?: string;
-        tags?: string;
-        location?: string;
-        area?: string;
-        year?: string;
-      };
-
-      const validationErrors = validateProjectInput({
-        title,
-        subtitle,
-        location,
-        area,
-        year,
-        tags,
-      });
-      if (validationErrors.length > 0) {
-        return res.status(400).json({ errors: validationErrors });
-      }
-
-      if (!title) {
-        return res.status(400).json({ error: 'Title is required' });
-      }
+      const { title, subtitle, tags, location, area, year } = req.body;
 
       let imageUrl = '';
       if (heroFiles.length > 0) {
@@ -269,7 +160,7 @@ router.post(
         title,
         subtitle,
         image_url: imageUrl,
-        tags: tags ? JSON.parse(tags) : [],
+        tags: tags || [],
         location,
         area,
         year,
@@ -287,7 +178,7 @@ router.post(
 
       res.status(201).json(project);
     } catch (error) {
-      console.error('Error creating project:', error);
+      logger.error('Error creating project', error);
       res.status(500).json({ error: 'Failed to create project' });
     }
   }
@@ -297,29 +188,11 @@ router.put(
   '/:id',
   authMiddleware,
   uploadProjectMedia,
+  validateFormData(portfolioUpdateSchema),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = req.params.id as string;
-      const { title, subtitle, tags, location, area, year } = req.body as {
-        title?: string;
-        subtitle?: string;
-        tags?: string;
-        location?: string;
-        area?: string;
-        year?: string;
-      };
-
-      const validationErrors = validateProjectInput({
-        title,
-        subtitle,
-        location,
-        area,
-        year,
-        tags,
-      });
-      if (validationErrors.length > 0) {
-        return res.status(400).json({ errors: validationErrors });
-      }
+      const { title, subtitle, tags, location, area, year } = req.body;
 
       const existing = await projectService.getById(id);
       const existingProject = existing.project;
@@ -343,7 +216,7 @@ router.put(
         title: title ?? existingProject.title,
         subtitle: subtitle ?? existingProject.subtitle,
         image_url: imageUrl,
-        tags: tags !== undefined ? JSON.parse(tags) : existingProject.tags,
+        tags: tags !== undefined ? tags : existingProject.tags,
         location: location ?? existingProject.location,
         area: area ?? existingProject.area,
         year: year ?? existingProject.year,
@@ -387,7 +260,7 @@ router.put(
 
       res.json(project);
     } catch (error) {
-      console.error('Error updating project:', error);
+      logger.error('Error updating project', error);
       res.status(500).json({ error: 'Failed to update project' });
     }
   }
@@ -416,7 +289,7 @@ router.delete('/:id', authMiddleware, async (req: AuthenticatedRequest, res: Res
 
     res.json({ message: 'Project deleted successfully' });
   } catch (error) {
-    console.error('Error deleting project:', error);
+    logger.error('Error deleting project', error);
     res.status(500).json({ error: 'Failed to delete project' });
   }
 });
