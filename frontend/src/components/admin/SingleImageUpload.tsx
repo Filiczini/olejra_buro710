@@ -14,6 +14,16 @@ interface ImagePreview {
   previewUrl: string;
 }
 
+const createPreview = (file: File): Promise<string> => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      resolve(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  });
+};
+
 export default function SingleImageUpload({
   image,
   onImageChange,
@@ -40,16 +50,6 @@ export default function SingleImageUpload({
 
     generatePreview();
   }, [image, initialImageUrl]);
-
-  const createPreview = (file: File): Promise<string> => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        resolve(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
 
   const validateFile = (file: File): string | null => {
     const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];

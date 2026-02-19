@@ -72,7 +72,7 @@ export default function DashboardPage() {
     }
   };
 
-  const handleFilterChange = (key: keyof PaginationParams, value: any) => {
+  const handleFilterChange = (key: keyof PaginationParams, value: string | string[] | undefined) => {
     setFilters({ ...filters, [key]: value, page: 1 });
   };
 
