@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Icon } from '@iconify-icon/react';
 import { Link } from 'react-router-dom';
 import { portfolioService } from '../services/api';
+import { logger } from '../lib/logger';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import type { PortfolioItem } from '../types/portfolio';
@@ -15,7 +16,7 @@ export default function AllProjectsPage() {
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  const loadItems = async () => {
+  const loadItems = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -30,15 +31,15 @@ export default function AllProjectsPage() {
       setTotalPages(result.pagination.totalPages);
       setAvailableTags(result.filters.tags);
     } catch (error) {
-      console.error('Error loading items:', error);
+      logger.error('Error loading items', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, selectedTags]);
 
   useEffect(() => {
     loadItems();
-  }, [page, selectedTags]);
+  }, [loadItems]);
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>

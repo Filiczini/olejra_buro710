@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { logger } from '../../lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { Search, ChevronDown, PlusCircle, Pencil, Eye, Trash2, CheckCircle } from 'lucide-react';
 import { postService } from '../../services/api';
@@ -15,7 +16,7 @@ export default function PostsPage() {
   const previousPostsRef = useRef<Post[]>([]);
   const previousPaginationRef = useRef(pagination);
 
-  const loadPosts = async () => {
+  const loadPosts = useCallback(async () => {
     setLoading(true);
     try {
       const result = await postService.getAll({
@@ -31,15 +32,15 @@ export default function PostsPage() {
         totalPages: result.pagination.totalPages,
       }));
     } catch (error) {
-      console.error('Error loading posts:', error);
+      logger.error('Error loading posts', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [pagination.page, pagination.limit, statusFilter, searchQuery]);
 
   useEffect(() => {
     loadPosts();
-  }, [pagination.page, statusFilter]);
+  }, [loadPosts]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -50,7 +51,7 @@ export default function PostsPage() {
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, loadPosts, pagination.page]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Ви впевнені, що хочете видалити цей пост?')) return;
@@ -64,7 +65,7 @@ export default function PostsPage() {
     try {
       await postService.delete(id);
     } catch (error) {
-      console.error('Error deleting post:', error);
+      logger.error('Error deleting post', error);
       setPosts(previousPostsRef.current);
       setPagination(previousPaginationRef.current);
     }
