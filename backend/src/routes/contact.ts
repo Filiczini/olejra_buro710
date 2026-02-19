@@ -17,7 +17,7 @@ router.post('/', contactLimiter, async (req: Request, res: Response) => {
   const { name, email, subject, message } = req.body;
 
   if (!name || !email || !subject || !message) {
-    return res.status(400).json({ error: 'Всі поля обов\'язкові' });
+    return res.status(400).json({ error: "Всі поля обов'язкові" });
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
