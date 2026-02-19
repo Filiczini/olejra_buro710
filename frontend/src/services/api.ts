@@ -1,14 +1,6 @@
 import api from '../api/client';
-import type {
-  PaginatedResponse,
-  Project,
-  PaginationParams,
-  FilterOptions,
-} from '../types/project';
-import type {
-  ActivityLog,
-  ActivityLogsParams,
-} from '../types/activityLog';
+import type { PaginatedResponse, Project, PaginationParams, FilterOptions } from '../types/project';
+import type { ActivityLog, ActivityLogsParams } from '../types/activityLog';
 import type { Post, PostPaginationParams } from '../types/post';
 import type { Block } from '../types/block';
 import type { PortfolioAllParams, PortfolioAllResponse } from '../types/portfolio';
@@ -27,7 +19,7 @@ export const authService = {
 export const portfolioService = {
   getAll: async (params?: PaginationParams) => {
     const queryParams = new URLSearchParams();
-    
+
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
@@ -48,7 +40,7 @@ export const portfolioService = {
 
   getById: async (id: string) => {
     const response = await api.get(`/portfolio/${id}`);
-    return response.data as { project: Project, heroMedia: { id: string; url: string }[] };
+    return response.data as { project: Project; heroMedia: { id: string; url: string }[] };
   },
 
   create: async (data: FormData) => {
@@ -87,11 +79,11 @@ export const portfolioService = {
         params: {
           limit: 50,
           sortBy: 'created_at',
-          sortOrder: 'asc'
-        }
+          sortOrder: 'asc',
+        },
       });
 
-      const currentIndex = data.data.findIndex(p => p.id === currentId);
+      const currentIndex = data.data.findIndex((p) => p.id === currentId);
       if (currentIndex === -1 || currentIndex === data.data.length - 1) {
         return null;
       }
@@ -105,7 +97,7 @@ export const portfolioService = {
 
   getAllWithPosts: async (params?: PortfolioAllParams): Promise<PortfolioAllResponse> => {
     const queryParams = new URLSearchParams();
-    
+
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.tags && params.tags.length > 0) queryParams.append('tags', params.tags.join(','));
@@ -180,4 +172,3 @@ export const contactService = {
     return response.data as ContactSubmitResponse;
   },
 };
-

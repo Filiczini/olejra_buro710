@@ -19,31 +19,38 @@ export default function TextFullBlock({ data }: TextFullBlockProps) {
             {label}
           </span>
         )}
-        
+
         <h2 className="text-2xl md:text-4xl font-normal tracking-tight text-zinc-900 mb-10 leading-snug">
           "{content}"
         </h2>
-        
+
         {hasStats && (
           <div className="flex items-center justify-center gap-12 border-t border-zinc-100 pt-10">
             {area && (
               <div className="text-center">
                 <span className="block text-2xl font-medium text-zinc-900">
-                  {area}<span className="text-sm align-top text-zinc-400">m²</span>
+                  {area}
+                  <span className="text-sm align-top text-zinc-400">m²</span>
                 </span>
-                <span className="text-xs text-zinc-400 uppercase tracking-wider mt-1 block">Area</span>
+                <span className="text-xs text-zinc-400 uppercase tracking-wider mt-1 block">
+                  Area
+                </span>
               </div>
             )}
             {months && (
               <div className="text-center">
                 <span className="block text-2xl font-medium text-zinc-900">{months}</span>
-                <span className="text-xs text-zinc-400 uppercase tracking-wider mt-1 block">Months</span>
+                <span className="text-xs text-zinc-400 uppercase tracking-wider mt-1 block">
+                  Months
+                </span>
               </div>
             )}
             {year && (
               <div className="text-center">
                 <span className="block text-2xl font-medium text-zinc-900">{year}</span>
-                <span className="text-xs text-zinc-400 uppercase tracking-wider mt-1 block">Year</span>
+                <span className="text-xs text-zinc-400 uppercase tracking-wider mt-1 block">
+                  Year
+                </span>
               </div>
             )}
           </div>

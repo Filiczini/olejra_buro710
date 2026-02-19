@@ -1,7 +1,14 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Icon } from '@iconify-icon/react';
-import type { Block, BlockType, BlockData, TextFullData, ImageFullData, TextImageData } from '../../../types/block';
+import type {
+  Block,
+  BlockType,
+  BlockData,
+  TextFullData,
+  ImageFullData,
+  TextImageData,
+} from '../../../types/block';
 import TextFullEditor from './editors/TextFullEditor';
 import ImageFullEditor from './editors/ImageFullEditor';
 import TextImageEditor from './editors/TextImageEditor';
@@ -28,15 +35,16 @@ const BLOCK_ICONS_MAP: Record<BlockType, string> = {
   image_text: 'solar:layout-right-linear',
 };
 
-export default function BlockItem({ block, index, onUpdate, onDelete, onImageChange }: BlockItemProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: block.id });
+export default function BlockItem({
+  block,
+  index,
+  onUpdate,
+  onDelete,
+  onImageChange,
+}: BlockItemProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: block.id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -121,9 +129,7 @@ export default function BlockItem({ block, index, onUpdate, onDelete, onImageCha
           <Icon icon="solar:trash-bin-trash-linear" width={20} />
         </button>
       </div>
-      <div className="p-4">
-        {renderEditor()}
-      </div>
+      <div className="p-4">{renderEditor()}</div>
     </div>
   );
 }

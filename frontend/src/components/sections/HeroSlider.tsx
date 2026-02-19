@@ -13,7 +13,7 @@ export default function HeroSlider() {
     const fetchPosts = async () => {
       try {
         const response = await postService.getAll({ status: 'published', limit: 10 });
-        const featuredPosts = response.data.filter(p => p.hero_image_url).slice(0, 5);
+        const featuredPosts = response.data.filter((p) => p.hero_image_url).slice(0, 5);
         setPosts(featuredPosts);
       } catch (error) {
         console.error('Failed to fetch posts:', error);
@@ -27,17 +27,17 @@ export default function HeroSlider() {
   useEffect(() => {
     if (posts.length <= 1) return;
     const interval = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % posts.length);
+      setCurrentSlide((prev) => (prev + 1) % posts.length);
     }, 6000);
     return () => clearInterval(interval);
   }, [posts.length]);
 
   const nextSlide = () => {
-    setCurrentSlide(prev => (prev + 1) % posts.length);
+    setCurrentSlide((prev) => (prev + 1) % posts.length);
   };
 
   const prevSlide = () => {
-    setCurrentSlide(prev => (prev - 1 + posts.length) % posts.length);
+    setCurrentSlide((prev) => (prev - 1 + posts.length) % posts.length);
   };
 
   if (loading || posts.length === 0) {
@@ -104,20 +104,32 @@ export default function HeroSlider() {
                 className="group hidden md:flex items-center gap-2 text-sm font-medium text-white hover:text-white transition-all duration-300 hover:opacity-80 cursor-pointer"
               >
                 Переглянути пост
-                <Icon icon="solar:arrow-right-linear" width={16} className="transition-transform duration-300 group-hover:translate-x-3 group-hover:scale-110" />
+                <Icon
+                  icon="solar:arrow-right-linear"
+                  width={16}
+                  className="transition-transform duration-300 group-hover:translate-x-3 group-hover:scale-110"
+                />
               </Link>
               <div className="flex gap-2 ml-4">
                 <button
                   onClick={prevSlide}
                   className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white hover:text-black hover:border-white hover:scale-110 hover:shadow-lg hover:shadow-white/20 transition-all duration-300 backdrop-blur-sm group cursor-pointer"
                 >
-                  <Icon icon="solar:arrow-left-linear" width={16} className="transition-transform duration-300 group-hover:-translate-x-0.5" />
+                  <Icon
+                    icon="solar:arrow-left-linear"
+                    width={16}
+                    className="transition-transform duration-300 group-hover:-translate-x-0.5"
+                  />
                 </button>
                 <button
                   onClick={nextSlide}
                   className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white hover:text-black hover:border-white hover:scale-110 hover:shadow-lg hover:shadow-white/20 transition-all duration-300 backdrop-blur-sm group cursor-pointer"
                 >
-                  <Icon icon="solar:arrow-right-linear" width={16} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+                  <Icon
+                    icon="solar:arrow-right-linear"
+                    width={16}
+                    className="transition-transform duration-300 group-hover:translate-x-0.5"
+                  />
                 </button>
               </div>
             </div>
@@ -125,7 +137,12 @@ export default function HeroSlider() {
               to={`/page/${currentPost.slug}`}
               className="md:hidden flex items-center gap-2 text-sm font-medium text-white/90 hover:text-white transition-all duration-300 hover:opacity-80 cursor-pointer"
             >
-              Переглянути пост <Icon icon="solar:arrow-right-linear" width={16} className="transition-transform duration-300 group-hover:translate-x-1 group-hover:scale-110" />
+              Переглянути пост{' '}
+              <Icon
+                icon="solar:arrow-right-linear"
+                width={16}
+                className="transition-transform duration-300 group-hover:translate-x-1 group-hover:scale-110"
+              />
             </Link>
           </div>
         </div>

@@ -19,8 +19,16 @@ interface HeroSectionFormProps {
   initialImageUrl?: string | null;
 }
 
-export default function HeroSectionForm({ data, onChange, errors, initialImageUrl }: HeroSectionFormProps) {
-  const handleChange = (field: keyof HeroSectionData, value: string | File | undefined | string[]) => {
+export default function HeroSectionForm({
+  data,
+  onChange,
+  errors,
+  initialImageUrl,
+}: HeroSectionFormProps) {
+  const handleChange = (
+    field: keyof HeroSectionData,
+    value: string | File | undefined | string[]
+  ) => {
     onChange({ ...data, [field]: value });
   };
 

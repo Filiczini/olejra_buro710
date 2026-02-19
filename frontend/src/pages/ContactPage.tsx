@@ -11,7 +11,7 @@ export default function ContactPage() {
     name: '',
     email: '',
     subject: '',
-    message: ''
+    message: '',
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -38,7 +38,7 @@ export default function ContactPage() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const contactInfo = [
@@ -46,44 +46,44 @@ export default function ContactPage() {
       icon: 'solar:letter-linear',
       label: 'Email',
       value: 'hello@buro710.com',
-      link: 'mailto:hello@buro710.com'
+      link: 'mailto:hello@buro710.com',
     },
     {
       icon: 'solar:phone-linear',
       label: 'Телефон',
       value: '+380 44 123 4567',
-      link: 'tel:+380441234567'
+      link: 'tel:+380441234567',
     },
     {
       icon: 'solar:map-point-linear',
       label: 'Адреса',
       value: 'Чернівці, вул. Рівненська, 5А',
-      link: null
+      link: null,
     },
     {
       icon: 'solar:clock-linear',
       label: 'Робочий час',
       value: 'Пн-Пт: 9:00 - 18:00',
-      link: null
-    }
+      link: null,
+    },
   ];
 
   const socialLinks = [
     {
       icon: 'solar:instagram-linear',
       name: 'Instagram',
-      link: 'https://instagram.com/buro710'
+      link: 'https://instagram.com/buro710',
     },
     {
       icon: 'solar:linkedin-linear',
       name: 'LinkedIn',
-      link: 'https://linkedin.com/company/buro710'
+      link: 'https://linkedin.com/company/buro710',
     },
     {
       icon: 'solar:behance-linear',
       name: 'Behance',
-      link: 'https://behance.net/buro710'
-    }
+      link: 'https://behance.net/buro710',
+    },
   ];
 
   return (
@@ -99,9 +99,7 @@ export default function ContactPage() {
             </div>
             <div className="space-y-8 flex flex-col justify-between">
               <div className="space-y-6 text-lg text-zinc-500 font-light leading-relaxed max-w-xl">
-                <p>
-                  Ми раді допомогти вам втілити ваш дизайн-проект у життя.
-                </p>
+                <p>Ми раді допомогти вам втілити ваш дизайн-проект у життя.</p>
               </div>
               <div className="flex gap-6">
                 <a
@@ -156,12 +154,8 @@ export default function ContactPage() {
               </div>
             </div>
             <div>
-              <h3 className="text-2xl font-medium tracking-tight mb-6">
-                Соціальні мережі
-              </h3>
-              <p className="text-zinc-500 text-lg mb-8">
-                Дізнавайтеся про наші новини.
-              </p>
+              <h3 className="text-2xl font-medium tracking-tight mb-6">Соціальні мережі</h3>
+              <p className="text-zinc-500 text-lg mb-8">Дізнавайтеся про наші новини.</p>
               <div className="space-y-4">
                 {socialLinks.map((social, index) => (
                   <a
@@ -171,7 +165,11 @@ export default function ContactPage() {
                     rel="noopener noreferrer"
                     className="flex items-center gap-4 p-4 border border-zinc-200 rounded-lg hover:border-zinc-900 hover:bg-zinc-100/50 transition-colors group"
                   >
-                    <Icon icon={social.icon} width={24} className="text-zinc-900 group-hover:text-zinc-900" />
+                    <Icon
+                      icon={social.icon}
+                      width={24}
+                      className="text-zinc-900 group-hover:text-zinc-900"
+                    />
                     <span className="text-zinc-900">{social.name}</span>
                   </a>
                 ))}
@@ -183,12 +181,8 @@ export default function ContactPage() {
         <section id="contact-form" className="max-w-[1800px] mx-auto px-6 py-24 md:py-32">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-4">
-                Напишіть нам
-              </h2>
-              <p className="text-zinc-500 text-lg max-w-2xl mx-auto">
-                Розкажіть про свій проект.
-              </p>
+              <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-4">Напишіть нам</h2>
+              <p className="text-zinc-500 text-lg max-w-2xl mx-auto">Розкажіть про свій проект.</p>
             </div>
 
             {success ? (
@@ -197,13 +191,8 @@ export default function ContactPage() {
                   <Icon icon="solar:check-circle-linear" width={32} className="text-green-600" />
                 </div>
                 <h3 className="text-2xl font-medium mb-2">Повідомлення надіслано!</h3>
-                <p className="text-zinc-500 mb-6">
-                  Ми зв'яжемося з вами найближчим часом.
-                </p>
-                <Button
-                  variant="secondary"
-                  onClick={() => setSuccess(false)}
-                >
+                <p className="text-zinc-500 mb-6">Ми зв'яжемося з вами найближчим часом.</p>
+                <Button variant="secondary" onClick={() => setSuccess(false)}>
                   Надіслати ще одне повідомлення
                 </Button>
               </div>
@@ -245,9 +234,7 @@ export default function ContactPage() {
                   disabled={loading}
                 />
                 <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-zinc-700">
-                    Повідомлення
-                  </label>
+                  <label className="text-sm font-medium text-zinc-700">Повідомлення</label>
                   <textarea
                     name="message"
                     value={formData.message}
@@ -261,12 +248,7 @@ export default function ContactPage() {
                   />
                 </div>
                 <div className="text-center">
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    className="px-12 py-4"
-                    disabled={loading}
-                  >
+                  <Button type="submit" variant="primary" className="px-12 py-4" disabled={loading}>
                     {loading ? (
                       <span className="flex items-center gap-2">
                         <Icon icon="solar:spinner-linear" width={18} className="animate-spin" />
@@ -286,12 +268,8 @@ export default function ContactPage() {
           <div className="max-w-[1800px] mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
-                <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-6">
-                  Знайти нас
-                </h2>
-                <p className="text-zinc-400 text-lg mb-8">
-                  Наш офіс знаходиться в районі Майдану.
-                </p>
+                <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-6">Знайти нас</h2>
+                <p className="text-zinc-400 text-lg mb-8">Наш офіс знаходиться в районі Майдану.</p>
                 <div className="flex items-start gap-4">
                   <Icon icon="solar:map-point-linear" width={24} className="text-zinc-500" />
                   <div>

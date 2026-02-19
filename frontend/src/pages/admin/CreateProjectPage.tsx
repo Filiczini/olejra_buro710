@@ -52,7 +52,7 @@ export default function CreateProjectPage() {
       formDataToSend.append('title', heroData.title);
       formDataToSend.append('subtitle', heroData.subtitle || '');
       formDataToSend.append('tags', JSON.stringify(heroData.tags));
-      
+
       if (heroData.location) formDataToSend.append('location', heroData.location);
       if (heroData.year) formDataToSend.append('year', heroData.year);
       if (heroData.area) formDataToSend.append('area', heroData.area);
@@ -73,8 +73,8 @@ export default function CreateProjectPage() {
       <div className="flex items-center gap-4 mb-8">
         <button
           onClick={() => navigate('/admin/dashboard')}
-className="text-zinc-600 hover:text-zinc-900 cursor-pointer"
->
+          className="text-zinc-600 hover:text-zinc-900 cursor-pointer"
+        >
           ← Повернутися до панелі керування
         </button>
         <h1 className="text-3xl font-bold text-zinc-900">Створити проєкт</h1>
@@ -83,11 +83,7 @@ className="text-zinc-600 hover:text-zinc-900 cursor-pointer"
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="flex-1">
           <form onSubmit={handleSubmit} className="space-y-8">
-            <HeroSectionForm
-              data={heroData}
-              onChange={setHeroData}
-              errors={errors}
-            />
+            <HeroSectionForm data={heroData} onChange={setHeroData} errors={errors} />
 
             <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
               {errors.submit && (

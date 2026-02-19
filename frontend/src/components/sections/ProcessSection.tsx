@@ -16,9 +16,16 @@ export default function ProcessSection() {
         <div className="lg:col-span-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {steps.map((step) => (
-              <div key={step.id} className="group py-4 border-t border-zinc-200 hover:border-zinc-900 transition-all duration-300 hover:bg-zinc-50 rounded-lg hover:-translate-y-1">
-                <span className="text-xs font-medium text-zinc-400 mb-2 block group-hover:text-zinc-900 transition-colors duration-300">{step.id}</span>
-                <span className="text-lg font-medium group-hover:text-zinc-700 transition-colors duration-300">{step.name}</span>
+              <div
+                key={step.id}
+                className="group py-4 border-t border-zinc-200 hover:border-zinc-900 transition-all duration-300 hover:bg-zinc-50 rounded-lg hover:-translate-y-1"
+              >
+                <span className="text-xs font-medium text-zinc-400 mb-2 block group-hover:text-zinc-900 transition-colors duration-300">
+                  {step.id}
+                </span>
+                <span className="text-lg font-medium group-hover:text-zinc-700 transition-colors duration-300">
+                  {step.name}
+                </span>
               </div>
             ))}
           </div>

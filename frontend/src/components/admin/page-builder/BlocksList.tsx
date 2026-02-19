@@ -65,15 +65,8 @@ export default function BlocksList({
   }
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <SortableContext
-        items={blocks.map((b) => b.id)}
-        strategy={verticalListSortingStrategy}
-      >
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
         <div className="space-y-4">
           {blocks.map((block, index) => (
             <BlockItem

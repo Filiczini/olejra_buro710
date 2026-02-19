@@ -14,7 +14,10 @@ interface PostHeroFormProps {
 }
 
 export default function PostHeroForm({ data, onChange, errors }: PostHeroFormProps) {
-  const handleChange = (field: keyof PostHeroFormData, value: string | File | string[] | undefined) => {
+  const handleChange = (
+    field: keyof PostHeroFormData,
+    value: string | File | string[] | undefined
+  ) => {
     onChange({ ...data, [field]: value });
   };
 

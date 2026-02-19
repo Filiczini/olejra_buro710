@@ -10,7 +10,12 @@ interface TextImageEditorProps {
   mirrored: boolean;
 }
 
-export default function TextImageEditor({ data, onChange, onImageChange, mirrored }: TextImageEditorProps) {
+export default function TextImageEditor({
+  data,
+  onChange,
+  onImageChange,
+  mirrored,
+}: TextImageEditorProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [hasNewImage, setHasNewImage] = useState(false);
   const [newFeature, setNewFeature] = useState('');
@@ -55,11 +60,16 @@ export default function TextImageEditor({ data, onChange, onImageChange, mirrore
 
   const removeFeature = (index: number) => {
     const features = data.features || [];
-    updateField('features', features.filter((_, i) => i !== index));
+    updateField(
+      'features',
+      features.filter((_, i) => i !== index)
+    );
   };
 
   const gridCols = 'md:grid-cols-[1fr_1fr]';
-  const order = mirrored ? { text: 'md:order-2', image: 'md:order-1' } : { text: 'md:order-1', image: 'md:order-2' };
+  const order = mirrored
+    ? { text: 'md:order-2', image: 'md:order-1' }
+    : { text: 'md:order-1', image: 'md:order-2' };
 
   return (
     <div className={`grid ${gridCols} gap-4`}>
@@ -74,7 +84,9 @@ export default function TextImageEditor({ data, onChange, onImageChange, mirrore
             >
               <option value="">Без іконки</option>
               {BLOCK_ICONS.map((icon) => (
-                <option key={icon.value} value={icon.value}>{icon.label}</option>
+                <option key={icon.value} value={icon.value}>
+                  {icon.label}
+                </option>
               ))}
             </select>
           </div>
@@ -113,7 +125,9 @@ export default function TextImageEditor({ data, onChange, onImageChange, mirrore
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-zinc-600 mb-1">Особливості (features)</label>
+          <label className="block text-xs font-medium text-zinc-600 mb-1">
+            Особливості (features)
+          </label>
           <div className="flex gap-2 mb-2">
             <input
               type="text"
@@ -152,10 +166,8 @@ export default function TextImageEditor({ data, onChange, onImageChange, mirrore
       </div>
 
       <div className={order.image}>
-        <label className="block text-sm font-medium text-zinc-700 mb-2">
-          Зображення
-        </label>
-        
+        <label className="block text-sm font-medium text-zinc-700 mb-2">Зображення</label>
+
         {displayUrl ? (
           <div className="relative group mb-3">
             <img
