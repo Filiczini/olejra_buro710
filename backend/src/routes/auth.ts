@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import { authMiddleware } from '../middleware/auth';
 import { generateToken } from '../config/jwt';
 import { userService } from '../services/userService';
+import { logger } from '../lib/logger.js';
 
 const router = Router();
 
@@ -38,7 +39,7 @@ router.post('/login', async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('Login error:', error);
+    logger.error('Login error', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -65,7 +66,7 @@ router.get('/me', authMiddleware, async (req: Request, res: Response) => {
       role: user.role,
     });
   } catch (error) {
-    console.error('Get user error:', error);
+    logger.error('Get user error', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
