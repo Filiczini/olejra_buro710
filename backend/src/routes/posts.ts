@@ -47,28 +47,46 @@ const validatePostInput = (data: PostBody): ValidationError[] => {
     if (title.length < VALIDATION_LIMITS.title.minLength) {
       errors.push({ field: 'title', message: 'Title is required' });
     } else if (title.length > VALIDATION_LIMITS.title.maxLength) {
-      errors.push({ field: 'title', message: `Title must be at most ${VALIDATION_LIMITS.title.maxLength} characters` });
+      errors.push({
+        field: 'title',
+        message: `Title must be at most ${VALIDATION_LIMITS.title.maxLength} characters`,
+      });
     }
   }
 
   if (slug && slug.length > VALIDATION_LIMITS.slug.maxLength) {
-    errors.push({ field: 'slug', message: `Slug must be at most ${VALIDATION_LIMITS.slug.maxLength} characters` });
+    errors.push({
+      field: 'slug',
+      message: `Slug must be at most ${VALIDATION_LIMITS.slug.maxLength} characters`,
+    });
   }
 
   if (seo_title && seo_title.length > VALIDATION_LIMITS.seoTitle.maxLength) {
-    errors.push({ field: 'seo_title', message: `SEO title must be at most ${VALIDATION_LIMITS.seoTitle.maxLength} characters` });
+    errors.push({
+      field: 'seo_title',
+      message: `SEO title must be at most ${VALIDATION_LIMITS.seoTitle.maxLength} characters`,
+    });
   }
 
   if (seo_description && seo_description.length > VALIDATION_LIMITS.seoDescription.maxLength) {
-    errors.push({ field: 'seo_description', message: `SEO description must be at most ${VALIDATION_LIMITS.seoDescription.maxLength} characters` });
+    errors.push({
+      field: 'seo_description',
+      message: `SEO description must be at most ${VALIDATION_LIMITS.seoDescription.maxLength} characters`,
+    });
   }
 
   if (hero_title && hero_title.length > VALIDATION_LIMITS.heroTitle.maxLength) {
-    errors.push({ field: 'hero_title', message: `Hero title must be at most ${VALIDATION_LIMITS.heroTitle.maxLength} characters` });
+    errors.push({
+      field: 'hero_title',
+      message: `Hero title must be at most ${VALIDATION_LIMITS.heroTitle.maxLength} characters`,
+    });
   }
 
   if (hero_subtitle && hero_subtitle.length > VALIDATION_LIMITS.heroSubtitle.maxLength) {
-    errors.push({ field: 'hero_subtitle', message: `Hero subtitle must be at most ${VALIDATION_LIMITS.heroSubtitle.maxLength} characters` });
+    errors.push({
+      field: 'hero_subtitle',
+      message: `Hero subtitle must be at most ${VALIDATION_LIMITS.heroSubtitle.maxLength} characters`,
+    });
   }
 
   return errors;
@@ -117,7 +135,20 @@ router.get('/:id', async (req, res) => {
 router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequest, res) => {
   try {
     const body = req.body as PostBody;
-    const { title, slug, status, seo_title, seo_description, hero_title, hero_subtitle, hero_tags, hero_location, hero_year, gallery_images, blocks } = body;
+    const {
+      title,
+      slug,
+      status,
+      seo_title,
+      seo_description,
+      hero_title,
+      hero_subtitle,
+      hero_tags,
+      hero_location,
+      hero_year,
+      gallery_images,
+      blocks,
+    } = body;
 
     const validationErrors = validatePostInput(body);
     if (validationErrors.length > 0) {
@@ -140,7 +171,13 @@ router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequ
       ogImageUrl = await storageService.uploadImage(files['ogImage'][0], 'blocks');
     }
 
-    let parsedBlocks: { id?: string; _tempId?: string; type: BlockType; data: Record<string, unknown>; sort_order?: number }[] = [];
+    let parsedBlocks: {
+      id?: string;
+      _tempId?: string;
+      type: BlockType;
+      data: Record<string, unknown>;
+      sort_order?: number;
+    }[] = [];
     if (blocks) {
       try {
         parsedBlocks = JSON.parse(blocks);
@@ -155,15 +192,16 @@ router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequ
 
     const processedBlocks = parsedBlocks.map((block, index) => {
       const data = { ...block.data };
-      const needsImage = block.type === 'image_full' || block.type === 'text_image' || block.type === 'image_text';
+      const needsImage =
+        block.type === 'image_full' || block.type === 'text_image' || block.type === 'image_text';
       const hasNewImage = data._hasNewImage === true;
-      
+
       if (needsImage && hasNewImage && blockImageFiles[blockImageIndex]) {
         blockUploads.push({ sort_order: index, file: blockImageFiles[blockImageIndex] });
         blockImageIndex++;
       }
       delete data._hasNewImage;
-      
+
       return {
         id: block.id,
         type: block.type,
@@ -175,12 +213,12 @@ router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequ
     const galleryImageFiles = files?.['galleryImages'] || [];
     const existingGalleryUrls = gallery_images ? JSON.parse(gallery_images) : [];
     const newGalleryUrls: string[] = [];
-    
+
     for (const file of galleryImageFiles) {
       const url = await storageService.uploadImage(file, 'blocks');
       newGalleryUrls.push(url);
     }
-    
+
     const finalGalleryImages = [...existingGalleryUrls, ...newGalleryUrls];
 
     const post = await postService.create({
@@ -197,12 +235,16 @@ router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequ
       hero_location,
       hero_year,
       gallery_images: finalGalleryImages,
-      blocks: processedBlocks as unknown as { type: BlockType; data: BlockData; sort_order: number }[],
+      blocks: processedBlocks as unknown as {
+        type: BlockType;
+        data: BlockData;
+        sort_order: number;
+      }[],
     });
 
     for (const upload of blockUploads) {
       const imageUrl = await storageService.uploadImage(upload.file, 'blocks');
-      
+
       const { data: blockRecord } = await supabase
         .from('blocks')
         .select('id')
@@ -233,7 +275,7 @@ router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequ
       entity_type: 'post',
       entity_id: post.id,
       entity_title: post.title,
-      changes: { 
+      changes: {
         blocks_count: parsedBlocks.length,
         hero_updated: heroFields.length > 0,
         hero_fields: heroFields.length > 0 ? heroFields : undefined,
@@ -251,7 +293,20 @@ router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRe
   try {
     const id = req.params.id as string;
     const body = req.body as PostBody;
-    const { title, slug, status, seo_title, seo_description, hero_title, hero_subtitle, hero_tags, hero_location, hero_year, gallery_images, blocks } = body;
+    const {
+      title,
+      slug,
+      status,
+      seo_title,
+      seo_description,
+      hero_title,
+      hero_subtitle,
+      hero_tags,
+      hero_location,
+      hero_year,
+      gallery_images,
+      blocks,
+    } = body;
 
     const validationErrors = validatePostInput(body);
     if (validationErrors.length > 0) {
@@ -277,7 +332,15 @@ router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRe
       ogImageUrl = await storageService.uploadImage(files['ogImage'][0], 'blocks');
     }
 
-    let parsedBlocks: { id?: string; _tempId?: string; type: BlockType; data: Record<string, unknown>; sort_order: number }[] | undefined;
+    let parsedBlocks:
+      | {
+          id?: string;
+          _tempId?: string;
+          type: BlockType;
+          data: Record<string, unknown>;
+          sort_order: number;
+        }[]
+      | undefined;
     if (blocks) {
       try {
         parsedBlocks = JSON.parse(blocks);
@@ -292,11 +355,15 @@ router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRe
     if (parsedBlocks && blockImageFiles.length > 0) {
       let blockImageIndex = 0;
       for (const block of parsedBlocks) {
-        const needsImage = block.type === 'image_full' || block.type === 'text_image' || block.type === 'image_text';
+        const needsImage =
+          block.type === 'image_full' || block.type === 'text_image' || block.type === 'image_text';
         const hasNewImage = block.data._hasNewImage === true;
-        
+
         if (needsImage && hasNewImage && blockImageFiles[blockImageIndex]) {
-          blockImageUrls[block.sort_order] = await storageService.uploadImage(blockImageFiles[blockImageIndex], 'blocks');
+          blockImageUrls[block.sort_order] = await storageService.uploadImage(
+            blockImageFiles[blockImageIndex],
+            'blocks'
+          );
           blockImageIndex++;
         }
         delete block.data._hasNewImage;
@@ -304,7 +371,7 @@ router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRe
     }
 
     if (parsedBlocks) {
-      parsedBlocks = parsedBlocks.map(block => {
+      parsedBlocks = parsedBlocks.map((block) => {
         if (blockImageUrls[block.sort_order]) {
           return {
             ...block,
@@ -316,14 +383,16 @@ router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRe
     }
 
     const galleryImageFiles = files?.['galleryImages'] || [];
-    const existingGalleryUrls = gallery_images ? JSON.parse(gallery_images) : existing.post.gallery_images || [];
+    const existingGalleryUrls = gallery_images
+      ? JSON.parse(gallery_images)
+      : existing.post.gallery_images || [];
     const newGalleryUrls: string[] = [];
-    
+
     for (const file of galleryImageFiles) {
       const url = await storageService.uploadImage(file, 'blocks');
       newGalleryUrls.push(url);
     }
-    
+
     const finalGalleryImages = [...existingGalleryUrls, ...newGalleryUrls];
 
     const changedFields: string[] = [];
@@ -355,7 +424,12 @@ router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRe
       hero_location,
       hero_year,
       gallery_images: finalGalleryImages,
-      blocks: parsedBlocks as unknown as { id?: string; type: BlockType; data: BlockData; sort_order: number }[],
+      blocks: parsedBlocks as unknown as {
+        id?: string;
+        type: BlockType;
+        data: BlockData;
+        sort_order: number;
+      }[],
     });
 
     await activityLogService.log({
@@ -364,8 +438,8 @@ router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRe
       entity_type: 'post',
       entity_id: id,
       entity_title: post.title,
-      changes: { 
-        fields: changedFields.length > 0 ? changedFields : undefined, 
+      changes: {
+        fields: changedFields.length > 0 ? changedFields : undefined,
         blocks_count: parsedBlocks?.length,
         hero_updated: heroFields.length > 0,
         hero_fields: heroFields.length > 0 ? heroFields : undefined,
@@ -402,43 +476,48 @@ router.delete('/:id', authMiddleware, async (req: AuthenticatedRequest, res) => 
   }
 });
 
-router.post('/:id/gallery', authMiddleware, uploadGalleryImages, async (req: AuthenticatedRequest, res) => {
-  try {
-    const id = req.params.id as string;
-    const files = req.files as Express.Multer.File[] | undefined;
+router.post(
+  '/:id/gallery',
+  authMiddleware,
+  uploadGalleryImages,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const id = req.params.id as string;
+      const files = req.files as Express.Multer.File[] | undefined;
 
-    if (!files || files.length === 0) {
-      return res.status(400).json({ error: 'No files uploaded' });
+      if (!files || files.length === 0) {
+        return res.status(400).json({ error: 'No files uploaded' });
+      }
+
+      const existing = await postService.getById(id);
+      const currentGallery = existing.post.gallery_images || [];
+
+      const uploadPromises = files.map((file) => storageService.uploadImage(file, 'blocks'));
+      const newUrls = await Promise.all(uploadPromises);
+
+      const updatedGallery = [...currentGallery, ...newUrls];
+
+      await postService.update(id, { gallery_images: updatedGallery });
+
+      await activityLogService.log({
+        user_email: req.user?.email || 'unknown',
+        action: 'update',
+        entity_type: 'post',
+        entity_id: id,
+        entity_title: existing.post.title,
+        changes: {
+          gallery_updated: true,
+          gallery_count: updatedGallery.length,
+        },
+      });
+
+      res.json({ gallery_images: updatedGallery, new_images: newUrls });
+    } catch (error) {
+      console.error('Error uploading gallery images:', error);
+      res.status(500).json({ error: 'Failed to upload gallery images' });
     }
-
-    const existing = await postService.getById(id);
-    const currentGallery = existing.post.gallery_images || [];
-
-    const uploadPromises = files.map(file => storageService.uploadImage(file, 'blocks'));
-    const newUrls = await Promise.all(uploadPromises);
-
-    const updatedGallery = [...currentGallery, ...newUrls];
-
-    await postService.update(id, { gallery_images: updatedGallery });
-
-    await activityLogService.log({
-      user_email: req.user?.email || 'unknown',
-      action: 'update',
-      entity_type: 'post',
-      entity_id: id,
-      entity_title: existing.post.title,
-      changes: { 
-        gallery_updated: true,
-        gallery_count: updatedGallery.length,
-      },
-    });
-
-    res.json({ gallery_images: updatedGallery, new_images: newUrls });
-  } catch (error) {
-    console.error('Error uploading gallery images:', error);
-    res.status(500).json({ error: 'Failed to upload gallery images' });
   }
-});
+);
 
 router.delete('/:id/gallery', authMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
@@ -452,7 +531,7 @@ router.delete('/:id/gallery', authMiddleware, async (req: AuthenticatedRequest, 
     const existing = await postService.getById(id);
     const currentGallery = existing.post.gallery_images || [];
 
-    const updatedGallery = currentGallery.filter(url => url !== image_url);
+    const updatedGallery = currentGallery.filter((url) => url !== image_url);
 
     if (updatedGallery.length !== currentGallery.length) {
       await storageService.deleteImage(image_url);
@@ -464,7 +543,7 @@ router.delete('/:id/gallery', authMiddleware, async (req: AuthenticatedRequest, 
         entity_type: 'post',
         entity_id: id,
         entity_title: existing.post.title,
-        changes: { 
+        changes: {
           gallery_updated: true,
           gallery_count: updatedGallery.length,
         },

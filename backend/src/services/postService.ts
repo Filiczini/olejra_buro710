@@ -1,7 +1,13 @@
 import { supabase } from '../config/supabase';
 import { blockService } from './blockService';
 import { storageService } from './storageService';
-import type { Post, PostStatus, PaginatedResponse, PostPaginationParams, PostHero } from '../types/post';
+import type {
+  Post,
+  PostStatus,
+  PaginatedResponse,
+  PostPaginationParams,
+  PostHero,
+} from '../types/post';
 import type { Block } from '../types/block';
 
 interface CreatePostParams extends PostHero {
@@ -38,16 +44,44 @@ interface UpdatePostParams extends Partial<PostHero> {
 function generateSlug(title: string): string {
   const transliterate = (str: string): string => {
     const map: Record<string, string> = {
-      'а': 'a', 'б': 'b', 'в': 'v', 'г': 'h', 'ґ': 'g', 'д': 'd', 'е': 'e', 'є': 'ye',
-      'ж': 'zh', 'з': 'z', 'и': 'y', 'і': 'i', 'ї': 'yi', 'й': 'y', 'к': 'k', 'л': 'l',
-      'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
-      'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'shch', 'ь': '', 'ю': 'yu',
-      'я': 'ya',
+      а: 'a',
+      б: 'b',
+      в: 'v',
+      г: 'h',
+      ґ: 'g',
+      д: 'd',
+      е: 'e',
+      є: 'ye',
+      ж: 'zh',
+      з: 'z',
+      и: 'y',
+      і: 'i',
+      ї: 'yi',
+      й: 'y',
+      к: 'k',
+      л: 'l',
+      м: 'm',
+      н: 'n',
+      о: 'o',
+      п: 'p',
+      р: 'r',
+      с: 's',
+      т: 't',
+      у: 'u',
+      ф: 'f',
+      х: 'kh',
+      ц: 'ts',
+      ч: 'ch',
+      ш: 'sh',
+      щ: 'shch',
+      ь: '',
+      ю: 'yu',
+      я: 'ya',
     };
     return str
       .toLowerCase()
       .split('')
-      .map(char => map[char] || char)
+      .map((char) => map[char] || char)
       .join('');
   };
 
@@ -61,9 +95,7 @@ export const postService = {
   getAll: async (params?: PostPaginationParams): Promise<PaginatedResponse<Post>> => {
     const { page = 1, limit = 10, status, search } = params || {};
 
-    let query = supabase
-      .from('posts')
-      .select('*', { count: 'exact' });
+    let query = supabase.from('posts').select('*', { count: 'exact' });
 
     if (status) {
       query = query.eq('status', status);
@@ -205,7 +237,7 @@ export const postService = {
     const blocks = await blockService.getByPostId(id);
 
     const imageUrls: string[] = [];
-    
+
     if (post?.hero_image_url) {
       imageUrls.push(post.hero_image_url);
     }
@@ -213,7 +245,7 @@ export const postService = {
     if (post?.gallery_images && Array.isArray(post.gallery_images)) {
       imageUrls.push(...post.gallery_images.filter((url): url is string => !!url));
     }
-    
+
     for (const block of blocks) {
       if ('image_url' in block.data && block.data.image_url) {
         imageUrls.push(block.data.image_url);

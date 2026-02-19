@@ -41,12 +41,13 @@ ${escapeMarkdown(data.message)}
 
 function escapeMarkdown(text: string): string {
   const specialChars = /[_*[\[\]]()`~>#+\-=|{}.!\\]/g;
-  return text.replace(specialChars, "\\$&");
+  return text.replace(specialChars, '\\$&');
 }
 
-
 export const telegramService = {
-  sendMessage: async (data: TelegramMessage): Promise<{ success: boolean; messageId?: string; error?: string }> => {
+  sendMessage: async (
+    data: TelegramMessage
+  ): Promise<{ success: boolean; messageId?: string; error?: string }> => {
     if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
       logger.warn('Telegram credentials not configured');
       return { success: false, error: 'Telegram not configured' };
@@ -63,11 +64,11 @@ export const telegramService = {
         },
         body: JSON.stringify({
           chat_id: TELEGRAM_CHAT_ID,
-          text
+          text,
         }),
       });
 
-      const result = await response.json() as TelegramApiResponse;
+      const result = (await response.json()) as TelegramApiResponse;
 
       if (!response.ok || !result.ok) {
         logger.error('Telegram API error', result.description);
