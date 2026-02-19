@@ -1,3 +1,4 @@
+import { logger } from '../lib/logger.js';
 import { supabase } from '../config/supabase';
 import { storageService } from './storageService';
 import type { Media, Project } from '../types/project';
@@ -199,7 +200,7 @@ async function createMediaForProject(
   const uploadResult = await storageService.uploadImages(files);
 
   if (uploadResult.errors.length > 0) {
-    console.warn(`Some uploads failed: ${uploadResult.errors.join(', ')}`);
+    logger.warn('Some uploads failed',  uploadResult.errors.join(', '));
   }
 
   if (uploadResult.urls.length === 0) {
