@@ -1,5 +1,7 @@
 import { Router } from 'express';
+import type { Response } from 'express';
 import { authMiddleware } from '../middleware/auth';
+import type { AuthenticatedRequest } from '../types/express.js';
 import { projectService } from '../services/projectService';
 import { postService } from '../services/postService';
 import { storageService } from '../services/storageService';
@@ -207,7 +209,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', authMiddleware, uploadProjectMedia, async (req, res) => {
+router.post('/', authMiddleware, uploadProjectMedia, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
     const heroFiles = files?.['heroMedia'] || [];
@@ -247,7 +249,7 @@ router.post('/', authMiddleware, uploadProjectMedia, async (req, res) => {
     });
 
     await activityLogService.log({
-      user_email: (req as any).user?.email || 'unknown',
+      user_email: req.user?.email || 'unknown',
       action: 'create',
       entity_type: 'project',
       entity_id: project.id,
@@ -262,7 +264,7 @@ router.post('/', authMiddleware, uploadProjectMedia, async (req, res) => {
   }
 });
 
-router.put('/:id', authMiddleware, uploadProjectMedia, async (req, res) => {
+router.put('/:id', authMiddleware, uploadProjectMedia, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const id = req.params.id as string;
     const { title, subtitle, tags, location, area, year } = req.body as {
@@ -335,7 +337,7 @@ router.put('/:id', authMiddleware, uploadProjectMedia, async (req, res) => {
     });
 
     await activityLogService.log({
-      user_email: (req as any).user?.email || 'unknown',
+      user_email: req.user?.email || 'unknown',
       action: 'update',
       entity_type: 'project',
       entity_id: id,
@@ -350,13 +352,13 @@ router.put('/:id', authMiddleware, uploadProjectMedia, async (req, res) => {
   }
 });
 
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const id = req.params.id as string;
     const result = await projectService.getById(id);
 
     await activityLogService.log({
-      user_email: (req as any).user?.email || 'unknown',
+      user_email: req.user?.email || 'unknown',
       action: 'delete',
       entity_type: 'project',
       entity_id: id,

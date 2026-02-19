@@ -7,13 +7,19 @@ if (!process.env.JWT_SECRET) {
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = '24h';
 
-export const generateToken = (payload: Record<string, unknown>): string => {
+export interface JwtPayload {
+  userId: string;
+  email: string;
+  role: string;
+}
+
+export const generateToken = (payload: JwtPayload): string => {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 };
 
-export const verifyToken = (token: string): Record<string, unknown> => {
+export const verifyToken = (token: string): JwtPayload => {
   try {
-    return jwt.verify(token, JWT_SECRET) as Record<string, unknown>;
+    return jwt.verify(token, JWT_SECRET) as JwtPayload;
   } catch {
     throw new Error('Invalid token');
   }

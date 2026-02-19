@@ -1,19 +1,12 @@
 import { Router } from 'express';
-import type { Request } from 'express';
 import { authMiddleware } from '../middleware/auth';
+import type { AuthenticatedRequest } from '../types/express.js';
 import { postService } from '../services/postService';
 import { storageService } from '../services/storageService';
 import { activityLogService } from '../services/activityLogService';
 import { uploadBlockMedia, uploadGalleryImages } from '../middleware/multer';
 import { supabase } from '../config/supabase';
 import type { BlockType, BlockData } from '../types/block';
-
-interface AuthenticatedRequest extends Request {
-  user?: {
-    email: string;
-    id: string;
-  };
-}
 
 interface PostBody {
   title?: string;
