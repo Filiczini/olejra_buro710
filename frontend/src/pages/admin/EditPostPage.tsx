@@ -10,7 +10,7 @@ import PostHeroPreview from '../../components/admin/PostHeroPreview';
 import PageBuilder from '../../components/admin/page-builder/PageBuilder';
 import GalleryUploader from '../../components/admin/GalleryUploader';
 import type { PostStatus } from '../../types/post';
-import type { Block, BlockType, BlockData } from '../../types/block';
+import type { Block, BlockType, BlockData, EditBlock } from '../../types/block';
 
 interface BlockWithFile {
   id: string;
@@ -18,7 +18,7 @@ interface BlockWithFile {
 }
 
 interface BlocksDataRef {
-  blocks: { id?: string; type: BlockType; data: BlockData; sort_order: number }[];
+  blocks: EditBlock[];
 }
 
 const INITIAL_HERO_DATA: PostHeroFormData = {
@@ -195,11 +195,11 @@ export default function EditPostPage() {
       }
 
 const blocksData = blocksDataRef.current.blocks.map((block) => {
-      const blockId = block.id || (block as any)._tempId;
+      const blockId = block.id || block._tempId;
       const blockFile = blockFiles.find(bf => bf.id === blockId);
       return {
         id: block.id?.startsWith('temp-') ? undefined : block.id,
-        _tempId: (block as any)._tempId,
+        _tempId: block._tempId,
         type: block.type,
         data: {
           ...block.data,

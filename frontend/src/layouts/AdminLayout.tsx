@@ -27,6 +27,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   // Close mobile sidebar when route changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMobileSidebarOpen(false);
   }, [location.pathname]);
 

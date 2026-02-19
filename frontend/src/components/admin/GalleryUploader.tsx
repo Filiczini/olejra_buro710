@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { Icon } from '@iconify-icon/react';
 
 interface GalleryUploaderProps {
@@ -24,33 +24,42 @@ export default function GalleryUploader({
   label = 'Галерея',
 }: GalleryUploaderProps) {
   const [isDragging, setIsDragging] = useState(false);
-  const [imageItems, setImageItems] = useState<ImageItem[]>([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [reorderedItems, setReorderedItems] = useState<ImageItem[] | null>(null);
+  const prevBlobUrlsRef = useRef<Set<string>>(new Set());
+
+  const computedItems: ImageItem[] = useMemo(() => [
+    ...images.map((url, index) => ({
+      id: `existing-${index}-${url}`,
+      url,
+      isNew: false,
+    })),
+    ...newFiles.map((file, index) => ({
+      id: `new-${index}-${file.name}`,
+      url: URL.createObjectURL(file),
+      isNew: true,
+      file,
+    })),
+  ], [images, newFiles]);
 
   useEffect(() => {
-    const items: ImageItem[] = [
-      ...images.map((url, index) => ({
-        id: `existing-${index}-${url}`,
-        url,
-        isNew: false,
-      })),
-      ...newFiles.map((file, index) => ({
-        id: `new-${index}-${file.name}`,
-        url: URL.createObjectURL(file),
-        isNew: true,
-        file,
-      })),
-    ];
-    setImageItems(items);
-
+    const currentBlobUrls = new Set(
+      computedItems.filter(item => item.isNew).map(item => item.url)
+    );
+    
+    const urlsToRevoke = [...prevBlobUrlsRef.current].filter(
+      url => !currentBlobUrls.has(url)
+    );
+    urlsToRevoke.forEach(url => URL.revokeObjectURL(url));
+    
+    prevBlobUrlsRef.current = currentBlobUrls;
+    
     return () => {
-      items.forEach(item => {
-        if (item.isNew) {
-          URL.revokeObjectURL(item.url);
-        }
-      });
+      prevBlobUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
     };
-  }, [images, newFiles]);
+  }, [computedItems]);
+
+  const imageItems = reorderedItems ?? computedItems;
 
   const validateFile = (file: File): boolean => {
     const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
@@ -117,7 +126,7 @@ export default function GalleryUploader({
     const draggedItem = newItems[draggedIndex];
     newItems.splice(draggedIndex, 1);
     newItems.splice(index, 0, draggedItem);
-    setImageItems(newItems);
+    setReorderedItems(newItems);
     setDraggedIndex(index);
   }, [draggedIndex, imageItems]);
 
@@ -135,6 +144,7 @@ export default function GalleryUploader({
     onImagesChange(existingUrls);
     onNewFilesChange(newFilesOrdered);
     setDraggedIndex(null);
+    setReorderedItems(null);
   }, [draggedIndex, imageItems, onImagesChange, onNewFilesChange]);
 
   return (
