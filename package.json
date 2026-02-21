@@ -19,13 +19,28 @@
     "seed:clean:posts": "npm run seed:clean:posts --workspace=backend",
     "seed:admin": "npm run seed:admin --workspace=backend",
     "migrate:projects": "npm run migrate:projects --workspace=backend",
-    "validate:i18n": "node scripts/validate-i18n.js"
+    "validate:i18n": "node scripts/validate-i18n.js",
+    "prepare": "husky"
   },
   "workspaces": [
     "frontend",
     "backend"
   ],
+  "lint-staged": {
+    "frontend/src/**/*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "frontend/src/**/*.{css,json}": [
+      "prettier --write"
+    ],
+    "backend/src/**/*.ts": [
+      "prettier --write"
+    ]
+  },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7"
   }
 }

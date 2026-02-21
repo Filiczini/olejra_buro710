@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { logger } from '../../lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { Search, ChevronDown, PlusCircle, Pencil, Eye, Trash2, CheckCircle } from 'lucide-react';
 import { postService } from '../../services/api';
@@ -15,7 +16,7 @@ export default function PostsPage() {
   const previousPostsRef = useRef<Post[]>([]);
   const previousPaginationRef = useRef(pagination);
 
-  const loadPosts = async () => {
+  const loadPosts = useCallback(async () => {
     setLoading(true);
     try {
       const result = await postService.getAll({
@@ -25,28 +26,32 @@ export default function PostsPage() {
         search: searchQuery || undefined,
       });
       setPosts(result.data);
-      setPagination(prev => ({ ...prev, total: result.pagination.total, totalPages: result.pagination.totalPages }));
+      setPagination((prev) => ({
+        ...prev,
+        total: result.pagination.total,
+        totalPages: result.pagination.totalPages,
+      }));
     } catch (error) {
-      console.error('Error loading posts:', error);
+      logger.error('Error loading posts', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [pagination.page, pagination.limit, statusFilter, searchQuery]);
 
   useEffect(() => {
     loadPosts();
-  }, [pagination.page, statusFilter]);
+  }, [loadPosts]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       if (pagination.page === 1) {
         loadPosts();
       } else {
-        setPagination(prev => ({ ...prev, page: 1 }));
+        setPagination((prev) => ({ ...prev, page: 1 }));
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, loadPosts, pagination.page]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Ви впевнені, що хочете видалити цей пост?')) return;
@@ -54,13 +59,13 @@ export default function PostsPage() {
     previousPostsRef.current = posts;
     previousPaginationRef.current = pagination;
 
-    setPosts(prev => prev.filter(p => p.id !== id));
-    setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));
+    setPosts((prev) => prev.filter((p) => p.id !== id));
+    setPagination((prev) => ({ ...prev, total: Math.max(0, prev.total - 1) }));
 
     try {
       await postService.delete(id);
     } catch (error) {
-      console.error('Error deleting post:', error);
+      logger.error('Error deleting post', error);
       setPosts(previousPostsRef.current);
       setPagination(previousPaginationRef.current);
     }
@@ -122,7 +127,9 @@ export default function PostsPage() {
                 </div>
               </div>
 
-              <span className="text-sm text-gray-500 ml-2 font-medium">Всього: {pagination.total}</span>
+              <span className="text-sm text-gray-500 ml-2 font-medium">
+                Всього: {pagination.total}
+              </span>
             </div>
 
             <button
@@ -141,22 +148,38 @@ export default function PostsPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/50">
-                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">Назва</th>
-                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">Slug</th>
-                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">Статус</th>
-                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">SEO</th>
-                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">Створено</th>
-                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide text-right">Дії</th>
+                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">
+                    Назва
+                  </th>
+                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">
+                    Slug
+                  </th>
+                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">
+                    Статус
+                  </th>
+                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">
+                    SEO
+                  </th>
+                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">
+                    Створено
+                  </th>
+                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide text-right">
+                    Дії
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-8 text-gray-500">Завантаження...</td>
+                    <td colSpan={6} className="text-center py-8 text-gray-500">
+                      Завантаження...
+                    </td>
                   </tr>
                 ) : posts.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-8 text-gray-500">Постів не знайдено</td>
+                    <td colSpan={6} className="text-center py-8 text-gray-500">
+                      Постів не знайдено
+                    </td>
                   </tr>
                 ) : (
                   posts.map((post) => (
@@ -165,11 +188,11 @@ export default function PostsPage() {
                         <p className="text-base font-medium text-gray-900">{post.title}</p>
                       </td>
                       <td className="py-4 px-6">
-                        <code className="text-sm font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">/{post.slug}</code>
+                        <code className="text-sm font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                          /{post.slug}
+                        </code>
                       </td>
-                      <td className="py-4 px-6">
-                        {getStatusBadge(post.status)}
-                      </td>
+                      <td className="py-4 px-6">{getStatusBadge(post.status)}</td>
                       <td className="py-4 px-6">
                         {post.seo_title || post.seo_description ? (
                           <div className="flex items-center text-emerald-600 text-sm font-medium">
@@ -223,11 +246,13 @@ export default function PostsPage() {
           {pagination.totalPages > 1 && (
             <div className="flex justify-between items-center px-6 py-4 border-t border-gray-100">
               <div className="text-sm text-gray-500">
-                Показано {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}-{Math.min(pagination.page * pagination.limit, pagination.total)} з {pagination.total}
+                Показано {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}-
+                {Math.min(pagination.page * pagination.limit, pagination.total)} з{' '}
+                {pagination.total}
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                  onClick={() => setPagination((prev) => ({ ...prev, page: prev.page - 1 }))}
                   disabled={pagination.page === 1}
                   className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer text-sm"
                 >
@@ -239,9 +264,11 @@ export default function PostsPage() {
                   return (
                     <button
                       key={page}
-                      onClick={() => setPagination(prev => ({ ...prev, page }))}
+                      onClick={() => setPagination((prev) => ({ ...prev, page }))}
                       className={`px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer text-sm ${
-                        page === pagination.page ? 'bg-gray-900 text-white border-gray-900 hover:bg-gray-800' : ''
+                        page === pagination.page
+                          ? 'bg-gray-900 text-white border-gray-900 hover:bg-gray-800'
+                          : ''
                       }`}
                     >
                       {page}
@@ -249,7 +276,7 @@ export default function PostsPage() {
                   );
                 })}
                 <button
-                  onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                  onClick={() => setPagination((prev) => ({ ...prev, page: prev.page + 1 }))}
                   disabled={pagination.page === pagination.totalPages}
                   className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer text-sm"
                 >

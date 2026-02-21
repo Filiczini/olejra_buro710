@@ -5,9 +5,7 @@ async function clearPosts() {
   console.log('');
 
   try {
-    const { data: posts, error: countError } = await supabase
-      .from('posts')
-      .select('id');
+    const { data: posts, error: countError } = await supabase.from('posts').select('id');
 
     if (countError) {
       throw countError;

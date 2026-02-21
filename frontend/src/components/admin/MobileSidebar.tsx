@@ -40,36 +40,15 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          <SidebarMenuItem
-            icon={FileText}
-            label="Пости"
-            path="/admin/posts"
-          />
-          <SidebarMenuItem
-            icon={History}
-            label="Журнал дій"
-            path="/admin/logs"
-          />
-          <SidebarMenuItem
-            icon={Users}
-            label="Користувачі"
-            path="/admin/users"
-          />
-          <SidebarMenuItem
-            icon={Settings}
-            label="Налаштування"
-            path="/admin/settings"
-          />
+          <SidebarMenuItem icon={FileText} label="Пости" path="/admin/posts" />
+          <SidebarMenuItem icon={History} label="Журнал дій" path="/admin/logs" />
+          <SidebarMenuItem icon={Users} label="Користувачі" path="/admin/users" />
+          <SidebarMenuItem icon={Settings} label="Налаштування" path="/admin/settings" />
         </nav>
 
         {/* Bottom Section */}
         <div className="p-4 border-t border-zinc-900 space-y-2">
-          <SidebarMenuItem
-            icon={ExternalLink}
-            label="Перегляд сайту"
-            path="/"
-            isExternal
-          />
+          <SidebarMenuItem icon={ExternalLink} label="Перегляд сайту" path="/" isExternal />
         </div>
       </aside>
     </>

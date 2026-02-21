@@ -35,10 +35,7 @@ export const blockService = {
       sort_order: block.sort_order ?? index,
     }));
 
-    const { data, error } = await supabase
-      .from('blocks')
-      .insert(blocks)
-      .select();
+    const { data, error } = await supabase.from('blocks').insert(blocks).select();
 
     if (error) throw error;
     return (data || []) as Block[];
@@ -57,30 +54,20 @@ export const blockService = {
   },
 
   delete: async (id: string): Promise<void> => {
-    const { error } = await supabase
-      .from('blocks')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from('blocks').delete().eq('id', id);
 
     if (error) throw error;
   },
 
   deleteByPostId: async (postId: string): Promise<void> => {
-    const { error } = await supabase
-      .from('blocks')
-      .delete()
-      .eq('post_id', postId);
+    const { error } = await supabase.from('blocks').delete().eq('post_id', postId);
 
     if (error) throw error;
   },
 
   reorder: async (params: ReorderBlocksParams): Promise<Block[]> => {
     const updates = params.blockOrders.map(({ id, sort_order }) =>
-      supabase
-        .from('blocks')
-        .update({ sort_order })
-        .eq('id', id)
-        .eq('post_id', params.postId)
+      supabase.from('blocks').update({ sort_order }).eq('id', id).eq('post_id', params.postId)
     );
 
     await Promise.all(updates);
@@ -93,23 +80,25 @@ export const blockService = {
     blocks: { id?: string; type: BlockType; data: BlockData; sort_order: number }[]
   ): Promise<Block[]> => {
     const existingBlocks = await blockService.getByPostId(postId);
-    const existingIds = new Set(existingBlocks.map(b => b.id));
-    const incomingIds = new Set(blocks.filter(b => b.id).map(b => b.id));
+    const existingIds = new Set(existingBlocks.map((b) => b.id));
+    const incomingIds = new Set(blocks.filter((b) => b.id).map((b) => b.id));
 
-    const toDelete = existingBlocks.filter(b => !incomingIds.has(b.id));
+    const toDelete = existingBlocks.filter((b) => !incomingIds.has(b.id));
     const toCreate: { type: BlockType; data: BlockData; sort_order: number }[] = [];
     const toUpdate: { id: string; type: BlockType; data: BlockData; sort_order: number }[] = [];
 
     for (const block of blocks) {
       if (block.id && existingIds.has(block.id)) {
-        toUpdate.push(block as { id: string; type: BlockType; data: BlockData; sort_order: number });
+        toUpdate.push(
+          block as { id: string; type: BlockType; data: BlockData; sort_order: number }
+        );
       } else {
         toCreate.push({ type: block.type, data: block.data, sort_order: block.sort_order });
       }
     }
 
     if (toDelete.length > 0) {
-      await Promise.all(toDelete.map(b => blockService.delete(b.id)));
+      await Promise.all(toDelete.map((b) => blockService.delete(b.id)));
     }
 
     if (toCreate.length > 0) {
@@ -117,7 +106,11 @@ export const blockService = {
     }
 
     for (const block of toUpdate) {
-      await blockService.update(block.id, { type: block.type, data: block.data, sort_order: block.sort_order });
+      await blockService.update(block.id, {
+        type: block.type,
+        data: block.data,
+        sort_order: block.sort_order,
+      });
     }
 
     return blockService.getByPostId(postId);

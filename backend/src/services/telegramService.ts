@@ -1,6 +1,8 @@
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
+import { logger } from '../lib/logger.js';
+
 interface TelegramMessage {
   name: string;
   email: string;
@@ -38,13 +40,16 @@ ${escapeMarkdown(data.message)}
 }
 
 function escapeMarkdown(text: string): string {
-  return text.replace(/[_*[`\(\)~>#\+\-=\|{}\.\!\\]/g, '\\$&');
+  const specialChars = /[_*[\[\]]()`~>#+\-=|{}.!\\]/g;
+  return text.replace(specialChars, '\\$&');
 }
 
 export const telegramService = {
-  sendMessage: async (data: TelegramMessage): Promise<{ success: boolean; messageId?: string; error?: string }> => {
+  sendMessage: async (
+    data: TelegramMessage
+  ): Promise<{ success: boolean; messageId?: string; error?: string }> => {
     if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-      console.warn('Telegram credentials not configured');
+      logger.warn('Telegram credentials not configured');
       return { success: false, error: 'Telegram not configured' };
     }
 
@@ -59,20 +64,20 @@ export const telegramService = {
         },
         body: JSON.stringify({
           chat_id: TELEGRAM_CHAT_ID,
-          text
+          text,
         }),
       });
 
-      const result = await response.json() as TelegramApiResponse;
+      const result = (await response.json()) as TelegramApiResponse;
 
       if (!response.ok || !result.ok) {
-        console.error('Telegram API error:', result.description);
+        logger.error('Telegram API error', result.description);
         return { success: false, error: result.description || 'Telegram API error' };
       }
 
       return { success: true, messageId: result.result?.message_id?.toString() };
     } catch (error) {
-      console.error('Telegram send error:', error);
+      logger.error('Telegram send error', error);
       return { success: false, error: 'Failed to send Telegram message' };
     }
   },

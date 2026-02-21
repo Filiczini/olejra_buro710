@@ -1,17 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { logger } from '../../lib/logger';
 import { ChevronDown } from 'lucide-react';
 import { activityLogService } from '../../services/api';
 import type { ActivityLog, ActivityLogsParams } from '../../types/activityLog';
 
 export default function ActivityLogPage() {
-
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 0 });
   const [filters, setFilters] = useState<ActivityLogsParams>({});
   const [uniqueUsers, setUniqueUsers] = useState<string[]>([]);
 
-  const loadLogs = async () => {
+  const loadLogs = useCallback(async () => {
     setLoading(true);
     try {
       const result = await activityLogService.getAll({
@@ -22,28 +22,28 @@ export default function ActivityLogPage() {
       setLogs(result.data);
       setPagination(result.pagination);
     } catch (error) {
-      console.error('Error loading logs:', error);
+      logger.error('Error loading logs', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [pagination.page, pagination.limit, filters]);
 
-  const loadUniqueUsers = async () => {
+  const loadUniqueUsers = useCallback(async () => {
     try {
       const users = await activityLogService.getUniqueUsers();
       setUniqueUsers(users);
     } catch (error) {
-      console.error('Error loading users:', error);
+      logger.error('Error loading users', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadLogs();
-  }, [pagination.page, filters.user_email, filters.action]);
+  }, [loadLogs]);
 
   useEffect(() => {
     loadUniqueUsers();
-  }, []);
+  }, [loadUniqueUsers]);
 
   const handleFilterChange = (key: keyof ActivityLogsParams, value: string | undefined) => {
     setFilters({ ...filters, [key]: value === '' ? undefined : value });
@@ -82,7 +82,11 @@ export default function ActivityLogPage() {
     }
 
     if (changes.hero_updated) {
-      if (changes.hero_fields && Array.isArray(changes.hero_fields) && changes.hero_fields.length > 0) {
+      if (
+        changes.hero_fields &&
+        Array.isArray(changes.hero_fields) &&
+        changes.hero_fields.length > 0
+      ) {
         parts.push(`Hero: ${changes.hero_fields.join(', ')}`);
       } else {
         parts.push('Hero оновлено');
@@ -232,20 +236,26 @@ export default function ActivityLogPage() {
                     <span className="text-sm font-medium text-gray-900">{log.user_email}</span>
                   </td>
                   <td className="py-5 px-4">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${getActionBadge(log.action)}`}>
+                    <span
+                      className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${getActionBadge(log.action)}`}
+                    >
                       {getActionText(log.action)}
                     </span>
                   </td>
                   <td className="py-5 px-4">
                     <div className="flex flex-col items-start gap-1.5">
-                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider font-semibold ${getEntityTypeBadge(log.entity_type)}`}>
+                      <span
+                        className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider font-semibold ${getEntityTypeBadge(log.entity_type)}`}
+                      >
                         {getEntityTypeText(log.entity_type)}
                       </span>
                       <span className="text-sm font-medium text-gray-900">{log.entity_title}</span>
                     </div>
                   </td>
                   <td className="py-5 pl-4 pr-8">
-                    <span className="text-sm text-gray-500">{formatChanges(log.changes as Record<string, unknown>)}</span>
+                    <span className="text-sm text-gray-500">
+                      {formatChanges(log.changes as Record<string, unknown>)}
+                    </span>
                   </td>
                 </tr>
               ))
@@ -257,14 +267,15 @@ export default function ActivityLogPage() {
       {pagination.totalPages > 1 && (
         <div className="flex justify-between items-center px-8 py-4 border-t border-gray-100">
           <div className="text-sm text-gray-500">
-            Показано {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}-{Math.min(pagination.page * pagination.limit, pagination.total)} з {pagination.total}
+            Показано {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}-
+            {Math.min(pagination.page * pagination.limit, pagination.total)} з {pagination.total}
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
               disabled={pagination.page === 1}
-className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
->
+              className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            >
               Попередня
             </button>
             {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
@@ -287,8 +298,8 @@ className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled
             <button
               onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
               disabled={pagination.page === pagination.totalPages}
-className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
->
+              className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            >
               Наступна
             </button>
           </div>

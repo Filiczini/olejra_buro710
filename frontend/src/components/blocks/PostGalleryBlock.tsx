@@ -42,9 +42,7 @@ export default function PostGalleryBlock({ images }: PostGalleryBlockProps) {
 
     const cardWidth = container.querySelector('.gallery-item')?.clientWidth || 0;
     const gap = 24;
-    const scrollAmount = isMobile 
-      ? cardWidth + gap 
-      : (cardWidth + gap) * 3;
+    const scrollAmount = isMobile ? cardWidth + gap : (cardWidth + gap) * 3;
 
     container.scrollBy({
       left: direction === 'left' ? -scrollAmount : scrollAmount,
@@ -58,10 +56,10 @@ export default function PostGalleryBlock({ images }: PostGalleryBlockProps) {
   };
 
   const closeLightbox = () => setLightboxOpen(false);
-  
-  const goPrev = () => setLightboxIndex(prev => (prev > 0 ? prev - 1 : images.length - 1));
-  
-  const goNext = () => setLightboxIndex(prev => (prev < images.length - 1 ? prev + 1 : 0));
+
+  const goPrev = () => setLightboxIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+
+  const goNext = () => setLightboxIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
 
   if (!images || images.length === 0) {
     return null;

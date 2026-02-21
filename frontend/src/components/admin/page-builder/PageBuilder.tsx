@@ -1,11 +1,20 @@
 import { useState, useCallback } from 'react';
-import type { Block, BlockType, BlockData, TextFullData, ImageFullData, TextImageData } from '../../../types/block';
+import type {
+  Block,
+  BlockType,
+  BlockData,
+  TextFullData,
+  ImageFullData,
+  TextImageData,
+} from '../../../types/block';
 import BlocksList from './BlocksList';
 import AddBlockMenu from './AddBlockMenu';
 
 interface PageBuilderProps {
   initialBlocks: Block[];
-  onChange: (blocks: { id?: string; type: BlockType; data: BlockData; sort_order: number }[]) => void;
+  onChange: (
+    blocks: { id?: string; type: BlockType; data: BlockData; sort_order: number }[]
+  ) => void;
   onImageChange: (blockId: string, file: File | null) => void;
 }
 
@@ -16,16 +25,19 @@ function generateTempId(): string {
 export default function PageBuilder({ initialBlocks, onChange, onImageChange }: PageBuilderProps) {
   const [blocks, setBlocks] = useState<Block[]>(initialBlocks);
 
-  const notifyChange = useCallback((updatedBlocks: Block[]) => {
-    const blocksData = updatedBlocks.map((block, index) => ({
-      id: block.id.startsWith('temp-') ? undefined : block.id,
-      _tempId: block.id.startsWith('temp-') ? block.id : undefined,
-      type: block.type,
-      data: block.data,
-      sort_order: index,
-    }));
-    onChange(blocksData);
-  }, [onChange]);
+  const notifyChange = useCallback(
+    (updatedBlocks: Block[]) => {
+      const blocksData = updatedBlocks.map((block, index) => ({
+        id: block.id.startsWith('temp-') ? undefined : block.id,
+        _tempId: block.id.startsWith('temp-') ? block.id : undefined,
+        type: block.type,
+        data: block.data,
+        sort_order: index,
+      }));
+      onChange(blocksData);
+    },
+    [onChange]
+  );
 
   const handleAddBlock = (type: BlockType) => {
     const newBlock: Block = {
@@ -43,9 +55,7 @@ export default function PageBuilder({ initialBlocks, onChange, onImageChange }: 
   };
 
   const handleUpdateBlock = (id: string, data: BlockData) => {
-    const updatedBlocks = blocks.map((block) =>
-      block.id === id ? { ...block, data } : block
-    );
+    const updatedBlocks = blocks.map((block) => (block.id === id ? { ...block, data } : block));
     setBlocks(updatedBlocks);
     notifyChange(updatedBlocks);
   };
@@ -60,7 +70,7 @@ export default function PageBuilder({ initialBlocks, onChange, onImageChange }: 
     const reorderedBlocks = blockIds
       .map((id) => blocks.find((b) => b.id === id))
       .filter((b): b is Block => b !== undefined);
-    
+
     setBlocks(reorderedBlocks);
     notifyChange(reorderedBlocks);
   };
@@ -91,6 +101,14 @@ function getDefaultBlockData(type: BlockType): BlockData {
       return { image_url: '', alt: '', caption: '' } as ImageFullData;
     case 'text_image':
     case 'image_text':
-      return { text: '', image_url: '', image_alt: '', icon: '', label: '', title: '', features: [] } as TextImageData;
+      return {
+        text: '',
+        image_url: '',
+        image_alt: '',
+        icon: '',
+        label: '',
+        title: '',
+        features: [],
+      } as TextImageData;
   }
 }

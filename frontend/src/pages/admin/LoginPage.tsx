@@ -49,7 +49,9 @@ export default function LoginPage() {
             label="Email"
             placeholder="Введіть ваш email"
             value={credentials.email}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCredentials({ ...credentials, email: e.target.value })}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setCredentials({ ...credentials, email: e.target.value })
+            }
             required
           />
 
@@ -58,15 +60,13 @@ export default function LoginPage() {
             label="Пароль"
             placeholder="Введіть ваш пароль"
             value={credentials.password}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCredentials({ ...credentials, password: e.target.value })}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setCredentials({ ...credentials, password: e.target.value })
+            }
             required
           />
 
-          {error && (
-            <div className="text-sm text-red-500 bg-red-50 p-3 rounded-lg">
-              {error}
-            </div>
-          )}
+          {error && <div className="text-sm text-red-500 bg-red-50 p-3 rounded-lg">{error}</div>}
 
           <Button type="submit" disabled={loading} className="w-full py-3">
             {loading ? 'Вхід...' : 'Увійти'}

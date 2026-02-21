@@ -8,12 +8,12 @@ interface TagInputProps {
   placeholder?: string;
 }
 
-export default function TagInput({ 
-  tags, 
-  onTagsChange, 
+export default function TagInput({
+  tags,
+  onTagsChange,
   maxTags = 5,
   label = 'Теги',
-  placeholder = 'Введіть тег і натисніть Enter'
+  placeholder = 'Введіть тег і натисніть Enter',
 }: TagInputProps) {
   const [inputValue, setInputValue] = useState('');
   const canAddMore = tags.length < maxTags;
@@ -38,7 +38,12 @@ export default function TagInput({
   return (
     <div className="flex flex-col gap-2">
       <label className="text-sm font-medium text-zinc-700">
-        {label} {maxTags && <span className="text-zinc-400">({tags.length}/{maxTags})</span>}
+        {label}{' '}
+        {maxTags && (
+          <span className="text-zinc-400">
+            ({tags.length}/{maxTags})
+          </span>
+        )}
       </label>
       <div
         className={`flex flex-wrap gap-2 min-h-[48px] px-3 py-2 border border-zinc-200 rounded-lg focus-within:ring-2 focus-within:ring-zinc-900 focus-within:border-transparent ${

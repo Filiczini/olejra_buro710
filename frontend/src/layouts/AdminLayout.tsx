@@ -27,6 +27,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   // Close mobile sidebar when route changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMobileSidebarOpen(false);
   }, [location.pathname]);
 
@@ -43,10 +44,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
       {/* Mobile Sidebar */}
       <div className="md:hidden">
-        <MobileSidebar
-          isOpen={isMobileSidebarOpen}
-          onClose={() => setIsMobileSidebarOpen(false)}
-        />
+        <MobileSidebar isOpen={isMobileSidebarOpen} onClose={() => setIsMobileSidebarOpen(false)} />
       </div>
 
       {/* Main Content */}
@@ -55,9 +53,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <TopBar onMobileMenuClick={isMobile ? toggleMobileSidebar : undefined} />
 
         {/* Page Content */}
-        <div className="flex-1 overflow-auto p-8">
-          {children}
-        </div>
+        <div className="flex-1 overflow-auto p-8">{children}</div>
       </main>
     </div>
   );

@@ -18,7 +18,7 @@ export default function ProjectPage() {
     const images: string[] = [];
 
     if (media.length > 0) {
-      images.push(...media.map(m => m.url));
+      images.push(...media.map((m) => m.url));
     }
 
     if (images.length === 0 && project.image_url) {
@@ -35,12 +35,12 @@ export default function ProjectPage() {
   useEffect(() => {
     const loadProject = async () => {
       if (!id) return;
-      
+
       try {
         setLoading(true);
-        const data = await portfolioService.getById(id) as unknown as { 
-          project: Project; 
-          heroMedia: Media[]; 
+        const data = (await portfolioService.getById(id)) as unknown as {
+          project: Project;
+          heroMedia: Media[];
         };
         setProject(data.project);
         setHeroMedia(data.heroMedia || []);
@@ -79,7 +79,7 @@ export default function ProjectPage() {
     const slideWidth = slider.offsetWidth;
     slider.scrollTo({
       left: index * slideWidth,
-      behavior: 'smooth'
+      behavior: 'smooth',
     });
   };
 
@@ -177,7 +177,10 @@ export default function ProjectPage() {
               ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <div
+              className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end animate-fade-in"
+              style={{ animationDelay: '0.2s' }}
+            >
               <div className="lg:col-span-8">
                 {project.subtitle && (
                   <p className="text-base md:text-lg font-light text-zinc-300 mb-2 leading-relaxed">
@@ -222,9 +225,7 @@ export default function ProjectPage() {
 
       <main className="bg-white text-zinc-900 py-24">
         <div className="max-w-screen-xl mx-auto px-6">
-          <p className="text-zinc-600 text-center">
-            Контент проекту буде додано пізніше...
-          </p>
+          <p className="text-zinc-600 text-center">Контент проекту буде додано пізніше...</p>
         </div>
       </main>
 

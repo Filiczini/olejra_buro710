@@ -1,3 +1,4 @@
+import { logger } from '../lib/logger.js';
 import { supabase } from '../config/supabase';
 import { storageService } from './storageService';
 import type { Media, Project } from '../types/project';
@@ -40,11 +41,18 @@ interface UpdateParams {
 
 export const projectService = {
   getAll: async (params?: PaginationParams & FilterParams) => {
-    const { page = 1, limit = 10, sortBy = 'created_at', sortOrder = 'desc', tags, location, year, search } = params || {};
-    
-    let query = supabase
-      .from('projects')
-      .select('*', { count: 'exact' });
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = 'created_at',
+      sortOrder = 'desc',
+      tags,
+      location,
+      year,
+      search,
+    } = params || {};
+
+    let query = supabase.from('projects').select('*', { count: 'exact' });
 
     query = query.order(sortBy, { ascending: sortOrder === 'asc' });
 
@@ -86,11 +94,7 @@ export const projectService = {
 
   getById: async (id: string) => {
     const [projectResult, mediaResult] = await Promise.all([
-      supabase
-        .from('projects')
-        .select('*')
-        .eq('id', id)
-        .single(),
+      supabase.from('projects').select('*').eq('id', id).single(),
       supabase
         .from('media')
         .select('*')
@@ -148,10 +152,7 @@ export const projectService = {
         .eq('role', 'hero');
 
       if (existingMedia && existingMedia.length > 0) {
-        await supabase
-          .from('media')
-          .delete()
-          .eq('id', existingMedia[0].id);
+        await supabase.from('media').delete().eq('id', existingMedia[0].id);
       }
 
       await createMediaForProject(id, [heroFile], 'hero');
@@ -161,10 +162,7 @@ export const projectService = {
   },
 
   delete: async (id: string) => {
-    await supabase
-      .from('projects')
-      .delete()
-      .eq('id', id);
+    await supabase.from('projects').delete().eq('id', id);
   },
 
   getFiltersOptions: async () => {
@@ -174,13 +172,13 @@ export const projectService = {
       supabase.from('projects').select('year'),
     ]);
 
-    const allTags = tagsResult.data?.flatMap(p => p.tags || []) || [];
+    const allTags = tagsResult.data?.flatMap((p) => p.tags || []) || [];
     const uniqueTags = [...new Set(allTags)].sort();
 
-    const locations = locationsResult.data?.map(p => p.location).filter(Boolean) || [];
+    const locations = locationsResult.data?.map((p) => p.location).filter(Boolean) || [];
     const uniqueLocations = [...new Set(locations)].sort();
 
-    const years = yearsResult.data?.map(p => p.year).filter(Boolean) || [];
+    const years = yearsResult.data?.map((p) => p.year).filter(Boolean) || [];
     const uniqueYears = [...new Set(years)].sort((a, b) => b.localeCompare(a));
 
     return {
@@ -199,7 +197,7 @@ async function createMediaForProject(
   const uploadResult = await storageService.uploadImages(files);
 
   if (uploadResult.errors.length > 0) {
-    console.warn(`Some uploads failed: ${uploadResult.errors.join(', ')}`);
+    logger.warn('Some uploads failed', uploadResult.errors.join(', '));
   }
 
   if (uploadResult.urls.length === 0) {
@@ -213,9 +211,7 @@ async function createMediaForProject(
     sort_order: index,
   }));
 
-  const { error } = await supabase
-    .from('media')
-    .insert(mediaRecords);
+  const { error } = await supabase.from('media').insert(mediaRecords);
 
   if (error) throw error;
 }
