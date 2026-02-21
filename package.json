@@ -28,7 +28,7 @@
   ],
   "lint-staged": {
     "frontend/src/**/*.{ts,tsx}": [
-      "eslint --fix",
+      "eslint --fix --config frontend/eslint.config.js",
       "prettier --write"
     ],
     "frontend/src/**/*.{css,json}": [
