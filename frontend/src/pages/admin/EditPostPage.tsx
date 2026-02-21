@@ -54,50 +54,53 @@ export default function EditPostPage() {
 
   const blocksDataRef = useRef<BlocksDataRef>({ blocks: [] });
 
+  const loadPost = useCallback(
+    async (postId: string) => {
+      setLoading(true);
+      try {
+        const result = await postService.getById(postId);
+        const { post, blocks: loadedBlocks } = result;
+
+        setTitle(post.title);
+        setSlug(post.slug);
+        setStatus(post.status);
+        setSeoTitle(post.seo_title || '');
+        setSeoDescription(post.seo_description || '');
+        setInitialBlocks(loadedBlocks);
+
+        setHeroData({
+          hero_image_url: post.hero_image_url || '',
+          hero_title: post.hero_title || '',
+          hero_subtitle: post.hero_subtitle || '',
+          hero_tags: post.hero_tags || [],
+          hero_location: post.hero_location || '',
+          hero_year: post.hero_year || '',
+          heroImage: undefined,
+        });
+
+        setGalleryImages(post.gallery_images || []);
+
+        blocksDataRef.current.blocks = loadedBlocks.map((b, index) => ({
+          id: b.id,
+          type: b.type,
+          data: b.data,
+          sort_order: index,
+        }));
+      } catch (error) {
+        logger.error('Error loading post', error);
+        navigate('/admin/posts');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [navigate]
+  );
+
   useEffect(() => {
     if (id) {
       loadPost(id);
     }
   }, [id, loadPost]);
-
-  const loadPost = useCallback(async (postId: string) => {
-    setLoading(true);
-    try {
-      const result = await postService.getById(postId);
-      const { post, blocks: loadedBlocks } = result;
-
-      setTitle(post.title);
-      setSlug(post.slug);
-      setStatus(post.status);
-      setSeoTitle(post.seo_title || '');
-      setSeoDescription(post.seo_description || '');
-      setInitialBlocks(loadedBlocks);
-
-      setHeroData({
-        hero_image_url: post.hero_image_url || '',
-        hero_title: post.hero_title || '',
-        hero_subtitle: post.hero_subtitle || '',
-        hero_tags: post.hero_tags || [],
-        hero_location: post.hero_location || '',
-        hero_year: post.hero_year || '',
-        heroImage: undefined,
-      });
-
-      setGalleryImages(post.gallery_images || []);
-
-      blocksDataRef.current.blocks = loadedBlocks.map((b, index) => ({
-        id: b.id,
-        type: b.type,
-        data: b.data,
-        sort_order: index,
-      }));
-    } catch (error) {
-      logger.error('Error loading post', error);
-      navigate('/admin/posts');
-    } finally {
-      setLoading(false);
-    }
-  }, [navigate]);
 
   const generateSlug = (titleValue: string) => {
     const transliterate = (str: string): string => {
