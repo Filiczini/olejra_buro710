@@ -4,9 +4,7 @@ async function migrateProjects() {
   console.log('Starting project migration...');
 
   try {
-    const { data: projects, error } = await supabase
-      .from('projects')
-      .select('id, title');
+    const { data: projects, error } = await supabase.from('projects').select('id, title');
 
     if (error) throw error;
 
@@ -64,7 +62,6 @@ async function migrateProjects() {
     console.log(`   Projects updated: ${updatedCount}`);
     console.log('========================================');
     console.log('Migration completed successfully!');
-
   } catch (error) {
     console.error('Migration failed:', error);
     process.exit(1);

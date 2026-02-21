@@ -36,6 +36,11 @@ export interface Block {
   created_at: string;
 }
 
+export interface EditBlock extends Omit<Block, 'id' | 'post_id' | 'created_at'> {
+  id?: string;
+  _tempId?: string;
+}
+
 export interface CreateBlockData {
   type: BlockType;
   data: BlockData;

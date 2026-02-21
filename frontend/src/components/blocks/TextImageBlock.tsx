@@ -25,7 +25,7 @@ export default function TextImageBlock({ data, mirrored }: TextImageBlockProps) 
             loading="lazy"
           />
         </div>
-        
+
         <div className={`flex flex-col justify-center p-12 md:p-24 ${textOrder}`}>
           <div className={mirrored ? 'max-w-md' : 'max-w-md ml-auto'}>
             {(icon || label) && (
@@ -38,20 +38,22 @@ export default function TextImageBlock({ data, mirrored }: TextImageBlockProps) 
                 )}
               </div>
             )}
-            
+
             {title && (
               <h3 className="text-3xl font-medium tracking-tight text-zinc-900 mb-6">{title}</h3>
             )}
-            
-            {text && (
-              <p className="text-zinc-600 font-light leading-7 mb-8">{text}</p>
-            )}
-            
+
+            {text && <p className="text-zinc-600 font-light leading-7 mb-8">{text}</p>}
+
             {features && features.length > 0 && (
               <ul className="space-y-4 border-t border-zinc-200 pt-6">
                 {features.map((feature, index) => (
                   <li key={index} className="flex items-start gap-3">
-                    <Icon icon="solar:check-circle-linear" className="text-zinc-900 mt-0.5" width={16} />
+                    <Icon
+                      icon="solar:check-circle-linear"
+                      className="text-zinc-900 mt-0.5"
+                      width={16}
+                    />
                     <span className="text-sm text-zinc-600">{feature}</span>
                   </li>
                 ))}

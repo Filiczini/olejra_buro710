@@ -52,9 +52,7 @@ export const storageService = {
 
     if (uploadError) throw uploadError;
 
-    const { data } = supabase.storage
-      .from(targetBucket)
-      .getPublicUrl(filePath);
+    const { data } = supabase.storage.from(targetBucket).getPublicUrl(filePath);
 
     return data.publicUrl;
   },
@@ -78,12 +76,18 @@ export const storageService = {
     const results = await Promise.all(uploadPromises);
 
     const urls = results
-      .filter((result): result is UploadResult & { url: string } => result.success && result.url !== undefined)
-      .map(result => result.url);
+      .filter(
+        (result): result is UploadResult & { url: string } =>
+          result.success && result.url !== undefined
+      )
+      .map((result) => result.url);
 
     const errors = results
-      .filter((result): result is UploadResult & { error: string } => !result.success && result.error !== undefined)
-      .map(result => result.error);
+      .filter(
+        (result): result is UploadResult & { error: string } =>
+          !result.success && result.error !== undefined
+      )
+      .map((result) => result.error);
 
     return {
       success: urls.length > 0,
@@ -113,9 +117,7 @@ export const storageService = {
         return { success: false, error: 'Invalid image URL format' };
       }
 
-      const { error: deleteError } = await supabase.storage
-        .from(bucket)
-        .remove([filePath]);
+      const { error: deleteError } = await supabase.storage.from(bucket).remove([filePath]);
 
       if (deleteError) {
         return { success: false, error: deleteError.message };
@@ -134,16 +136,16 @@ export const storageService = {
    * @returns Object with success status and array of failed URLs
    */
   deleteImages: async (imageUrls: string[]): Promise<BulkDeleteResult> => {
-    const deletePromises = imageUrls.map(async (url): Promise<{ url: string; success: boolean }> => {
-      const result = await storageService.deleteImage(url);
-      return { url, success: result.success };
-    });
+    const deletePromises = imageUrls.map(
+      async (url): Promise<{ url: string; success: boolean }> => {
+        const result = await storageService.deleteImage(url);
+        return { url, success: result.success };
+      }
+    );
 
     const results = await Promise.all(deletePromises);
 
-    const failed = results
-      .filter(result => !result.success)
-      .map(result => result.url);
+    const failed = results.filter((result) => !result.success).map((result) => result.url);
 
     return {
       success: failed.length === 0,

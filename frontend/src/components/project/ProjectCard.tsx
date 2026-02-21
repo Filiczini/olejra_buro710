@@ -12,15 +12,12 @@ export default function ProjectCard({ project }: ProjectCardProps) {
     category,
     project.area ? `${project.area} м²` : null,
     project.location,
-    project.year
+    project.year,
   ].filter(Boolean);
   const metadata = metadataParts.join(' · ');
 
   return (
-    <Link
-      to={`/project/${project.id}`}
-      className="group flex flex-col gap-6 cursor-pointer"
-    >
+    <Link to={`/project/${project.id}`} className="group flex flex-col gap-6 cursor-pointer">
       <div className="aspect-[4/3] bg-zinc-100 overflow-hidden w-full relative rounded-lg">
         <img
           src={project.image_url}

@@ -26,9 +26,7 @@ export default function TextFullEditor({ data, onChange }: TextFullEditorProps) 
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-2">
-          Текст цитати
-        </label>
+        <label className="block text-sm font-medium text-zinc-700 mb-2">Текст цитати</label>
         <textarea
           value={data.content || ''}
           onChange={(e) => updateField('content', e.target.value)}

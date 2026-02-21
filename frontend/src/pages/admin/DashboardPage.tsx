@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { logger } from '../../lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { portfolioService } from '../../services/api';
 import type { Project, FilterOptions, PaginationParams } from '../../types/project';
@@ -12,13 +13,17 @@ export default function DashboardPage() {
   const [filters, setFilters] = useState<PaginationParams>({});
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>({ tags: [], locations: [], years: [] });
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    tags: [],
+    locations: [],
+    years: [],
+  });
   const [showFilters, setShowFilters] = useState(false);
-  
+
   const previousProjectsRef = useRef<Project[]>([]);
   const previousPaginationRef = useRef(pagination);
 
-  const loadProjects = async () => {
+  const loadProjects = useCallback(async () => {
     setLoading(true);
     try {
       const result = await portfolioService.getAll({
@@ -26,33 +31,33 @@ export default function DashboardPage() {
         limit: pagination.limit,
         sortBy,
         sortOrder,
-        ...filters
+        ...filters,
       });
       setProjects(result.data);
       setPagination(result.pagination);
     } catch (error) {
-      console.error('Error loading projects:', error);
+      logger.error('Error loading projects', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [pagination.page, pagination.limit, sortBy, sortOrder, filters]);
 
-  const loadFilters = async () => {
+  const loadFilters = useCallback(async () => {
     try {
       const options = await portfolioService.getFilters();
       setFilterOptions(options);
     } catch (error) {
-      console.error('Error loading filters:', error);
+      logger.error('Error loading filters', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadProjects();
-  }, [pagination.page, filters, sortBy, sortOrder]);
+  }, [loadProjects]);
 
   useEffect(() => {
     loadFilters();
-  }, []);
+  }, [loadFilters]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Ви впевнені, що хочете видалити цей проєкт?')) return;
@@ -60,19 +65,22 @@ export default function DashboardPage() {
     previousProjectsRef.current = projects;
     previousPaginationRef.current = pagination;
 
-    setProjects(prev => prev.filter(p => p.id !== id));
-    setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));
+    setProjects((prev) => prev.filter((p) => p.id !== id));
+    setPagination((prev) => ({ ...prev, total: Math.max(0, prev.total - 1) }));
 
     try {
       await portfolioService.delete(id);
     } catch (error) {
-      console.error('Error deleting project:', error);
+      logger.error('Error deleting project', error);
       setProjects(previousProjectsRef.current);
       setPagination(previousPaginationRef.current);
     }
   };
 
-  const handleFilterChange = (key: keyof PaginationParams, value: any) => {
+  const handleFilterChange = (
+    key: keyof PaginationParams,
+    value: string | string[] | undefined
+  ) => {
     setFilters({ ...filters, [key]: value, page: 1 });
   };
 
@@ -93,17 +101,13 @@ export default function DashboardPage() {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors cursor-pointer"
->
+                className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors cursor-pointer"
+              >
                 Фільтри {showFilters ? '▼' : '▶'}
               </button>
-              <span className="text-zinc-600">
-                Всього проєктів: {pagination.total}
-              </span>
+              <span className="text-zinc-600">Всього проєктів: {pagination.total}</span>
             </div>
-            <Button onClick={() => navigate('/admin/projects/create')}>
-              Додати проєкт
-            </Button>
+            <Button onClick={() => navigate('/admin/projects/create')}>Додати проєкт</Button>
           </div>
 
           {showFilters && (
@@ -128,7 +132,9 @@ className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 transiti
                 >
                   <option value="">Всі локації</option>
                   {filterOptions.locations.map((loc) => (
-                    <option key={loc} value={loc}>{loc}</option>
+                    <option key={loc} value={loc}>
+                      {loc}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -142,7 +148,9 @@ className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 transiti
                 >
                   <option value="">Всі роки</option>
                   {filterOptions.years.map((year) => (
-                    <option key={year} value={year}>{year}</option>
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -152,11 +160,15 @@ className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 transiti
                 <select
                   className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900"
                   value={(filters.tags && filters.tags[0]) || ''}
-                  onChange={(e) => handleFilterChange('tags', e.target.value ? [e.target.value] : undefined)}
+                  onChange={(e) =>
+                    handleFilterChange('tags', e.target.value ? [e.target.value] : undefined)
+                  }
                 >
                   <option value="">Всі теги</option>
                   {filterOptions.tags.map((tag) => (
-                    <option key={tag} value={tag}>{tag}</option>
+                    <option key={tag} value={tag}>
+                      {tag}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -194,15 +206,22 @@ className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 transiti
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-8 text-zinc-600">Завантаження...</td>
+                    <td colSpan={7} className="text-center py-8 text-zinc-600">
+                      Завантаження...
+                    </td>
                   </tr>
                 ) : projects.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-8 text-zinc-600">Проєктів не знайдено</td>
+                    <td colSpan={7} className="text-center py-8 text-zinc-600">
+                      Проєктів не знайдено
+                    </td>
                   </tr>
                 ) : (
                   projects.map((project) => (
-                    <tr key={project.id} className="border-b border-zinc-100 hover:bg-zinc-50 transition-colors">
+                    <tr
+                      key={project.id}
+                      className="border-b border-zinc-100 hover:bg-zinc-50 transition-colors"
+                    >
                       <td className="py-3 px-4">
                         <img
                           src={project.image_url}
@@ -216,7 +235,10 @@ className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 transiti
                       <td className="py-3 px-4">
                         <div className="flex flex-wrap gap-1">
                           {project.tags.slice(0, 3).map((tag, index) => (
-                            <span key={index} className="px-2 py-1 bg-zinc-100 text-zinc-700 text-xs rounded-full">
+                            <span
+                              key={index}
+                              className="px-2 py-1 bg-zinc-100 text-zinc-700 text-xs rounded-full"
+                            >
                               {tag}
                             </span>
                           ))}
@@ -234,14 +256,14 @@ className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 transiti
                         <div className="flex gap-2">
                           <button
                             onClick={() => navigate(`/admin/projects/edit/${project.id}`)}
-className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors cursor-pointer"
->
+                            className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors cursor-pointer"
+                          >
                             Редагувати
                           </button>
                           <button
                             onClick={() => handleDelete(project.id)}
-className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors cursor-pointer"
->
+                            className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors cursor-pointer"
+                          >
                             Видалити
                           </button>
                         </div>
@@ -256,14 +278,16 @@ className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition
           {pagination.totalPages > 1 && (
             <div className="flex justify-between items-center mt-4 pt-4 border-t border-zinc-200">
               <div className="text-sm text-zinc-600">
-                Показано {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}-{Math.min(pagination.page * pagination.limit, pagination.total)} з {pagination.total}
+                Показано {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}-
+                {Math.min(pagination.page * pagination.limit, pagination.total)} з{' '}
+                {pagination.total}
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
                   disabled={pagination.page === 1}
-className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
->
+                  className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                >
                   Попередня
                 </button>
                 {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
@@ -284,8 +308,8 @@ className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled
                 <button
                   onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
                   disabled={pagination.page === pagination.totalPages}
-className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
->
+                  className="px-4 py-2 border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                >
                   Наступна
                 </button>
               </div>

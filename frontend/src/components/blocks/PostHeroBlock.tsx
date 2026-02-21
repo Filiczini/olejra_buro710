@@ -6,15 +6,8 @@ interface PostHeroBlockProps {
 }
 
 export default function PostHeroBlock({ post }: PostHeroBlockProps) {
-  const {
-    hero_image_url,
-    hero_title,
-    hero_subtitle,
-    hero_tags,
-    hero_location,
-    hero_year,
-    title,
-  } = post;
+  const { hero_image_url, hero_title, hero_subtitle, hero_tags, hero_location, hero_year, title } =
+    post;
 
   const displayTitle = hero_title || title;
   const hasHeroContent = hero_image_url || displayTitle;
@@ -22,7 +15,7 @@ export default function PostHeroBlock({ post }: PostHeroBlockProps) {
   const handleScrollToContent = () => {
     window.scrollBy({
       top: window.innerHeight,
-      behavior: 'smooth'
+      behavior: 'smooth',
     });
   };
 
@@ -53,7 +46,9 @@ export default function PostHeroBlock({ post }: PostHeroBlockProps) {
             )}
             {(hero_location || hero_year) && (
               <span className="text-white/70 text-[10px] uppercase tracking-widest">
-                {hero_location}{hero_location && hero_year ? ', ' : ''}{hero_year}
+                {hero_location}
+                {hero_location && hero_year ? ', ' : ''}
+                {hero_year}
               </span>
             )}
           </div>
@@ -70,9 +65,7 @@ export default function PostHeroBlock({ post }: PostHeroBlockProps) {
 
         {hero_subtitle && (
           <div className="md:max-w-xs md:mb-2">
-            <p className="text-white/80 text-sm font-light leading-relaxed">
-              {hero_subtitle}
-            </p>
+            <p className="text-white/80 text-sm font-light leading-relaxed">{hero_subtitle}</p>
             <div className="mt-6 flex items-center gap-4">
               <button
                 onClick={handleScrollToContent}

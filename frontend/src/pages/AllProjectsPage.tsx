@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Icon } from '@iconify-icon/react';
 import { Link } from 'react-router-dom';
 import { portfolioService } from '../services/api';
+import { logger } from '../lib/logger';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import type { PortfolioItem } from '../types/portfolio';
@@ -15,7 +16,7 @@ export default function AllProjectsPage() {
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  const loadItems = async () => {
+  const loadItems = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -30,21 +31,19 @@ export default function AllProjectsPage() {
       setTotalPages(result.pagination.totalPages);
       setAvailableTags(result.filters.tags);
     } catch (error) {
-      console.error('Error loading items:', error);
+      logger.error('Error loading items', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, selectedTags]);
 
   useEffect(() => {
     loadItems();
-  }, [page, selectedTags]);
+  }, [loadItems]);
 
   const toggleTag = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
     setPage(1);
   };
@@ -73,9 +72,7 @@ export default function AllProjectsPage() {
       <div className="pt-20">
         <div className="max-w-[1800px] mx-auto px-6 py-16">
           <div className="mb-12">
-            <h1 className="text-4xl md:text-5xl font-medium tracking-tight mb-4">
-              Проєкти
-            </h1>
+            <h1 className="text-4xl md:text-5xl font-medium tracking-tight mb-4">Проєкти</h1>
             <p className="text-zinc-600 text-lg">
               {total} {total === 1 ? 'запис' : total > 1 && total < 5 ? 'записи' : 'записів'}
             </p>
@@ -83,7 +80,7 @@ export default function AllProjectsPage() {
 
           {availableTags.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-12">
-              {availableTags.map(tag => (
+              {availableTags.map((tag) => (
                 <button
                   key={tag}
                   onClick={() => toggleTag(tag)}
@@ -108,9 +105,7 @@ export default function AllProjectsPage() {
           )}
 
           {items.length === 0 ? (
-            <div className="text-center py-24 text-zinc-600">
-              Немає результатів
-            </div>
+            <div className="text-center py-24 text-zinc-600">Немає результатів</div>
           ) : (
             <>
               <div className="columns-1 md:columns-2 lg:columns-3 gap-6 mb-16">
@@ -145,7 +140,11 @@ export default function AllProjectsPage() {
                           {item.location} {item.year && `· ${item.year}`}
                         </p>
                       </div>
-                      <Icon icon="solar:arrow-right-linear" width={20} className="-rotate-45 group-hover:rotate-0 transition-transform" />
+                      <Icon
+                        icon="solar:arrow-right-linear"
+                        width={20}
+                        className="-rotate-45 group-hover:rotate-0 transition-transform"
+                      />
                     </div>
                   </Link>
                 ))}
@@ -165,15 +164,15 @@ export default function AllProjectsPage() {
                     const pageNum = Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
                     if (pageNum > totalPages) return null;
                     return (
-                       <button
-                         key={pageNum}
-                         onClick={() => setPage(pageNum)}
-                         className={`w-10 h-10 rounded-full transition-all duration-200 text-sm font-medium cursor-pointer ${
-                           page === pageNum
-                             ? 'bg-zinc-900 text-white hover:bg-zinc-800'
-                             : 'border border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900'
-                         }`}
-                       >
+                      <button
+                        key={pageNum}
+                        onClick={() => setPage(pageNum)}
+                        className={`w-10 h-10 rounded-full transition-all duration-200 text-sm font-medium cursor-pointer ${
+                          page === pageNum
+                            ? 'bg-zinc-900 text-white hover:bg-zinc-800'
+                            : 'border border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900'
+                        }`}
+                      >
                         {pageNum}
                       </button>
                     );

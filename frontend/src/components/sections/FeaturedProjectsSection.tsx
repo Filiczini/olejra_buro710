@@ -39,9 +39,7 @@ export default function FeaturedProjectsSection() {
             Вибрані проєкти
           </h2>
         </div>
-        <div className="text-center py-24 text-zinc-500">
-          Завантаження...
-        </div>
+        <div className="text-center py-24 text-zinc-500">Завантаження...</div>
       </section>
     );
   }
@@ -54,9 +52,7 @@ export default function FeaturedProjectsSection() {
             Вибрані проєкти
           </h2>
         </div>
-        <div className="text-center py-24 text-zinc-500">
-          Не вдалося завантажити
-        </div>
+        <div className="text-center py-24 text-zinc-500">Не вдалося завантажити</div>
       </section>
     );
   }
@@ -69,9 +65,7 @@ export default function FeaturedProjectsSection() {
             Вибрані проєкти
           </h2>
         </div>
-        <div className="text-center py-24 text-zinc-500">
-          Немає проєктів
-        </div>
+        <div className="text-center py-24 text-zinc-500">Немає проєктів</div>
       </section>
     );
   }
@@ -92,11 +86,7 @@ export default function FeaturedProjectsSection() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
         {items.map((item) => (
-          <Link
-            key={`${item.type}-${item.id}`}
-            to={getItemLink(item)}
-            className="group block"
-          >
+          <Link key={`${item.type}-${item.id}`} to={getItemLink(item)} className="group block">
             <div className="relative aspect-[4/5] mb-6 overflow-hidden bg-zinc-100">
               {item.image_url ? (
                 <img
@@ -122,7 +112,11 @@ export default function FeaturedProjectsSection() {
                   {item.location} {item.year && `· ${item.year}`}
                 </p>
               </div>
-              <Icon icon="solar:arrow-right-linear" width={20} className="-rotate-45 group-hover:rotate-0 transition-transform" />
+              <Icon
+                icon="solar:arrow-right-linear"
+                width={20}
+                className="-rotate-45 group-hover:rotate-0 transition-transform"
+              />
             </div>
           </Link>
         ))}

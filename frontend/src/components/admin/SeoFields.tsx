@@ -45,8 +45,10 @@ export default function SeoFields({
 
   const titleLength = seoTitle.length;
   const descLength = seoDescription.length;
-  const titleColor = titleLength > 60 ? 'text-red-500' : titleLength > 50 ? 'text-yellow-600' : 'text-zinc-500';
-  const descColor = descLength > 160 ? 'text-red-500' : descLength > 140 ? 'text-yellow-600' : 'text-zinc-500';
+  const titleColor =
+    titleLength > 60 ? 'text-red-500' : titleLength > 50 ? 'text-yellow-600' : 'text-zinc-500';
+  const descColor =
+    descLength > 160 ? 'text-red-500' : descLength > 140 ? 'text-yellow-600' : 'text-zinc-500';
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -75,12 +77,8 @@ export default function SeoFields({
         <div className="p-4 pt-0 space-y-4 border-t border-zinc-100">
           <div>
             <div className="flex justify-between items-center mb-1">
-              <label className="block text-sm font-medium text-zinc-700">
-                SEO Title
-              </label>
-              <span className={`text-xs ${titleColor}`}>
-                {titleLength}/60
-              </span>
+              <label className="block text-sm font-medium text-zinc-700">SEO Title</label>
+              <span className={`text-xs ${titleColor}`}>{titleLength}/60</span>
             </div>
             <input
               type="text"
@@ -92,19 +90,13 @@ export default function SeoFields({
               }`}
               maxLength={100}
             />
-            {errors?.seo_title && (
-              <p className="text-sm text-red-500 mt-1">{errors.seo_title}</p>
-            )}
+            {errors?.seo_title && <p className="text-sm text-red-500 mt-1">{errors.seo_title}</p>}
           </div>
 
           <div>
             <div className="flex justify-between items-center mb-1">
-              <label className="block text-sm font-medium text-zinc-700">
-                SEO Description
-              </label>
-              <span className={`text-xs ${descColor}`}>
-                {descLength}/160
-              </span>
+              <label className="block text-sm font-medium text-zinc-700">SEO Description</label>
+              <span className={`text-xs ${descColor}`}>{descLength}/160</span>
             </div>
             <textarea
               value={seoDescription}
@@ -126,7 +118,7 @@ export default function SeoFields({
               <label className="block text-sm font-medium text-zinc-700 mb-2">
                 OG Image (для соціальних мереж)
               </label>
-              
+
               {previewUrl ? (
                 <div className="relative group">
                   <img

@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
 import { postService } from '../services/api';
+import { logger } from '../lib/logger';
 import Header from '../components/layout/Header';
 import PostHeroBlock from '../components/blocks/PostHeroBlock';
 import BlockRenderer from '../components/blocks/BlockRenderer';
@@ -16,39 +17,39 @@ export default function PostPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  useEffect(() => {
-    if (slug) {
-      loadPost(slug);
-    }
-  }, [slug]);
-
-  const loadPost = async (postSlug: string) => {
+  const loadPost = useCallback(async (postSlug: string) => {
     setLoading(true);
     setError(false);
     try {
       const result = await postService.getBySlug(postSlug);
       setPost(result.post);
       setBlocks(result.blocks);
-      
+
       const seoTitle = result.post.seo_title || result.post.hero_title || result.post.title;
       const seoDescription = result.post.seo_description || result.post.hero_subtitle || '';
-      
+
       document.title = seoTitle;
       updateMetaTag('description', seoDescription);
       updateMetaTag('og:title', seoTitle);
       updateMetaTag('og:description', seoDescription);
-      
+
       const ogImage = result.post.og_image_url || result.post.hero_image_url;
       if (ogImage) {
         updateMetaTag('og:image', ogImage);
       }
     } catch (err) {
-      console.error('Error loading post:', err);
+      logger.error('Error loading post', err);
       setError(true);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (slug) {
+      loadPost(slug);
+    }
+  }, [slug, loadPost]);
 
   const updateMetaTag = (name: string, content: string) => {
     let meta = document.querySelector(`meta[name="${name}"], meta[property="${name}"]`);
@@ -92,19 +93,21 @@ export default function PostPage() {
 
       <main className={hasHero ? '' : 'pt-16'}>
         {blocks.length > 0 && <BlockRenderer blocks={blocks} />}
-        
+
         {post.gallery_images && post.gallery_images.length > 0 && (
           <PostGalleryBlock images={post.gallery_images} />
         )}
-        
-        {!hasHero && blocks.length === 0 && !(post.gallery_images && post.gallery_images.length > 0) && (
-          <div className="max-w-5xl mx-auto px-4 py-24">
-            <div className="text-center text-zinc-400">
-              <Icon icon="solar:document-text-linear" width={48} className="mx-auto mb-4" />
-              <p>Контент сторінки буде додано пізніше...</p>
+
+        {!hasHero &&
+          blocks.length === 0 &&
+          !(post.gallery_images && post.gallery_images.length > 0) && (
+            <div className="max-w-5xl mx-auto px-4 py-24">
+              <div className="text-center text-zinc-400">
+                <Icon icon="solar:document-text-linear" width={48} className="mx-auto mb-4" />
+                <p>Контент сторінки буде додано пізніше...</p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
       </main>
     </div>
   );

@@ -1,5 +1,6 @@
 import { supabase } from '../config/supabase';
 import { telegramService } from './telegramService';
+import { logger } from '../lib/logger.js';
 
 interface CreateContactData {
   name: string;
@@ -26,7 +27,7 @@ export const contactService = {
       .single();
 
     if (error) {
-      console.error('Error saving contact message:', error);
+      logger.error('Error saving contact message', error);
       throw error;
     }
 

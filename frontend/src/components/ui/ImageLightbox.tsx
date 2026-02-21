@@ -14,7 +14,7 @@ export default function ImageLightbox({
   currentIndex,
   onClose,
   onPrev,
-  onNext
+  onNext,
 }: ImageLightboxProps) {
   const [isClosing, setIsClosing] = useState(false);
 
@@ -29,40 +29,52 @@ export default function ImageLightbox({
     }
   }, [isClosing, onClose]);
 
-  const handlePrev = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onPrev();
-  }, [onPrev]);
+  const handlePrev = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onPrev();
+    },
+    [onPrev]
+  );
 
-  const handleNext = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onNext();
-  }, [onNext]);
+  const handleNext = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onNext();
+    },
+    [onNext]
+  );
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    switch (e.key) {
-      case 'Escape':
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      switch (e.key) {
+        case 'Escape':
+          handleClose();
+          break;
+        case 'ArrowLeft':
+          onPrev();
+          break;
+        case 'ArrowRight':
+          onNext();
+          break;
+      }
+    },
+    [handleClose, onPrev, onNext]
+  );
+
+  const handleBackdropClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.target === e.currentTarget) {
         handleClose();
-        break;
-      case 'ArrowLeft':
-        onPrev();
-        break;
-      case 'ArrowRight':
-        onNext();
-        break;
-    }
-  }, [handleClose, onPrev, onNext]);
-
-  const handleBackdropClick = useCallback((e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      handleClose();
-    }
-  }, [handleClose]);
+      }
+    },
+    [handleClose]
+  );
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     document.body.style.overflow = 'hidden';
-    
+
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = 'unset';
@@ -76,9 +88,12 @@ export default function ImageLightbox({
       onClick={handleBackdropClick}
     >
       <div className="absolute inset-0 bg-black/95" />
-      
+
       <button
-        onClick={(e) => { e.stopPropagation(); handleClose(); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleClose();
+        }}
         className="absolute top-6 right-6 z-10 w-10 h-10 flex items-center justify-center text-white/80 hover:text-white transition-colors cursor-pointer"
         aria-label="Закрити"
       >
