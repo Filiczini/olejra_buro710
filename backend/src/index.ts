@@ -32,8 +32,15 @@ app.use('/api/contact', contactRoutes);
 // External API v1
 app.use('/api/v1/posts', apiPostsRoutes);
 
-// API Documentation
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// API Documentation - use CDN for Swagger UI assets
+const swaggerUiOptions = {
+  customCssUrl: 'https://unpkg.com/swagger-ui-dist@5/swagger-ui.css',
+  customJs: [
+    'https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js',
+    'https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js',
+  ],
+};
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
 app.get('/api/docs.json', (_req: Request, res: Response) => {
   res.setHeader('Content-Type', 'application/json');
   res.send(swaggerSpec);
