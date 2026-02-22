@@ -234,15 +234,16 @@ export default function DashboardPage() {
                       <td className="py-3 px-4 text-zinc-600">{project.year || '-'}</td>
                       <td className="py-3 px-4">
                         <div className="flex flex-wrap gap-1">
-                          {project.tags.slice(0, 3).map((tag, index) => (
-                            <span
-                              key={index}
-                              className="px-2 py-1 bg-zinc-100 text-zinc-700 text-xs rounded-full"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                          {project.tags.length > 3 && (
+                          {Array.isArray(project.tags) &&
+                            project.tags.slice(0, 3).map((tag, index) => (
+                              <span
+                                key={index}
+                                className="px-2 py-1 bg-zinc-100 text-zinc-700 text-xs rounded-full"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          {Array.isArray(project.tags) && project.tags.length > 3 && (
                             <span className="px-2 py-1 bg-zinc-100 text-zinc-700 text-xs rounded-full">
                               +{project.tags.length - 3}
                             </span>
