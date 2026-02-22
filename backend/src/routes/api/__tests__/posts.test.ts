@@ -916,4 +916,501 @@ describe('Posts API', () => {
       expect(postService.getAll).toHaveBeenCalledWith({ page: 9999, limit: 100 });
     });
   });
+
+  // ==========================================================================
+  // URL Support Tests
+  // ==========================================================================
+
+  describe('URL Support', () => {
+    const validPostData = {
+      title: 'New Test Post',
+      slug: 'new-test-post',
+      status: 'draft',
+      hero_title: 'Hero Title',
+      hero_subtitle: 'Hero Subtitle',
+      hero_tags: JSON.stringify(['tag1', 'tag2']),
+      hero_location: 'Kyiv',
+      hero_year: '2024',
+      seo_title: 'SEO Title',
+      seo_description: 'SEO Description',
+    };
+
+    // --------------------------------------------------------------------------
+    // POST with URLs
+    // --------------------------------------------------------------------------
+
+    describe('POST /api/v1/posts with URLs', () => {
+      it('creates post with hero_image_url (JSON) and returns 201', async () => {
+        // Arrange
+        const heroUrl = 'https://example.com/hero-image.jpg';
+        const expectedPost = {
+          ...MOCK_POST,
+          hero_image_url: heroUrl,
+        };
+        vi.mocked(postService.create).mockResolvedValue(expectedPost);
+
+        // Act
+        const response = await withApiKey(
+          request(app)
+            .post('/api/v1/posts')
+            .send({ ...validPostData, hero_image_url: heroUrl })
+        );
+
+        // Assert
+        expect(response.status).toBe(201);
+        expect(response.body.hero_image_url).toBe(heroUrl);
+        expect(postService.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            hero_image_url: heroUrl,
+          })
+        );
+      });
+
+      it('creates post with og_image_url (JSON) and returns 201', async () => {
+        // Arrange
+        const ogUrl = 'https://example.com/og-image.jpg';
+        const expectedPost = {
+          ...MOCK_POST,
+          og_image_url: ogUrl,
+        };
+        vi.mocked(postService.create).mockResolvedValue(expectedPost);
+
+        // Act
+        const response = await withApiKey(
+          request(app)
+            .post('/api/v1/posts')
+            .send({ ...validPostData, og_image_url: ogUrl })
+        );
+
+        // Assert
+        expect(response.status).toBe(201);
+        expect(response.body.og_image_url).toBe(ogUrl);
+        expect(postService.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            og_image_url: ogUrl,
+          })
+        );
+      });
+
+      it('creates post with both hero_image_url and og_image_url and returns 201', async () => {
+        // Arrange
+        const heroUrl = 'https://example.com/hero-image.jpg';
+        const ogUrl = 'https://example.com/og-image.jpg';
+        const expectedPost = {
+          ...MOCK_POST,
+          hero_image_url: heroUrl,
+          og_image_url: ogUrl,
+        };
+        vi.mocked(postService.create).mockResolvedValue(expectedPost);
+
+        // Act
+        const response = await withApiKey(
+          request(app)
+            .post('/api/v1/posts')
+            .send({ ...validPostData, hero_image_url: heroUrl, og_image_url: ogUrl })
+        );
+
+        // Assert
+        expect(response.status).toBe(201);
+        expect(response.body.hero_image_url).toBe(heroUrl);
+        expect(response.body.og_image_url).toBe(ogUrl);
+        expect(postService.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            hero_image_url: heroUrl,
+            og_image_url: ogUrl,
+          })
+        );
+      });
+
+      it('creates post with gallery_images (URLs array) and returns 201', async () => {
+        // Arrange
+        const galleryUrls = [
+          'https://example.com/gallery-1.jpg',
+          'https://example.com/gallery-2.jpg',
+          'https://example.com/gallery-3.jpg',
+        ];
+        const expectedPost = {
+          ...MOCK_POST,
+          gallery_images: galleryUrls,
+        };
+        vi.mocked(postService.create).mockResolvedValue(expectedPost);
+
+        // Act
+        const response = await withApiKey(
+          request(app)
+            .post('/api/v1/posts')
+            .send({ ...validPostData, gallery_images: JSON.stringify(galleryUrls) })
+        );
+
+        // Assert
+        expect(response.status).toBe(201);
+        expect(response.body.gallery_images).toEqual(galleryUrls);
+        expect(postService.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            gallery_images: galleryUrls,
+          })
+        );
+      });
+
+      it('uses file upload over hero_image_url when both provided', async () => {
+        // Arrange
+        const uploadedUrl = 'https://example.com/image.jpg'; // Mock returns this
+        const heroUrlFromBody = 'https://example.com/hero-from-url.jpg';
+        vi.mocked(postService.create).mockResolvedValue({
+          ...MOCK_POST,
+          hero_image_url: uploadedUrl,
+        });
+
+        // Act - Send multipart with file and URL
+        const response = await withApiKey(
+          request(app)
+            .post('/api/v1/posts')
+            .field('title', validPostData.title)
+            .field('slug', validPostData.slug)
+            .field('hero_image_url', heroUrlFromBody)
+            .attach('hero_image', Buffer.from('fake-image'), 'hero.jpg')
+        );
+
+        // Assert - File URL should be used, not the URL from body
+        expect(response.status).toBe(201);
+        expect(response.body.hero_image_url).toBe(uploadedUrl);
+        // storageService.uploadImage should have been called for the file
+        expect(postService.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            hero_image_url: uploadedUrl,
+          })
+        );
+      });
+
+      it('uses file upload over og_image_url when both provided', async () => {
+        // Arrange
+        const uploadedUrl = 'https://example.com/image.jpg'; // Mock returns this
+        const ogUrlFromBody = 'https://example.com/og-from-url.jpg';
+        vi.mocked(postService.create).mockResolvedValue({
+          ...MOCK_POST,
+          og_image_url: uploadedUrl,
+        });
+
+        // Act - Send multipart with file and URL
+        const response = await withApiKey(
+          request(app)
+            .post('/api/v1/posts')
+            .field('title', validPostData.title)
+            .field('slug', validPostData.slug)
+            .field('og_image_url', ogUrlFromBody)
+            .attach('og_image', Buffer.from('fake-image'), 'og.jpg')
+        );
+
+        // Assert - File URL should be used
+        expect(response.status).toBe(201);
+        expect(response.body.og_image_url).toBe(uploadedUrl);
+        expect(postService.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            og_image_url: uploadedUrl,
+          })
+        );
+      });
+    });
+
+    // --------------------------------------------------------------------------
+    // PUT with URLs
+    // --------------------------------------------------------------------------
+
+    describe('PUT /api/v1/posts/:id with URLs', () => {
+      it('updates hero_image_url and returns 200', async () => {
+        // Arrange
+        const newHeroUrl = 'https://example.com/new-hero.jpg';
+        const updatedPost = {
+          ...MOCK_POST,
+          hero_image_url: newHeroUrl,
+        };
+        vi.mocked(postService.getById).mockResolvedValue({
+          post: MOCK_POST,
+          blocks: [],
+        });
+        vi.mocked(postService.update).mockResolvedValue(updatedPost);
+
+        // Act
+        const response = await withApiKey(
+          request(app).put(`/api/v1/posts/${MOCK_POST.id}`).send({ hero_image_url: newHeroUrl })
+        );
+
+        // Assert
+        expect(response.status).toBe(200);
+        expect(response.body.hero_image_url).toBe(newHeroUrl);
+        expect(postService.update).toHaveBeenCalledWith(
+          MOCK_POST.id,
+          expect.objectContaining({
+            hero_image_url: newHeroUrl,
+          })
+        );
+      });
+
+      it('updates og_image_url and returns 200', async () => {
+        // Arrange
+        const newOgUrl = 'https://example.com/new-og.jpg';
+        const updatedPost = {
+          ...MOCK_POST,
+          og_image_url: newOgUrl,
+        };
+        vi.mocked(postService.getById).mockResolvedValue({
+          post: MOCK_POST,
+          blocks: [],
+        });
+        vi.mocked(postService.update).mockResolvedValue(updatedPost);
+
+        // Act
+        const response = await withApiKey(
+          request(app).put(`/api/v1/posts/${MOCK_POST.id}`).send({ og_image_url: newOgUrl })
+        );
+
+        // Assert
+        expect(response.status).toBe(200);
+        expect(response.body.og_image_url).toBe(newOgUrl);
+        expect(postService.update).toHaveBeenCalledWith(
+          MOCK_POST.id,
+          expect.objectContaining({
+            og_image_url: newOgUrl,
+          })
+        );
+      });
+
+      it('clears hero_image_url when empty string provided', async () => {
+        // Arrange
+        const postWithHero = {
+          ...MOCK_POST,
+          hero_image_url: 'https://example.com/existing-hero.jpg',
+        };
+        const updatedPost = {
+          ...MOCK_POST,
+          hero_image_url: undefined,
+        };
+        vi.mocked(postService.getById).mockResolvedValue({
+          post: postWithHero,
+          blocks: [],
+        });
+        vi.mocked(postService.update).mockResolvedValue(updatedPost);
+
+        // Act
+        const response = await withApiKey(
+          request(app).put(`/api/v1/posts/${MOCK_POST.id}`).send({ hero_image_url: '' })
+        );
+
+        // Assert
+        expect(response.status).toBe(200);
+        expect(postService.update).toHaveBeenCalledWith(
+          MOCK_POST.id,
+          expect.objectContaining({
+            hero_image_url: undefined,
+          })
+        );
+      });
+
+      it('clears og_image_url when empty string provided', async () => {
+        // Arrange
+        const postWithOg = {
+          ...MOCK_POST,
+          og_image_url: 'https://example.com/existing-og.jpg',
+        };
+        const updatedPost = {
+          ...MOCK_POST,
+          og_image_url: undefined,
+        };
+        vi.mocked(postService.getById).mockResolvedValue({
+          post: postWithOg,
+          blocks: [],
+        });
+        vi.mocked(postService.update).mockResolvedValue(updatedPost);
+
+        // Act
+        const response = await withApiKey(
+          request(app).put(`/api/v1/posts/${MOCK_POST.id}`).send({ og_image_url: '' })
+        );
+
+        // Assert
+        expect(response.status).toBe(200);
+        expect(postService.update).toHaveBeenCalledWith(
+          MOCK_POST.id,
+          expect.objectContaining({
+            og_image_url: undefined,
+          })
+        );
+      });
+
+      it('preserves existing hero_image_url when not provided in update', async () => {
+        // Arrange
+        const existingHeroUrl = 'https://example.com/existing-hero.jpg';
+        const postWithHero = {
+          ...MOCK_POST,
+          hero_image_url: existingHeroUrl,
+        };
+        vi.mocked(postService.getById).mockResolvedValue({
+          post: postWithHero,
+          blocks: [],
+        });
+        vi.mocked(postService.update).mockResolvedValue(postWithHero);
+
+        // Act - Update without hero_image_url
+        const response = await withApiKey(
+          request(app).put(`/api/v1/posts/${MOCK_POST.id}`).send({ title: 'Updated Title' })
+        );
+
+        // Assert - Existing URL should be preserved
+        expect(response.status).toBe(200);
+        expect(postService.update).toHaveBeenCalledWith(
+          MOCK_POST.id,
+          expect.objectContaining({
+            hero_image_url: existingHeroUrl,
+          })
+        );
+      });
+
+      it('uses file upload over hero_image_url when both provided on update', async () => {
+        // Arrange
+        const uploadedUrl = 'https://example.com/image.jpg'; // Mock returns this
+        const heroUrlFromBody = 'https://example.com/hero-from-url.jpg';
+        vi.mocked(postService.getById).mockResolvedValue({
+          post: MOCK_POST,
+          blocks: [],
+        });
+        vi.mocked(postService.update).mockResolvedValue({
+          ...MOCK_POST,
+          hero_image_url: uploadedUrl,
+        });
+
+        // Act - Send multipart with file and URL
+        const response = await withApiKey(
+          request(app)
+            .put(`/api/v1/posts/${MOCK_POST.id}`)
+            .field('hero_image_url', heroUrlFromBody)
+            .attach('hero_image', Buffer.from('fake-image'), 'hero.jpg')
+        );
+
+        // Assert - File URL should be used
+        expect(response.status).toBe(200);
+        expect(response.body.hero_image_url).toBe(uploadedUrl);
+        expect(postService.update).toHaveBeenCalledWith(
+          MOCK_POST.id,
+          expect.objectContaining({
+            hero_image_url: uploadedUrl,
+          })
+        );
+      });
+
+      it('uses file upload over og_image_url when both provided on update', async () => {
+        // Arrange
+        const uploadedUrl = 'https://example.com/image.jpg'; // Mock returns this
+        const ogUrlFromBody = 'https://example.com/og-from-url.jpg';
+        vi.mocked(postService.getById).mockResolvedValue({
+          post: MOCK_POST,
+          blocks: [],
+        });
+        vi.mocked(postService.update).mockResolvedValue({
+          ...MOCK_POST,
+          og_image_url: uploadedUrl,
+        });
+
+        // Act - Send multipart with file and URL
+        const response = await withApiKey(
+          request(app)
+            .put(`/api/v1/posts/${MOCK_POST.id}`)
+            .field('og_image_url', ogUrlFromBody)
+            .attach('og_image', Buffer.from('fake-image'), 'og.jpg')
+        );
+
+        // Assert - File URL should be used
+        expect(response.status).toBe(200);
+        expect(response.body.og_image_url).toBe(uploadedUrl);
+        expect(postService.update).toHaveBeenCalledWith(
+          MOCK_POST.id,
+          expect.objectContaining({
+            og_image_url: uploadedUrl,
+          })
+        );
+      });
+    });
+
+    // --------------------------------------------------------------------------
+    // URL Validation Edge Cases
+    // --------------------------------------------------------------------------
+
+    describe('URL validation edge cases', () => {
+      it('accepts valid external URLs', async () => {
+        // Arrange
+        const validUrls = [
+          'https://cdn.example.com/image.jpg',
+          'https://example.com/path/to/image.png',
+          'https://s3.amazonaws.com/bucket/image.jpg',
+        ];
+        vi.mocked(postService.create).mockResolvedValue({
+          ...MOCK_POST,
+          hero_image_url: validUrls[0],
+          og_image_url: validUrls[1],
+          gallery_images: validUrls,
+        });
+
+        // Act
+        const response = await withApiKey(
+          request(app)
+            .post('/api/v1/posts')
+            .send({
+              ...validPostData,
+              hero_image_url: validUrls[0],
+              og_image_url: validUrls[1],
+              gallery_images: JSON.stringify(validUrls),
+            })
+        );
+
+        // Assert
+        expect(response.status).toBe(201);
+      });
+
+      it('handles empty gallery_images array', async () => {
+        // Arrange
+        vi.mocked(postService.create).mockResolvedValue({
+          ...MOCK_POST,
+          gallery_images: [],
+        });
+
+        // Act
+        const response = await withApiKey(
+          request(app)
+            .post('/api/v1/posts')
+            .send({ ...validPostData, gallery_images: JSON.stringify([]) })
+        );
+
+        // Assert
+        expect(response.status).toBe(201);
+        expect(postService.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            gallery_images: [],
+          })
+        );
+      });
+
+      it('handles single image in gallery_images', async () => {
+        // Arrange
+        const singleGallery = ['https://example.com/single.jpg'];
+        vi.mocked(postService.create).mockResolvedValue({
+          ...MOCK_POST,
+          gallery_images: singleGallery,
+        });
+
+        // Act
+        const response = await withApiKey(
+          request(app)
+            .post('/api/v1/posts')
+            .send({ ...validPostData, gallery_images: JSON.stringify(singleGallery) })
+        );
+
+        // Assert
+        expect(response.status).toBe(201);
+        expect(postService.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            gallery_images: singleGallery,
+          })
+        );
+      });
+    });
+  });
 });
