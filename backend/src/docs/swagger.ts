@@ -119,6 +119,16 @@ export const swaggerSpec = {
                   title: { type: 'string', description: 'Заголовок (обов\'язкове)' },
                   slug: { type: 'string', description: 'URL-slug (авто-генерація)' },
                   status: { type: 'string', enum: ['draft', 'published'] },
+                  hero_image_url: {
+                    type: 'string',
+                    description: 'URL hero зображення (альтернатива hero_image файлу). Якщо передано файл, файл має пріоритет.',
+                    example: 'https://example.com/hero-image.jpg',
+                  },
+                  og_image_url: {
+                    type: 'string',
+                    description: 'URL OG зображення для соціальних мереж (альтернатива og_image файлу). Якщо передано файл, файл має пріоритет.',
+                    example: 'https://example.com/og-image.jpg',
+                  },
                   hero_title: { type: 'string' }, hero_subtitle: { type: 'string' },
                   hero_tags: { type: 'string', description: 'JSON-масив тегів' },
                   hero_location: { type: 'string' }, hero_year: { type: 'string' },
@@ -134,7 +144,10 @@ export const swaggerSpec = {
                 type: 'object',
                 properties: {
                   title: { type: 'string' }, slug: { type: 'string' }, status: { type: 'string', enum: ['draft', 'published'] },
-                  hero_image: { type: 'string', format: 'binary', description: 'Головне зображення (JPEG/PNG, макс 5MB)' },
+                  hero_image: { type: 'string', format: 'binary', description: 'Головне зображення (JPEG/PNG, макс 5MB). Має пріоритет над hero_image_url.' },
+                  og_image: { type: 'string', format: 'binary', description: 'OG зображення для соціальних мереж (JPEG/PNG, макс 5MB). Має пріоритет над og_image_url.' },
+                  hero_image_url: { type: 'string', description: 'URL hero зображення (використовується, якщо не передано файл)' },
+                  og_image_url: { type: 'string', description: 'URL OG зображення (використовується, якщо не передано файл)' },
                   hero_title: { type: 'string' }, hero_subtitle: { type: 'string' },
                   hero_tags: { type: 'string', description: 'JSON-масив тегів' },
                   hero_location: { type: 'string' }, hero_year: { type: 'string' },
@@ -183,6 +196,16 @@ export const swaggerSpec = {
                 type: 'object',
                 properties: {
                   title: { type: 'string' }, slug: { type: 'string' }, status: { type: 'string', enum: ['draft', 'published'] },
+                  hero_image_url: {
+                    type: 'string',
+                    description: 'URL hero зображення (альтернатива hero_image файлу). Якщо передано файл, файл має пріоритет.',
+                    example: 'https://example.com/hero-image.jpg',
+                  },
+                  og_image_url: {
+                    type: 'string',
+                    description: 'URL OG зображення для соціальних мереж (альтернатива og_image файлу). Якщо передано файл, файл має пріоритет.',
+                    example: 'https://example.com/og-image.jpg',
+                  },
                   hero_title: { type: 'string' }, hero_subtitle: { type: 'string' },
                   hero_tags: { type: 'string', description: 'JSON-масив тегів' },
                   hero_location: { type: 'string' }, hero_year: { type: 'string' },
@@ -197,7 +220,10 @@ export const swaggerSpec = {
                 type: 'object',
                 properties: {
                   title: { type: 'string' }, slug: { type: 'string' }, status: { type: 'string', enum: ['draft', 'published'] },
-                  hero_image: { type: 'string', format: 'binary', description: 'Нове головне зображення' },
+                  hero_image: { type: 'string', format: 'binary', description: 'Нове головне зображення (JPEG/PNG, макс 5MB). Має пріоритет над hero_image_url.' },
+                  og_image: { type: 'string', format: 'binary', description: 'Нове OG зображення (JPEG/PNG, макс 5MB). Має пріоритет над og_image_url.' },
+                  hero_image_url: { type: 'string', description: 'URL hero зображення (використовується, якщо не передано файл)' },
+                  og_image_url: { type: 'string', description: 'URL OG зображення (використовується, якщо не передано файл)' },
                   hero_title: { type: 'string' }, hero_subtitle: { type: 'string' },
                   hero_tags: { type: 'string' }, hero_location: { type: 'string' }, hero_year: { type: 'string' },
                   seo_title: { type: 'string' }, seo_description: { type: 'string' },

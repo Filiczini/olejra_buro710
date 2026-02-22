@@ -17,6 +17,8 @@ export interface PostBody {
   hero_year?: string;
   gallery_images?: string;
   blocks?: string;
+  hero_image_url?: string;
+  og_image_url?: string;
 }
 
 export interface ValidationError {
