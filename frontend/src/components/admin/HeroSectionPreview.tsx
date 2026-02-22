@@ -30,7 +30,7 @@ export default function HeroSectionPreview({ data, existingImageUrl }: HeroSecti
 
         {imageUrl && (
           <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-            {data.tags.length > 0 && (
+            {Array.isArray(data.tags) && data.tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-3">
                 {data.tags.slice(0, 3).map((tag, index) => (
                   <span
@@ -86,11 +86,14 @@ export default function HeroSectionPreview({ data, existingImageUrl }: HeroSecti
         )}
       </div>
 
-      {!data.title && !data.heroImage && !data.tags.length && !data.location && (
-        <p className="text-zinc-400 text-sm text-center py-4">
-          Заповніть форму для перегляду прев'ю
-        </p>
-      )}
+      {!data.title &&
+        !data.heroImage &&
+        !(Array.isArray(data.tags) && data.tags.length) &&
+        !data.location && (
+          <p className="text-zinc-400 text-sm text-center py-4">
+            Заповніть форму для перегляду прев'ю
+          </p>
+        )}
     </div>
   );
 }

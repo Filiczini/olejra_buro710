@@ -33,7 +33,7 @@ export default function PostHeroPreview({ data }: PostHeroPreviewProps) {
 
         {imageUrl && (
           <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
-            {data.hero_tags && data.hero_tags.length > 0 && (
+            {Array.isArray(data.hero_tags) && data.hero_tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-4">
                 {data.hero_tags.slice(0, 3).map((tag, index) => (
                   <span
@@ -72,11 +72,14 @@ export default function PostHeroPreview({ data }: PostHeroPreviewProps) {
         )}
       </div>
 
-      {!data.hero_title && !data.heroImage && !data.hero_image_url && !data.hero_tags?.length && (
-        <p className="text-zinc-400 text-sm text-center py-4">
-          Заповніть форму для перегляду прев'ю
-        </p>
-      )}
+      {!data.hero_title &&
+        !data.heroImage &&
+        !data.hero_image_url &&
+        !(Array.isArray(data.hero_tags) && data.hero_tags.length) && (
+          <p className="text-zinc-400 text-sm text-center py-4">
+            Заповніть форму для перегляду прев'ю
+          </p>
+        )}
     </div>
   );
 }
