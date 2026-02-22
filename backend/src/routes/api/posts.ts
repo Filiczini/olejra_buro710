@@ -1,0 +1,353 @@
+/**
+ * External API v1 Routes - Posts
+ * CRUD operations for posts, protected by API Key authentication
+ * Supports both JSON and multipart/form-data requests
+ */
+import { Router } from 'express';
+import multer from 'multer';
+import { memoryStorage } from 'multer';
+import type { FileFilterCallback } from 'multer';
+import { apiKeyMiddleware } from '../../middleware/apiKey';
+import { postService } from '../../services/postService';
+import { storageService } from '../../services/storageService';
+import type { BlockType, BlockData } from '../../types/block';
+import type { PostStatus } from '../../types/post';
+import { validatePostInput, parseJsonField, type PostBody } from './posts.validation';
+
+const router = Router();
+
+// ============================================================================
+// Multer Configuration for API uploads
+// ============================================================================
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_MIMETYPES = ['image/jpeg', 'image/png', 'image/jpg'];
+
+const fileFilter = (_req: unknown, file: Express.Multer.File, cb: FileFilterCallback) => {
+  if (ALLOWED_MIMETYPES.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only JPEG and PNG files are allowed'));
+  }
+};
+
+const upload = multer({
+  storage: memoryStorage(),
+  limits: { fileSize: MAX_FILE_SIZE },
+  fileFilter,
+});
+
+const uploadPostMedia = upload.fields([
+  { name: 'hero_image', maxCount: 1 },
+  { name: 'gallery_images', maxCount: 20 },
+]);
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+interface ProcessedFiles {
+  heroImageUrl?: string;
+  galleryUrls: string[];
+}
+
+const processUploadedFiles = async (
+  files: { [fieldname: string]: Express.Multer.File[] } | undefined,
+  existingGallery: string[] = []
+): Promise<ProcessedFiles> => {
+  const result: ProcessedFiles = { galleryUrls: existingGallery };
+
+  if (!files) return result;
+
+  if (files['hero_image']?.[0]) {
+    result.heroImageUrl = await storageService.uploadImage(files['hero_image'][0], 'posts');
+  }
+
+  const galleryFiles = files['gallery_images'] || [];
+  const newGalleryUrls: string[] = [];
+
+  for (const file of galleryFiles) {
+    const url = await storageService.uploadImage(file, 'posts');
+    newGalleryUrls.push(url);
+  }
+
+  result.galleryUrls = [...existingGallery, ...newGalleryUrls];
+
+  return result;
+};
+
+interface ProcessedBlock {
+  id?: string;
+  type: BlockType;
+  data: Record<string, unknown>;
+  sort_order: number;
+}
+
+const processBlocks = (blocksJson: string | undefined): ProcessedBlock[] => {
+  if (!blocksJson) return [];
+
+  const parsed = parseJsonField<ProcessedBlock[]>(blocksJson, 'blocks');
+  if (!parsed) return [];
+
+  return parsed.map((block, index) => {
+    const data = { ...block.data };
+    delete data._hasNewImage;
+
+    return {
+      id: block.id,
+      type: block.type,
+      data,
+      sort_order: block.sort_order ?? index,
+    };
+  });
+};
+
+// ============================================================================
+// Routes - All protected by API Key
+// ============================================================================
+
+router.use(apiKeyMiddleware);
+
+/**
+ * GET /api/v1/posts
+ * List posts with pagination and optional status filter
+ */
+router.get('/', async (req, res) => {
+  try {
+    const { page, limit, status, search } = req.query;
+
+    const result = await postService.getAll({
+      page: page ? parseInt(page as string, 10) : undefined,
+      limit: limit ? parseInt(limit as string, 10) : undefined,
+      status: status as PostStatus,
+      search: search as string,
+    });
+
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    res.status(500).json({ error: 'Failed to fetch posts' });
+  }
+});
+
+/**
+ * GET /api/v1/posts/:id
+ * Get a single post by ID with all blocks
+ */
+router.get('/:id', async (req, res) => {
+  try {
+    const id = req.params.id as string;
+    const result = await postService.getById(id);
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching post:', error);
+    res.status(404).json({ error: 'Post not found' });
+  }
+});
+
+/**
+ * POST /api/v1/posts
+ * Create a new post (JSON or multipart/form-data)
+ */
+router.post('/', uploadPostMedia, async (req, res) => {
+  try {
+    const body = req.body as PostBody;
+    const {
+      title,
+      slug,
+      status,
+      seo_title,
+      seo_description,
+      hero_title,
+      hero_subtitle,
+      hero_tags,
+      hero_location,
+      hero_year,
+      gallery_images,
+      blocks,
+    } = body;
+
+    const validationErrors = validatePostInput(body, true);
+    if (validationErrors.length > 0) {
+      return res.status(400).json({ errors: validationErrors });
+    }
+
+    if (!title) {
+      return res.status(400).json({ error: 'Title is required' });
+    }
+
+    // Parse JSON fields
+    let parsedHeroTags: string[] = [];
+    let parsedBlocks: ProcessedBlock[] = [];
+    let existingGallery: string[] = [];
+
+    try {
+      parsedHeroTags = parseJsonField<string[]>(hero_tags, 'hero_tags') || [];
+      parsedBlocks = processBlocks(blocks);
+      existingGallery = parseJsonField<string[]>(gallery_images, 'gallery_images') || [];
+    } catch (e) {
+      return res.status(400).json({ error: (e as Error).message });
+    }
+
+    // Process uploaded files
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+    const processedFiles = await processUploadedFiles(files, existingGallery);
+
+    // Create post
+    const post = await postService.create({
+      title,
+      slug: slug || postService.generateSlug(title),
+      status,
+      seo_title,
+      seo_description,
+      hero_image_url: processedFiles.heroImageUrl,
+      hero_title,
+      hero_subtitle,
+      hero_tags: parsedHeroTags,
+      hero_location,
+      hero_year,
+      gallery_images: processedFiles.galleryUrls,
+      blocks: parsedBlocks as unknown as {
+        type: BlockType;
+        data: BlockData;
+        sort_order?: number;
+      }[],
+    });
+
+    res.status(201).json(post);
+  } catch (error) {
+    console.error('Error creating post:', error);
+    res.status(500).json({ error: 'Failed to create post' });
+  }
+});
+
+/**
+ * PUT /api/v1/posts/:id
+ * Update an existing post (JSON or multipart/form-data)
+ */
+router.put('/:id', uploadPostMedia, async (req, res) => {
+  try {
+    const id = req.params.id as string;
+    const body = req.body as PostBody;
+    const {
+      title,
+      slug,
+      status,
+      seo_title,
+      seo_description,
+      hero_title,
+      hero_subtitle,
+      hero_tags,
+      hero_location,
+      hero_year,
+      gallery_images,
+      blocks,
+    } = body;
+
+    const validationErrors = validatePostInput(body, false);
+    if (validationErrors.length > 0) {
+      return res.status(400).json({ errors: validationErrors });
+    }
+
+    // Get existing post
+    let existing;
+    try {
+      existing = await postService.getById(id);
+    } catch {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    // Parse JSON fields
+    let parsedHeroTags: string[] | undefined;
+    let parsedBlocks: ProcessedBlock[] | undefined;
+    let existingGallery: string[];
+
+    try {
+      if (hero_tags !== undefined) {
+        parsedHeroTags = parseJsonField<string[]>(hero_tags, 'hero_tags') || [];
+      }
+      if (blocks !== undefined) {
+        parsedBlocks = processBlocks(blocks);
+      }
+      existingGallery =
+        gallery_images !== undefined
+          ? parseJsonField<string[]>(gallery_images, 'gallery_images') || []
+          : existing.post.gallery_images || [];
+    } catch (e) {
+      return res.status(400).json({ error: (e as Error).message });
+    }
+
+    // Process uploaded files
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+
+    let heroImageUrl = existing.post.hero_image_url;
+    if (files?.['hero_image']?.[0]) {
+      if (heroImageUrl) {
+        await storageService.deleteImage(heroImageUrl);
+      }
+      heroImageUrl = await storageService.uploadImage(files['hero_image'][0], 'posts');
+    }
+
+    const galleryFiles = files?.['gallery_images'] || [];
+    const newGalleryUrls: string[] = [];
+    for (const file of galleryFiles) {
+      newGalleryUrls.push(await storageService.uploadImage(file, 'posts'));
+    }
+
+    const finalGalleryImages = [...existingGallery, ...newGalleryUrls];
+
+    // Update post
+    const post = await postService.update(id, {
+      title,
+      slug,
+      status,
+      seo_title,
+      seo_description,
+      hero_image_url: heroImageUrl,
+      hero_title,
+      hero_subtitle,
+      hero_tags: parsedHeroTags,
+      hero_location,
+      hero_year,
+      gallery_images: finalGalleryImages,
+      blocks: parsedBlocks as unknown as {
+        id?: string;
+        type: BlockType;
+        data: BlockData;
+        sort_order: number;
+      }[],
+    });
+
+    res.json(post);
+  } catch (error) {
+    console.error('Error updating post:', error);
+    if ((error as Error).message === 'Slug already exists') {
+      return res.status(400).json({ error: 'Slug already exists' });
+    }
+    res.status(500).json({ error: 'Failed to update post' });
+  }
+});
+
+/**
+ * DELETE /api/v1/posts/:id
+ * Delete a post by ID
+ */
+router.delete('/:id', async (req, res) => {
+  try {
+    const id = req.params.id as string;
+
+    try {
+      await postService.getById(id);
+    } catch {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    await postService.delete(id);
+    res.json({ message: 'Post deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting post:', error);
+    res.status(500).json({ error: 'Failed to delete post' });
+  }
+});
+
+export default router;
