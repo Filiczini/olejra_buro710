@@ -39,6 +39,7 @@ const upload = multer({
 
 const uploadPostMedia = upload.fields([
   { name: 'hero_image', maxCount: 1 },
+  { name: 'og_image', maxCount: 1 },
   { name: 'gallery_images', maxCount: 20 },
 ]);
 
@@ -46,23 +47,50 @@ const uploadPostMedia = upload.fields([
 // Helper Functions
 // ============================================================================
 
-interface ProcessedFiles {
+export interface ProcessedFiles {
   heroImageUrl?: string;
+  ogImageUrl?: string;
   galleryUrls: string[];
 }
 
-const processUploadedFiles = async (
+export interface UrlOptions {
+  hero_image_url?: string;
+  og_image_url?: string;
+}
+
+export const processUploadedFiles = async (
   files: { [fieldname: string]: Express.Multer.File[] } | undefined,
-  existingGallery: string[] = []
+  existingGallery: string[] = [],
+  urls: UrlOptions = {}
 ): Promise<ProcessedFiles> => {
   const result: ProcessedFiles = { galleryUrls: existingGallery };
 
-  if (!files) return result;
-
-  if (files['hero_image']?.[0]) {
-    result.heroImageUrl = await storageService.uploadImage(files['hero_image'][0], 'posts');
+  if (!files) {
+    // If no files, use URLs if provided
+    if (urls.hero_image_url) {
+      result.heroImageUrl = urls.hero_image_url;
+    }
+    if (urls.og_image_url) {
+      result.ogImageUrl = urls.og_image_url;
+    }
+    return result;
   }
 
+  // Hero image: file takes priority over URL
+  if (files['hero_image']?.[0]) {
+    result.heroImageUrl = await storageService.uploadImage(files['hero_image'][0], 'posts');
+  } else if (urls.hero_image_url) {
+    result.heroImageUrl = urls.hero_image_url;
+  }
+
+  // OG image: file takes priority over URL
+  if (files['og_image']?.[0]) {
+    result.ogImageUrl = await storageService.uploadImage(files['og_image'][0], 'posts');
+  } else if (urls.og_image_url) {
+    result.ogImageUrl = urls.og_image_url;
+  }
+
+  // Gallery (existing logic)
   const galleryFiles = files['gallery_images'] || [];
   const newGalleryUrls: string[] = [];
 
@@ -165,6 +193,8 @@ router.post('/', uploadPostMedia, async (req, res) => {
       hero_year,
       gallery_images,
       blocks,
+      hero_image_url,
+      og_image_url,
     } = body;
 
     const validationErrors = validatePostInput(body, true);
@@ -191,7 +221,10 @@ router.post('/', uploadPostMedia, async (req, res) => {
 
     // Process uploaded files
     const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
-    const processedFiles = await processUploadedFiles(files, existingGallery);
+    const processedFiles = await processUploadedFiles(files, existingGallery, {
+      hero_image_url,
+      og_image_url,
+    });
 
     // Create post
     const post = await postService.create({
@@ -201,6 +234,7 @@ router.post('/', uploadPostMedia, async (req, res) => {
       seo_title,
       seo_description,
       hero_image_url: processedFiles.heroImageUrl,
+      og_image_url: processedFiles.ogImageUrl,
       hero_title,
       hero_subtitle,
       hero_tags: parsedHeroTags,
@@ -242,6 +276,8 @@ router.put('/:id', uploadPostMedia, async (req, res) => {
       hero_year,
       gallery_images,
       blocks,
+      hero_image_url: heroImageUrlFromBody,
+      og_image_url: ogImageUrlFromBody,
     } = body;
 
     const validationErrors = validatePostInput(body, false);
@@ -280,12 +316,26 @@ router.put('/:id', uploadPostMedia, async (req, res) => {
     // Process uploaded files
     const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
 
+    // Hero image: file takes priority over URL
     let heroImageUrl = existing.post.hero_image_url;
     if (files?.['hero_image']?.[0]) {
       if (heroImageUrl) {
         await storageService.deleteImage(heroImageUrl);
       }
       heroImageUrl = await storageService.uploadImage(files['hero_image'][0], 'posts');
+    } else if (heroImageUrlFromBody !== undefined) {
+      heroImageUrl = heroImageUrlFromBody || undefined;
+    }
+
+    // OG image: file takes priority over URL
+    let ogImageUrl = existing.post.og_image_url;
+    if (files?.['og_image']?.[0]) {
+      if (ogImageUrl) {
+        await storageService.deleteImage(ogImageUrl);
+      }
+      ogImageUrl = await storageService.uploadImage(files['og_image'][0], 'posts');
+    } else if (ogImageUrlFromBody !== undefined) {
+      ogImageUrl = ogImageUrlFromBody || undefined;
     }
 
     const galleryFiles = files?.['gallery_images'] || [];
@@ -304,6 +354,7 @@ router.put('/:id', uploadPostMedia, async (req, res) => {
       seo_title,
       seo_description,
       hero_image_url: heroImageUrl,
+      og_image_url: ogImageUrl,
       hero_title,
       hero_subtitle,
       hero_tags: parsedHeroTags,
