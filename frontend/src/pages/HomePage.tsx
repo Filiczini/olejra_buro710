@@ -2,7 +2,6 @@ import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import HeroSlider from '../components/sections/HeroSlider';
 import AboutSection from '../components/sections/AboutSection';
-import FeaturedProjectsSection from '../components/sections/FeaturedProjectsSection';
 import FeaturedPostsSection from '../components/sections/FeaturedPostsSection';
 import PhilosophySection from '../components/sections/PhilosophySection';
 import ProcessSection from '../components/sections/ProcessSection';
@@ -16,7 +15,6 @@ export default function HomePage() {
       <main>
         <HeroSlider />
         <AboutSection />
-        <FeaturedProjectsSection />
         <FeaturedPostsSection />
         <PhilosophySection />
         <ProcessSection />
