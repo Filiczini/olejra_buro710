@@ -269,7 +269,7 @@ export default function EditPostPage() {
 
       navigate('/admin/posts');
     } catch (error) {
-      console.error('Error saving post:', error);
+      logger.error('Error saving post:', error);
       setErrors({ submit: 'Помилка збереження посту' });
     } finally {
       setSaving(false);
