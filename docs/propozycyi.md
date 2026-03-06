@@ -1,66 +1,149 @@
 # Пропозиції покращень проєкту Buro 710
 
-> Аналіз оновлено: 2026-02-19
-> Версія: 3.0
-> Попередній аналіз: 2026-02-16
+> Останнє сканування: 2026-02-19
+> Версія: 4.0
 
 ---
 
 ## Зміст
 
-1. [Виконані завдання](#виконані-завдання)
-2. [Актуальні проблеми](#актуальні-проблеми)
-3. [Поступовий план виправнення](#поступовий-план-виправнення)
-4. [Технічні деталі](#технічні-деталі)
+1. [Огляд проєкту](#огляд-проєкту)
+2. [Поточний стан](#поточний-стан)
+3. [Проблеми та рішення](#проблеми-та-рішення)
+4. [План покращень](#план-покращень)
+5. [Технічні деталі](#технічні-деталі)
 
 ---
 
-## Виконані завдання
+## Огляд проєкту
 
-### Початкові (до плану)
+**Buro 710** — портфоліо сайт для архітектурної студії.
 
-| Завдання | Статус | Дата |
-|----------|--------|------|
-| Міграція структури (`src/` → `frontend/` + `backend/`) | ✅ Виконано | - |
-| TypeScript strict mode (frontend + backend) | ✅ Виконано | - |
-| GalleryUploader.tsx — виправлено useEffect pattern | ✅ Виконано | - |
-| SingleImageUpload.tsx — виправлено hoisting problem | ✅ Виконано | - |
-| .env файли додано в .gitignore | ✅ Виконано | - |
+### Технологічний стек
 
-### Фаза 1: Інфраструктура
+| Компонент | Технологія |
+|-----------|------------|
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS 4 |
+| Backend | Node.js, Express 5, Supabase (PostgreSQL) |
+| Auth | JWT tokens |
+| Deploy | Vercel (frontend) + Docker (backend) |
+| Language | Ukrainian |
 
-| Завдання | Статус | Коміт |
-|----------|--------|-------|
-| ESLint 9 flat config (`eslint.config.js`) | ✅ Виконано | `e2b7157` |
-| Typed Express Request (`express.d.ts`) | ✅ Виконано | `bb4cd2d` |
-| Виправлено `(req as any).user` → `req.user` | ✅ Виконано | `bb4cd2d` |
-| Prettier + eslint-config-prettier | ✅ Виконано | `55c63ab` |
-| Husky + lint-staged | ✅ Виконано | `dd5406f` |
+### Структура
 
-### Фаза 2: Якість коду
-
-| Завдання | Статус | Коміт |
-|----------|--------|-------|
-| Logger.ts (frontend + backend) | ✅ Виконано | `bbc59c4` |
-| Error Boundary компонент | ✅ Виконано | `bbc59c4`, `3238127` |
-| TelegramService escape fix | ✅ Виконано | `bbc59c4` |
-| Форматування backend prettier | ✅ Виконано | `3f13141` |
-
-### Фаза 3: Тестування
-
-| Завдання | Статус | Коміт |
-|----------|--------|-------|
-| Vitest + testing-library setup | ✅ Виконано | `9d9b25a` |
-| Button.test.tsx (5 тестів) | ✅ Виконано | `9d9b25a` |
-| logger.test.ts (4 тести) | ✅ Виконано | `9d9b25a` |
+```
+buro710/
+├── frontend/              # React + Vite + Tailwind
+│   ├── src/
+│   │   ├── api/           # Axios client
+│   │   ├── components/    # React components
+│   │   ├── hooks/         # Custom hooks
+│   │   ├── layouts/       # Page layouts
+│   │   ├── lib/           # Utilities (logger)
+│   │   ├── pages/         # Page components
+│   │   ├── services/      # API service layer
+│   │   ├── test/          # Test setup
+│   │   └── types/         # TypeScript types
+│   ├── eslint.config.js   # ESLint 9 flat config
+│   ├── vitest.config.ts   # Vitest config
+│   └── .prettierrc        # Prettier config
+│
+├── backend/               # Express + Supabase
+│   ├── src/
+│   │   ├── config/        # Supabase, JWT config
+│   │   ├── lib/           # Utilities (logger)
+│   │   ├── middleware/    # Auth, multer
+│   │   ├── routes/        # API routes
+│   │   ├── services/      # Business logic
+│   │   └── types/         # TypeScript types
+│   └── .prettierrc        # Prettier config
+│
+├── .husky/                # Git hooks
+├── docs/                  # Documentation
+├── scripts/               # Utility scripts
+└── package.json           # Workspaces root
+```
 
 ---
 
-## Актуальні проблеми
+## Поточний стан
 
-### 🟡 Середньої пріоритетності
+### ✅ Реалізовано
 
-#### 1. console.log/error (частково виправлено)
+| Компонент | Статус | Деталі |
+|-----------|--------|--------|
+| ESLint 9 config | ✅ | Flat config, React hooks rules |
+| TypeScript strict mode | ✅ | Frontend + Backend |
+| Prettier | ✅ | Форматування коду |
+| Husky + lint-staged | ✅ | Pre-commit hooks |
+| Typed Express Request | ✅ | `AuthenticatedUser` interface |
+| Error Boundary | ✅ | Обробка помилок рендерингу |
+| Logger | ✅ | Frontend + Backend |
+| Vitest | ✅ | 9 тестів passing |
+| Docker config | ✅ | docker-compose.yml |
+
+### 📊 Метрики
+
+| Метрика | Значення |
+|---------|----------|
+| TypeScript файлів | ~100 |
+| ESLint errors | 1 (unused variable) |
+| ESLint warnings | 7 (useEffect deps) |
+| Тести | 9 passing |
+| console.* використань | ~200 |
+
+### ⚠️ Відкриті питання
+
+1. **ESLint error:** `originalEnv` unused в `logger.test.ts`
+2. **ESLint warnings:** Missing useEffect dependencies (7 файлів)
+3. **Console statements:** ~200 випадків (частково в seed scripts)
+
+---
+
+## Проблеми та рішення
+
+### 🟡 Середній пріоритет
+
+#### 1. ESLint error в тесті
+
+**Файл:** `frontend/src/lib/__tests__/logger.test.ts:5`
+
+```typescript
+// Проблема:
+const originalEnv = import.meta.env.DEV; // never used
+
+// Рішення: видалити змінну
+```
+
+---
+
+#### 2. useEffect dependencies warnings (7 файлів)
+
+**Файли:**
+- `frontend/src/pages/AllProjectsPage.tsx`
+- `frontend/src/pages/PublicPostPage.tsx`
+- `frontend/src/pages/admin/ActivityLogPage.tsx`
+- `frontend/src/pages/admin/DashboardPage.tsx`
+- `frontend/src/pages/admin/EditPostPage.tsx`
+- `frontend/src/pages/admin/PostsPage.tsx` (2 warnings)
+
+**Рішення:**
+1. Обгорнути функції в `useCallback`
+2. Або додати eslint-disable коментарі якщо функція повинна викликатись тільки при mount
+
+---
+
+#### 3. Console statements (~200)
+
+**Розподіл:**
+| Категорія | Кількість | Дія |
+|-----------|-----------|-----|
+| Seed scripts | ~80 | Залишити (CLI output) |
+| Backend routes | ~25 | Замінити на logger |
+| Backend services | ~10 | Частково виправлено |
+| Frontend pages | ~15 | Замінити на logger |
+| Tests | ~5 | Залишити (mock assertions) |
+| Logger implementation | ~5 | Залишити |
 
 **Виправлено:**
 - `backend/src/routes/auth.ts`
@@ -68,176 +151,179 @@
 - `backend/src/services/projectService.ts`
 - `backend/src/services/telegramService.ts`
 
-**Залишилось:**
-- `backend/src/routes/portfolio.ts`
-- `backend/src/routes/posts.ts`
-- `backend/src/routes/contact.ts`
-- `backend/src/routes/activityLogs.ts`
-- Frontend pages/components (~50)
-
-**Рішення**: Поступово замінити на logger за потребою.
-
 ---
 
-### 🟢 Рекомендовані (Фаза 4)
+### 🟢 Низький пріоритет
 
-#### 2. API валідація (Zod)
+#### 4. Відсутність Zod валідації
 
-Немає schema валідації для вхідних даних.
+API не має schema валідації вхідних даних.
 
-**Рішення**:
+**Рішення:**
 ```bash
 npm install zod
 ```
 
-Створити schemas для portfolio, posts, contact.
+Створити schemas для:
+- Portfolio create/update
+- Posts create/update
+- Contact form
 
 ---
 
-#### 3. `noUncheckedIndexedAccess` в tsconfig
+#### 5. Неповне покриття тестами
 
-Додає безпечність при роботі з масивами.
+**Поточний стан:**
+- `Button.test.tsx` — 5 тестів ✅
+- `logger.test.ts` — 4 тести ✅
+
+**Рекомендовано додати:**
+- `Input.test.tsx`
+- `ProjectCard.test.tsx`
+- `projectService.test.ts` (backend)
+- Auth routes integration tests
 
 ---
 
-#### 4. OpenAPI документація
+#### 6. noUncheckedIndexedAccess
 
-Автоматична документація API.
+TypeScript опція для безпечної роботи з масивами.
+
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "noUncheckedIndexedAccess": true
+  }
+}
+```
 
 ---
 
-## Поступовий план виправнення
+## План покращень
 
-### Фаза 1: Інфраструктура ✅ ЗАВЕРШЕНО
+### Фаза 1: Quick Fixes (30 хв)
 
-| ID | Завдання | Пріоритет | Оцінка | Статус |
-|----|----------|-----------|--------|--------|
-| 1.1 | Створити `eslint.config.js` | 🔴 P0 | 30m | ✅ |
-| 1.2 | Typed Express Request (`express.d.ts`) | 🔴 P0 | 30m | ✅ |
-| 1.3 | Виправити `(req as any).user` → `req.user` | 🔴 P0 | 15m | ✅ |
-| 1.4 | Додати prettier + eslint-config-prettier | 🟡 P1 | 20m | ✅ |
-| 1.5 | Налаштувати husky + lint-staged | 🟡 P1 | 20m | ✅ |
+| ID | Завдання | Пріоритет | Статус |
+|----|----------|-----------|--------|
+| 1.1 | Видалити unused `originalEnv` з logger.test.ts | 🟡 | ⬜ |
+| 1.2 | Виправити useEffect deps warnings | 🟡 | ⬜ |
+| 1.3 | Замінити console.* на logger в routes | 🟡 | ⬜ |
 
-### Фаза 2: Якість коду ✅ ЗАВЕРШЕНО
+### Фаза 2: Валідація (2-3 години)
 
-| ID | Завдання | Пріоритет | Оцінка | Статус |
-|----|----------|-----------|--------|--------|
-| 2.1 | Створити `logger.ts` (frontend + backend) | 🟡 P1 | 1.5h | ✅ |
-| 2.2 | Замінити console.* на logger | 🟡 P1 | 1h | ✅ (частково) |
-| 2.3 | Додати Error Boundary | 🟡 P1 | 30m | ✅ |
-| 2.4 | Виправити escape символи в telegramService | 🟢 P2 | 15m | ✅ |
+| ID | Завдання | Пріоритет | Статус |
+|----|----------|-----------|--------|
+| 2.1 | Встановити Zod | 🟢 | ⬜ |
+| 2.2 | Schema для portfolio routes | 🟢 | ⬜ |
+| 2.3 | Schema для posts routes | 🟢 | ⬜ |
+| 2.4 | Schema для contact form | 🟢 | ⬜ |
 
-### Фаза 3: Тестування ✅ ЗАВЕРШЕНО (мінімальний набір)
+### Фаза 3: Тести (3-4 години)
 
-| ID | Завдання | Пріоритет | Оцінка | Статус |
-|----|----------|-----------|--------|--------|
-| 3.1 | Встановити Vitest + testing-library | 🟡 P1 | 30m | ✅ |
-| 3.2 | Unit тести: authService, projectService | 🟡 P1 | 1.5h | ⬜ |
-| 3.3 | Component тести: Button, Input, ProjectCard | 🟢 P2 | 1.5h | ✅ (Button) |
-| 3.4 | Integration тести: auth routes | 🟢 P2 | 1h | ⬜ |
+| ID | Завдання | Пріоритет | Статус |
+|----|----------|-----------|--------|
+| 3.1 | Input.test.tsx | 🟢 | ⬜ |
+| 3.2 | ProjectCard.test.tsx | 🟢 | ⬜ |
+| 3.3 | Backend services tests | 🟢 | ⬜ |
+| 3.4 | Auth integration tests | 🟢 | ⬜ |
 
-### Фаза 4: Покращення ⬜ ОПЦІОНАЛЬНО
+### Фаза 4: Оптимізація (опціонально)
 
-| ID | Завдання | Пріоритет | Оцінка | Статус |
-|----|----------|-----------|--------|--------|
-| 4.1 | API валідація з Zod | 🟢 P2 | 2h | ⬜ |
-| 4.2 | `noUncheckedIndexedAccess` в tsconfig | 🟢 P2 | 30m | ⬜ |
-| 4.3 | OpenAPI документація | 🟢 P2 | 1.5h | ⬜ |
+| ID | Завдання | Пріоритет | Статус |
+|----|----------|-----------|--------|
+| 4.1 | noUncheckedIndexedAccess | 🟢 | ⬜ |
+| 4.2 | API documentation (OpenAPI) | 🟢 | ⬜ |
+| 4.3 | Bundle analysis | 🟢 | ⬜ |
 
 ---
 
 ## Технічні деталі
-
-### Структура проєкту
-
-```
-buro710/
-├── .husky/              # Git hooks
-├── frontend/            # React + Vite + Tailwind
-│   ├── src/
-│   │   ├── api/
-│   │   ├── components/
-│   │   │   └── ui/__tests__/  # Тести компонентів
-│   │   ├── hooks/
-│   │   ├── lib/             # Logger
-│   │   │   └── __tests__/
-│   │   ├── pages/
-│   │   ├── services/
-│   │   ├── test/            # Test setup
-│   │   └── types/
-│   ├── .prettierrc
-│   ├── eslint.config.js
-│   ├── vitest.config.ts
-│   └── package.json
-├── backend/             # Express + Supabase
-│   ├── src/
-│   │   ├── config/
-│   │   ├── lib/            # Logger
-│   │   ├── middleware/
-│   │   ├── routes/
-│   │   ├── services/
-│   │   └── types/
-│   ├── .prettierrc
-│   └── package.json
-└── package.json         # Workspaces root + lint-staged
-```
 
 ### Команди
 
 ```bash
 # Development
 npm run dev              # Frontend + Backend
-npm run dev:frontend     # Frontend only
-npm run dev:backend      # Backend only
+npm run dev:frontend     # Frontend only (port 5173)
+npm run dev:backend      # Backend only (port 3000)
 
 # Build
 npm run build            # TypeScript check + Vite build
+npm run preview          # Preview production build
 
 # Quality
-npm run lint             # ESLint (0 errors, 7 warnings)
-npm run format           # Prettier format all
-
-# Testing
+npm run lint             # ESLint (1 error, 7 warnings)
+npm run format           # Prettier format frontend
 npm run test             # Vitest watch mode
 npm run test:run         # Vitest run once
 
 # Database
 npm run seed             # Seed projects
 npm run seed:posts       # Seed posts
-npm run seed:admin       # Seed admin user
+npm run seed:admin       # Create admin user
+npm run seed:clean       # Clear projects
+npm run migrate:projects # Run migrations
 ```
 
-### Нові файли (додані під час виконання плану)
+### Налаштування
 
-| Файл | Опис |
-|------|------|
-| `frontend/eslint.config.js` | ESLint 9 flat config |
-| `frontend/.prettierrc` | Prettier config |
-| `frontend/.prettierignore` | Prettier ignore |
-| `frontend/vitest.config.ts` | Vitest config |
-| `frontend/src/lib/logger.ts` | Frontend logger |
-| `frontend/src/test/setup.ts` | Test setup |
-| `frontend/src/components/ErrorBoundary.tsx` | Error Boundary |
-| `frontend/src/components/ui/__tests__/Button.test.tsx` | Button tests |
-| `frontend/src/lib/__tests__/logger.test.ts` | Logger tests |
-| `backend/src/lib/logger.ts` | Backend logger |
-| `backend/src/types/express.d.ts` | Typed Express Request |
-| `backend/.prettierrc` | Prettier config |
-| `backend/.prettierignore` | Prettier ignore |
-| `.husky/pre-commit` | Pre-commit hook |
+**ESLint (frontend/eslint.config.js)**
+- TypeScript recommended rules
+- React Hooks rules
+- Prettier compatibility
+
+**TypeScript**
+- Strict mode enabled
+- ES2022 target
+- Module: ESNext
+
+**Prettier**
+- Single quotes
+- Semi: true
+- Tab width: 2
+- Trailing comma: es5
+
+### Змінні середовища
+
+**Frontend (.env)**
+```
+VITE_API_URL=http://localhost:3000/api
+```
+
+**Backend (.env)**
+```
+DATABASE_URL=supabase_connection_string
+JWT_SECRET=your_secret_here
+TELEGRAM_BOT_TOKEN=optional
+TELEGRAM_CHAT_ID=optional
+```
+
+### API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /api/auth/login | Login |
+| GET | /api/auth/me | Current user |
+| GET | /api/portfolio | List projects |
+| POST | /api/portfolio | Create project (auth) |
+| PUT | /api/portfolio/:id | Update project (auth) |
+| DELETE | /api/portfolio/:id | Delete project (auth) |
+| GET | /api/posts | List posts |
+| GET | /api/posts/:slug | Get post by slug |
+| POST | /api/posts | Create post (auth) |
+| POST | /api/contact | Send contact form |
 
 ---
 
-## Статистика виконання
+## Історія змін
 
-| Метрика | Значення |
-|---------|----------|
-| Фаз завершено | 3 / 4 |
-| Завдань виконано | 13 / 17 |
-| Комітів | 10+ |
-| Тестів | 9 passing |
-| ESLint errors | 0 (was 6+) |
+| Дата | Версія | Зміни |
+|------|--------|-------|
+| 2026-02-19 | 4.0 | Повний рескан проєкту, нова структура документа |
+| 2026-02-19 | 3.0 | Завершено Фази 1-3 |
+| 2026-02-16 | 1.0 | Початковий аналіз |
 
 ---
 
-*Звіт оновлено 2026-02-19 після виконання Фаз 1-3.*
+*Документ згенеровано на основі сканування кодової бази.*
