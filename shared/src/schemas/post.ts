@@ -29,7 +29,10 @@ export const postCreateSchema = z.object({
     .string()
     .max(300, 'Hero subtitle не може бути довшим за 300 символів')
     .optional(),
-  hero_tags: z.array(z.string()).max(15, 'Максимум 15 тегів').optional(),
+  hero_tags: z
+    .array(z.string().max(20, 'Тег не може бути довшим за 20 символів'))
+    .max(15, 'Максимум 15 тегів')
+    .optional(),
   hero_location: z.string().max(200).optional(),
   hero_year: z.string().max(20).optional(),
   blocks: z.array(blockSchema).optional(),
