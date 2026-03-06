@@ -1,0 +1,106 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Commands
+
+All commands are run from the monorepo root unless otherwise noted.
+
+### Development
+```bash
+npm run dev              # Start frontend (port 5173) + backend (port 3000) concurrently
+npm run dev:frontend     # Frontend only
+npm run dev:backend      # Backend only (tsx watch)
+```
+
+### Build & Lint
+```bash
+npm run build            # tsc + vite build (frontend)
+npm run lint             # ESLint on frontend
+```
+
+### Testing
+```bash
+# Backend tests (Vitest, node environment)
+cd backend && npm test           # Watch mode
+cd backend && npm run test:run   # Single run
+cd backend && npm run test:coverage
+
+# Frontend tests (Vitest, jsdom environment)
+cd frontend && npm test          # Watch mode
+cd frontend && npm run test:run  # Single run
+```
+
+Tests live at `backend/src/**/*.test.ts` and `frontend/src/**/*.test.{ts,tsx}`.
+
+### Database Utilities (backend workspace)
+```bash
+npm run seed:admin       # Create admin user
+npm run seed             # Seed projects
+npm run seed:posts       # Seed blog posts
+npm run seed:clean       # Clear projects
+npm run seed:clean:posts # Clear posts
+npm run migrate:projects # Run project migrations
+npm run validate:i18n    # Validate i18n keys
+```
+
+### Code Quality
+Pre-commit hooks run automatically via Husky + lint-staged:
+- `frontend/src/**/*.{ts,tsx}` — ESLint fix + Prettier
+- `backend/src/**/*.ts` — Prettier
+
+Manual formatting: `cd frontend && npm run format`
+
+## Architecture
+
+This is an npm workspaces monorepo with `frontend/` and `backend/` packages.
+
+### Backend (`backend/src/`)
+
+Express 5 server with TypeScript, running on port 3000.
+
+**Two API tiers:**
+- **Internal API** (`/api/admin`, `/api/portfolio`, `/api/posts`, `/api/logs`, `/api/contact`) — JWT-authenticated, used by the React admin panel
+- **External API v1** (`/api/v1/posts`) — API key-authenticated (`apiKeyMiddleware`), public-facing CRUD for posts with full OpenAPI docs at `/api/docs`
+
+**Key modules:**
+- `src/index.ts` — Express app entry, route mounting, Swagger UI served inline
+- `src/routes/` — Route handlers; `routes/api/` contains the external v1 API
+- `src/services/` — Business logic (`projectService`, `postService`, `blockService`, `storageService`, `userService`, `activityLogService`, `contactService`, `telegramService`)
+- `src/middleware/` — `auth.ts` (JWT), `apiKey.ts` (API key), `multer.ts` (file uploads), `validate.ts`
+- `src/config/` — Supabase client and JWT config
+- `src/migrations/` — Database migration scripts
+
+**Storage:** Supabase Storage via `storageService`. Images uploaded via multer (memory storage) then pushed to Supabase buckets. File uploads support both binary multipart and URL strings — file takes priority over URL.
+
+**Content blocks:** Posts use a block-based content system (`blockService`). Block types: `text_full`, `text_image`, `image_full`, `post_gallery`, `post_hero`. Blocks have `type`, `data` (JSON), and `sort_order`.
+
+### Frontend (`frontend/src/`)
+
+React 19 + TypeScript + Vite + Tailwind CSS 4, served on port 5173 in dev.
+
+**Routing** (React Router 7, `App.tsx`):
+- Public: `/`, `/projects`, `/project/:id`, `/about`, `/contact`, `/page/:slug`
+- Admin (JWT-protected via `ProtectedRoute`): `/admin/*` — wrapped in `AdminLayout`
+
+**Key modules:**
+- `src/api/client.ts` — Axios instance with JWT interceptor, FormData content-type handling, and 401 auto-redirect
+- `src/services/api.ts` — Service layer (`portfolioService`, `authService`, `postService`, etc.)
+- `src/hooks/useAuth.ts` — Auth state hook
+- `src/components/admin/page-builder/` — Block-based page editor with drag-and-drop (`@dnd-kit`)
+- `src/components/blocks/` — Public-facing block renderers
+- `src/types/` — Shared TypeScript interfaces (mirrors backend DB schema)
+
+**Styling:** Tailwind CSS 4 utility classes only. Color palette: `zinc` as primary grayscale. Icons via `@iconify-icon/react`.
+
+### Database (Supabase/PostgreSQL)
+
+Tables: `projects`, `posts`, `post_blocks`, `users`, `activity_logs`, `contacts`. DB columns use `snake_case`. Supabase RLS policies are in place.
+
+### Production
+
+In production, the backend serves the frontend's built `dist/` as static files. Docker Compose orchestrates frontend + backend containers. See `docs/DEPLOYMENT.md` for VPS deployment details.
+
+## Additional Conventions
+
+Detailed code patterns (imports, component structure, naming, error handling, state management) are documented in `AGENTS.md`.
