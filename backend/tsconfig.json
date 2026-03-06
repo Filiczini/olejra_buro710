@@ -15,7 +15,10 @@
     "resolveJsonModule": true,
     "verbatimModuleSyntax": true,
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "paths": {
+      "@buro710/shared": ["../shared/src/index.ts"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
