@@ -16,6 +16,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@buro710/shared": "*",
     "@supabase/supabase-js": "^2.95.2",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",

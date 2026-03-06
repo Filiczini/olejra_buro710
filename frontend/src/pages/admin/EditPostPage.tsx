@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { logger } from '../../lib/logger';
+import { postCreateSchema } from '@buro710/shared';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
 import { postService } from '../../services/api';
@@ -176,32 +177,33 @@ export default function EditPostPage() {
   };
 
   const validate = (): boolean => {
-    const newErrors: Record<string, string> = {};
+    const result = postCreateSchema.safeParse({
+      title,
+      slug,
+      status,
+      seo_title: seoTitle,
+      seo_description: seoDescription,
+      hero_title: heroData.hero_title,
+      hero_subtitle: heroData.hero_subtitle,
+      hero_tags: heroData.hero_tags,
+      hero_location: heroData.hero_location,
+      hero_year: heroData.hero_year,
+    });
 
-    if (!title.trim()) {
-      newErrors.title = "Назва обов'язкова";
+    if (!result.success) {
+      const newErrors: Record<string, string> = {};
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0] as string;
+        if (field && !newErrors[field]) {
+          newErrors[field] = issue.message;
+        }
+      });
+      setErrors(newErrors);
+      return false;
     }
 
-    if (!slug.trim()) {
-      newErrors.slug = "Slug обов'язковий";
-    } else if (!/^[a-z0-9-]+$/.test(slug)) {
-      newErrors.slug = 'Slug може містити лише латинські літери, цифри та дефіси';
-    }
-
-    if (seoTitle && seoTitle.length > 60) {
-      newErrors.seo_title = 'SEO title не може бути довшим за 60 символів';
-    }
-
-    if (seoDescription && seoDescription.length > 160) {
-      newErrors.seo_description = 'SEO description не може бути довшим за 160 символів';
-    }
-
-    if (heroData.hero_title && heroData.hero_title.length > 200) {
-      newErrors.hero_title = 'Hero title не може бути довшим за 200 символів';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors({});
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

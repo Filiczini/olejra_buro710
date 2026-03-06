@@ -23,6 +23,7 @@
     "prepare": "husky"
   },
   "workspaces": [
+    "shared",
     "frontend",
     "backend"
   ],
