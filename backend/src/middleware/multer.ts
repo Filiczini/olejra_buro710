@@ -27,11 +27,6 @@ export const uploadSingleImage = uploadMiddleware.single('image');
  * Accepts 'heroMedia' (max 1 file) and 'galleryMedia' (max 10 files) fields.
  * Files are stored in memory as Buffers.
  */
-export const uploadProjectMedia = uploadMiddleware.fields([
-  { name: 'heroMedia', maxCount: 5 },
-  { name: 'galleryMedia', maxCount: 10 },
-]);
-
 export const uploadBlockMedia = uploadMiddleware.fields([
   { name: 'heroImage', maxCount: 1 },
   { name: 'ogImage', maxCount: 1 },
