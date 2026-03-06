@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middleware/auth';
 import { activityLogService } from '../services/activityLogService';
+import { logger } from '../lib/logger';
 
 const router = Router();
 
@@ -17,7 +18,7 @@ router.get('/', authMiddleware, async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error('Error fetching activity logs:', error);
+    logger.error('Error fetching activity logs:', error);
     res.status(500).json({ error: 'Failed to fetch activity logs' });
   }
 });
@@ -27,7 +28,7 @@ router.get('/users', authMiddleware, async (_req, res) => {
     const users = await activityLogService.getUniqueUsers();
     res.json(users);
   } catch (error) {
-    console.error('Error fetching unique users:', error);
+    logger.error('Error fetching unique users:', error);
     res.status(500).json({ error: 'Failed to fetch unique users' });
   }
 });
