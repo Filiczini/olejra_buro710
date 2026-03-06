@@ -7,7 +7,7 @@ import { postService } from '../services/postService';
 import { storageService } from '../services/storageService';
 import { activityLogService } from '../services/activityLogService';
 import { uploadProjectMedia } from '../middleware/multer';
-import { portfolioCreateSchema, portfolioUpdateSchema } from '../schemas/index.js';
+import { portfolioCreateSchema, portfolioUpdateSchema } from '@buro710/shared';
 import { validateFormData } from '../middleware/validate.js';
 import { logger } from '../lib/logger.js';
 import type { PortfolioItem } from '../types/portfolio';
