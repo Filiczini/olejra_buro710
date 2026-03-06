@@ -150,6 +150,11 @@ export const postService = {
     return response.data as { post: Post; blocks: Block[] };
   },
 
+  getFeatured: async () => {
+    const response = await api.get('/posts/featured');
+    return response.data as Post[];
+  },
+
   create: async (data: FormData) => {
     const token = localStorage.getItem('token');
     const response = await api.post('/posts', data, {
