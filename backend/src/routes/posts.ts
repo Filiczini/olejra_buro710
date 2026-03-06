@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middleware/auth';
+import { logger } from '../lib/logger';
 import type { AuthenticatedRequest } from '../types/express.js';
 import { postService } from '../services/postService';
 import { storageService } from '../services/storageService';
@@ -105,7 +106,7 @@ router.get('/', async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error('Error fetching posts:', error);
+    logger.error('Error fetching posts:', error);
     res.status(500).json({ error: 'Failed to fetch posts' });
   }
 });
@@ -116,7 +117,7 @@ router.get('/public/:slug', async (req, res) => {
     const result = await postService.getBySlug(slug);
     res.json(result);
   } catch (error) {
-    console.error('Error fetching post by slug:', error);
+    logger.error('Error fetching post by slug:', error);
     res.status(404).json({ error: 'Post not found' });
   }
 });
@@ -127,7 +128,7 @@ router.get('/:id', async (req, res) => {
     const result = await postService.getById(id);
     res.json(result);
   } catch (error) {
-    console.error('Error fetching post:', error);
+    logger.error('Error fetching post:', error);
     res.status(404).json({ error: 'Post not found' });
   }
 });
@@ -284,7 +285,7 @@ router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequ
 
     res.status(201).json(post);
   } catch (error) {
-    console.error('Error creating post:', error);
+    logger.error('Error creating post:', error);
     res.status(500).json({ error: 'Failed to create post' });
   }
 });
@@ -448,7 +449,7 @@ router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRe
 
     res.json(post);
   } catch (error) {
-    console.error('Error updating post:', error);
+    logger.error('Error updating post:', error);
     res.status(500).json({ error: 'Failed to update post' });
   }
 });
@@ -471,7 +472,7 @@ router.delete('/:id', authMiddleware, async (req: AuthenticatedRequest, res) => 
 
     res.json({ message: 'Post deleted successfully' });
   } catch (error) {
-    console.error('Error deleting post:', error);
+    logger.error('Error deleting post:', error);
     res.status(500).json({ error: 'Failed to delete post' });
   }
 });
@@ -513,7 +514,7 @@ router.post(
 
       res.json({ gallery_images: updatedGallery, new_images: newUrls });
     } catch (error) {
-      console.error('Error uploading gallery images:', error);
+      logger.error('Error uploading gallery images:', error);
       res.status(500).json({ error: 'Failed to upload gallery images' });
     }
   }
@@ -552,7 +553,7 @@ router.delete('/:id/gallery', authMiddleware, async (req: AuthenticatedRequest, 
 
     res.json({ gallery_images: updatedGallery });
   } catch (error) {
-    console.error('Error deleting gallery image:', error);
+    logger.error('Error deleting gallery image:', error);
     res.status(500).json({ error: 'Failed to delete gallery image' });
   }
 });
