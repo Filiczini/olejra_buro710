@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { logger } from '../../lib/logger';
 import Button from '../../components/ui/Button';
 import HeroSectionForm, { type HeroSectionData } from '../../components/admin/HeroSectionForm';
 import HeroSectionPreview from '../../components/admin/HeroSectionPreview';
@@ -54,7 +55,7 @@ export default function EditProjectPage() {
           setExistingHeroUrl(data.heroMedia[0].url);
         }
       } catch (error) {
-        console.error('Error loading project:', error);
+        logger.error('Error loading project:', error);
         navigate('/admin/dashboard');
       } finally {
         setFetching(false);
@@ -104,7 +105,7 @@ export default function EditProjectPage() {
       await portfolioService.update(id, formDataToSend);
       navigate('/admin/dashboard');
     } catch (error) {
-      console.error('Error updating project:', error);
+      logger.error('Error updating project:', error);
       setErrors({ submit: 'Помилка оновлення проєкту' });
     } finally {
       setLoading(false);

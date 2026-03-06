@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
+import { logger } from '../lib/logger';
 import type { Project, Media } from '../types/project';
 import { portfolioService } from '../services/api';
 import { Icon } from '@iconify-icon/react';
@@ -46,7 +47,7 @@ export default function ProjectPage() {
         setHeroMedia(data.heroMedia || []);
       } catch (err) {
         setError('Помилка завантаження проекту');
-        console.error('Error loading project:', err);
+        logger.error('Error loading project:', err);
       } finally {
         setLoading(false);
       }
