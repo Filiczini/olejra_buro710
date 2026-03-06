@@ -151,17 +151,26 @@ export const postService = {
   },
 
   create: async (data: FormData) => {
-    const response = await api.post('/posts', data);
+    const token = localStorage.getItem('token');
+    const response = await api.post('/posts', data, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return response.data as Post;
   },
 
   update: async (id: string, data: FormData) => {
-    const response = await api.put(`/posts/${id}`, data);
+    const token = localStorage.getItem('token');
+    const response = await api.put(`/posts/${id}`, data, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return response.data as Post;
   },
 
   delete: async (id: string) => {
-    const response = await api.delete(`/posts/${id}`);
+    const token = localStorage.getItem('token');
+    const response = await api.delete(`/posts/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return response.data;
   },
 };
