@@ -6,7 +6,10 @@ export const portfolioCreateSchema = z.object({
   location: z.string().max(200, 'Location не може бути довшим за 200 символів').optional(),
   area: z.string().max(50, 'Area не може бути довшим за 50 символів').optional(),
   year: z.string().max(20, 'Year не може бути довшим за 20 символів').optional(),
-  tags: z.array(z.string()).max(15, 'Максимум 15 тегів').optional(),
+  tags: z
+    .array(z.string().max(20, 'Тег не може бути довшим за 20 символів'))
+    .max(15, 'Максимум 15 тегів')
+    .optional(),
 });
 
 export const portfolioUpdateSchema = portfolioCreateSchema.partial();
