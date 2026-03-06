@@ -158,6 +158,9 @@ export default function PostsPage() {
                     Статус
                   </th>
                   <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">
+                    Обране
+                  </th>
+                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">
                     SEO
                   </th>
                   <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">
@@ -171,13 +174,13 @@ export default function PostsPage() {
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-8 text-gray-500">
+                    <td colSpan={7} className="text-center py-8 text-gray-500">
                       Завантаження...
                     </td>
                   </tr>
                 ) : posts.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-8 text-gray-500">
+                    <td colSpan={7} className="text-center py-8 text-gray-500">
                       Постів не знайдено
                     </td>
                   </tr>
@@ -209,6 +212,15 @@ export default function PostsPage() {
                         </code>
                       </td>
                       <td className="py-4 px-6">{getStatusBadge(post.status)}</td>
+                      <td className="py-4 px-6">
+                        {post.featured ? (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/20">
+                            Так
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 text-sm">—</span>
+                        )}
+                      </td>
                       <td className="py-4 px-6">
                         {post.seo_title || post.seo_description ? (
                           <div className="flex items-center text-emerald-600 text-sm font-medium">
