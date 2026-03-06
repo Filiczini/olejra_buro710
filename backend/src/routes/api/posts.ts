@@ -5,6 +5,7 @@
  */
 import { Router } from 'express';
 import multer from 'multer';
+import { logger } from '../../lib/logger';
 import { memoryStorage } from 'multer';
 import type { FileFilterCallback } from 'multer';
 import { apiKeyMiddleware } from '../../middleware/apiKey';
@@ -153,7 +154,7 @@ router.get('/', async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error('Error fetching posts:', error);
+    logger.error('Error fetching posts:', error);
     res.status(500).json({ error: 'Failed to fetch posts' });
   }
 });
@@ -168,7 +169,7 @@ router.get('/:id', async (req, res) => {
     const result = await postService.getById(id);
     res.json(result);
   } catch (error) {
-    console.error('Error fetching post:', error);
+    logger.error('Error fetching post:', error);
     res.status(404).json({ error: 'Post not found' });
   }
 });
@@ -250,7 +251,7 @@ router.post('/', uploadPostMedia, async (req, res) => {
 
     res.status(201).json(post);
   } catch (error) {
-    console.error('Error creating post:', error);
+    logger.error('Error creating post:', error);
     res.status(500).json({ error: 'Failed to create post' });
   }
 });
@@ -371,7 +372,7 @@ router.put('/:id', uploadPostMedia, async (req, res) => {
 
     res.json(post);
   } catch (error) {
-    console.error('Error updating post:', error);
+    logger.error('Error updating post:', error);
     if ((error as Error).message === 'Slug already exists') {
       return res.status(400).json({ error: 'Slug already exists' });
     }
@@ -396,7 +397,7 @@ router.delete('/:id', async (req, res) => {
     await postService.delete(id);
     res.json({ message: 'Post deleted successfully' });
   } catch (error) {
-    console.error('Error deleting post:', error);
+    logger.error('Error deleting post:', error);
     res.status(500).json({ error: 'Failed to delete post' });
   }
 });

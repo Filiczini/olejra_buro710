@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { logger } from '../../lib/logger';
 import Button from '../../components/ui/Button';
 import HeroSectionForm, { type HeroSectionData } from '../../components/admin/HeroSectionForm';
 import HeroSectionPreview from '../../components/admin/HeroSectionPreview';
@@ -61,7 +62,7 @@ export default function CreateProjectPage() {
       await portfolioService.create(formDataToSend);
       navigate('/admin/dashboard');
     } catch (error) {
-      console.error('Error creating project:', error);
+      logger.error('Error creating project:', error);
       setErrors({ submit: 'Помилка створення проєкту' });
     } finally {
       setLoading(false);
