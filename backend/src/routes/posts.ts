@@ -13,6 +13,7 @@ interface PostBody {
   title?: string;
   slug?: string;
   status?: 'draft' | 'published';
+  featured?: string;
   seo_title?: string;
   seo_description?: string;
   hero_title?: string;
@@ -111,6 +112,16 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/featured', async (_req, res) => {
+  try {
+    const posts = await postService.getFeatured();
+    res.json(posts);
+  } catch (error) {
+    logger.error('Error fetching featured posts:', error);
+    res.status(500).json({ error: 'Failed to fetch featured posts' });
+  }
+});
+
 router.get('/public/:slug', async (req, res) => {
   try {
     const slug = req.params.slug as string;
@@ -140,6 +151,7 @@ router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequ
       title,
       slug,
       status,
+      featured,
       seo_title,
       seo_description,
       hero_title,
@@ -226,6 +238,7 @@ router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequ
       title,
       slug: slug || postService.generateSlug(title),
       status,
+      featured: featured === 'true',
       seo_title,
       seo_description,
       og_image_url: ogImageUrl,
@@ -298,6 +311,7 @@ router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRe
       title,
       slug,
       status,
+      featured,
       seo_title,
       seo_description,
       hero_title,
@@ -415,6 +429,7 @@ router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRe
       title,
       slug,
       status,
+      featured: featured !== undefined ? featured === 'true' : undefined,
       seo_title,
       seo_description,
       og_image_url: ogImageUrl,

@@ -51,6 +51,7 @@ export default function EditPostPage() {
   const [blockFiles, setBlockFiles] = useState<BlockWithFile[]>([]);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [galleryNewFiles, setGalleryNewFiles] = useState<File[]>([]);
+  const [featured, setFeatured] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const blocksDataRef = useRef<BlocksDataRef>({ blocks: [] });
@@ -79,6 +80,7 @@ export default function EditPostPage() {
           heroImage: undefined,
         });
 
+        setFeatured(post.featured || false);
         setGalleryImages(post.gallery_images || []);
 
         blocksDataRef.current.blocks = loadedBlocks.map((b, index) => ({
@@ -220,6 +222,7 @@ export default function EditPostPage() {
       formData.append('seo_title', seoTitle);
       formData.append('seo_description', seoDescription);
 
+      formData.append('featured', String(featured));
       formData.append('hero_title', heroData.hero_title || '');
       formData.append('hero_subtitle', heroData.hero_subtitle || '');
       formData.append('hero_tags', JSON.stringify(heroData.hero_tags || []));
@@ -345,6 +348,23 @@ export default function EditPostPage() {
               </label>
             </div>
           </div>
+
+          <label className="flex items-center gap-3 cursor-pointer select-none">
+            <div
+              onClick={() => setFeatured((v) => !v)}
+              className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${featured ? 'bg-zinc-900' : 'bg-zinc-200'}`}
+            >
+              <span
+                className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${featured ? 'translate-x-5' : 'translate-x-0'}`}
+              />
+            </div>
+            <span className="text-sm font-medium text-zinc-700">
+              Вибраний пост{' '}
+              <span className="text-zinc-400 font-normal">
+                (відображається на головній, макс. 6)
+              </span>
+            </span>
+          </label>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">

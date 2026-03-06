@@ -19,6 +19,7 @@ export const postCreateSchema = z.object({
     .max(200, 'Slug не може бути довшим за 200 символів')
     .regex(/^[a-z0-9-]+$/, 'Slug може містити лише латинські літери, цифри та дефіси'),
   status: z.enum(['draft', 'published']).optional(),
+  featured: z.boolean().optional(),
   seo_title: z.string().max(60, 'SEO title не може бути довшим за 60 символів').optional(),
   seo_description: z
     .string()

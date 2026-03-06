@@ -16,6 +16,7 @@ export interface Post extends PostHero {
   title: string;
   slug: string;
   status: PostStatus;
+  featured?: boolean;
   seo_title?: string;
   seo_description?: string;
   og_image_url?: string;
