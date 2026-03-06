@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { logger } from '../../lib/logger';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Search, ChevronDown, PlusCircle, Pencil, Eye, Trash2, CheckCircle } from 'lucide-react';
 import { postService } from '../../services/api';
 import type { Post } from '../../types/post';
@@ -185,7 +185,23 @@ export default function PostsPage() {
                   posts.map((post) => (
                     <tr key={post.id} className="group hover:bg-gray-50/80 transition-colors">
                       <td className="py-4 px-6">
-                        <p className="text-base font-medium text-gray-900">{post.title}</p>
+                        {post.status === 'published' ? (
+                          <a
+                            href={`/page/${post.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors"
+                          >
+                            {post.title}
+                          </a>
+                        ) : (
+                          <Link
+                            to={`/admin/posts/edit/${post.id}`}
+                            className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors"
+                          >
+                            {post.title}
+                          </Link>
+                        )}
                       </td>
                       <td className="py-4 px-6">
                         <code className="text-sm font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
