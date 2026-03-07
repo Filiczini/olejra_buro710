@@ -19,7 +19,8 @@ COPY shared/package*.json ./shared/
 COPY frontend/package*.json ./frontend/
 
 # Install all dependencies (including shared workspace)
-RUN npm install --workspace=shared --workspace=frontend
+# --ignore-scripts skips husky prepare script
+RUN npm install --workspace=shared --workspace=frontend --ignore-scripts
 
 # Copy source files
 COPY shared/ ./shared/
