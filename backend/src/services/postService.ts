@@ -14,6 +14,7 @@ interface CreatePostParams extends PostHero {
   title: string;
   slug: string;
   status?: PostStatus;
+  featured?: boolean;
   seo_title?: string;
   seo_description?: string;
   og_image_url?: string;
@@ -29,6 +30,7 @@ interface UpdatePostParams extends Partial<PostHero> {
   title?: string;
   slug?: string;
   status?: PostStatus;
+  featured?: boolean;
   seo_title?: string;
   seo_description?: string;
   og_image_url?: string;
@@ -257,6 +259,19 @@ export const postService = {
     }
 
     await supabase.from('posts').delete().eq('id', id);
+  },
+
+  getFeatured: async (): Promise<Post[]> => {
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('featured', true)
+      .eq('status', 'published')
+      .order('created_at', { ascending: false })
+      .limit(6);
+
+    if (error) throw error;
+    return (data || []) as Post[];
   },
 
   generateSlug,

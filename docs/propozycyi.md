@@ -1,7 +1,7 @@
 # Пропозиції покращень проєкту Buro 710
 
-> Останнє сканування: 2026-02-19
-> Версія: 4.0
+> Останнє сканування: 2026-03-06
+> Версія: 6.0
 
 ---
 
@@ -9,15 +9,14 @@
 
 1. [Огляд проєкту](#огляд-проєкту)
 2. [Поточний стан](#поточний-стан)
-3. [Проблеми та рішення](#проблеми-та-рішення)
+3. [Відкриті проблеми та пропозиції](#відкриті-проблеми-та-пропозиції)
 4. [План покращень](#план-покращень)
-5. [Технічні деталі](#технічні-деталі)
 
 ---
 
 ## Огляд проєкту
 
-**Buro 710** — портфоліо сайт для архітектурної студії.
+**Buro 710** — сайт для архітектурної студії. Концепція портфоліо/проєктів повністю видалена — сайт побудований на постах/статтях.
 
 ### Технологічний стек
 
@@ -25,6 +24,7 @@
 |-----------|------------|
 | Frontend | React 19, TypeScript, Vite, Tailwind CSS 4 |
 | Backend | Node.js, Express 5, Supabase (PostgreSQL) |
+| Shared | `@buro710/shared` — Zod-схеми (contact, post) |
 | Auth | JWT tokens |
 | Deploy | Vercel (frontend) + Docker (backend) |
 | Language | Ukrainian |
@@ -34,160 +34,165 @@
 ```
 buro710/
 ├── frontend/              # React + Vite + Tailwind
-│   ├── src/
-│   │   ├── api/           # Axios client
-│   │   ├── components/    # React components
-│   │   ├── hooks/         # Custom hooks
-│   │   ├── layouts/       # Page layouts
-│   │   ├── lib/           # Utilities (logger)
-│   │   ├── pages/         # Page components
-│   │   ├── services/      # API service layer
-│   │   ├── test/          # Test setup
-│   │   └── types/         # TypeScript types
-│   ├── eslint.config.js   # ESLint 9 flat config
-│   ├── vitest.config.ts   # Vitest config
-│   └── .prettierrc        # Prettier config
+│   └── src/
+│       ├── api/           # Axios client
+│       ├── components/    # React components
+│       │   ├── admin/     # Admin UI + page-builder
+│       │   ├── blocks/    # Public block renderers
+│       │   ├── layout/    # Header, Footer
+│       │   ├── sections/  # Homepage sections
+│       │   └── ui/        # Button, Input, ImageLightbox
+│       ├── hooks/         # Custom hooks
+│       ├── layouts/       # AdminLayout
+│       ├── lib/           # logger
+│       ├── pages/         # Public + admin pages
+│       ├── services/      # API service layer
+│       └── types/         # TypeScript types
 │
 ├── backend/               # Express + Supabase
-│   ├── src/
-│   │   ├── config/        # Supabase, JWT config
-│   │   ├── lib/           # Utilities (logger)
-│   │   ├── middleware/    # Auth, multer
-│   │   ├── routes/        # API routes
-│   │   ├── services/      # Business logic
-│   │   └── types/         # TypeScript types
-│   └── .prettierrc        # Prettier config
+│   └── src/
+│       ├── config/        # Supabase, JWT config
+│       ├── lib/           # logger
+│       ├── middleware/    # auth, apiKey, multer, validate
+│       ├── routes/        # API routes + external v1
+│       ├── services/      # Business logic
+│       └── types/         # TypeScript types
+│
+├── shared/                # @buro710/shared
+│   └── src/schemas/       # Zod-схеми: contact.ts, post.ts
 │
 ├── .husky/                # Git hooks
 ├── docs/                  # Documentation
-├── scripts/               # Utility scripts
 └── package.json           # Workspaces root
 ```
+
+### API Endpoints
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | /api/auth/login | — | Login |
+| GET | /api/auth/me | JWT | Current user |
+| GET | /api/posts | JWT | List posts (admin, з пагінацією та пошуком) |
+| GET | /api/posts/:id | JWT | Get post by ID |
+| POST | /api/posts | JWT | Create post |
+| PUT | /api/posts/:id | JWT | Update post |
+| DELETE | /api/posts/:id | JWT | Delete post |
+| GET | /api/v1/posts | API Key | Public posts list |
+| GET | /api/v1/posts/:slug | API Key | Public post by slug |
+| POST | /api/contact | Rate limit + Zod | Send contact form |
+| GET | /api/logs | JWT | Activity logs |
 
 ---
 
 ## Поточний стан
 
-### ✅ Реалізовано
+### Реалізовано
 
-| Компонент | Статус | Деталі |
-|-----------|--------|--------|
-| ESLint 9 config | ✅ | Flat config, React hooks rules |
-| TypeScript strict mode | ✅ | Frontend + Backend |
-| Prettier | ✅ | Форматування коду |
-| Husky + lint-staged | ✅ | Pre-commit hooks |
-| Typed Express Request | ✅ | `AuthenticatedUser` interface |
-| Error Boundary | ✅ | Обробка помилок рендерингу |
-| Logger | ✅ | Frontend + Backend |
-| Vitest | ✅ | 9 тестів passing |
-| Docker config | ✅ | docker-compose.yml |
+| Компонент | Деталі |
+|-----------|--------|
+| ESLint 9 config | Flat config, React hooks rules |
+| TypeScript strict mode | Frontend + Backend + Shared |
+| Prettier | Форматування коду |
+| Husky + lint-staged | Pre-commit hooks |
+| Error Boundary | Обробка помилок рендерингу |
+| Logger | Frontend + Backend |
+| Vitest | 7 тест-файлів (frontend: Button, Input, logger; backend: apiKey, e2e, posts.helper, posts) |
+| Docker config | docker-compose.yml |
+| Zod-валідація | Shared-пакет `@buro710/shared`: `contactSchema`, `postCreateSchema`, `postUpdateSchema`, `blockSchema` |
+| Rate limiting | Contact route: 3 запити/хвилину (`express-rate-limit`) |
+| Posts validation | `posts.validation.ts` — ручна валідація для зовнішнього API v1 |
+| useCallback | Всі сторінки з `useEffect` використовують `useCallback` — warnings виправлені |
+| console.* | Видалено з усіх routes і services, залишено лише в seed-скриптах та logger |
+| Featured posts | Поле `featured` у БД, toggle в адмін-панелі, секція на головній |
+| Пагінація + пошук | Admin PostsPage: пагінація, пошук, фільтр по статусу |
+| Shared package | `@buro710/shared` зі Zod-схемами, використовується в frontend і backend |
+| ProjectsGallerySection | Секція "Вибрані Проєкти" на головній — завантажує featured пости з БД, стиль з `docs/projects.html` |
+| ProjectsPage `/projects` | Публічна сторінка з усіма опублікованими постами, той самий стиль карток (grayscale hover, skeleton loading) |
+| Навігація | Посилання "Проєкти" в хедері веде на `/projects` (раніше — `/posts`) |
+| Seed: 10 нових постів | `seed-posts-new.ts` — 10 ресторанних проєктів (Osteria Mano, Nox, Solarium, Karst, Grain, Birch, Assembly, Marea, Dvor, Alto), 3 з них featured |
 
-### 📊 Метрики
+### Метрики
 
 | Метрика | Значення |
 |---------|----------|
-| TypeScript файлів | ~100 |
-| ESLint errors | 1 (unused variable) |
-| ESLint warnings | 7 (useEffect deps) |
-| Тести | 9 passing |
-| console.* використань | ~200 |
-
-### ⚠️ Відкриті питання
-
-1. **ESLint error:** `originalEnv` unused в `logger.test.ts`
-2. **ESLint warnings:** Missing useEffect dependencies (7 файлів)
-3. **Console statements:** ~200 випадків (частково в seed scripts)
+| Пакети монорепо | 3 (frontend, backend, shared) |
+| TypeScript файлів | ~110 |
+| ESLint errors | 0 |
+| ESLint warnings | 0 |
+| Тест-файлів | 7 |
+| console.* в routes/services | 0 |
 
 ---
 
-## Проблеми та рішення
+## Відкриті проблеми та пропозиції
 
-### 🟡 Середній пріоритет
+### Критично (SEO / видимість)
 
-#### 1. ESLint error в тесті
+#### 1. `index.html` — порожній SEO
 
-**Файл:** `frontend/src/lib/__tests__/logger.test.ts:5`
+**Файл:** `frontend/index.html`
 
-```typescript
-// Проблема:
-const originalEnv = import.meta.env.DEV; // never used
+Поточний стан — лише базовий заголовок без будь-яких мета-тегів. Favicon — дефолтний `vite.svg`.
 
-// Рішення: видалити змінну
+```html
+<!-- Зараз: -->
+<title>buro710</title>
+<link rel="icon" href="/vite.svg" />
+<!-- Немає: description, og:title, og:image, twitter:card, canonical -->
 ```
 
+**Рішення:** Додати базові мета-теги, власний favicon, og:image за замовчуванням.
+
 ---
 
-#### 2. useEffect dependencies warnings (7 файлів)
+#### 2. ~~Відсутня публічна сторінка архіву постів~~ ✅ Виконано
 
-**Файли:**
-- `frontend/src/pages/AllProjectsPage.tsx`
-- `frontend/src/pages/PublicPostPage.tsx`
-- `frontend/src/pages/admin/ActivityLogPage.tsx`
-- `frontend/src/pages/admin/DashboardPage.tsx`
-- `frontend/src/pages/admin/EditPostPage.tsx`
-- `frontend/src/pages/admin/PostsPage.tsx` (2 warnings)
+Створено `frontend/src/pages/ProjectsPage.tsx`, роут `/projects` додано в `App.tsx`.
+
+---
+
+#### 3. Відсутні `robots.txt` і `sitemap.xml`
+
+Файли для пошукових роботів не існують. Критично для індексації.
 
 **Рішення:**
-1. Обгорнути функції в `useCallback`
-2. Або додати eslint-disable коментарі якщо функція повинна викликатись тільки при mount
+- `frontend/public/robots.txt` — статичний файл
+- Динамічний `sitemap.xml` через ендпоінт бекенду або генерація при білді
 
 ---
 
-#### 3. Console statements (~200)
+### Середній пріоритет
 
-**Розподіл:**
-| Категорія | Кількість | Дія |
-|-----------|-----------|-----|
-| Seed scripts | ~80 | Залишити (CLI output) |
-| Backend routes | ~25 | Замінити на logger |
-| Backend services | ~10 | Частково виправлено |
-| Frontend pages | ~15 | Замінити на logger |
-| Tests | ~5 | Залишити (mock assertions) |
-| Logger implementation | ~5 | Залишити |
+#### 4. Відсутній `<Footer />` на сторінці поста
 
-**Виправлено:**
-- `backend/src/routes/auth.ts`
-- `backend/src/services/contactService.ts`
-- `backend/src/services/projectService.ts`
-- `backend/src/services/telegramService.ts`
+**Файл:** `frontend/src/pages/PublicPostPage.tsx`
+
+`PublicPostPage` не рендерить `<Footer />` — сторінка "обривається". Всі інші публічні сторінки мають футер.
+
+**Рішення:** Додати `<Footer />` в кінець `PublicPostPage`.
 
 ---
 
-### 🟢 Низький пріоритет
-
-#### 4. Відсутність Zod валідації
-
-API не має schema валідації вхідних даних.
-
-**Рішення:**
-```bash
-npm install zod
-```
-
-Створити schemas для:
-- Portfolio create/update
-- Posts create/update
-- Contact form
-
----
-
-#### 5. Неповне покриття тестами
+#### 5. Недостатнє покриття тестами бекенду
 
 **Поточний стан:**
-- `Button.test.tsx` — 5 тестів ✅
-- `logger.test.ts` — 4 тести ✅
+- `middleware/apiKey.test.ts` — тести middleware
+- `e2e/api.test.ts` — e2e тести
+- `routes/api/posts.test.ts` + `posts.helper.test.ts` — тести зовнішнього API
 
-**Рекомендовано додати:**
-- `Input.test.tsx`
-- `ProjectCard.test.tsx`
-- `projectService.test.ts` (backend)
-- Auth routes integration tests
+**Відсутні тести для сервісів:**
+- `postService.test.ts`
+- `blockService.test.ts`
+- `contactService.test.ts`
+- Тести admin-routes (`routes/posts.ts`, `routes/auth.ts`)
 
 ---
 
-#### 6. noUncheckedIndexedAccess
+### Низький пріоритет
 
-TypeScript опція для безпечної роботи з масивами.
+#### 6. `noUncheckedIndexedAccess` в tsconfig
+
+TypeScript опція для безпечної роботи з масивами та об'єктами.
 
 ```json
 // tsconfig.json
@@ -198,121 +203,56 @@ TypeScript опція для безпечної роботи з масивами
 }
 ```
 
+Може вимагати виправлення існуючого коду.
+
+---
+
+#### 7. RSS-стрічка
+
+Корисно для архітектурної студії — підписка на нові публікації.
+
+**Рішення:** Ендпоінт `GET /api/v1/rss.xml` або `/rss.xml` (статичний файл при деплої).
+
+---
+
+#### 8. Час читання статті
+
+Автоматичний розрахунок з текстових блоків і відображення на сторінці поста.
+
 ---
 
 ## План покращень
 
-### Фаза 1: Quick Fixes (30 хв)
+### Фаза 1: SEO (1-2 години)
 
-| ID | Завдання | Пріоритет | Статус |
-|----|----------|-----------|--------|
-| 1.1 | Видалити unused `originalEnv` з logger.test.ts | 🟡 | ⬜ |
-| 1.2 | Виправити useEffect deps warnings | 🟡 | ⬜ |
-| 1.3 | Замінити console.* на logger в routes | 🟡 | ⬜ |
+| ID | Завдання | Статус |
+|----|----------|--------|
+| 1.1 | Базові мета-теги + favicon в `index.html` | ✅ |
+| 1.2 | `robots.txt` | ⬜ |
+| 1.3 | `sitemap.xml` (статичний або динамічний) | ⬜ |
 
-### Фаза 2: Валідація (2-3 години)
+### Фаза 2: Контент (2-3 години)
 
-| ID | Завдання | Пріоритет | Статус |
-|----|----------|-----------|--------|
-| 2.1 | Встановити Zod | 🟢 | ⬜ |
-| 2.2 | Schema для portfolio routes | 🟢 | ⬜ |
-| 2.3 | Schema для posts routes | 🟢 | ⬜ |
-| 2.4 | Schema для contact form | 🟢 | ⬜ |
+| ID | Завдання | Статус |
+|----|----------|--------|
+| 2.1 | Публічна сторінка архіву проєктів `/projects` | ✅ |
+| 2.2 | Додати `<Footer />` на `PublicPostPage` | ⬜ |
 
-### Фаза 3: Тести (3-4 години)
+### Фаза 3: Тести (2-3 години)
 
-| ID | Завдання | Пріоритет | Статус |
-|----|----------|-----------|--------|
-| 3.1 | Input.test.tsx | 🟢 | ⬜ |
-| 3.2 | ProjectCard.test.tsx | 🟢 | ⬜ |
-| 3.3 | Backend services tests | 🟢 | ⬜ |
-| 3.4 | Auth integration tests | 🟢 | ⬜ |
+| ID | Завдання | Статус |
+|----|----------|--------|
+| 3.1 | `postService.test.ts` | ⬜ |
+| 3.2 | `blockService.test.ts` | ⬜ |
+| 3.3 | Admin routes integration tests | ⬜ |
 
-### Фаза 4: Оптимізація (опціонально)
+### Фаза 4: Опціонально
 
-| ID | Завдання | Пріоритет | Статус |
-|----|----------|-----------|--------|
-| 4.1 | noUncheckedIndexedAccess | 🟢 | ⬜ |
-| 4.2 | API documentation (OpenAPI) | 🟢 | ⬜ |
-| 4.3 | Bundle analysis | 🟢 | ⬜ |
-
----
-
-## Технічні деталі
-
-### Команди
-
-```bash
-# Development
-npm run dev              # Frontend + Backend
-npm run dev:frontend     # Frontend only (port 5173)
-npm run dev:backend      # Backend only (port 3000)
-
-# Build
-npm run build            # TypeScript check + Vite build
-npm run preview          # Preview production build
-
-# Quality
-npm run lint             # ESLint (1 error, 7 warnings)
-npm run format           # Prettier format frontend
-npm run test             # Vitest watch mode
-npm run test:run         # Vitest run once
-
-# Database
-npm run seed             # Seed projects
-npm run seed:posts       # Seed posts
-npm run seed:admin       # Create admin user
-npm run seed:clean       # Clear projects
-npm run migrate:projects # Run migrations
-```
-
-### Налаштування
-
-**ESLint (frontend/eslint.config.js)**
-- TypeScript recommended rules
-- React Hooks rules
-- Prettier compatibility
-
-**TypeScript**
-- Strict mode enabled
-- ES2022 target
-- Module: ESNext
-
-**Prettier**
-- Single quotes
-- Semi: true
-- Tab width: 2
-- Trailing comma: es5
-
-### Змінні середовища
-
-**Frontend (.env)**
-```
-VITE_API_URL=http://localhost:3000/api
-```
-
-**Backend (.env)**
-```
-DATABASE_URL=supabase_connection_string
-JWT_SECRET=your_secret_here
-TELEGRAM_BOT_TOKEN=optional
-TELEGRAM_CHAT_ID=optional
-```
-
-### API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | /api/auth/login | Login |
-| GET | /api/auth/me | Current user |
-| GET | /api/portfolio | List projects |
-| POST | /api/portfolio | Create project (auth) |
-| PUT | /api/portfolio/:id | Update project (auth) |
-| DELETE | /api/portfolio/:id | Delete project (auth) |
-| GET | /api/posts | List posts |
-| GET | /api/posts/:slug | Get post by slug |
-| POST | /api/posts | Create post (auth) |
-| POST | /api/contact | Send contact form |
+| ID | Завдання | Статус |
+|----|----------|--------|
+| 4.1 | `noUncheckedIndexedAccess` в tsconfig | ⬜ |
+| 4.2 | RSS-стрічка | ⬜ |
+| 4.3 | Час читання статті | ⬜ |
 
 ---
 
@@ -320,6 +260,8 @@ TELEGRAM_CHAT_ID=optional
 
 | Дата | Версія | Зміни |
 |------|--------|-------|
+| 2026-03-06 | 6.0 | ProjectsGallerySection на головній (стиль з projects.html, featured пости з БД). ProjectsPage `/projects`. Навігація на `/projects`. Seed 10 нових постів-проєктів |
+| 2026-03-06 | 5.0 | Повний рескан. Видалено концепцію projects/portfolio. Відображено реальний стан: Zod, rate limit, shared-пакет, виправлені warnings та ESLint errors |
 | 2026-02-19 | 4.0 | Повний рескан проєкту, нова структура документа |
 | 2026-02-19 | 3.0 | Завершено Фази 1-3 |
 | 2026-02-16 | 1.0 | Початковий аналіз |

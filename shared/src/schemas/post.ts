@@ -19,6 +19,7 @@ export const postCreateSchema = z.object({
     .max(200, 'Slug не може бути довшим за 200 символів')
     .regex(/^[a-z0-9-]+$/, 'Slug може містити лише латинські літери, цифри та дефіси'),
   status: z.enum(['draft', 'published']).optional(),
+  featured: z.boolean().optional(),
   seo_title: z.string().max(60, 'SEO title не може бути довшим за 60 символів').optional(),
   seo_description: z
     .string()
@@ -29,7 +30,10 @@ export const postCreateSchema = z.object({
     .string()
     .max(300, 'Hero subtitle не може бути довшим за 300 символів')
     .optional(),
-  hero_tags: z.array(z.string()).max(15, 'Максимум 15 тегів').optional(),
+  hero_tags: z
+    .array(z.string().max(20, 'Тег не може бути довшим за 20 символів'))
+    .max(15, 'Максимум 15 тегів')
+    .optional(),
   hero_location: z.string().max(200).optional(),
   hero_year: z.string().max(20).optional(),
   blocks: z.array(blockSchema).optional(),

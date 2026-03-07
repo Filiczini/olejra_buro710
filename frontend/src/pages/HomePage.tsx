@@ -2,11 +2,11 @@ import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import HeroSlider from '../components/sections/HeroSlider';
 import AboutSection from '../components/sections/AboutSection';
-import FeaturedProjectsSection from '../components/sections/FeaturedProjectsSection';
 import PhilosophySection from '../components/sections/PhilosophySection';
 import ProcessSection from '../components/sections/ProcessSection';
 import CinematicDivider from '../components/sections/CinematicDivider';
 import ContactCTA from '../components/sections/ContactCTA';
+import ProjectsGallerySection from '../components/sections/ProjectsGallerySection';
 
 export default function HomePage() {
   return (
@@ -15,7 +15,7 @@ export default function HomePage() {
       <main>
         <HeroSlider />
         <AboutSection />
-        <FeaturedProjectsSection />
+        <ProjectsGallerySection />
         <PhilosophySection />
         <ProcessSection />
         <CinematicDivider />
