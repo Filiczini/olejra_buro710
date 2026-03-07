@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { logger } from '../../lib/logger';
 import { postCreateSchema } from '@buro710/shared';
+import type { ZodIssue } from 'zod';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
 import { postService } from '../../services/api';
@@ -194,7 +195,7 @@ export default function EditPostPage() {
 
     if (!result.success) {
       const newErrors: Record<string, string> = {};
-      result.error.issues.forEach((issue) => {
+      result.error.issues.forEach((issue: ZodIssue) => {
         const field = issue.path[0] as string;
         if (field && !newErrors[field]) {
           newErrors[field] = issue.message;
