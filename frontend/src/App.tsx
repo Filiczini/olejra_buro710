@@ -3,6 +3,7 @@ import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import PublicPostPage from './pages/PublicPostPage';
+import ProjectsPage from './pages/ProjectsPage';
 import LoginPage from './pages/admin/LoginPage';
 import PostsPage from './pages/admin/PostsPage';
 import EditPostPage from './pages/admin/EditPostPage';
@@ -28,6 +29,7 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<HomePage />} />
+        <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/page/:slug" element={<PublicPostPage />} />

@@ -6,6 +6,7 @@
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
     "seed:posts": "tsx src/seed-posts.ts",
+    "seed:posts:new": "tsx src/seed-posts-new.ts",
     "seed:clean:posts": "tsx src/clear-posts.ts",
     "seed:admin": "tsx src/seed-admin.ts",
     "test": "vitest",
