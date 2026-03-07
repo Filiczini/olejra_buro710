@@ -6,7 +6,7 @@ COPY package*.json ./
 COPY shared/package*.json ./shared/
 COPY backend/package*.json ./backend/
 
-RUN npm install --workspace=shared --workspace=backend --production
+RUN npm install --workspace=shared --workspace=backend --production --ignore-scripts
 
 COPY shared/ ./shared/
 COPY backend/ ./backend/
