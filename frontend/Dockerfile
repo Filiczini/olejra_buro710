@@ -6,16 +6,24 @@ ENV VITE_API_URL=$VITE_API_URL
 
 WORKDIR /app
 
+# Copy root package.json for workspaces
+COPY package*.json ./
+
 # Copy shared package
-COPY shared/ ./shared/
+COPY shared/package*.json ./shared/
 
-# Copy frontend dependencies and install
+# Copy frontend package
 COPY frontend/package*.json ./frontend/
-RUN cd frontend && npm install
 
-# Copy frontend source and build
+# Install all dependencies (including shared workspace)
+RUN npm install --workspace=shared --workspace=frontend
+
+# Copy source files
+COPY shared/ ./shared/
 COPY frontend/ ./frontend/
-RUN cd frontend && npm run build
+
+# Build frontend
+RUN npm run build --workspace=frontend
 
 # Stage 2: Serve
 FROM nginx:alpine
