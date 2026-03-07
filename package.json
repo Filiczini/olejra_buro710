@@ -12,13 +12,9 @@
     "start": "npm run start --workspace=backend",
     "lint": "npm run lint --workspace=frontend",
     "preview": "npm run preview --workspace=frontend",
-    "seed": "npm run seed --workspace=backend",
     "seed:posts": "npm run seed:posts --workspace=backend",
-    "seed:random": "npm run seed --workspace=backend",
-    "seed:clean": "npm run seed:clean --workspace=backend",
     "seed:clean:posts": "npm run seed:clean:posts --workspace=backend",
     "seed:admin": "npm run seed:admin --workspace=backend",
-    "migrate:projects": "npm run migrate:projects --workspace=backend",
     "validate:i18n": "node scripts/validate-i18n.js",
     "prepare": "husky"
   },

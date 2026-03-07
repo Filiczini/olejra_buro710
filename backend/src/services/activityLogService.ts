@@ -17,7 +17,7 @@ export const activityLogService = {
       .insert({
         user_email: params.user_email,
         action: params.action,
-        entity_type: params.entity_type || 'project',
+        entity_type: params.entity_type || 'post',
         entity_id: params.entity_id,
         entity_title: params.entity_title,
         changes: params.changes || {},
