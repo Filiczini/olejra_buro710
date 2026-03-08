@@ -10,6 +10,9 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+    networks:
+      - dokploy-network
+      - default
 
   backend:
     build:
@@ -25,4 +28,12 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - FRONTEND_URL=${FRONTEND_URL}
       - API_KEY=${API_KEY}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
     restart: unless-stopped
+    networks:
+      - default
+
+networks:
+  dokploy-network:
+    external: true
