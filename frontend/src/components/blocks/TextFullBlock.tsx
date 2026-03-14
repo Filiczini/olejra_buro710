@@ -20,7 +20,7 @@ export default function TextFullBlock({ data }: TextFullBlockProps) {
           </span>
         )}
 
-        <h2 className="text-2xl md:text-4xl font-normal tracking-tight text-zinc-900 mb-10 leading-snug">
+        <h2 className="text-2xl md:text-4xl font-display tracking-tight text-zinc-900 mb-10 leading-snug">
           "{content}"
         </h2>
 

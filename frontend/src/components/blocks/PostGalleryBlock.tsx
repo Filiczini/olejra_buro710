@@ -68,7 +68,7 @@ export default function PostGalleryBlock({ images }: PostGalleryBlockProps) {
   return (
     <section className="py-24 px-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-12">
-        <h3 className="text-2xl font-medium tracking-tight text-zinc-900">Gallery</h3>
+        <h3 className="text-2xl font-display tracking-tight text-zinc-900">Gallery</h3>
         <div className="flex gap-2">
           <button
             onClick={() => scroll('left')}
