@@ -19,7 +19,7 @@ export default function FeaturedPostsSection() {
   if (loading || posts.length === 0) return null;
 
   return (
-    <section className="max-w-[1600px] mx-auto px-6 mb-40">
+    <section className="max-w-[1800px] mx-auto px-6 mb-40">
       <div className="flex justify-between items-end mb-16 pb-6 gap-12">
         <h2 className="text-4xl font-medium tracking-tight uppercase text-zinc-900">
           Вибрані проєкти
