@@ -6,6 +6,7 @@ import type {
   TextFullData,
   ImageFullData,
   TextImageData,
+  ThreeImagesData,
 } from '../../../types/block';
 import BlocksList from './BlocksList';
 import AddBlockMenu from './AddBlockMenu';
@@ -15,7 +16,7 @@ interface PageBuilderProps {
   onChange: (
     blocks: { id?: string; type: BlockType; data: BlockData; sort_order: number }[]
   ) => void;
-  onImageChange: (blockId: string, file: File | null) => void;
+  onImageChange: (blockId: string, file: File | null, field?: string) => void;
 }
 
 function generateTempId(): string {
@@ -75,8 +76,8 @@ export default function PageBuilder({ initialBlocks, onChange, onImageChange }: 
     notifyChange(reorderedBlocks);
   };
 
-  const handleImageChange = (blockId: string, file: File | null) => {
-    onImageChange(blockId, file);
+  const handleImageChange = (blockId: string, file: File | null, field?: string) => {
+    onImageChange(blockId, file, field);
   };
 
   return (
@@ -110,5 +111,13 @@ function getDefaultBlockData(type: BlockType): BlockData {
         title: '',
         features: [],
       } as TextImageData;
+    case 'three_images':
+      return {
+        images: [
+          { url: '', alt: '' },
+          { url: '', alt: '' },
+          { url: '', alt: '' },
+        ],
+      } as ThreeImagesData;
   }
 }

@@ -8,10 +8,12 @@ import type {
   TextFullData,
   ImageFullData,
   TextImageData,
+  ThreeImagesData,
 } from '../../../types/block';
 import TextFullEditor from './editors/TextFullEditor';
 import ImageFullEditor from './editors/ImageFullEditor';
 import TextImageEditor from './editors/TextImageEditor';
+import ThreeImagesEditor from './editors/ThreeImagesEditor';
 
 interface BlockItemProps {
   block: Block;
@@ -26,6 +28,7 @@ const BLOCK_LABELS: Record<BlockType, string> = {
   image_full: 'Зображення на повну ширину',
   text_image: 'Текст + Зображення',
   image_text: 'Зображення + Текст',
+  three_images: 'Три зображення',
 };
 
 const BLOCK_ICONS_MAP: Record<BlockType, string> = {
@@ -33,6 +36,7 @@ const BLOCK_ICONS_MAP: Record<BlockType, string> = {
   image_full: 'solar:gallery-wide-linear',
   text_image: 'solar:layout-left-linear',
   image_text: 'solar:layout-right-linear',
+  three_images: 'solar:gallery-minimalistic-linear',
 };
 
 export default function BlockItem({
@@ -90,6 +94,14 @@ export default function BlockItem({
             onChange={(data) => onUpdate(block.id, data)}
             onImageChange={(file) => onImageChange(block.id, file)}
             mirrored
+          />
+        );
+      case 'three_images':
+        return (
+          <ThreeImagesEditor
+            data={block.data as ThreeImagesData}
+            onChange={(data) => onUpdate(block.id, data)}
+            onImageChange={(file, field) => onImageChange(block.id, file, field)}
           />
         );
       default:

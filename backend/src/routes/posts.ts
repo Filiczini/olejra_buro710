@@ -200,20 +200,38 @@ router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequ
     }
 
     const blockImageFiles = files?.['blockImages'] || [];
-    const blockUploads: { sort_order: number; file: Express.Multer.File }[] = [];
+    const blockUploads: { sort_order: number; file: Express.Multer.File; imageSlot?: number }[] =
+      [];
     let blockImageIndex = 0;
 
     const processedBlocks = parsedBlocks.map((block, index) => {
       const data = { ...block.data };
-      const needsImage =
-        block.type === 'image_full' || block.type === 'text_image' || block.type === 'image_text';
-      const hasNewImage = data._hasNewImage === true;
 
-      if (needsImage && hasNewImage && blockImageFiles[blockImageIndex]) {
-        blockUploads.push({ sort_order: index, file: blockImageFiles[blockImageIndex] });
-        blockImageIndex++;
+      if (block.type === 'three_images') {
+        const newImageSlots = (data._newImageSlots as number[]) || [];
+        for (const slot of newImageSlots) {
+          if (blockImageFiles[blockImageIndex]) {
+            blockUploads.push({
+              sort_order: index,
+              file: blockImageFiles[blockImageIndex],
+              imageSlot: slot,
+            });
+            blockImageIndex++;
+          }
+        }
+        delete data._newImageSlots;
+      } else {
+        const needsImage =
+          block.type === 'image_full' || block.type === 'text_image' || block.type === 'image_text';
+        const hasNewImage = data._hasNewImage === true;
+
+        if (needsImage && hasNewImage && blockImageFiles[blockImageIndex]) {
+          blockUploads.push({ sort_order: index, file: blockImageFiles[blockImageIndex] });
+          blockImageIndex++;
+        }
       }
       delete data._hasNewImage;
+      delete data._newImageSlots;
 
       return {
         id: block.id,
@@ -261,17 +279,26 @@ router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequ
 
       const { data: blockRecord } = await supabase
         .from('blocks')
-        .select('id')
+        .select('id, data')
         .eq('post_id', post.id)
         .eq('sort_order', upload.sort_order)
         .single();
 
       if (blockRecord) {
-        const block = processedBlocks[upload.sort_order];
-        await supabase
-          .from('blocks')
-          .update({ data: { ...block.data, image_url: imageUrl } })
-          .eq('id', blockRecord.id);
+        const currentData = (blockRecord.data as Record<string, unknown>) || {};
+        if (upload.imageSlot !== undefined) {
+          const images = [...((currentData.images as { url: string; alt: string }[]) || [])];
+          images[upload.imageSlot] = { ...images[upload.imageSlot], url: imageUrl };
+          await supabase
+            .from('blocks')
+            .update({ data: { ...currentData, images } })
+            .eq('id', blockRecord.id);
+        } else {
+          await supabase
+            .from('blocks')
+            .update({ data: { ...currentData, image_url: imageUrl } })
+            .eq('id', blockRecord.id);
+        }
       }
     }
 
@@ -365,35 +392,63 @@ router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRe
     }
 
     const blockImageFiles = files?.['blockImages'] || [];
-    const blockImageUrls: Record<number, string> = {};
+    const blockImageUploads: Record<number, { url: string; slot?: number }[]> = {};
 
     if (parsedBlocks && blockImageFiles.length > 0) {
       let blockImageIndex = 0;
       for (const block of parsedBlocks) {
-        const needsImage =
-          block.type === 'image_full' || block.type === 'text_image' || block.type === 'image_text';
-        const hasNewImage = block.data._hasNewImage === true;
+        if (block.type === 'three_images') {
+          const newImageSlots = (block.data._newImageSlots as number[]) || [];
+          for (const slot of newImageSlots) {
+            if (blockImageFiles[blockImageIndex]) {
+              const url = await storageService.uploadImage(
+                blockImageFiles[blockImageIndex],
+                'blocks'
+              );
+              if (!blockImageUploads[block.sort_order]) blockImageUploads[block.sort_order] = [];
+              blockImageUploads[block.sort_order].push({ url, slot });
+              blockImageIndex++;
+            }
+          }
+          delete block.data._newImageSlots;
+        } else {
+          const needsImage =
+            block.type === 'image_full' ||
+            block.type === 'text_image' ||
+            block.type === 'image_text';
+          const hasNewImage = block.data._hasNewImage === true;
 
-        if (needsImage && hasNewImage && blockImageFiles[blockImageIndex]) {
-          blockImageUrls[block.sort_order] = await storageService.uploadImage(
-            blockImageFiles[blockImageIndex],
-            'blocks'
-          );
-          blockImageIndex++;
+          if (needsImage && hasNewImage && blockImageFiles[blockImageIndex]) {
+            const url = await storageService.uploadImage(
+              blockImageFiles[blockImageIndex],
+              'blocks'
+            );
+            if (!blockImageUploads[block.sort_order]) blockImageUploads[block.sort_order] = [];
+            blockImageUploads[block.sort_order].push({ url });
+            blockImageIndex++;
+          }
         }
         delete block.data._hasNewImage;
+        delete block.data._newImageSlots;
       }
     }
 
     if (parsedBlocks) {
       parsedBlocks = parsedBlocks.map((block) => {
-        if (blockImageUrls[block.sort_order]) {
-          return {
-            ...block,
-            data: { ...block.data, image_url: blockImageUrls[block.sort_order] },
-          };
+        const uploads = blockImageUploads[block.sort_order];
+        if (!uploads) return block;
+
+        const data = { ...block.data };
+        for (const upload of uploads) {
+          if (upload.slot !== undefined) {
+            const images = [...((data.images as { url: string; alt: string }[]) || [])];
+            images[upload.slot] = { ...images[upload.slot], url: upload.url };
+            data.images = images;
+          } else {
+            data.image_url = upload.url;
+          }
         }
-        return block;
+        return { ...block, data };
       });
     }
 
