@@ -169,13 +169,14 @@ export default function EditPostPage() {
     blocksDataRef.current.blocks = updatedBlocks;
   };
 
-  const handleBlockImageChange = (blockId: string, file: File | null) => {
+  const handleBlockImageChange = (blockId: string, file: File | null, field?: string) => {
+    const key = field ? `${blockId}__${field}` : blockId;
     setBlockFiles((prev) => {
-      const existing = prev.find((bf) => bf.id === blockId);
+      const existing = prev.find((bf) => bf.id === key);
       if (existing) {
-        return prev.map((bf) => (bf.id === blockId ? { ...bf, file } : bf));
+        return prev.map((bf) => (bf.id === key ? { ...bf, file } : bf));
       }
-      return [...prev, { id: blockId, file }];
+      return [...prev, { id: key, file }];
     });
   };
 
@@ -236,6 +237,26 @@ export default function EditPostPage() {
 
       const blocksData = blocksDataRef.current.blocks.map((block) => {
         const blockId = block.id || block._tempId;
+
+        if (block.type === 'three_images') {
+          const newImageSlots: number[] = [];
+          for (let i = 0; i < 3; i++) {
+            const key = `${blockId}__images.${i}`;
+            const bf = blockFiles.find((f) => f.id === key);
+            if (bf?.file) newImageSlots.push(i);
+          }
+          return {
+            id: block.id?.startsWith('temp-') ? undefined : block.id,
+            _tempId: block._tempId,
+            type: block.type,
+            data: {
+              ...block.data,
+              _newImageSlots: newImageSlots.length > 0 ? newImageSlots : undefined,
+            },
+            sort_order: block.sort_order,
+          };
+        }
+
         const blockFile = blockFiles.find((bf) => bf.id === blockId);
         return {
           id: block.id?.startsWith('temp-') ? undefined : block.id,
@@ -254,10 +275,17 @@ export default function EditPostPage() {
         formData.append('ogImage', ogImageFile);
       }
 
-      const imageBlocks = blockFiles.filter((bf) => bf.file);
-      imageBlocks.forEach((bf) => {
-        if (bf.file) {
-          formData.append('blockImages', bf.file);
+      blocksDataRef.current.blocks.forEach((block) => {
+        const blockId = block.id || block._tempId;
+        if (block.type === 'three_images') {
+          for (let i = 0; i < 3; i++) {
+            const key = `${blockId}__images.${i}`;
+            const bf = blockFiles.find((f) => f.id === key);
+            if (bf?.file) formData.append('blockImages', bf.file);
+          }
+        } else {
+          const bf = blockFiles.find((f) => f.id === blockId);
+          if (bf?.file) formData.append('blockImages', bf.file);
         }
       });
 

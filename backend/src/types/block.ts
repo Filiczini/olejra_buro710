@@ -1,5 +1,5 @@
 export type PostStatus = 'draft' | 'published';
-export type BlockType = 'text_full' | 'image_full' | 'text_image' | 'image_text';
+export type BlockType = 'text_full' | 'image_full' | 'text_image' | 'image_text' | 'three_images';
 
 export interface TextFullData {
   content: string;
@@ -25,7 +25,11 @@ export interface TextImageData {
   features?: string[];
 }
 
-export type BlockData = TextFullData | ImageFullData | TextImageData;
+export interface ThreeImagesData {
+  images: { url: string; alt: string }[];
+}
+
+export type BlockData = TextFullData | ImageFullData | TextImageData | ThreeImagesData;
 
 export interface Block {
   id: string;
