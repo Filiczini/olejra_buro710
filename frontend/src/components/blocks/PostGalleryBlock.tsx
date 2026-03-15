@@ -24,7 +24,7 @@ export default function PostGalleryBlock({ images, title }: PostGalleryBlockProp
     setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
   }, []);
 
-  const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const checkScrollButtons = useCallback(() => {
     clearTimeout(scrollTimerRef.current);
     scrollTimerRef.current = setTimeout(checkScrollButtonsRaw, 50);
