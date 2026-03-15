@@ -65,20 +65,20 @@
 
 ## 4. PERFORMANCE
 
-- [ ] **4.1 Promise.all для post + blocks** — зараз 2 послідовних запити (N+1)
+- [x] **4.1 Promise.all для post + blocks** — зараз 2 послідовних запити (N+1)
   - `backend/src/services/postService.ts:131-142`
 
-- [ ] **4.2 Паралельний upload зображень блоків** — зараз послідовний for loop
+- [x] **4.2 Паралельний upload зображень блоків** — зараз послідовний for loop
   - `backend/src/routes/posts.ts:242-268`
 
-- [ ] **4.3 getUniqueUsers() тягне всю таблицю** — потрібен DISTINCT або пагінація
+- [x] **4.3 getUniqueUsers() тягне всю таблицю** — потрібен DISTINCT або пагінація
   - `backend/src/services/activityLogService.ts:68-78`
 
-- [ ] **4.4 Додати `loading="lazy"` на зображення**
+- [x] **4.4 Додати `loading="lazy"` на зображення**
   - `frontend/src/components/sections/ProjectsGallerySection.tsx:45`
   - Інші компоненти з `<img>`
 
-- [ ] **4.5 React.memo для секцій з великими списками**
+- [x] **4.5 React.memo для секцій з великими списками**
   - `frontend/src/components/sections/FeaturedPostsSection.tsx`
   - `frontend/src/components/sections/ProjectsGallerySection.tsx`
 
@@ -86,27 +86,27 @@
 
 ## 5. ФРОНТЕНД — ЯКІСТЬ КОДУ
 
-- [ ] **5.1 Замінити тихі `.catch(() => {})`** на логування або user feedback
+- [x] **5.1 Замінити тихі `.catch(() => {})`** на логування або user feedback
   - `frontend/src/pages/ProjectsPage.tsx:17`
   - `frontend/src/components/sections/FeaturedPostsSection.tsx:14`
   - `frontend/src/components/sections/HeroSlider.tsx:19`
 
-- [ ] **5.2 Замінити array index на унікальний key** в динамічних списках
+- [x] **5.2 Замінити array index на унікальний key** в динамічних списках
   - `frontend/src/components/blocks/ThreeImagesBlock.tsx:17`
   - `frontend/src/components/blocks/PostGalleryBlock.tsx:104`
   - `frontend/src/components/admin/page-builder/editors/TextImageEditor.tsx:151`
   - `frontend/src/pages/ContactPage.tsx:134,160`
 
-- [ ] **5.3 Спростити стан блоків** — зараз `useState` + `useRef` без чіткого ownership
+- [x] **5.3 Спростити стан блоків** — зараз `useState` + `useRef` без чіткого ownership
   - `frontend/src/pages/admin/EditPostPage.tsx:51-92`
 
-- [ ] **5.4 Використати `AxiosError`** замість `err as { response? ... }`
+- [x] **5.4 Використати `AxiosError`** замість `err as { response? ... }`
   - `frontend/src/pages/admin/LoginPage.tsx:34`
 
-- [ ] **5.5 Винести транслітерацію** в `utils/transliterate.ts`
+- [x] **5.5 Винести транслітерацію** в `utils/transliterate.ts`
   - `frontend/src/pages/admin/EditPostPage.tsx:110-145`
 
-- [ ] **5.6 Винести Pagination** в окремий компонент
+- [x] **5.6 Винести Pagination** в окремий компонент
   - `frontend/src/pages/admin/PostsPage.tsx:274-315`
 
 ---

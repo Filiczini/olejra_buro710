@@ -1,6 +1,7 @@
 import { memo, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
+import { logger } from '../../lib/logger';
 import { postService } from '../../services/api';
 import type { Post } from '../../types/post';
 
@@ -12,7 +13,7 @@ export default memo(function ProjectsGallerySection() {
     postService
       .getFeatured()
       .then(setPosts)
-      .catch(() => {})
+      .catch((err) => logger.error('Failed to load gallery projects', err))
       .finally(() => setLoading(false));
   }, []);
 

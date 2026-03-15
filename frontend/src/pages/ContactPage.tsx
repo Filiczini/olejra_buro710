@@ -131,8 +131,8 @@ export default function ContactPage() {
                 Зв'яжіться з нами зручним для вас способом.
               </p>
               <div className="space-y-6">
-                {contactInfo.map((info, index) => (
-                  <div key={index} className="flex items-start gap-4">
+                {contactInfo.map((info) => (
+                  <div key={info.label} className="flex items-start gap-4">
                     <div className="flex-shrink-0">
                       <Icon icon={info.icon} width={24} className="text-zinc-900" />
                     </div>
@@ -157,9 +157,9 @@ export default function ContactPage() {
               <h3 className="text-2xl font-medium tracking-tight mb-6">Соціальні мережі</h3>
               <p className="text-zinc-500 text-lg mb-8">Дізнавайтеся про наші новини.</p>
               <div className="space-y-4">
-                {socialLinks.map((social, index) => (
+                {socialLinks.map((social) => (
                   <a
-                    key={index}
+                    key={social.name}
                     href={social.link}
                     target="_blank"
                     rel="noopener noreferrer"

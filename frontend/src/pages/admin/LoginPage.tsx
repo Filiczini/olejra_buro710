@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AxiosError } from 'axios';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import { authService } from '../../services/api';
@@ -31,8 +32,8 @@ export default function LoginPage() {
       localStorage.setItem('token', response.token);
       navigate('/admin/posts');
     } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || 'Невірний email або пароль');
+      const error = err instanceof AxiosError ? err.response?.data?.error : undefined;
+      setError(error || 'Невірний email або пароль');
     } finally {
       setLoading(false);
     }

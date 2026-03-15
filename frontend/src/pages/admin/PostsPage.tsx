@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Search, ChevronDown, PlusCircle, Pencil, Eye, Trash2, CheckCircle } from 'lucide-react';
 import { postService } from '../../services/api';
 import type { Post } from '../../types/post';
+import Pagination from '../../components/admin/Pagination';
 
 export default function PostsPage() {
   const navigate = useNavigate();
@@ -270,49 +271,13 @@ export default function PostsPage() {
             </table>
           </div>
 
-          {/* Pagination */}
-          {pagination.totalPages > 1 && (
-            <div className="flex justify-between items-center px-6 py-4 border-t border-gray-100">
-              <div className="text-sm text-gray-500">
-                Показано {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}-
-                {Math.min(pagination.page * pagination.limit, pagination.total)} з{' '}
-                {pagination.total}
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setPagination((prev) => ({ ...prev, page: prev.page - 1 }))}
-                  disabled={pagination.page === 1}
-                  className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer text-sm"
-                >
-                  Попередня
-                </button>
-                {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
-                  const page = Math.max(1, pagination.page - 2) + i;
-                  if (page > pagination.totalPages) return null;
-                  return (
-                    <button
-                      key={page}
-                      onClick={() => setPagination((prev) => ({ ...prev, page }))}
-                      className={`px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer text-sm ${
-                        page === pagination.page
-                          ? 'bg-gray-900 text-white border-gray-900 hover:bg-gray-800'
-                          : ''
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  );
-                })}
-                <button
-                  onClick={() => setPagination((prev) => ({ ...prev, page: prev.page + 1 }))}
-                  disabled={pagination.page === pagination.totalPages}
-                  className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer text-sm"
-                >
-                  Наступна
-                </button>
-              </div>
-            </div>
-          )}
+          <Pagination
+            page={pagination.page}
+            totalPages={pagination.totalPages}
+            total={pagination.total}
+            limit={pagination.limit}
+            onPageChange={(page) => setPagination((prev) => ({ ...prev, page }))}
+          />
         </div>
       </div>
     </div>

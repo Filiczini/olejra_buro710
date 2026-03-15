@@ -14,14 +14,11 @@ import PageBuilder from '../../components/admin/page-builder/PageBuilder';
 import GalleryUploader from '../../components/admin/GalleryUploader';
 import type { PostStatus } from '../../types/post';
 import type { Block, BlockType, BlockData, EditBlock } from '../../types/block';
+import { generateSlug } from '../../utils/transliterate';
 
 interface BlockWithFile {
   id: string;
   file: File | null;
-}
-
-interface BlocksDataRef {
-  blocks: EditBlock[];
 }
 
 const INITIAL_HERO_DATA: PostHeroFormData = {
@@ -55,7 +52,7 @@ export default function EditPostPage() {
   const [featured, setFeatured] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const blocksDataRef = useRef<BlocksDataRef>({ blocks: [] });
+  const blocksDataRef = useRef<EditBlock[]>([]);
 
   const loadPost = useCallback(
     async (postId: string) => {
@@ -84,7 +81,7 @@ export default function EditPostPage() {
         setFeatured(post.featured || false);
         setGalleryImages(post.gallery_images || []);
 
-        blocksDataRef.current.blocks = loadedBlocks.map((b, index) => ({
+        blocksDataRef.current = loadedBlocks.map((b, index) => ({
           id: b.id,
           type: b.type,
           data: b.data,
@@ -106,56 +103,6 @@ export default function EditPostPage() {
     }
   }, [id, loadPost]);
 
-  const generateSlug = (titleValue: string) => {
-    const transliterate = (str: string): string => {
-      const map: Record<string, string> = {
-        а: 'a',
-        б: 'b',
-        в: 'v',
-        г: 'h',
-        ґ: 'g',
-        д: 'd',
-        е: 'e',
-        є: 'ye',
-        ж: 'zh',
-        з: 'z',
-        и: 'y',
-        і: 'i',
-        ї: 'yi',
-        й: 'y',
-        к: 'k',
-        л: 'l',
-        м: 'm',
-        н: 'n',
-        о: 'o',
-        п: 'p',
-        р: 'r',
-        с: 's',
-        т: 't',
-        у: 'u',
-        ф: 'f',
-        х: 'kh',
-        ц: 'ts',
-        ч: 'ch',
-        ш: 'sh',
-        щ: 'shch',
-        ь: '',
-        ю: 'yu',
-        я: 'ya',
-      };
-      return str
-        .toLowerCase()
-        .split('')
-        .map((char) => map[char] || char)
-        .join('');
-    };
-
-    return transliterate(titleValue)
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '');
-  };
-
   const handleTitleChange = (value: string) => {
     setTitle(value);
     if (!isEditing && !slug) {
@@ -166,7 +113,7 @@ export default function EditPostPage() {
   const handleBlocksChange = (
     updatedBlocks: { id?: string; type: BlockType; data: BlockData; sort_order: number }[]
   ) => {
-    blocksDataRef.current.blocks = updatedBlocks;
+    blocksDataRef.current = updatedBlocks;
   };
 
   const handleBlockImageChange = (blockId: string, file: File | null, field?: string) => {
@@ -235,7 +182,7 @@ export default function EditPostPage() {
         formData.append('heroImage', heroData.heroImage);
       }
 
-      const blocksData = blocksDataRef.current.blocks.map((block) => {
+      const blocksData = blocksDataRef.current.map((block) => {
         const blockId = block.id || block._tempId;
 
         if (block.type === 'three_images') {
@@ -275,7 +222,7 @@ export default function EditPostPage() {
         formData.append('ogImage', ogImageFile);
       }
 
-      blocksDataRef.current.blocks.forEach((block) => {
+      blocksDataRef.current.forEach((block) => {
         const blockId = block.id || block._tempId;
         if (block.type === 'three_images') {
           for (let i = 0; i < 3; i++) {

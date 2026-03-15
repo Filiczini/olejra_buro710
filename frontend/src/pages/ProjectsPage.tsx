@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
+import { logger } from '../lib/logger';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import { postService } from '../services/api';
@@ -14,7 +15,7 @@ export default function ProjectsPage() {
     postService
       .getAll({ status: 'published', limit: 100 })
       .then((res) => setPosts(res.data))
-      .catch(() => {})
+      .catch((err) => logger.error('Failed to load projects', err))
       .finally(() => setLoading(false));
   }, []);
 

@@ -148,7 +148,7 @@ export default function TextImageEditor({
           <div className="flex flex-wrap gap-1">
             {(data.features || []).map((feature, index) => (
               <span
-                key={index}
+                key={`${index}-${feature}`}
                 className="inline-flex items-center gap-1 px-2 py-1 bg-zinc-100 text-zinc-700 rounded text-xs"
               >
                 {feature}
