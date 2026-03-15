@@ -10,6 +10,7 @@ export default function Footer() {
             href="#"
             className="text-zinc-400 hover:text-zinc-900 transition-colors"
             title="Instagram"
+            aria-label="Instagram"
           >
             <Icon icon="lucide:instagram" width={20} />
           </a>
@@ -17,6 +18,7 @@ export default function Footer() {
             href="#"
             className="text-zinc-400 hover:text-zinc-900 transition-colors"
             title="Facebook"
+            aria-label="Facebook"
           >
             <Icon icon="lucide:facebook" width={20} />
           </a>

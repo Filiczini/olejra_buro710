@@ -95,7 +95,7 @@ export default function PostPage() {
         {blocks.length > 0 && <BlockRenderer blocks={blocks} />}
 
         {post.gallery_images && post.gallery_images.length > 0 && (
-          <PostGalleryBlock images={post.gallery_images} />
+          <PostGalleryBlock images={post.gallery_images} title={post.title} />
         )}
 
         {!hasHero &&

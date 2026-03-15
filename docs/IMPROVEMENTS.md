@@ -113,14 +113,14 @@
 
 ## 6. ACCESSIBILITY
 
-- [ ] **6.1 Додати `aria-label`** на icon-only кнопки
+- [x] **6.1 Додати `aria-label`** на icon-only кнопки
   - `frontend/src/components/layout/Footer.tsx:10,17`
   - `frontend/src/components/blocks/PostGalleryBlock.tsx:79,89`
 
-- [ ] **6.2 ESC закриває dropdown** + focus management
+- [x] **6.2 ESC закриває dropdown** + focus management
   - `frontend/src/components/admin/page-builder/AddBlockMenu.tsx:65`
 
-- [ ] **6.3 Покращити alt text** — замість "Gallery 1" використовувати назву поста
+- [x] **6.3 Покращити alt text** — замість "Gallery 1" використовувати назву поста
   - `frontend/src/components/blocks/PostGalleryBlock.tsx:110`
 
 ---

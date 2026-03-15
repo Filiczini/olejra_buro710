@@ -4,9 +4,10 @@ import ImageLightbox from '../ui/ImageLightbox';
 
 interface PostGalleryBlockProps {
   images: string[];
+  title?: string;
 }
 
-export default function PostGalleryBlock({ images }: PostGalleryBlockProps) {
+export default function PostGalleryBlock({ images, title }: PostGalleryBlockProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -107,7 +108,7 @@ export default function PostGalleryBlock({ images }: PostGalleryBlockProps) {
           >
             <img
               src={image}
-              alt={`Gallery ${index + 1}`}
+              alt={`${title || 'Gallery'} — зображення ${index + 1}`}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
           </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Icon } from '@iconify-icon/react';
 import type { BlockType } from '../../../types/block';
 
@@ -41,17 +41,44 @@ const BLOCK_TYPES: { type: BlockType; label: string; icon: string; description: 
 
 export default function AddBlockMenu({ onAddBlock }: AddBlockMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+        buttonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen && menuRef.current) {
+      const firstButton = menuRef.current.querySelector('button');
+      firstButton?.focus();
+    }
+  }, [isOpen]);
 
   const handleSelect = (type: BlockType) => {
     onAddBlock(type);
     setIsOpen(false);
+    buttonRef.current?.focus();
   };
 
   return (
     <div className="relative">
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        aria-haspopup="true"
         className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-zinc-300 rounded-lg text-zinc-600 hover:border-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-colors cursor-pointer"
       >
         <Icon icon="solar:add-circle-linear" width={20} />
@@ -65,7 +92,11 @@ export default function AddBlockMenu({ onAddBlock }: AddBlockMenuProps) {
       {isOpen && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-          <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-zinc-200 z-20 overflow-hidden">
+          <div
+            ref={menuRef}
+            role="menu"
+            className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-zinc-200 z-20 overflow-hidden"
+          >
             {BLOCK_TYPES.map((blockType) => (
               <button
                 key={blockType.type}
