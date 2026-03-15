@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import path from 'path';
 import type { Request, Response } from 'express';
 import { env } from './config/env';
+import { requestIdMiddleware } from './middleware/requestId';
 import authRoutes from './routes/auth';
 import activityLogsRoutes from './routes/activityLogs';
 import postsRoutes from './routes/posts';
@@ -15,6 +16,7 @@ import { swaggerSpec } from './docs/swagger';
 const app = express();
 const PORT = env.PORT;
 
+app.use(requestIdMiddleware);
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(
   cors({

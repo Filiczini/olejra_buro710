@@ -146,11 +146,11 @@
 
 ## 8. ЛОГУВАННЯ
 
-- [ ] **8.1 Структуроване логування** — JSON формат замість plain text
+- [x] **8.1 Структуроване логування** — JSON формат замість plain text
   - `backend/src/lib/logger.ts`
 
-- [ ] **8.2 Request ID middleware** для трасування запитів
+- [x] **8.2 Request ID middleware** для трасування запитів
   - `backend/src/index.ts`
 
-- [ ] **8.3 Контекст в error логах** — userId, requestId, duration
+- [x] **8.3 Контекст в error логах** — userId, requestId, duration
   - Всі route handlers
