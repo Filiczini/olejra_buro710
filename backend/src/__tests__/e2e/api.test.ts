@@ -11,6 +11,7 @@ import express from 'express';
 import request from 'supertest';
 import type { Application } from 'express';
 import type { Post, PaginatedResponse } from '../../types/post';
+import { ConflictError } from '../../lib/errors';
 
 // ============================================================================
 // Mock Configuration
@@ -129,7 +130,7 @@ vi.mock('../../services/postService', () => ({
           (p) => p.slug === data.slug && p.id !== id
         );
         if (duplicate) {
-          throw new Error('Slug already exists');
+          throw new ConflictError('Slug already exists');
         }
       }
 

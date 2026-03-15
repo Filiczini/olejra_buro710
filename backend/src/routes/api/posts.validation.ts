@@ -1,5 +1,5 @@
 /**
- * Validation utilities for Posts API
+ * Validation utilities for Posts API (shared between internal and external routes)
  */
 
 import type { PostStatus } from '../../types/post';
@@ -8,7 +8,8 @@ import { postUpdateSchema } from '@buro710/shared';
 export interface PostBody {
   title?: string;
   slug?: string;
-  status?: PostStatus;
+  status?: PostStatus | 'draft' | 'published';
+  featured?: string;
   seo_title?: string;
   seo_description?: string;
   hero_title?: string;
@@ -47,7 +48,7 @@ export const validatePostInput = (data: PostBody, isCreate: boolean): Validation
     }
   }
 
-  // Use postUpdateSchema (all fields optional) since we only validate
+  // Always use postUpdateSchema (all fields optional) since we only validate
   // fields that are actually present. Required field checks (e.g. title)
   // are handled by the route handlers.
   const schema = postUpdateSchema;

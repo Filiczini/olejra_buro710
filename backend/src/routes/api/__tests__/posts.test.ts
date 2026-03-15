@@ -689,7 +689,8 @@ describe('Posts API', () => {
         post: MOCK_POST,
         blocks: [],
       });
-      vi.mocked(postService.update).mockRejectedValue(new Error('Slug already exists'));
+      const { ConflictError } = await import('../../../lib/errors');
+      vi.mocked(postService.update).mockRejectedValue(new ConflictError('Slug already exists'));
 
       // Act
       const response = await withApiKey(
@@ -697,7 +698,7 @@ describe('Posts API', () => {
       );
 
       // Assert
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(409);
       expect(response.body).toEqual({ error: 'Slug already exists' });
     });
 

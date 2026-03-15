@@ -8,56 +8,9 @@ import { activityLogService } from '../services/activityLogService';
 import { uploadBlockMedia, uploadGalleryImages } from '../middleware/multer';
 import { supabase } from '../config/supabase';
 import type { BlockType, BlockData } from '../types/block';
-import { postCreateSchema, postUpdateSchema } from '@buro710/shared';
-
-interface PostBody {
-  title?: string;
-  slug?: string;
-  status?: 'draft' | 'published';
-  featured?: string;
-  seo_title?: string;
-  seo_description?: string;
-  hero_title?: string;
-  hero_subtitle?: string;
-  hero_tags?: string;
-  hero_location?: string;
-  hero_year?: string;
-  gallery_images?: string;
-  blocks?: string;
-}
+import { validatePostInput, type PostBody } from './api/posts.validation';
 
 const router = Router();
-
-const validatePostBody = (body: PostBody, isCreate: boolean) => {
-  const dataToValidate: Record<string, unknown> = {};
-
-  if (body.title !== undefined) dataToValidate.title = body.title;
-  if (body.slug !== undefined) dataToValidate.slug = body.slug;
-  if (body.status !== undefined) dataToValidate.status = body.status;
-  if (body.seo_title !== undefined) dataToValidate.seo_title = body.seo_title;
-  if (body.seo_description !== undefined) dataToValidate.seo_description = body.seo_description;
-  if (body.hero_title !== undefined) dataToValidate.hero_title = body.hero_title;
-  if (body.hero_subtitle !== undefined) dataToValidate.hero_subtitle = body.hero_subtitle;
-  if (body.hero_location !== undefined) dataToValidate.hero_location = body.hero_location;
-  if (body.hero_year !== undefined) dataToValidate.hero_year = body.hero_year;
-  if (body.hero_tags) {
-    try {
-      dataToValidate.hero_tags = JSON.parse(body.hero_tags);
-    } catch {
-      /* will be validated as string */
-    }
-  }
-
-  const schema = isCreate ? postCreateSchema : postUpdateSchema;
-  const result = schema.safeParse(dataToValidate);
-  if (!result.success) {
-    return result.error.issues.map((e) => ({
-      field: e.path.join('.'),
-      message: e.message,
-    }));
-  }
-  return [];
-};
 
 router.get('/', async (req, res) => {
   try {
@@ -138,7 +91,7 @@ router.post(
         blocks,
       } = body;
 
-      const validationErrors = validatePostBody(body, true);
+      const validationErrors = validatePostInput(body, true);
       if (validationErrors.length > 0) {
         return res.status(400).json({ errors: validationErrors });
       }
@@ -333,7 +286,7 @@ router.put(
         blocks,
       } = body;
 
-      const validationErrors = validatePostBody(body, false);
+      const validationErrors = validatePostInput(body, false);
       if (validationErrors.length > 0) {
         return res.status(400).json({ errors: validationErrors });
       }

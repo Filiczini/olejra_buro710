@@ -1,6 +1,7 @@
 import { supabase } from '../config/supabase';
 import { blockService } from './blockService';
 import { storageService } from './storageService';
+import { ConflictError, NotFoundError } from '../lib/errors';
 import type {
   Post,
   PostStatus,
@@ -187,7 +188,7 @@ export const postService = {
       .single();
 
     if (postError) throw postError;
-    if (!post) throw new Error('Failed to create post');
+    if (!post) throw new NotFoundError('Failed to create post');
 
     if (blocks && blocks.length > 0) {
       await blockService.create({ postId: post.id, blocks });
@@ -208,7 +209,7 @@ export const postService = {
         .single();
 
       if (existing) {
-        throw new Error('Slug already exists');
+        throw new ConflictError('Slug already exists');
       }
     }
 
@@ -220,7 +221,7 @@ export const postService = {
       .single();
 
     if (postError) throw postError;
-    if (!post) throw new Error('Failed to update post');
+    if (!post) throw new NotFoundError('Failed to update post');
 
     if (blocks !== undefined) {
       await blockService.syncBlocks(id, blocks);

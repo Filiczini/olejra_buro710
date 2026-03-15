@@ -13,6 +13,7 @@ import { postService } from '../../services/postService';
 import { storageService } from '../../services/storageService';
 import type { BlockType, BlockData } from '../../types/block';
 import type { PostStatus } from '../../types/post';
+import { AppError } from '../../lib/errors';
 import { parseJsonField, validatePostInput, type PostBody } from './posts.validation';
 
 const router = Router();
@@ -378,8 +379,8 @@ router.put('/:id', uploadPostMedia, async (req, res) => {
     res.json(post);
   } catch (error) {
     logger.error('Error updating post:', error);
-    if ((error as Error).message === 'Slug already exists') {
-      return res.status(400).json({ error: 'Slug already exists' });
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json({ error: error.message });
     }
     res.status(500).json({ error: 'Failed to update post' });
   }
