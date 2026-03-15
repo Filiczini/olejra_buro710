@@ -24,11 +24,14 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Type check backend
+        run: npx tsc --noEmit --project backend/tsconfig.json
+
       - name: Build frontend
         run: npm run build
 
       - name: Run frontend tests
         run: npm run test:frontend
 
-      - name: Run backend tests
-        run: npm run test:backend
+      - name: Run backend tests with coverage
+        run: npm run test:coverage --workspace=backend

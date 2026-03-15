@@ -56,7 +56,7 @@ export const swaggerSpec = {
         properties: {
           id: { type: 'string' },
           post_id: { type: 'string' },
-          type: { type: 'string', enum: ['text_full', 'image_full', 'text_image', 'image_text'] },
+          type: { type: 'string', enum: ['text_full', 'image_full', 'text_image', 'image_text', 'three_images'] },
           data: { type: 'object' },
           sort_order: { type: 'integer' },
           created_at: { type: 'string', format: 'date-time' },

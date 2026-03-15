@@ -5,6 +5,7 @@
  */
 import { Router } from 'express';
 import multer from 'multer';
+import rateLimit from 'express-rate-limit';
 import { logger } from '../../lib/logger';
 import { memoryStorage } from 'multer';
 import type { FileFilterCallback } from 'multer';
@@ -14,7 +15,13 @@ import { storageService } from '../../services/storageService';
 import type { BlockType, BlockData } from '../../types/block';
 import type { PostStatus } from '../../types/post';
 import { AppError } from '../../lib/errors';
-import { parseJsonField, validatePostInput, type PostBody } from './posts.validation';
+import {
+  parseJsonField,
+  processBlocks,
+  validatePostInput,
+  type PostBody,
+  type ProcessedBlock,
+} from './posts.validation';
 
 const router = Router();
 
@@ -106,37 +113,21 @@ export const processUploadedFiles = async (
   return result;
 };
 
-interface ProcessedBlock {
-  id?: string;
-  type: BlockType;
-  data: Record<string, unknown>;
-  sort_order: number;
-}
-
-const processBlocks = (blocksJson: string | undefined): ProcessedBlock[] => {
-  if (!blocksJson) return [];
-
-  const parsed = parseJsonField<ProcessedBlock[]>(blocksJson, 'blocks');
-  if (!parsed) return [];
-
-  return parsed.map((block, index) => {
-    const data = { ...block.data };
-    delete data._hasNewImage;
-
-    return {
-      id: block.id,
-      type: block.type,
-      data,
-      sort_order: block.sort_order ?? index,
-    };
-  });
-};
-
 // ============================================================================
 // Routes - All protected by API Key
 // ============================================================================
 
+const apiRateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+  skip: () => process.env.NODE_ENV === 'test',
+});
+
 router.use(apiKeyMiddleware);
+router.use(apiRateLimiter);
 
 /**
  * GET /api/v1/posts
@@ -206,7 +197,7 @@ router.post('/', uploadPostMedia, async (req, res) => {
 
     const validationErrors = validatePostInput(body, true);
     if (validationErrors.length > 0) {
-      return res.status(400).json({ errors: validationErrors });
+      return res.status(400).json({ error: 'Validation failed', details: validationErrors });
     }
 
     if (!title) {
@@ -289,7 +280,7 @@ router.put('/:id', uploadPostMedia, async (req, res) => {
 
     const validationErrors = validatePostInput(body, false);
     if (validationErrors.length > 0) {
-      return res.status(400).json({ errors: validationErrors });
+      return res.status(400).json({ error: 'Validation failed', details: validationErrors });
     }
 
     // Get existing post

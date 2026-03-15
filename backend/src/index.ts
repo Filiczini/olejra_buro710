@@ -5,17 +5,34 @@ import helmet from 'helmet';
 import path from 'path';
 import type { Request, Response } from 'express';
 import { env } from './config/env';
+import { logger } from './lib/logger';
+import { requestIdMiddleware } from './middleware/requestId';
 import authRoutes from './routes/auth';
 import activityLogsRoutes from './routes/activityLogs';
 import postsRoutes from './routes/posts';
 import contactRoutes from './routes/contact';
 import apiPostsRoutes from './routes/api/posts';
+import { supabase } from './config/supabase';
 import { swaggerSpec } from './docs/swagger';
 
 const app = express();
 const PORT = env.PORT;
 
-app.use(helmet({ contentSecurityPolicy: false }));
+app.use(requestIdMiddleware);
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com'],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com'],
+        imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'"],
+      },
+    },
+  })
+);
 app.use(
   cors({
     origin: env.FRONTEND_URL,
@@ -33,9 +50,10 @@ app.use('/api/contact', contactRoutes);
 // External API v1
 app.use('/api/v1/posts', apiPostsRoutes);
 
-// API Documentation - custom HTML with CDN assets
-app.get('/api/docs', (_req: Request, res: Response) => {
-  const html = `<!DOCTYPE html>
+// API Documentation - only in non-production environments
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/api/docs', (_req: Request, res: Response) => {
+    const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -63,16 +81,23 @@ app.get('/api/docs', (_req: Request, res: Response) => {
   </script>
 </body>
 </html>`;
-  res.setHeader('Content-Type', 'text/html');
-  res.send(html);
-});
-app.get('/api/docs.json', (_req: Request, res: Response) => {
-  res.setHeader('Content-Type', 'application/json');
-  res.send(swaggerSpec);
-});
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+  });
+  app.get('/api/docs.json', (_req: Request, res: Response) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+  });
+}
 
-app.get('/health', (_req: Request, res: Response) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get('/health', async (_req: Request, res: Response) => {
+  try {
+    const { error } = await supabase.from('posts').select('id', { count: 'exact', head: true });
+    if (error) throw error;
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  } catch {
+    res.status(503).json({ status: 'degraded', timestamp: new Date().toISOString() });
+  }
 });
 
 if (process.env.NODE_ENV === 'production') {
@@ -85,5 +110,5 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  logger.info(`Server running on port ${PORT}`);
 });

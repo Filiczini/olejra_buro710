@@ -568,10 +568,10 @@ describe('E2E: Posts API', () => {
 
       // Assert: Multiple errors returned
       expect(response.status).toBe(400);
-      expect(response.body.errors).toBeDefined();
-      expect(response.body.errors).toContainEqual(expect.objectContaining({ field: 'title' }));
-      expect(response.body.errors).toContainEqual(expect.objectContaining({ field: 'slug' }));
-      expect(response.body.errors).toContainEqual(expect.objectContaining({ field: 'seo_title' }));
+      expect(response.body.details).toBeDefined();
+      expect(response.body.details).toContainEqual(expect.objectContaining({ field: 'title' }));
+      expect(response.body.details).toContainEqual(expect.objectContaining({ field: 'slug' }));
+      expect(response.body.details).toContainEqual(expect.objectContaining({ field: 'seo_title' }));
     });
 
     it('handles JSON parsing errors in hero_tags', async () => {
@@ -841,7 +841,7 @@ describe('E2E: Posts API', () => {
 
       // Assert
       expect(response.status).toBe(400);
-      expect(response.body.errors).toContainEqual(
+      expect(response.body.details).toContainEqual(
         expect.objectContaining({
           field: 'seo_description',
           message: expect.stringContaining('160'),

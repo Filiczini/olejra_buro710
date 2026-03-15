@@ -33,14 +33,11 @@ cd frontend && npm run test:run  # Single run
 
 Tests live at `backend/src/**/*.test.ts` and `frontend/src/**/*.test.{ts,tsx}`.
 
-### Database Utilities (backend workspace)
+### Database Utilities
 ```bash
-npm run seed:admin       # Create admin user
-npm run seed             # Seed projects
-npm run seed:posts       # Seed blog posts
-npm run seed:clean       # Clear projects
-npm run seed:clean:posts # Clear posts
-npm run migrate:projects # Run project migrations
+npm run seed:admin       # Create admin user (delegates to backend)
+npm run seed:posts       # Seed blog posts (delegates to backend)
+npm run seed:clean:posts # Clear posts (delegates to backend)
 npm run validate:i18n    # Validate i18n keys
 ```
 

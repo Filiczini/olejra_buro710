@@ -8,6 +8,20 @@ export const adminMiddleware = (req: Request, res: Response, next: NextFunction)
   next();
 };
 
+export const optionalAuthMiddleware = (req: Request, _res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.split(' ')[1];
+    try {
+      req.user = verifyToken(token);
+    } catch {
+      // Invalid token — proceed as unauthenticated
+    }
+  }
+  next();
+};
+
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
@@ -15,7 +29,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
     return res.status(401).json({ error: 'No token provided' });
   }
 
-  const token = authHeader.substring(7);
+  const token = authHeader.split(' ')[1];
 
   try {
     const decoded = verifyToken(token);

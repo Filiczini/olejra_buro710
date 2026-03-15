@@ -23,6 +23,7 @@ export interface Post extends PostHero {
   gallery_images?: string[];
   created_at: string;
   updated_at: string;
+  deleted_at?: string | null;
   blocks?: Block[];
 }
 

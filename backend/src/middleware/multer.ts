@@ -6,7 +6,7 @@ const storage = memoryStorage();
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_MIMETYPES = ['image/jpeg', 'image/png', 'image/jpg'];
 
-const fileFilter = (_req: any, file: any, cb: FileFilterCallback) => {
+const fileFilter = (_req: unknown, file: Express.Multer.File, cb: FileFilterCallback) => {
   if (ALLOWED_MIMETYPES.includes(file.mimetype)) {
     cb(null, true);
   } else {

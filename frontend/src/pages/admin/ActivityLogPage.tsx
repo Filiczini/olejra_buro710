@@ -1,13 +1,22 @@
 import { useState, useEffect, useCallback } from 'react';
 import { logger } from '../../lib/logger';
 import { ChevronDown } from 'lucide-react';
+import Pagination from '../../components/admin/Pagination';
 import { activityLogService } from '../../services/api';
 import type { ActivityLog, ActivityLogsParams } from '../../types/activityLog';
+
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 20;
 
 export default function ActivityLogPage() {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 0 });
+  const [pagination, setPagination] = useState({
+    page: DEFAULT_PAGE,
+    limit: DEFAULT_LIMIT,
+    total: 0,
+    totalPages: 0,
+  });
   const [filters, setFilters] = useState<ActivityLogsParams>({});
   const [uniqueUsers, setUniqueUsers] = useState<string[]>([]);
 
@@ -264,47 +273,13 @@ export default function ActivityLogPage() {
         </table>
       </div>
 
-      {pagination.totalPages > 1 && (
-        <div className="flex justify-between items-center px-8 py-4 border-t border-gray-100">
-          <div className="text-sm text-gray-500">
-            Показано {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}-
-            {Math.min(pagination.page * pagination.limit, pagination.total)} з {pagination.total}
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
-              disabled={pagination.page === 1}
-              className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
-            >
-              Попередня
-            </button>
-            {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
-              const page = Math.max(1, pagination.page - 2) + i;
-              if (page > pagination.totalPages) return null;
-              return (
-                <button
-                  key={page}
-                  onClick={() => setPagination({ ...pagination, page })}
-                  className={`px-4 py-2 border rounded-lg transition-colors cursor-pointer ${
-                    page === pagination.page
-                      ? 'bg-gray-900 text-white border-gray-900'
-                      : 'border-gray-200 hover:bg-gray-50'
-                  }`}
-                >
-                  {page}
-                </button>
-              );
-            })}
-            <button
-              onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
-              disabled={pagination.page === pagination.totalPages}
-              className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
-            >
-              Наступна
-            </button>
-          </div>
-        </div>
-      )}
+      <Pagination
+        page={pagination.page}
+        totalPages={pagination.totalPages}
+        total={pagination.total}
+        limit={pagination.limit}
+        onPageChange={(page) => setPagination({ ...pagination, page })}
+      />
     </div>
   );
 }

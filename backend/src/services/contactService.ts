@@ -54,12 +54,15 @@ export const contactService = {
         .range(offset, offset + limit - 1),
     ]);
 
+    const total = countResult.count || 0;
     return {
       data: dataResult.data || [],
-      total: countResult.count || 0,
-      page,
-      limit,
-      totalPages: Math.ceil((countResult.count || 0) / limit),
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
     };
   },
 };

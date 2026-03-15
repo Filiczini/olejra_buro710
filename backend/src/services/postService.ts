@@ -2,6 +2,7 @@ import { supabase } from '../config/supabase';
 import { blockService } from './blockService';
 import { storageService } from './storageService';
 import { ConflictError, NotFoundError } from '../lib/errors';
+import { generateSlug } from '@buro710/shared';
 import type {
   Post,
   PostStatus,
@@ -44,61 +45,11 @@ interface UpdatePostParams extends Partial<PostHero> {
   }[];
 }
 
-function generateSlug(title: string): string {
-  const transliterate = (str: string): string => {
-    const map: Record<string, string> = {
-      а: 'a',
-      б: 'b',
-      в: 'v',
-      г: 'h',
-      ґ: 'g',
-      д: 'd',
-      е: 'e',
-      є: 'ye',
-      ж: 'zh',
-      з: 'z',
-      и: 'y',
-      і: 'i',
-      ї: 'yi',
-      й: 'y',
-      к: 'k',
-      л: 'l',
-      м: 'm',
-      н: 'n',
-      о: 'o',
-      п: 'p',
-      р: 'r',
-      с: 's',
-      т: 't',
-      у: 'u',
-      ф: 'f',
-      х: 'kh',
-      ц: 'ts',
-      ч: 'ch',
-      ш: 'sh',
-      щ: 'shch',
-      ь: '',
-      ю: 'yu',
-      я: 'ya',
-    };
-    return str
-      .toLowerCase()
-      .split('')
-      .map((char) => map[char] || char)
-      .join('');
-  };
-
-  return transliterate(title)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
-}
-
 export const postService = {
   getAll: async (params?: PostPaginationParams): Promise<PaginatedResponse<Post>> => {
     const { page = 1, limit = 10, status, search } = params || {};
 
-    let query = supabase.from('posts').select('*', { count: 'exact' });
+    let query = supabase.from('posts').select('*', { count: 'exact' }).is('deleted_at', null);
 
     if (status) {
       query = query.eq('status', status);
@@ -130,17 +81,14 @@ export const postService = {
   },
 
   getById: async (id: string): Promise<{ post: Post; blocks: Block[] }> => {
-    const { data: post, error: postError } = await supabase
-      .from('posts')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const [postResult, blocks] = await Promise.all([
+      supabase.from('posts').select('*').eq('id', id).single(),
+      blockService.getByPostId(id),
+    ]);
 
-    if (postError) throw postError;
+    if (postResult.error) throw postResult.error;
 
-    const blocks = await blockService.getByPostId(id);
-
-    return { post: post as Post, blocks };
+    return { post: postResult.data as Post, blocks };
   },
 
   getBySlug: async (slug: string): Promise<{ post: Post; blocks: Block[] }> => {
@@ -149,6 +97,7 @@ export const postService = {
       .select('*')
       .eq('slug', slug)
       .eq('status', 'published')
+      .is('deleted_at', null)
       .single();
 
     if (postError) throw postError;
@@ -168,6 +117,7 @@ export const postService = {
         .from('posts')
         .select('id')
         .eq('slug', uniqueSlug)
+        .is('deleted_at', null)
         .single();
 
       if (!existing) break;
@@ -206,6 +156,7 @@ export const postService = {
         .select('id')
         .eq('slug', postData.slug)
         .neq('id', id)
+        .is('deleted_at', null)
         .single();
 
       if (existing) {
@@ -231,6 +182,29 @@ export const postService = {
   },
 
   delete: async (id: string): Promise<void> => {
+    const { error } = await supabase
+      .from('posts')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id);
+
+    if (error) throw error;
+  },
+
+  restore: async (id: string): Promise<Post> => {
+    const { data: post, error } = await supabase
+      .from('posts')
+      .update({ deleted_at: null })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    if (!post) throw new NotFoundError('Post not found');
+
+    return post as Post;
+  },
+
+  permanentDelete: async (id: string): Promise<void> => {
     const { data: post } = await supabase
       .from('posts')
       .select('hero_image_url, gallery_images')
@@ -268,6 +242,7 @@ export const postService = {
       .select('*')
       .eq('featured', true)
       .eq('status', 'published')
+      .is('deleted_at', null)
       .order('created_at', { ascending: false })
       .limit(6);
 

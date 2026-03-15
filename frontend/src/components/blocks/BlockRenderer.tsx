@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type {
   Block,
   TextFullData,
@@ -14,7 +15,7 @@ interface BlockRendererProps {
   blocks: Block[];
 }
 
-export default function BlockRenderer({ blocks }: BlockRendererProps) {
+export default memo(function BlockRenderer({ blocks }: BlockRendererProps) {
   if (!blocks || blocks.length === 0) return null;
 
   return (
@@ -39,4 +40,4 @@ export default function BlockRenderer({ blocks }: BlockRendererProps) {
       })}
     </div>
   );
-}
+});

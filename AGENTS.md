@@ -29,7 +29,10 @@ npm run seed:random          # Seed with random projects
 npm run seed:clean           # Clear all projects
 npm run migrate:projects      # Run project migrations
 
-# Note: No test suite exists yet - tests should use Jest/Vitest when added
+# Testing (Vitest)
+cd backend && npm run test:run   # Backend tests
+cd frontend && npm run test:run  # Frontend tests
+cd shared && npm run test:run    # Shared package tests
 ```
 
 ## Code Structure
@@ -325,6 +328,5 @@ JWT_SECRET=your_secret_here
 
 ## Known Issues & TODOs
 
-- No test suite exists - add Vitest/Jest when ready
 - JSON parsing for media IDs needs robust handling (single string vs array)
 - Consider adding TypeScript strict mode in tsconfig

@@ -12,9 +12,9 @@ export default function ThreeImagesBlock({ data }: ThreeImagesBlockProps) {
   return (
     <section className="py-12 px-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-        {images.map((image, index) =>
+        {images.map((image) =>
           image.url ? (
-            <div key={index} className="overflow-hidden group">
+            <div key={image.url} className="overflow-hidden group">
               <img
                 src={image.url}
                 alt={image.alt || ''}

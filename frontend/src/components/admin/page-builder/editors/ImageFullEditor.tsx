@@ -23,6 +23,7 @@ export default function ImageFullEditor({ data, onChange, onImageChange }: Image
         setPreviewUrl(reader.result as string);
         setHasNewImage(true);
       };
+      reader.onerror = () => setPreviewUrl(null);
       reader.readAsDataURL(file);
       onImageChange(file);
     }

@@ -1,6 +1,8 @@
 import { Router } from 'express';
-import { authMiddleware, adminMiddleware } from '../middleware/auth';
+import rateLimit from 'express-rate-limit';
+import { authMiddleware, adminMiddleware, optionalAuthMiddleware } from '../middleware/auth';
 import { logger } from '../lib/logger';
+import { AppError } from '../lib/errors';
 import type { AuthenticatedRequest } from '../types/express.js';
 import { postService } from '../services/postService';
 import { storageService } from '../services/storageService';
@@ -8,11 +10,27 @@ import { activityLogService } from '../services/activityLogService';
 import { uploadBlockMedia, uploadGalleryImages } from '../middleware/multer';
 import { supabase } from '../config/supabase';
 import type { BlockType, BlockData } from '../types/block';
-import { validatePostInput, type PostBody } from './api/posts.validation';
+import {
+  validatePostInput,
+  parseBlocksJson,
+  extractBlockImageUploads,
+  type PostBody,
+} from './api/posts.validation';
 
 const router = Router();
 
-router.get('/', async (req, res) => {
+const adminRateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+  skip: () => process.env.NODE_ENV === 'test',
+});
+
+router.use(adminRateLimiter);
+
+router.get('/', optionalAuthMiddleware, async (req, res) => {
   try {
     const { page, limit, status, search } = req.query;
 
@@ -21,10 +39,15 @@ router.get('/', async (req, res) => {
       ? Math.min(100, Math.max(1, parseInt(limit as string, 10) || 10))
       : undefined;
 
+    // Unauthenticated users can only see published posts
+    const effectiveStatus = (req as AuthenticatedRequest).user
+      ? (status as 'draft' | 'published')
+      : 'published';
+
     const result = await postService.getAll({
       page: parsedPage,
       limit: parsedLimit,
-      status: status as 'draft' | 'published',
+      status: effectiveStatus,
       search: search ? String(search).slice(0, 200) : undefined,
     });
 
@@ -52,18 +75,20 @@ router.get('/public/:slug', async (req, res) => {
     res.json(result);
   } catch (error) {
     logger.error('Error fetching post by slug:', error);
-    res.status(404).json({ error: 'Post not found' });
+    const status = error instanceof AppError && error.statusCode === 404 ? 404 : 500;
+    res.status(status).json({ error: status === 404 ? 'Post not found' : 'Failed to fetch post' });
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const id = req.params.id as string;
     const result = await postService.getById(id);
     res.json(result);
   } catch (error) {
     logger.error('Error fetching post:', error);
-    res.status(404).json({ error: 'Post not found' });
+    const status = error instanceof AppError && error.statusCode === 404 ? 404 : 500;
+    res.status(status).json({ error: status === 404 ? 'Post not found' : 'Failed to fetch post' });
   }
 });
 
@@ -93,7 +118,7 @@ router.post(
 
       const validationErrors = validatePostInput(body, true);
       if (validationErrors.length > 0) {
-        return res.status(400).json({ errors: validationErrors });
+        return res.status(400).json({ error: 'Validation failed', details: validationErrors });
       }
 
       if (!title) {
@@ -112,73 +137,18 @@ router.post(
         ogImageUrl = await storageService.uploadImage(files['ogImage'][0], 'blocks');
       }
 
-      let parsedBlocks: {
-        id?: string;
-        _tempId?: string;
-        type: BlockType;
-        data: Record<string, unknown>;
-        sort_order?: number;
-      }[] = [];
-      if (blocks) {
-        try {
-          parsedBlocks = JSON.parse(blocks);
-        } catch {
-          return res.status(400).json({ error: 'Invalid blocks format' });
-        }
-      }
-
+      const rawBlocks = parseBlocksJson(blocks);
       const blockImageFiles = files?.['blockImages'] || [];
-      const blockUploads: { sort_order: number; file: Express.Multer.File; imageSlot?: number }[] =
-        [];
-      let blockImageIndex = 0;
-
-      const processedBlocks = parsedBlocks.map((block, index) => {
-        const data = { ...block.data };
-
-        if (block.type === 'three_images') {
-          const newImageSlots = (data._newImageSlots as number[]) || [];
-          for (const slot of newImageSlots) {
-            if (blockImageFiles[blockImageIndex]) {
-              blockUploads.push({
-                sort_order: index,
-                file: blockImageFiles[blockImageIndex],
-                imageSlot: slot,
-              });
-              blockImageIndex++;
-            }
-          }
-          delete data._newImageSlots;
-        } else {
-          const needsImage =
-            block.type === 'image_full' ||
-            block.type === 'text_image' ||
-            block.type === 'image_text';
-          const hasNewImage = data._hasNewImage === true;
-
-          if (needsImage && hasNewImage && blockImageFiles[blockImageIndex]) {
-            blockUploads.push({ sort_order: index, file: blockImageFiles[blockImageIndex] });
-            blockImageIndex++;
-          }
-        }
-        delete data._hasNewImage;
-        delete data._newImageSlots;
-
-        return {
-          id: block.id,
-          type: block.type,
-          data,
-          sort_order: block.sort_order ?? index,
-        };
-      });
+      const { blocks: processedBlocks, uploads: blockUploads } = extractBlockImageUploads(
+        rawBlocks,
+        blockImageFiles
+      );
 
       const galleryImageFiles = files?.['galleryImages'] || [];
       const existingGalleryUrls = gallery_images ? JSON.parse(gallery_images) : [];
-      const newGalleryUrls: string[] = [];
-
-      for (const file of galleryImageFiles) {
-        const url = await storageService.uploadImage(file, 'blocks');
-        newGalleryUrls.push(url);
-      }
+      const newGalleryUrls = await Promise.all(
+        galleryImageFiles.map((file) => storageService.uploadImage(file, 'blocks'))
+      );
 
       const finalGalleryImages = [...existingGalleryUrls, ...newGalleryUrls];
 
@@ -204,32 +174,38 @@ router.post(
         }[],
       });
 
-      for (const upload of blockUploads) {
-        const imageUrl = await storageService.uploadImage(upload.file, 'blocks');
-
-        const { data: blockRecord } = await supabase
+      if (blockUploads.length > 0) {
+        // Prefetch all blocks once to avoid N+1 queries
+        const { data: allBlocks } = await supabase
           .from('blocks')
-          .select('id, data')
-          .eq('post_id', post.id)
-          .eq('sort_order', upload.sort_order)
-          .single();
+          .select('id, data, sort_order')
+          .eq('post_id', post.id);
 
-        if (blockRecord) {
-          const currentData = (blockRecord.data as Record<string, unknown>) || {};
-          if (upload.imageSlot !== undefined) {
-            const images = [...((currentData.images as { url: string; alt: string }[]) || [])];
-            images[upload.imageSlot] = { ...images[upload.imageSlot], url: imageUrl };
-            await supabase
-              .from('blocks')
-              .update({ data: { ...currentData, images } })
-              .eq('id', blockRecord.id);
-          } else {
-            await supabase
-              .from('blocks')
-              .update({ data: { ...currentData, image_url: imageUrl } })
-              .eq('id', blockRecord.id);
-          }
-        }
+        const blocksByOrder = new Map((allBlocks || []).map((b) => [b.sort_order, b]));
+
+        await Promise.all(
+          blockUploads.map(async (upload) => {
+            const imageUrl = await storageService.uploadImage(upload.file, 'blocks');
+            const blockRecord = blocksByOrder.get(upload.sort_order);
+
+            if (blockRecord) {
+              const currentData = (blockRecord.data as Record<string, unknown>) || {};
+              if (upload.imageSlot !== undefined) {
+                const images = [...((currentData.images as { url: string; alt: string }[]) || [])];
+                images[upload.imageSlot] = { ...images[upload.imageSlot], url: imageUrl };
+                await supabase
+                  .from('blocks')
+                  .update({ data: { ...currentData, images } })
+                  .eq('id', blockRecord.id);
+              } else {
+                await supabase
+                  .from('blocks')
+                  .update({ data: { ...currentData, image_url: imageUrl } })
+                  .eq('id', blockRecord.id);
+              }
+            }
+          })
+        );
       }
 
       const heroFields: string[] = [];
@@ -247,7 +223,7 @@ router.post(
         entity_id: post.id,
         entity_title: post.title,
         changes: {
-          blocks_count: parsedBlocks.length,
+          blocks_count: rawBlocks.length,
           hero_updated: heroFields.length > 0,
           hero_fields: heroFields.length > 0 ? heroFields : undefined,
         },
@@ -288,7 +264,7 @@ router.put(
 
       const validationErrors = validatePostInput(body, false);
       if (validationErrors.length > 0) {
-        return res.status(400).json({ errors: validationErrors });
+        return res.status(400).json({ error: 'Validation failed', details: validationErrors });
       }
 
       const existing = await postService.getById(id);
@@ -310,63 +286,27 @@ router.put(
         ogImageUrl = await storageService.uploadImage(files['ogImage'][0], 'blocks');
       }
 
-      let parsedBlocks:
-        | {
-            id?: string;
-            _tempId?: string;
-            type: BlockType;
-            data: Record<string, unknown>;
-            sort_order: number;
-          }[]
-        | undefined;
-      if (blocks) {
-        try {
-          parsedBlocks = JSON.parse(blocks);
-        } catch {
-          return res.status(400).json({ error: 'Invalid blocks format' });
-        }
-      }
-
+      const rawBlocks = blocks ? parseBlocksJson(blocks) : undefined;
       const blockImageFiles = files?.['blockImages'] || [];
+
+      const extracted = rawBlocks
+        ? extractBlockImageUploads(rawBlocks, blockImageFiles)
+        : { blocks: undefined, uploads: [] };
+      let parsedBlocks = extracted.blocks;
+      const blockUploadsForUpdate = extracted.uploads;
+
+      // Upload block images in parallel and apply URLs to block data
+      const blockUploadResults = await Promise.all(
+        blockUploadsForUpdate.map(async (upload) => ({
+          sort_order: upload.sort_order,
+          url: await storageService.uploadImage(upload.file, 'blocks'),
+          slot: upload.imageSlot,
+        }))
+      );
       const blockImageUploads: Record<number, { url: string; slot?: number }[]> = {};
-
-      if (parsedBlocks && blockImageFiles.length > 0) {
-        let blockImageIndex = 0;
-        for (const block of parsedBlocks) {
-          if (block.type === 'three_images') {
-            const newImageSlots = (block.data._newImageSlots as number[]) || [];
-            for (const slot of newImageSlots) {
-              if (blockImageFiles[blockImageIndex]) {
-                const url = await storageService.uploadImage(
-                  blockImageFiles[blockImageIndex],
-                  'blocks'
-                );
-                if (!blockImageUploads[block.sort_order]) blockImageUploads[block.sort_order] = [];
-                blockImageUploads[block.sort_order].push({ url, slot });
-                blockImageIndex++;
-              }
-            }
-            delete block.data._newImageSlots;
-          } else {
-            const needsImage =
-              block.type === 'image_full' ||
-              block.type === 'text_image' ||
-              block.type === 'image_text';
-            const hasNewImage = block.data._hasNewImage === true;
-
-            if (needsImage && hasNewImage && blockImageFiles[blockImageIndex]) {
-              const url = await storageService.uploadImage(
-                blockImageFiles[blockImageIndex],
-                'blocks'
-              );
-              if (!blockImageUploads[block.sort_order]) blockImageUploads[block.sort_order] = [];
-              blockImageUploads[block.sort_order].push({ url });
-              blockImageIndex++;
-            }
-          }
-          delete block.data._hasNewImage;
-          delete block.data._newImageSlots;
-        }
+      for (const result of blockUploadResults) {
+        if (!blockImageUploads[result.sort_order]) blockImageUploads[result.sort_order] = [];
+        blockImageUploads[result.sort_order].push({ url: result.url, slot: result.slot });
       }
 
       if (parsedBlocks) {
@@ -392,12 +332,9 @@ router.put(
       const existingGalleryUrls = gallery_images
         ? JSON.parse(gallery_images)
         : existing.post.gallery_images || [];
-      const newGalleryUrls: string[] = [];
-
-      for (const file of galleryImageFiles) {
-        const url = await storageService.uploadImage(file, 'blocks');
-        newGalleryUrls.push(url);
-      }
+      const newGalleryUrls = await Promise.all(
+        galleryImageFiles.map((file) => storageService.uploadImage(file, 'blocks'))
+      );
 
       const finalGalleryImages = [...existingGalleryUrls, ...newGalleryUrls];
 
@@ -537,8 +474,14 @@ router.delete(
       const id = req.params.id as string;
       const { image_url } = req.body as { image_url?: string };
 
-      if (!image_url) {
+      if (!image_url || typeof image_url !== 'string') {
         return res.status(400).json({ error: 'Image URL is required' });
+      }
+
+      try {
+        new URL(image_url);
+      } catch {
+        return res.status(400).json({ error: 'Invalid image URL format' });
       }
 
       const existing = await postService.getById(id);

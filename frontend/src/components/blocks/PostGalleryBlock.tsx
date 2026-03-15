@@ -1,12 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Icon } from '@iconify-icon/react';
 import ImageLightbox from '../ui/ImageLightbox';
 
 interface PostGalleryBlockProps {
   images: string[];
+  title?: string;
 }
 
-export default function PostGalleryBlock({ images }: PostGalleryBlockProps) {
+export default function PostGalleryBlock({ images, title }: PostGalleryBlockProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -14,14 +15,20 @@ export default function PostGalleryBlock({ images }: PostGalleryBlockProps) {
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
-  const checkScrollButtons = () => {
+  const checkScrollButtonsRaw = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = container;
     setCanScrollLeft(scrollLeft > 0);
     setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-  };
+  }, []);
+
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const checkScrollButtons = useCallback(() => {
+    clearTimeout(scrollTimerRef.current);
+    scrollTimerRef.current = setTimeout(checkScrollButtonsRaw, 50);
+  }, [checkScrollButtonsRaw]);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -101,13 +108,13 @@ export default function PostGalleryBlock({ images }: PostGalleryBlockProps) {
       >
         {images.map((image, index) => (
           <div
-            key={index}
+            key={image}
             onClick={() => openLightbox(index)}
             className="gallery-item aspect-[2/3] w-[calc(100vw-48px)] md:w-auto md:min-w-[240px] md:max-w-[400px] bg-zinc-100 overflow-hidden group cursor-pointer flex-shrink-0 snap-center md:snap-none"
           >
             <img
               src={image}
-              alt={`Gallery ${index + 1}`}
+              alt={`${title || 'Gallery'} — зображення ${index + 1}`}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
           </div>

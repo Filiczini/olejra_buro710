@@ -1,22 +1,12 @@
-import { useEffect, useState } from 'react';
+import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
-import { postService } from '../../services/api';
-import type { Post } from '../../types/post';
+import { useFetchPosts } from '../../hooks/useFetchPosts';
 
-export default function ProjectsGallerySection() {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
+export default memo(function ProjectsGallerySection() {
+  const { posts, loading, error } = useFetchPosts({ featured: true });
 
-  useEffect(() => {
-    postService
-      .getFeatured()
-      .then(setPosts)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading || posts.length === 0) return null;
+  if (loading || error || posts.length === 0) return null;
 
   return (
     <section className="max-w-[1800px] mx-auto px-6 mb-40">
@@ -44,6 +34,7 @@ export default function ProjectsGallerySection() {
                   <img
                     src={post.hero_image_url}
                     alt={post.title}
+                    loading="lazy"
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out group-hover:scale-105"
                   />
                 ) : (
@@ -76,4 +67,4 @@ export default function ProjectsGallerySection() {
       </div>
     </section>
   );
-}
+});

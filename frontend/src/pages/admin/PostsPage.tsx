@@ -4,54 +4,65 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Search, ChevronDown, PlusCircle, Pencil, Eye, Trash2, CheckCircle } from 'lucide-react';
 import { postService } from '../../services/api';
 import type { Post } from '../../types/post';
+import Pagination from '../../components/admin/Pagination';
+
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 10;
 
 export default function PostsPage() {
   const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
+  const [pagination, setPagination] = useState({
+    page: DEFAULT_PAGE,
+    limit: DEFAULT_LIMIT,
+    total: 0,
+    totalPages: 0,
+  });
   const [statusFilter, setStatusFilter] = useState<'draft' | 'published' | ''>('');
   const [searchQuery, setSearchQuery] = useState('');
 
   const previousPostsRef = useRef<Post[]>([]);
   const previousPaginationRef = useRef(pagination);
 
-  const loadPosts = useCallback(async () => {
-    setLoading(true);
-    try {
-      const result = await postService.getAll({
-        page: pagination.page,
-        limit: pagination.limit,
-        status: statusFilter || undefined,
-        search: searchQuery || undefined,
-      });
-      setPosts(result.data);
-      setPagination((prev) => ({
-        ...prev,
-        total: result.pagination.total,
-        totalPages: result.pagination.totalPages,
-      }));
-    } catch (error) {
-      logger.error('Error loading posts', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [pagination.page, pagination.limit, statusFilter, searchQuery]);
+  const loadPosts = useCallback(
+    async (page: number) => {
+      setLoading(true);
+      try {
+        const result = await postService.getAll({
+          page,
+          limit: DEFAULT_LIMIT,
+          status: statusFilter || undefined,
+          search: searchQuery || undefined,
+        });
+        setPosts(result.data);
+        setPagination((prev) => ({
+          ...prev,
+          page,
+          total: result.pagination.total,
+          totalPages: result.pagination.totalPages,
+        }));
+      } catch (error) {
+        logger.error('Error loading posts', error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [statusFilter, searchQuery]
+  );
 
   useEffect(() => {
-    loadPosts();
-  }, [loadPosts]);
+    loadPosts(pagination.page);
+  }, [loadPosts]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (pagination.page === 1) {
-        loadPosts();
-      } else {
-        setPagination((prev) => ({ ...prev, page: 1 }));
+      if (pagination.page !== 1) {
+        loadPosts(1);
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery, loadPosts, pagination.page]);
+  }, [searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDelete = async (id: string) => {
     if (!confirm('Ви впевнені, що хочете видалити цей пост?')) return;
@@ -270,49 +281,13 @@ export default function PostsPage() {
             </table>
           </div>
 
-          {/* Pagination */}
-          {pagination.totalPages > 1 && (
-            <div className="flex justify-between items-center px-6 py-4 border-t border-gray-100">
-              <div className="text-sm text-gray-500">
-                Показано {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}-
-                {Math.min(pagination.page * pagination.limit, pagination.total)} з{' '}
-                {pagination.total}
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setPagination((prev) => ({ ...prev, page: prev.page - 1 }))}
-                  disabled={pagination.page === 1}
-                  className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer text-sm"
-                >
-                  Попередня
-                </button>
-                {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
-                  const page = Math.max(1, pagination.page - 2) + i;
-                  if (page > pagination.totalPages) return null;
-                  return (
-                    <button
-                      key={page}
-                      onClick={() => setPagination((prev) => ({ ...prev, page }))}
-                      className={`px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer text-sm ${
-                        page === pagination.page
-                          ? 'bg-gray-900 text-white border-gray-900 hover:bg-gray-800'
-                          : ''
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  );
-                })}
-                <button
-                  onClick={() => setPagination((prev) => ({ ...prev, page: prev.page + 1 }))}
-                  disabled={pagination.page === pagination.totalPages}
-                  className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer text-sm"
-                >
-                  Наступна
-                </button>
-              </div>
-            </div>
-          )}
+          <Pagination
+            page={pagination.page}
+            totalPages={pagination.totalPages}
+            total={pagination.total}
+            limit={pagination.limit}
+            onPageChange={(page) => loadPosts(page)}
+          />
         </div>
       </div>
     </div>

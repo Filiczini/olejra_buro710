@@ -1,22 +1,11 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
-import { postService } from '../services/api';
-import type { Post } from '../types/post';
+import { useFetchPosts } from '../hooks/useFetchPosts';
 
 export default function ProjectsPage() {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    postService
-      .getAll({ status: 'published', limit: 100 })
-      .then((res) => setPosts(res.data))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const { posts, loading, error } = useFetchPosts({ status: 'published', limit: 100 });
 
   return (
     <div className="min-h-screen bg-white text-zinc-900 antialiased">
@@ -46,7 +35,19 @@ export default function ProjectsPage() {
             </div>
           )}
 
-          {!loading && posts.length === 0 && (
+          {!loading && error && (
+            <div className="text-center py-16">
+              <p className="text-zinc-500 mb-4">Не вдалося завантажити проєкти.</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="text-sm font-medium text-zinc-900 underline underline-offset-4 hover:text-zinc-600 transition-colors"
+              >
+                Спробувати знову
+              </button>
+            </div>
+          )}
+
+          {!loading && !error && posts.length === 0 && (
             <p className="text-zinc-400 text-sm">Проєктів поки немає.</p>
           )}
 
@@ -59,6 +60,7 @@ export default function ProjectsPage() {
                   <Link
                     key={post.id}
                     to={`/page/${post.slug}`}
+                    aria-label={`Переглянути проєкт: ${post.hero_title || post.title}`}
                     className="group flex flex-col gap-6"
                   >
                     <div className="aspect-[4/3] bg-zinc-100 overflow-hidden w-full relative">
@@ -66,6 +68,7 @@ export default function ProjectsPage() {
                         <img
                           src={post.hero_image_url}
                           alt={post.title}
+                          loading="lazy"
                           className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out group-hover:scale-105"
                         />
                       ) : (
