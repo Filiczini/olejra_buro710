@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const blockSchema = z.object({
   id: z.string().optional(),
   _tempId: z.string().optional(),
-  type: z.enum(['text_full', 'image_full', 'text_image', 'image_text']),
+  type: z.enum(['text_full', 'image_full', 'text_image', 'image_text', 'three_images']),
   data: z.record(z.string(), z.unknown()),
   sort_order: z.number().optional(),
 });
@@ -17,7 +17,8 @@ export const postCreateSchema = z.object({
     .string()
     .min(1, "Slug обов'язковий")
     .max(200, 'Slug не може бути довшим за 200 символів')
-    .regex(/^[a-z0-9-]+$/, 'Slug може містити лише латинські літери, цифри та дефіси'),
+    .regex(/^[a-z0-9-]+$/, 'Slug може містити лише латинські літери, цифри та дефіси')
+    .optional(),
   status: z.enum(['draft', 'published']).optional(),
   featured: z.boolean().optional(),
   seo_title: z.string().max(60, 'SEO title не може бути довшим за 60 символів').optional(),

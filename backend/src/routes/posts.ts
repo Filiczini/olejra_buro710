@@ -8,6 +8,7 @@ import { activityLogService } from '../services/activityLogService';
 import { uploadBlockMedia, uploadGalleryImages } from '../middleware/multer';
 import { supabase } from '../config/supabase';
 import type { BlockType, BlockData } from '../types/block';
+import { postCreateSchema, postUpdateSchema } from '@buro710/shared';
 
 interface PostBody {
   title?: string;
@@ -27,71 +28,35 @@ interface PostBody {
 
 const router = Router();
 
-const VALIDATION_LIMITS = {
-  title: { minLength: 1, maxLength: 200 },
-  slug: { maxLength: 200 },
-  seoTitle: { maxLength: 60 },
-  seoDescription: { maxLength: 160 },
-  heroTitle: { maxLength: 200 },
-  heroSubtitle: { maxLength: 300 },
-};
+const validatePostBody = (body: PostBody, isCreate: boolean) => {
+  const dataToValidate: Record<string, unknown> = {};
 
-interface ValidationError {
-  field: string;
-  message: string;
-}
-
-const validatePostInput = (data: PostBody): ValidationError[] => {
-  const errors: ValidationError[] = [];
-  const { title, slug, seo_title, seo_description, hero_title, hero_subtitle } = data;
-
-  if (title !== undefined) {
-    if (title.length < VALIDATION_LIMITS.title.minLength) {
-      errors.push({ field: 'title', message: 'Title is required' });
-    } else if (title.length > VALIDATION_LIMITS.title.maxLength) {
-      errors.push({
-        field: 'title',
-        message: `Title must be at most ${VALIDATION_LIMITS.title.maxLength} characters`,
-      });
+  if (body.title !== undefined) dataToValidate.title = body.title;
+  if (body.slug !== undefined) dataToValidate.slug = body.slug;
+  if (body.status !== undefined) dataToValidate.status = body.status;
+  if (body.seo_title !== undefined) dataToValidate.seo_title = body.seo_title;
+  if (body.seo_description !== undefined) dataToValidate.seo_description = body.seo_description;
+  if (body.hero_title !== undefined) dataToValidate.hero_title = body.hero_title;
+  if (body.hero_subtitle !== undefined) dataToValidate.hero_subtitle = body.hero_subtitle;
+  if (body.hero_location !== undefined) dataToValidate.hero_location = body.hero_location;
+  if (body.hero_year !== undefined) dataToValidate.hero_year = body.hero_year;
+  if (body.hero_tags) {
+    try {
+      dataToValidate.hero_tags = JSON.parse(body.hero_tags);
+    } catch {
+      /* will be validated as string */
     }
   }
 
-  if (slug && slug.length > VALIDATION_LIMITS.slug.maxLength) {
-    errors.push({
-      field: 'slug',
-      message: `Slug must be at most ${VALIDATION_LIMITS.slug.maxLength} characters`,
-    });
+  const schema = isCreate ? postCreateSchema : postUpdateSchema;
+  const result = schema.safeParse(dataToValidate);
+  if (!result.success) {
+    return result.error.issues.map((e) => ({
+      field: e.path.join('.'),
+      message: e.message,
+    }));
   }
-
-  if (seo_title && seo_title.length > VALIDATION_LIMITS.seoTitle.maxLength) {
-    errors.push({
-      field: 'seo_title',
-      message: `SEO title must be at most ${VALIDATION_LIMITS.seoTitle.maxLength} characters`,
-    });
-  }
-
-  if (seo_description && seo_description.length > VALIDATION_LIMITS.seoDescription.maxLength) {
-    errors.push({
-      field: 'seo_description',
-      message: `SEO description must be at most ${VALIDATION_LIMITS.seoDescription.maxLength} characters`,
-    });
-  }
-
-  if (hero_title && hero_title.length > VALIDATION_LIMITS.heroTitle.maxLength) {
-    errors.push({
-      field: 'hero_title',
-      message: `Hero title must be at most ${VALIDATION_LIMITS.heroTitle.maxLength} characters`,
-    });
-  }
-
-  if (hero_subtitle && hero_subtitle.length > VALIDATION_LIMITS.heroSubtitle.maxLength) {
-    errors.push({
-      field: 'hero_subtitle',
-      message: `Hero subtitle must be at most ${VALIDATION_LIMITS.heroSubtitle.maxLength} characters`,
-    });
-  }
-
-  return errors;
+  return [];
 };
 
 router.get('/', async (req, res) => {
@@ -163,7 +128,7 @@ router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequ
       blocks,
     } = body;
 
-    const validationErrors = validatePostInput(body);
+    const validationErrors = validatePostBody(body, true);
     if (validationErrors.length > 0) {
       return res.status(400).json({ errors: validationErrors });
     }
@@ -350,7 +315,7 @@ router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRe
       blocks,
     } = body;
 
-    const validationErrors = validatePostInput(body);
+    const validationErrors = validatePostBody(body, false);
     if (validationErrors.length > 0) {
       return res.status(400).json({ errors: validationErrors });
     }

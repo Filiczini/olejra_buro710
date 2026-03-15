@@ -13,7 +13,7 @@ import { postService } from '../../services/postService';
 import { storageService } from '../../services/storageService';
 import type { BlockType, BlockData } from '../../types/block';
 import type { PostStatus } from '../../types/post';
-import { validatePostInput, parseJsonField, type PostBody } from './posts.validation';
+import { parseJsonField, validatePostInput, type PostBody } from './posts.validation';
 
 const router = Router();
 

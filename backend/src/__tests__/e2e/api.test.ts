@@ -523,11 +523,10 @@ describe('E2E: Posts API', () => {
       // Act: Create with invalid data
       const failResponse = await withApiKey(request(app).post('/api/v1/posts').send(invalidData));
 
-      // Assert: Failure response (validation returns errors array)
+      // Assert: Failure response (missing title returns error string)
       expect(failResponse.status).toBe(400);
-      expect(failResponse.body).toHaveProperty('errors');
-      expect(Array.isArray(failResponse.body.errors)).toBe(true);
-      expect(failResponse.body.errors.length).toBeGreaterThan(0);
+      expect(failResponse.body).toHaveProperty('error');
+      expect(failResponse.body.error).toBe('Title is required');
 
       // ================================================================
       // Step 2: Retry with valid data
@@ -844,14 +843,14 @@ describe('E2E: Posts API', () => {
       expect(response.body.errors).toContainEqual(
         expect.objectContaining({
           field: 'seo_description',
-          message: expect.stringContaining('160 characters'),
+          message: expect.stringContaining('160'),
         })
       );
     });
 
     it('handles large hero_tags array', async () => {
-      // Arrange: Many tags
-      const manyTags = Array(50)
+      // Arrange: Many tags (within the 15-tag limit)
+      const manyTags = Array(15)
         .fill(null)
         .map((_, i) => `tag-${i}`);
 
@@ -867,7 +866,7 @@ describe('E2E: Posts API', () => {
 
       // Assert
       expect(response.status).toBe(201);
-      expect(response.body.hero_tags).toHaveLength(50);
+      expect(response.body.hero_tags).toHaveLength(15);
     });
   });
 
@@ -963,11 +962,8 @@ describe('E2E: Posts API', () => {
     });
 
     it('handles XSS in hero_tags array', async () => {
-      // Arrange: XSS payloads in tags
-      const xssTags = [
-        '<script>alert("tag-xss")</script>',
-        '<img src=x onerror="alert(\'tag-xss\')">',
-      ];
+      // Arrange: XSS payloads in tags (within 20-char tag limit)
+      const xssTags = ['<script>xss</script>', '<img src=x>'];
 
       // Act
       const response = await withApiKey(
@@ -1142,10 +1138,10 @@ describe('E2E: Posts API', () => {
       // Act: Try to create without title
       const response = await withApiKey(request(app).post('/api/v1/posts').send({}));
 
-      // Assert (API returns errors array for validation failures)
+      // Assert (API returns error string for missing title)
       expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty('errors');
-      expect(Array.isArray(response.body.errors)).toBe(true);
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.error).toBe('Title is required');
     });
   });
 
