@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Icon } from '@iconify-icon/react';
 
 interface ImageLightboxProps {
@@ -17,6 +17,7 @@ export default function ImageLightbox({
   onNext,
 }: ImageLightboxProps) {
   const [isClosing, setIsClosing] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleClose = useCallback(() => {
     setIsClosing(true);
@@ -57,6 +58,23 @@ export default function ImageLightbox({
         case 'ArrowRight':
           onNext();
           break;
+        case 'Tab': {
+          // Focus trap: keep Tab within lightbox
+          const focusable = containerRef.current?.querySelectorAll<HTMLElement>(
+            'button, [href], [tabindex]:not([tabindex="-1"])'
+          );
+          if (!focusable || focusable.length === 0) break;
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+          break;
+        }
       }
     },
     [handleClose, onPrev, onNext]
@@ -75,15 +93,25 @@ export default function ImageLightbox({
     document.addEventListener('keydown', handleKeyDown);
     document.body.style.overflow = 'hidden';
 
+    // Focus trap: focus the container so Tab stays within lightbox
+    const prevFocus = document.activeElement as HTMLElement | null;
+    containerRef.current?.focus();
+
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = 'unset';
+      prevFocus?.focus();
     };
   }, [handleKeyDown]);
 
   return (
     <div
-      className={`fixed inset-0 z-[70] group ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
+      ref={containerRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Перегляд зображення"
+      tabIndex={-1}
+      className={`fixed inset-0 z-[70] group outline-none ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
       onAnimationEnd={handleAnimationEnd}
       onClick={handleBackdropClick}
     >

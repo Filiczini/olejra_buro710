@@ -31,6 +31,7 @@ export default function TextImageEditor({
         setPreviewUrl(reader.result as string);
         setHasNewImage(true);
       };
+      reader.onerror = () => setPreviewUrl(null);
       reader.readAsDataURL(file);
       onImageChange(file);
     }

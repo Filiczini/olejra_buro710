@@ -43,6 +43,13 @@ export default function ThreeImagesEditor({
           return next;
         });
       };
+      reader.onerror = () => {
+        setPreviews((prev) => {
+          const next = [...prev];
+          next[index] = null;
+          return next;
+        });
+      };
       reader.readAsDataURL(file);
       onImageChange(file, `images.${index}`);
     }

@@ -33,6 +33,7 @@ export default function SeoFields({
       reader.onloadend = () => {
         setPreviewUrl(reader.result as string);
       };
+      reader.onerror = () => setPreviewUrl(null);
       reader.readAsDataURL(file);
       onOgImageChange?.(file);
     }

@@ -7,7 +7,9 @@ export default function Footer() {
         <div className="text-zinc-400 text-sm">©2026 BURO 710. Всі права захищено.</div>
         <div className="flex gap-6 mt-4 md:mt-0">
           <a
-            href="#"
+            href="https://www.instagram.com/buro_710/"
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-zinc-400 hover:text-zinc-900 transition-colors"
             title="Instagram"
             aria-label="Instagram"
@@ -15,7 +17,9 @@ export default function Footer() {
             <Icon icon="lucide:instagram" width={20} />
           </a>
           <a
-            href="#"
+            href="https://www.facebook.com/buro710"
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-zinc-400 hover:text-zinc-900 transition-colors"
             title="Facebook"
             aria-label="Facebook"

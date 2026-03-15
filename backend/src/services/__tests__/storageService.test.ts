@@ -189,7 +189,7 @@ describe('storageService', () => {
       expect(result.success).toBe(true);
       expect(result.urls).toHaveLength(1);
       expect(result.errors).toHaveLength(1);
-      expect(result.errors[0]).toBe('Quota exceeded');
+      expect(result.errors[0]).toBe('Upload failed: Quota exceeded');
     });
 
     it('returns success false when all uploads fail', async () => {

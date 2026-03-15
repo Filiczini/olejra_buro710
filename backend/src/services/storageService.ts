@@ -60,7 +60,7 @@ export const storageService = {
         contentType: file.mimetype,
       });
 
-    if (uploadError) throw uploadError;
+    if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`);
 
     const { data } = supabase.storage.from(targetBucket).getPublicUrl(filePath);
 

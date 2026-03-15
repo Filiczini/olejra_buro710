@@ -1,7 +1,7 @@
 import { Icon } from '@iconify-icon/react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 
 interface HeaderProps {
   transparent?: boolean;
@@ -13,6 +13,24 @@ export default function Header({ transparent = false }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  const handleMobileTabTrap = useCallback((e: KeyboardEvent) => {
+    if (e.key !== 'Tab' || !mobileMenuRef.current) return;
+    const focusable = mobileMenuRef.current.querySelectorAll<HTMLElement>(
+      'a, button, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }, []);
 
   const handleClose = () => {
     setIsClosing(true);
@@ -36,13 +54,15 @@ export default function Header({ transparent = false }: HeaderProps) {
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
+      document.addEventListener('keydown', handleMobileTabTrap);
     } else {
       document.body.style.overflow = 'unset';
     }
     return () => {
       document.body.style.overflow = 'unset';
+      document.removeEventListener('keydown', handleMobileTabTrap);
     };
-  }, [mobileMenuOpen]);
+  }, [mobileMenuOpen, handleMobileTabTrap]);
 
   // When transparent is false, always show solid header
   // When transparent is true, show transparent until scrolled
@@ -128,6 +148,10 @@ export default function Header({ transparent = false }: HeaderProps) {
         <div className="fixed inset-0 z-[60] md:hidden">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose} />
           <div
+            ref={mobileMenuRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Мобільне меню"
             className={`absolute inset-0 bg-white flex flex-col ${isClosing ? 'animate-slide-out' : 'animate-slide-in'}`}
             onAnimationEnd={handleAnimationEnd}
           >
