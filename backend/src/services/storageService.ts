@@ -1,4 +1,7 @@
+import path from 'path';
 import { supabase } from '../config/supabase';
+
+const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png'];
 
 interface UploadResult {
   success: boolean;
@@ -39,6 +42,13 @@ export const storageService = {
    * @returns Public URL of uploaded image
    */
   uploadImage: async (file: Express.Multer.File, bucket?: string): Promise<string> => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      throw new Error(
+        `File extension '${ext}' is not allowed. Allowed: ${ALLOWED_EXTENSIONS.join(', ')}`
+      );
+    }
+
     const targetBucket = bucket || 'projects';
     const fileName = storageService.generateSafeFileName(file.originalname);
     const folder = bucket === 'blocks' ? 'blocks' : 'projects/media';

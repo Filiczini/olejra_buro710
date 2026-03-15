@@ -3,7 +3,14 @@ import { z } from 'zod';
 const envSchema = z.object({
   PORT: z.coerce.number().default(3000),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  FRONTEND_URL: z.string().url().default('http://localhost:5173'),
+  FRONTEND_URL: z
+    .string()
+    .url()
+    .default('http://localhost:5173')
+    .refine(
+      (url) => process.env.NODE_ENV !== 'production' || url.startsWith('https://'),
+      'FRONTEND_URL must use HTTPS in production'
+    ),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
   SUPABASE_URL: z.string().url('SUPABASE_URL must be a valid URL'),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, 'SUPABASE_SERVICE_ROLE_KEY is required'),

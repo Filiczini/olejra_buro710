@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authMiddleware } from '../middleware/auth';
+import { authMiddleware, adminMiddleware } from '../middleware/auth';
 import { logger } from '../lib/logger';
 import type { AuthenticatedRequest } from '../types/express.js';
 import { postService } from '../services/postService';
@@ -63,11 +63,16 @@ router.get('/', async (req, res) => {
   try {
     const { page, limit, status, search } = req.query;
 
+    const parsedPage = page ? Math.max(1, parseInt(page as string, 10) || 1) : undefined;
+    const parsedLimit = limit
+      ? Math.min(100, Math.max(1, parseInt(limit as string, 10) || 10))
+      : undefined;
+
     const result = await postService.getAll({
-      page: page ? parseInt(page as string) : undefined,
-      limit: limit ? parseInt(limit as string) : undefined,
+      page: parsedPage,
+      limit: parsedLimit,
       status: status as 'draft' | 'published',
-      search: search as string,
+      search: search ? String(search).slice(0, 200) : undefined,
     });
 
     res.json(result);
@@ -109,387 +114,401 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequest, res) => {
-  try {
-    const body = req.body as PostBody;
-    const {
-      title,
-      slug,
-      status,
-      featured,
-      seo_title,
-      seo_description,
-      hero_title,
-      hero_subtitle,
-      hero_tags,
-      hero_location,
-      hero_year,
-      gallery_images,
-      blocks,
-    } = body;
+router.post(
+  '/',
+  authMiddleware,
+  adminMiddleware,
+  uploadBlockMedia,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const body = req.body as PostBody;
+      const {
+        title,
+        slug,
+        status,
+        featured,
+        seo_title,
+        seo_description,
+        hero_title,
+        hero_subtitle,
+        hero_tags,
+        hero_location,
+        hero_year,
+        gallery_images,
+        blocks,
+      } = body;
 
-    const validationErrors = validatePostBody(body, true);
-    if (validationErrors.length > 0) {
-      return res.status(400).json({ errors: validationErrors });
-    }
-
-    if (!title) {
-      return res.status(400).json({ error: 'Title is required' });
-    }
-
-    const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
-
-    let heroImageUrl: string | undefined;
-    if (files?.['heroImage']?.[0]) {
-      heroImageUrl = await storageService.uploadImage(files['heroImage'][0], 'blocks');
-    }
-
-    let ogImageUrl: string | undefined;
-    if (files?.['ogImage']?.[0]) {
-      ogImageUrl = await storageService.uploadImage(files['ogImage'][0], 'blocks');
-    }
-
-    let parsedBlocks: {
-      id?: string;
-      _tempId?: string;
-      type: BlockType;
-      data: Record<string, unknown>;
-      sort_order?: number;
-    }[] = [];
-    if (blocks) {
-      try {
-        parsedBlocks = JSON.parse(blocks);
-      } catch {
-        return res.status(400).json({ error: 'Invalid blocks format' });
+      const validationErrors = validatePostBody(body, true);
+      if (validationErrors.length > 0) {
+        return res.status(400).json({ errors: validationErrors });
       }
-    }
 
-    const blockImageFiles = files?.['blockImages'] || [];
-    const blockUploads: { sort_order: number; file: Express.Multer.File; imageSlot?: number }[] =
-      [];
-    let blockImageIndex = 0;
-
-    const processedBlocks = parsedBlocks.map((block, index) => {
-      const data = { ...block.data };
-
-      if (block.type === 'three_images') {
-        const newImageSlots = (data._newImageSlots as number[]) || [];
-        for (const slot of newImageSlots) {
-          if (blockImageFiles[blockImageIndex]) {
-            blockUploads.push({
-              sort_order: index,
-              file: blockImageFiles[blockImageIndex],
-              imageSlot: slot,
-            });
-            blockImageIndex++;
-          }
-        }
-        delete data._newImageSlots;
-      } else {
-        const needsImage =
-          block.type === 'image_full' || block.type === 'text_image' || block.type === 'image_text';
-        const hasNewImage = data._hasNewImage === true;
-
-        if (needsImage && hasNewImage && blockImageFiles[blockImageIndex]) {
-          blockUploads.push({ sort_order: index, file: blockImageFiles[blockImageIndex] });
-          blockImageIndex++;
-        }
+      if (!title) {
+        return res.status(400).json({ error: 'Title is required' });
       }
-      delete data._hasNewImage;
-      delete data._newImageSlots;
 
-      return {
-        id: block.id,
-        type: block.type,
-        data,
-        sort_order: block.sort_order ?? index,
-      };
-    });
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
 
-    const galleryImageFiles = files?.['galleryImages'] || [];
-    const existingGalleryUrls = gallery_images ? JSON.parse(gallery_images) : [];
-    const newGalleryUrls: string[] = [];
+      let heroImageUrl: string | undefined;
+      if (files?.['heroImage']?.[0]) {
+        heroImageUrl = await storageService.uploadImage(files['heroImage'][0], 'blocks');
+      }
 
-    for (const file of galleryImageFiles) {
-      const url = await storageService.uploadImage(file, 'blocks');
-      newGalleryUrls.push(url);
-    }
+      let ogImageUrl: string | undefined;
+      if (files?.['ogImage']?.[0]) {
+        ogImageUrl = await storageService.uploadImage(files['ogImage'][0], 'blocks');
+      }
 
-    const finalGalleryImages = [...existingGalleryUrls, ...newGalleryUrls];
-
-    const post = await postService.create({
-      title,
-      slug: slug || postService.generateSlug(title),
-      status,
-      featured: featured === 'true',
-      seo_title,
-      seo_description,
-      og_image_url: ogImageUrl,
-      hero_image_url: heroImageUrl,
-      hero_title,
-      hero_subtitle,
-      hero_tags: hero_tags ? JSON.parse(hero_tags) : [],
-      hero_location,
-      hero_year,
-      gallery_images: finalGalleryImages,
-      blocks: processedBlocks as unknown as {
+      let parsedBlocks: {
+        id?: string;
+        _tempId?: string;
         type: BlockType;
-        data: BlockData;
-        sort_order: number;
-      }[],
-    });
-
-    for (const upload of blockUploads) {
-      const imageUrl = await storageService.uploadImage(upload.file, 'blocks');
-
-      const { data: blockRecord } = await supabase
-        .from('blocks')
-        .select('id, data')
-        .eq('post_id', post.id)
-        .eq('sort_order', upload.sort_order)
-        .single();
-
-      if (blockRecord) {
-        const currentData = (blockRecord.data as Record<string, unknown>) || {};
-        if (upload.imageSlot !== undefined) {
-          const images = [...((currentData.images as { url: string; alt: string }[]) || [])];
-          images[upload.imageSlot] = { ...images[upload.imageSlot], url: imageUrl };
-          await supabase
-            .from('blocks')
-            .update({ data: { ...currentData, images } })
-            .eq('id', blockRecord.id);
-        } else {
-          await supabase
-            .from('blocks')
-            .update({ data: { ...currentData, image_url: imageUrl } })
-            .eq('id', blockRecord.id);
+        data: Record<string, unknown>;
+        sort_order?: number;
+      }[] = [];
+      if (blocks) {
+        try {
+          parsedBlocks = JSON.parse(blocks);
+        } catch {
+          return res.status(400).json({ error: 'Invalid blocks format' });
         }
       }
-    }
 
-    const heroFields: string[] = [];
-    if (heroImageUrl) heroFields.push('hero_image');
-    if (hero_title) heroFields.push('hero_title');
-    if (hero_subtitle) heroFields.push('hero_subtitle');
-    if (hero_tags) heroFields.push('hero_tags');
-    if (hero_location) heroFields.push('hero_location');
-    if (hero_year) heroFields.push('hero_year');
-
-    await activityLogService.log({
-      user_email: req.user?.email || 'unknown',
-      action: 'create',
-      entity_type: 'post',
-      entity_id: post.id,
-      entity_title: post.title,
-      changes: {
-        blocks_count: parsedBlocks.length,
-        hero_updated: heroFields.length > 0,
-        hero_fields: heroFields.length > 0 ? heroFields : undefined,
-      },
-    });
-
-    res.status(201).json(post);
-  } catch (error) {
-    logger.error('Error creating post:', error);
-    res.status(500).json({ error: 'Failed to create post' });
-  }
-});
-
-router.put('/:id', authMiddleware, uploadBlockMedia, async (req: AuthenticatedRequest, res) => {
-  try {
-    const id = req.params.id as string;
-    const body = req.body as PostBody;
-    const {
-      title,
-      slug,
-      status,
-      featured,
-      seo_title,
-      seo_description,
-      hero_title,
-      hero_subtitle,
-      hero_tags,
-      hero_location,
-      hero_year,
-      gallery_images,
-      blocks,
-    } = body;
-
-    const validationErrors = validatePostBody(body, false);
-    if (validationErrors.length > 0) {
-      return res.status(400).json({ errors: validationErrors });
-    }
-
-    const existing = await postService.getById(id);
-    const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
-
-    let heroImageUrl = existing.post.hero_image_url;
-    if (files?.['heroImage']?.[0]) {
-      if (heroImageUrl) {
-        await storageService.deleteImage(heroImageUrl);
-      }
-      heroImageUrl = await storageService.uploadImage(files['heroImage'][0], 'blocks');
-    }
-
-    let ogImageUrl = existing.post.og_image_url;
-    if (files?.['ogImage']?.[0]) {
-      if (ogImageUrl) {
-        await storageService.deleteImage(ogImageUrl);
-      }
-      ogImageUrl = await storageService.uploadImage(files['ogImage'][0], 'blocks');
-    }
-
-    let parsedBlocks:
-      | {
-          id?: string;
-          _tempId?: string;
-          type: BlockType;
-          data: Record<string, unknown>;
-          sort_order: number;
-        }[]
-      | undefined;
-    if (blocks) {
-      try {
-        parsedBlocks = JSON.parse(blocks);
-      } catch {
-        return res.status(400).json({ error: 'Invalid blocks format' });
-      }
-    }
-
-    const blockImageFiles = files?.['blockImages'] || [];
-    const blockImageUploads: Record<number, { url: string; slot?: number }[]> = {};
-
-    if (parsedBlocks && blockImageFiles.length > 0) {
+      const blockImageFiles = files?.['blockImages'] || [];
+      const blockUploads: { sort_order: number; file: Express.Multer.File; imageSlot?: number }[] =
+        [];
       let blockImageIndex = 0;
-      for (const block of parsedBlocks) {
+
+      const processedBlocks = parsedBlocks.map((block, index) => {
+        const data = { ...block.data };
+
         if (block.type === 'three_images') {
-          const newImageSlots = (block.data._newImageSlots as number[]) || [];
+          const newImageSlots = (data._newImageSlots as number[]) || [];
           for (const slot of newImageSlots) {
             if (blockImageFiles[blockImageIndex]) {
-              const url = await storageService.uploadImage(
-                blockImageFiles[blockImageIndex],
-                'blocks'
-              );
-              if (!blockImageUploads[block.sort_order]) blockImageUploads[block.sort_order] = [];
-              blockImageUploads[block.sort_order].push({ url, slot });
+              blockUploads.push({
+                sort_order: index,
+                file: blockImageFiles[blockImageIndex],
+                imageSlot: slot,
+              });
               blockImageIndex++;
             }
           }
-          delete block.data._newImageSlots;
+          delete data._newImageSlots;
         } else {
           const needsImage =
             block.type === 'image_full' ||
             block.type === 'text_image' ||
             block.type === 'image_text';
-          const hasNewImage = block.data._hasNewImage === true;
+          const hasNewImage = data._hasNewImage === true;
 
           if (needsImage && hasNewImage && blockImageFiles[blockImageIndex]) {
-            const url = await storageService.uploadImage(
-              blockImageFiles[blockImageIndex],
-              'blocks'
-            );
-            if (!blockImageUploads[block.sort_order]) blockImageUploads[block.sort_order] = [];
-            blockImageUploads[block.sort_order].push({ url });
+            blockUploads.push({ sort_order: index, file: blockImageFiles[blockImageIndex] });
             blockImageIndex++;
           }
         }
-        delete block.data._hasNewImage;
-        delete block.data._newImageSlots;
+        delete data._hasNewImage;
+        delete data._newImageSlots;
+
+        return {
+          id: block.id,
+          type: block.type,
+          data,
+          sort_order: block.sort_order ?? index,
+        };
+      });
+
+      const galleryImageFiles = files?.['galleryImages'] || [];
+      const existingGalleryUrls = gallery_images ? JSON.parse(gallery_images) : [];
+      const newGalleryUrls: string[] = [];
+
+      for (const file of galleryImageFiles) {
+        const url = await storageService.uploadImage(file, 'blocks');
+        newGalleryUrls.push(url);
       }
-    }
 
-    if (parsedBlocks) {
-      parsedBlocks = parsedBlocks.map((block) => {
-        const uploads = blockImageUploads[block.sort_order];
-        if (!uploads) return block;
+      const finalGalleryImages = [...existingGalleryUrls, ...newGalleryUrls];
 
-        const data = { ...block.data };
-        for (const upload of uploads) {
-          if (upload.slot !== undefined) {
-            const images = [...((data.images as { url: string; alt: string }[]) || [])];
-            images[upload.slot] = { ...images[upload.slot], url: upload.url };
-            data.images = images;
+      const post = await postService.create({
+        title,
+        slug: slug || postService.generateSlug(title),
+        status,
+        featured: featured === 'true',
+        seo_title,
+        seo_description,
+        og_image_url: ogImageUrl,
+        hero_image_url: heroImageUrl,
+        hero_title,
+        hero_subtitle,
+        hero_tags: hero_tags ? JSON.parse(hero_tags) : [],
+        hero_location,
+        hero_year,
+        gallery_images: finalGalleryImages,
+        blocks: processedBlocks as unknown as {
+          type: BlockType;
+          data: BlockData;
+          sort_order: number;
+        }[],
+      });
+
+      for (const upload of blockUploads) {
+        const imageUrl = await storageService.uploadImage(upload.file, 'blocks');
+
+        const { data: blockRecord } = await supabase
+          .from('blocks')
+          .select('id, data')
+          .eq('post_id', post.id)
+          .eq('sort_order', upload.sort_order)
+          .single();
+
+        if (blockRecord) {
+          const currentData = (blockRecord.data as Record<string, unknown>) || {};
+          if (upload.imageSlot !== undefined) {
+            const images = [...((currentData.images as { url: string; alt: string }[]) || [])];
+            images[upload.imageSlot] = { ...images[upload.imageSlot], url: imageUrl };
+            await supabase
+              .from('blocks')
+              .update({ data: { ...currentData, images } })
+              .eq('id', blockRecord.id);
           } else {
-            data.image_url = upload.url;
+            await supabase
+              .from('blocks')
+              .update({ data: { ...currentData, image_url: imageUrl } })
+              .eq('id', blockRecord.id);
           }
         }
-        return { ...block, data };
+      }
+
+      const heroFields: string[] = [];
+      if (heroImageUrl) heroFields.push('hero_image');
+      if (hero_title) heroFields.push('hero_title');
+      if (hero_subtitle) heroFields.push('hero_subtitle');
+      if (hero_tags) heroFields.push('hero_tags');
+      if (hero_location) heroFields.push('hero_location');
+      if (hero_year) heroFields.push('hero_year');
+
+      await activityLogService.log({
+        user_email: req.user?.email || 'unknown',
+        action: 'create',
+        entity_type: 'post',
+        entity_id: post.id,
+        entity_title: post.title,
+        changes: {
+          blocks_count: parsedBlocks.length,
+          hero_updated: heroFields.length > 0,
+          hero_fields: heroFields.length > 0 ? heroFields : undefined,
+        },
       });
+
+      res.status(201).json(post);
+    } catch (error) {
+      logger.error('Error creating post:', error);
+      res.status(500).json({ error: 'Failed to create post' });
     }
-
-    const galleryImageFiles = files?.['galleryImages'] || [];
-    const existingGalleryUrls = gallery_images
-      ? JSON.parse(gallery_images)
-      : existing.post.gallery_images || [];
-    const newGalleryUrls: string[] = [];
-
-    for (const file of galleryImageFiles) {
-      const url = await storageService.uploadImage(file, 'blocks');
-      newGalleryUrls.push(url);
-    }
-
-    const finalGalleryImages = [...existingGalleryUrls, ...newGalleryUrls];
-
-    const changedFields: string[] = [];
-    if (title !== undefined && title !== existing.post.title) changedFields.push('title');
-    if (slug !== undefined && slug !== existing.post.slug) changedFields.push('slug');
-    if (status !== undefined && status !== existing.post.status) changedFields.push('status');
-
-    const heroFields: string[] = [];
-    if (heroImageUrl !== existing.post.hero_image_url) heroFields.push('hero_image');
-    if (hero_title !== existing.post.hero_title) heroFields.push('hero_title');
-    if (hero_subtitle !== existing.post.hero_subtitle) heroFields.push('hero_subtitle');
-    const newHeroTags = hero_tags ? JSON.parse(hero_tags) : [];
-    const oldHeroTags = existing.post.hero_tags || [];
-    if (JSON.stringify(newHeroTags) !== JSON.stringify(oldHeroTags)) heroFields.push('hero_tags');
-    if (hero_location !== existing.post.hero_location) heroFields.push('hero_location');
-    if (hero_year !== existing.post.hero_year) heroFields.push('hero_year');
-
-    const post = await postService.update(id, {
-      title,
-      slug,
-      status,
-      featured: featured !== undefined ? featured === 'true' : undefined,
-      seo_title,
-      seo_description,
-      og_image_url: ogImageUrl,
-      hero_image_url: heroImageUrl,
-      hero_title,
-      hero_subtitle,
-      hero_tags: hero_tags ? JSON.parse(hero_tags) : undefined,
-      hero_location,
-      hero_year,
-      gallery_images: finalGalleryImages,
-      blocks: parsedBlocks as unknown as {
-        id?: string;
-        type: BlockType;
-        data: BlockData;
-        sort_order: number;
-      }[],
-    });
-
-    await activityLogService.log({
-      user_email: req.user?.email || 'unknown',
-      action: 'update',
-      entity_type: 'post',
-      entity_id: id,
-      entity_title: post.title,
-      changes: {
-        fields: changedFields.length > 0 ? changedFields : undefined,
-        blocks_count: parsedBlocks?.length,
-        hero_updated: heroFields.length > 0,
-        hero_fields: heroFields.length > 0 ? heroFields : undefined,
-      },
-    });
-
-    res.json(post);
-  } catch (error) {
-    logger.error('Error updating post:', error);
-    res.status(500).json({ error: 'Failed to update post' });
   }
-});
+);
 
-router.delete('/:id', authMiddleware, async (req: AuthenticatedRequest, res) => {
+router.put(
+  '/:id',
+  authMiddleware,
+  adminMiddleware,
+  uploadBlockMedia,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const id = req.params.id as string;
+      const body = req.body as PostBody;
+      const {
+        title,
+        slug,
+        status,
+        featured,
+        seo_title,
+        seo_description,
+        hero_title,
+        hero_subtitle,
+        hero_tags,
+        hero_location,
+        hero_year,
+        gallery_images,
+        blocks,
+      } = body;
+
+      const validationErrors = validatePostBody(body, false);
+      if (validationErrors.length > 0) {
+        return res.status(400).json({ errors: validationErrors });
+      }
+
+      const existing = await postService.getById(id);
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+
+      let heroImageUrl = existing.post.hero_image_url;
+      if (files?.['heroImage']?.[0]) {
+        if (heroImageUrl) {
+          await storageService.deleteImage(heroImageUrl);
+        }
+        heroImageUrl = await storageService.uploadImage(files['heroImage'][0], 'blocks');
+      }
+
+      let ogImageUrl = existing.post.og_image_url;
+      if (files?.['ogImage']?.[0]) {
+        if (ogImageUrl) {
+          await storageService.deleteImage(ogImageUrl);
+        }
+        ogImageUrl = await storageService.uploadImage(files['ogImage'][0], 'blocks');
+      }
+
+      let parsedBlocks:
+        | {
+            id?: string;
+            _tempId?: string;
+            type: BlockType;
+            data: Record<string, unknown>;
+            sort_order: number;
+          }[]
+        | undefined;
+      if (blocks) {
+        try {
+          parsedBlocks = JSON.parse(blocks);
+        } catch {
+          return res.status(400).json({ error: 'Invalid blocks format' });
+        }
+      }
+
+      const blockImageFiles = files?.['blockImages'] || [];
+      const blockImageUploads: Record<number, { url: string; slot?: number }[]> = {};
+
+      if (parsedBlocks && blockImageFiles.length > 0) {
+        let blockImageIndex = 0;
+        for (const block of parsedBlocks) {
+          if (block.type === 'three_images') {
+            const newImageSlots = (block.data._newImageSlots as number[]) || [];
+            for (const slot of newImageSlots) {
+              if (blockImageFiles[blockImageIndex]) {
+                const url = await storageService.uploadImage(
+                  blockImageFiles[blockImageIndex],
+                  'blocks'
+                );
+                if (!blockImageUploads[block.sort_order]) blockImageUploads[block.sort_order] = [];
+                blockImageUploads[block.sort_order].push({ url, slot });
+                blockImageIndex++;
+              }
+            }
+            delete block.data._newImageSlots;
+          } else {
+            const needsImage =
+              block.type === 'image_full' ||
+              block.type === 'text_image' ||
+              block.type === 'image_text';
+            const hasNewImage = block.data._hasNewImage === true;
+
+            if (needsImage && hasNewImage && blockImageFiles[blockImageIndex]) {
+              const url = await storageService.uploadImage(
+                blockImageFiles[blockImageIndex],
+                'blocks'
+              );
+              if (!blockImageUploads[block.sort_order]) blockImageUploads[block.sort_order] = [];
+              blockImageUploads[block.sort_order].push({ url });
+              blockImageIndex++;
+            }
+          }
+          delete block.data._hasNewImage;
+          delete block.data._newImageSlots;
+        }
+      }
+
+      if (parsedBlocks) {
+        parsedBlocks = parsedBlocks.map((block) => {
+          const uploads = blockImageUploads[block.sort_order];
+          if (!uploads) return block;
+
+          const data = { ...block.data };
+          for (const upload of uploads) {
+            if (upload.slot !== undefined) {
+              const images = [...((data.images as { url: string; alt: string }[]) || [])];
+              images[upload.slot] = { ...images[upload.slot], url: upload.url };
+              data.images = images;
+            } else {
+              data.image_url = upload.url;
+            }
+          }
+          return { ...block, data };
+        });
+      }
+
+      const galleryImageFiles = files?.['galleryImages'] || [];
+      const existingGalleryUrls = gallery_images
+        ? JSON.parse(gallery_images)
+        : existing.post.gallery_images || [];
+      const newGalleryUrls: string[] = [];
+
+      for (const file of galleryImageFiles) {
+        const url = await storageService.uploadImage(file, 'blocks');
+        newGalleryUrls.push(url);
+      }
+
+      const finalGalleryImages = [...existingGalleryUrls, ...newGalleryUrls];
+
+      const changedFields: string[] = [];
+      if (title !== undefined && title !== existing.post.title) changedFields.push('title');
+      if (slug !== undefined && slug !== existing.post.slug) changedFields.push('slug');
+      if (status !== undefined && status !== existing.post.status) changedFields.push('status');
+
+      const heroFields: string[] = [];
+      if (heroImageUrl !== existing.post.hero_image_url) heroFields.push('hero_image');
+      if (hero_title !== existing.post.hero_title) heroFields.push('hero_title');
+      if (hero_subtitle !== existing.post.hero_subtitle) heroFields.push('hero_subtitle');
+      const newHeroTags = hero_tags ? JSON.parse(hero_tags) : [];
+      const oldHeroTags = existing.post.hero_tags || [];
+      if (JSON.stringify(newHeroTags) !== JSON.stringify(oldHeroTags)) heroFields.push('hero_tags');
+      if (hero_location !== existing.post.hero_location) heroFields.push('hero_location');
+      if (hero_year !== existing.post.hero_year) heroFields.push('hero_year');
+
+      const post = await postService.update(id, {
+        title,
+        slug,
+        status,
+        featured: featured !== undefined ? featured === 'true' : undefined,
+        seo_title,
+        seo_description,
+        og_image_url: ogImageUrl,
+        hero_image_url: heroImageUrl,
+        hero_title,
+        hero_subtitle,
+        hero_tags: hero_tags ? JSON.parse(hero_tags) : undefined,
+        hero_location,
+        hero_year,
+        gallery_images: finalGalleryImages,
+        blocks: parsedBlocks as unknown as {
+          id?: string;
+          type: BlockType;
+          data: BlockData;
+          sort_order: number;
+        }[],
+      });
+
+      await activityLogService.log({
+        user_email: req.user?.email || 'unknown',
+        action: 'update',
+        entity_type: 'post',
+        entity_id: id,
+        entity_title: post.title,
+        changes: {
+          fields: changedFields.length > 0 ? changedFields : undefined,
+          blocks_count: parsedBlocks?.length,
+          hero_updated: heroFields.length > 0,
+          hero_fields: heroFields.length > 0 ? heroFields : undefined,
+        },
+      });
+
+      res.json(post);
+    } catch (error) {
+      logger.error('Error updating post:', error);
+      res.status(500).json({ error: 'Failed to update post' });
+    }
+  }
+);
+
+router.delete('/:id', authMiddleware, adminMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const id = req.params.id as string;
     const result = await postService.getById(id);
@@ -515,6 +534,7 @@ router.delete('/:id', authMiddleware, async (req: AuthenticatedRequest, res) => 
 router.post(
   '/:id/gallery',
   authMiddleware,
+  adminMiddleware,
   uploadGalleryImages,
   async (req: AuthenticatedRequest, res) => {
     try {
@@ -555,42 +575,47 @@ router.post(
   }
 );
 
-router.delete('/:id/gallery', authMiddleware, async (req: AuthenticatedRequest, res) => {
-  try {
-    const id = req.params.id as string;
-    const { image_url } = req.body as { image_url?: string };
+router.delete(
+  '/:id/gallery',
+  authMiddleware,
+  adminMiddleware,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const id = req.params.id as string;
+      const { image_url } = req.body as { image_url?: string };
 
-    if (!image_url) {
-      return res.status(400).json({ error: 'Image URL is required' });
+      if (!image_url) {
+        return res.status(400).json({ error: 'Image URL is required' });
+      }
+
+      const existing = await postService.getById(id);
+      const currentGallery = existing.post.gallery_images || [];
+
+      const updatedGallery = currentGallery.filter((url) => url !== image_url);
+
+      if (updatedGallery.length !== currentGallery.length) {
+        await storageService.deleteImage(image_url);
+        await postService.update(id, { gallery_images: updatedGallery });
+
+        await activityLogService.log({
+          user_email: req.user?.email || 'unknown',
+          action: 'update',
+          entity_type: 'post',
+          entity_id: id,
+          entity_title: existing.post.title,
+          changes: {
+            gallery_updated: true,
+            gallery_count: updatedGallery.length,
+          },
+        });
+      }
+
+      res.json({ gallery_images: updatedGallery });
+    } catch (error) {
+      logger.error('Error deleting gallery image:', error);
+      res.status(500).json({ error: 'Failed to delete gallery image' });
     }
-
-    const existing = await postService.getById(id);
-    const currentGallery = existing.post.gallery_images || [];
-
-    const updatedGallery = currentGallery.filter((url) => url !== image_url);
-
-    if (updatedGallery.length !== currentGallery.length) {
-      await storageService.deleteImage(image_url);
-      await postService.update(id, { gallery_images: updatedGallery });
-
-      await activityLogService.log({
-        user_email: req.user?.email || 'unknown',
-        action: 'update',
-        entity_type: 'post',
-        entity_id: id,
-        entity_title: existing.post.title,
-        changes: {
-          gallery_updated: true,
-          gallery_count: updatedGallery.length,
-        },
-      });
-    }
-
-    res.json({ gallery_images: updatedGallery });
-  } catch (error) {
-    logger.error('Error deleting gallery image:', error);
-    res.status(500).json({ error: 'Failed to delete gallery image' });
   }
-});
+);
 
 export default router;

@@ -6,7 +6,7 @@ vi.mock('../../config/jwt', () => ({
   verifyToken: vi.fn(),
 }));
 
-import { authMiddleware } from '../auth';
+import { authMiddleware, adminMiddleware } from '../auth';
 import { verifyToken } from '../../config/jwt';
 
 const mockedVerifyToken = vi.mocked(verifyToken);
@@ -107,5 +107,49 @@ describe('authMiddleware', () => {
     authMiddleware(mockReq as Request, mockRes as Response, mockNext);
 
     expect(mockedVerifyToken).toHaveBeenCalledWith('my-jwt-token-value');
+  });
+});
+
+describe('adminMiddleware', () => {
+  let mockReq: Partial<Request>;
+  let mockRes: Partial<Response>;
+  let mockNext: NextFunction;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    mockReq = {};
+    mockRes = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+    };
+    mockNext = vi.fn();
+  });
+
+  it('returns 403 when req.user is undefined', () => {
+    adminMiddleware(mockReq as Request, mockRes as Response, mockNext);
+
+    expect(mockRes.status).toHaveBeenCalledWith(403);
+    expect(mockRes.json).toHaveBeenCalledWith({ error: 'Admin access required' });
+    expect(mockNext).not.toHaveBeenCalled();
+  });
+
+  it('returns 403 when user role is not admin', () => {
+    mockReq.user = { userId: 'user-1', email: 'test@example.com', role: 'editor' };
+
+    adminMiddleware(mockReq as Request, mockRes as Response, mockNext);
+
+    expect(mockRes.status).toHaveBeenCalledWith(403);
+    expect(mockRes.json).toHaveBeenCalledWith({ error: 'Admin access required' });
+    expect(mockNext).not.toHaveBeenCalled();
+  });
+
+  it('calls next() when user role is admin', () => {
+    mockReq.user = { userId: 'user-1', email: 'admin@example.com', role: 'admin' };
+
+    adminMiddleware(mockReq as Request, mockRes as Response, mockNext);
+
+    expect(mockNext).toHaveBeenCalledTimes(1);
+    expect(mockRes.status).not.toHaveBeenCalled();
   });
 });

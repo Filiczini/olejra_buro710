@@ -145,11 +145,16 @@ router.get('/', async (req, res) => {
   try {
     const { page, limit, status, search } = req.query;
 
+    const parsedPage = page ? Math.max(1, parseInt(page as string, 10) || 1) : undefined;
+    const parsedLimit = limit
+      ? Math.min(100, Math.max(1, parseInt(limit as string, 10) || 10))
+      : undefined;
+
     const result = await postService.getAll({
-      page: page ? parseInt(page as string, 10) : undefined,
-      limit: limit ? parseInt(limit as string, 10) : undefined,
+      page: parsedPage,
+      limit: parsedLimit,
       status: status as PostStatus,
-      search: search as string,
+      search: search ? String(search).slice(0, 200) : undefined,
     });
 
     res.json(result);

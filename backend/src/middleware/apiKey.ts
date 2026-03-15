@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
+import { timingSafeEqual } from 'crypto';
 
 type ValidationResult = { valid: true } | { valid: false; error: string; statusCode: 401 | 500 };
 
@@ -17,7 +18,10 @@ export const validateApiKey = (
     return { valid: false, error: 'API key is required', statusCode: 401 };
   }
 
-  if (providedKey !== expectedKey) {
+  const expected = Buffer.from(expectedKey);
+  const provided = Buffer.from(providedKey);
+
+  if (expected.length !== provided.length || !timingSafeEqual(expected, provided)) {
     return { valid: false, error: 'Invalid API key', statusCode: 401 };
   }
 

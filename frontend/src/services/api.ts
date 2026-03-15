@@ -63,26 +63,17 @@ export const postService = {
   },
 
   create: async (data: FormData) => {
-    const token = localStorage.getItem('token');
-    const response = await api.post('/posts', data, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await api.post('/posts', data);
     return response.data as Post;
   },
 
   update: async (id: string, data: FormData) => {
-    const token = localStorage.getItem('token');
-    const response = await api.put(`/posts/${id}`, data, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await api.put(`/posts/${id}`, data);
     return response.data as Post;
   },
 
   delete: async (id: string) => {
-    const token = localStorage.getItem('token');
-    const response = await api.delete(`/posts/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await api.delete(`/posts/${id}`);
     return response.data;
   },
 };
