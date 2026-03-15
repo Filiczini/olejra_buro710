@@ -37,6 +37,9 @@
     ],
     "backend/src/**/*.ts": [
       "prettier --write"
+    ],
+    "shared/src/**/*.ts": [
+      "prettier --write"
     ]
   },
   "devDependencies": {

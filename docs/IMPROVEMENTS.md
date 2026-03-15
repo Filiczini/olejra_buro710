@@ -127,19 +127,19 @@
 
 ## 7. CI/CD & КОНФІГУРАЦІЯ
 
-- [ ] **7.1 Додати `tsc --noEmit`** в CI pipeline
+- [x] **7.1 Додати `tsc --noEmit`** в CI pipeline
   - `.github/workflows/test.yml`
 
-- [ ] **7.2 Додати coverage reporting** в CI
+- [x] **7.2 Додати coverage reporting** в CI
   - `.github/workflows/test.yml`
 
-- [ ] **7.3 Оновити Swagger** — додати `three_images` в block types
+- [x] **7.3 Оновити Swagger** — додати `three_images` в block types
   - `backend/src/docs/swagger.ts:59`
 
-- [ ] **7.4 Docker healthchecks** для обох сервісів
+- [x] **7.4 Docker healthchecks** для обох сервісів
   - `backend/Dockerfile`, `frontend/Dockerfile`
 
-- [ ] **7.5 Lint-staged для shared/** — зараз не лінтиться
+- [x] **7.5 Lint-staged для shared/** — зараз не лінтиться
   - `package.json` lint-staged config
 
 ---
