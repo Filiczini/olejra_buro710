@@ -49,6 +49,9 @@ export default function PostPage() {
     if (slug) {
       loadPost(slug);
     }
+    return () => {
+      document.title = 'Buro 710';
+    };
   }, [slug, loadPost]);
 
   const updateMetaTag = (name: string, content: string) => {

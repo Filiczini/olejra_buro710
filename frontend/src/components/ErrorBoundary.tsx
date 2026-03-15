@@ -1,4 +1,5 @@
-import { Component, type ReactNode } from 'react';
+import { Component, type ReactNode, type ErrorInfo } from 'react';
+import { logger } from '../lib/logger';
 
 interface Props {
   children: ReactNode;
@@ -16,25 +17,27 @@ export default class ErrorBoundary extends Component<Props, State> {
     return { hasError: true };
   }
 
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    logger.error('ErrorBoundary caught an error', { error, componentStack: info.componentStack });
+  }
+
   render() {
     if (this.state.hasError) {
-      return this.props.fallback ?? (
-        <div className="min-h-screen flex items-center justify-center bg-white">
-          <div className="text-center p-8">
-            <h1 className="text-2xl font-bold text-zinc-900 mb-4">
-              Щось пішло не так
-            </h1>
-            <p className="text-zinc-600 mb-6">
-              Виникла помилка при завантаженні сторінки
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-6 py-3 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-colors cursor-pointer"
-            >
-              Перезавантажити сторінку
-            </button>
+      return (
+        this.props.fallback ?? (
+          <div className="min-h-screen flex items-center justify-center bg-white">
+            <div className="text-center p-8">
+              <h1 className="text-2xl font-bold text-zinc-900 mb-4">Щось пішло не так</h1>
+              <p className="text-zinc-600 mb-6">Виникла помилка при завантаженні сторінки</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-6 py-3 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-colors cursor-pointer"
+              >
+                Перезавантажити сторінку
+              </button>
+            </div>
           </div>
-        </div>
+        )
       );
     }
     return this.props.children;

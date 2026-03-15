@@ -25,42 +25,44 @@ export default function PostsPage() {
   const previousPostsRef = useRef<Post[]>([]);
   const previousPaginationRef = useRef(pagination);
 
-  const loadPosts = useCallback(async () => {
-    setLoading(true);
-    try {
-      const result = await postService.getAll({
-        page: pagination.page,
-        limit: pagination.limit,
-        status: statusFilter || undefined,
-        search: searchQuery || undefined,
-      });
-      setPosts(result.data);
-      setPagination((prev) => ({
-        ...prev,
-        total: result.pagination.total,
-        totalPages: result.pagination.totalPages,
-      }));
-    } catch (error) {
-      logger.error('Error loading posts', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [pagination.page, pagination.limit, statusFilter, searchQuery]);
+  const loadPosts = useCallback(
+    async (page: number) => {
+      setLoading(true);
+      try {
+        const result = await postService.getAll({
+          page,
+          limit: DEFAULT_LIMIT,
+          status: statusFilter || undefined,
+          search: searchQuery || undefined,
+        });
+        setPosts(result.data);
+        setPagination((prev) => ({
+          ...prev,
+          page,
+          total: result.pagination.total,
+          totalPages: result.pagination.totalPages,
+        }));
+      } catch (error) {
+        logger.error('Error loading posts', error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [statusFilter, searchQuery]
+  );
 
   useEffect(() => {
-    loadPosts();
-  }, [loadPosts]);
+    loadPosts(pagination.page);
+  }, [loadPosts]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (pagination.page === 1) {
-        loadPosts();
-      } else {
-        setPagination((prev) => ({ ...prev, page: 1 }));
+      if (pagination.page !== 1) {
+        loadPosts(1);
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery, loadPosts, pagination.page]);
+  }, [searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDelete = async (id: string) => {
     if (!confirm('Ви впевнені, що хочете видалити цей пост?')) return;
@@ -284,7 +286,7 @@ export default function PostsPage() {
             totalPages={pagination.totalPages}
             total={pagination.total}
             limit={pagination.limit}
-            onPageChange={(page) => setPagination((prev) => ({ ...prev, page }))}
+            onPageChange={(page) => loadPosts(page)}
           />
         </div>
       </div>

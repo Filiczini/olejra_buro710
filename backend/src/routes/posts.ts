@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { authMiddleware, adminMiddleware } from '../middleware/auth';
+import { authMiddleware, adminMiddleware, optionalAuthMiddleware } from '../middleware/auth';
 import { logger } from '../lib/logger';
+import { AppError } from '../lib/errors';
 import type { AuthenticatedRequest } from '../types/express.js';
 import { postService } from '../services/postService';
 import { storageService } from '../services/storageService';
@@ -29,7 +30,7 @@ const adminRateLimiter = rateLimit({
 
 router.use(adminRateLimiter);
 
-router.get('/', async (req, res) => {
+router.get('/', optionalAuthMiddleware, async (req, res) => {
   try {
     const { page, limit, status, search } = req.query;
 
@@ -38,10 +39,15 @@ router.get('/', async (req, res) => {
       ? Math.min(100, Math.max(1, parseInt(limit as string, 10) || 10))
       : undefined;
 
+    // Unauthenticated users can only see published posts
+    const effectiveStatus = (req as AuthenticatedRequest).user
+      ? (status as 'draft' | 'published')
+      : 'published';
+
     const result = await postService.getAll({
       page: parsedPage,
       limit: parsedLimit,
-      status: status as 'draft' | 'published',
+      status: effectiveStatus,
       search: search ? String(search).slice(0, 200) : undefined,
     });
 
@@ -69,18 +75,20 @@ router.get('/public/:slug', async (req, res) => {
     res.json(result);
   } catch (error) {
     logger.error('Error fetching post by slug:', error);
-    res.status(404).json({ error: 'Post not found' });
+    const status = error instanceof AppError && error.statusCode === 404 ? 404 : 500;
+    res.status(status).json({ error: status === 404 ? 'Post not found' : 'Failed to fetch post' });
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const id = req.params.id as string;
     const result = await postService.getById(id);
     res.json(result);
   } catch (error) {
     logger.error('Error fetching post:', error);
-    res.status(404).json({ error: 'Post not found' });
+    const status = error instanceof AppError && error.statusCode === 404 ? 404 : 500;
+    res.status(status).json({ error: status === 404 ? 'Post not found' : 'Failed to fetch post' });
   }
 });
 

@@ -89,6 +89,7 @@ export default function HeroSlider() {
               <img
                 src={post.hero_image_url}
                 alt={post.hero_title || post.title}
+                loading={index === 0 ? 'eager' : 'lazy'}
                 className={`w-full h-full object-cover opacity-90 transition-transform duration-[6000ms] ease-out ${index === currentSlide ? 'scale-105' : 'scale-100'}`}
               />
             </div>
