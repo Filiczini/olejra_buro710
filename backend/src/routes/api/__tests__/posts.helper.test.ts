@@ -6,7 +6,17 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// Mock storageService before importing the helper
+// Mock dependencies before importing the helper
+vi.mock('../../../config/supabase', () => ({
+  supabase: {
+    from: vi.fn(),
+  },
+}));
+
+vi.mock('../../../services/postService', () => ({
+  postService: {},
+}));
+
 vi.mock('../../../services/storageService', () => ({
   storageService: {
     uploadImage: vi.fn().mockResolvedValue('https://example.com/uploaded-image.jpg'),
