@@ -5,6 +5,7 @@
  */
 import { Router } from 'express';
 import multer from 'multer';
+import { logger } from '../../lib/logger';
 import { memoryStorage } from 'multer';
 import type { FileFilterCallback } from 'multer';
 import { apiKeyMiddleware } from '../../middleware/apiKey';
@@ -12,7 +13,8 @@ import { postService } from '../../services/postService';
 import { storageService } from '../../services/storageService';
 import type { BlockType, BlockData } from '../../types/block';
 import type { PostStatus } from '../../types/post';
-import { validatePostInput, parseJsonField, type PostBody } from './posts.validation';
+import { AppError } from '../../lib/errors';
+import { parseJsonField, validatePostInput, type PostBody } from './posts.validation';
 
 const router = Router();
 
@@ -144,16 +146,21 @@ router.get('/', async (req, res) => {
   try {
     const { page, limit, status, search } = req.query;
 
+    const parsedPage = page ? Math.max(1, parseInt(page as string, 10) || 1) : undefined;
+    const parsedLimit = limit
+      ? Math.min(100, Math.max(1, parseInt(limit as string, 10) || 10))
+      : undefined;
+
     const result = await postService.getAll({
-      page: page ? parseInt(page as string, 10) : undefined,
-      limit: limit ? parseInt(limit as string, 10) : undefined,
+      page: parsedPage,
+      limit: parsedLimit,
       status: status as PostStatus,
-      search: search as string,
+      search: search ? String(search).slice(0, 200) : undefined,
     });
 
     res.json(result);
   } catch (error) {
-    console.error('Error fetching posts:', error);
+    logger.error('Error fetching posts:', error);
     res.status(500).json({ error: 'Failed to fetch posts' });
   }
 });
@@ -168,7 +175,7 @@ router.get('/:id', async (req, res) => {
     const result = await postService.getById(id);
     res.json(result);
   } catch (error) {
-    console.error('Error fetching post:', error);
+    logger.error('Error fetching post:', error);
     res.status(404).json({ error: 'Post not found' });
   }
 });
@@ -250,7 +257,7 @@ router.post('/', uploadPostMedia, async (req, res) => {
 
     res.status(201).json(post);
   } catch (error) {
-    console.error('Error creating post:', error);
+    logger.error('Error creating post:', error);
     res.status(500).json({ error: 'Failed to create post' });
   }
 });
@@ -371,9 +378,9 @@ router.put('/:id', uploadPostMedia, async (req, res) => {
 
     res.json(post);
   } catch (error) {
-    console.error('Error updating post:', error);
-    if ((error as Error).message === 'Slug already exists') {
-      return res.status(400).json({ error: 'Slug already exists' });
+    logger.error('Error updating post:', error);
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json({ error: error.message });
     }
     res.status(500).json({ error: 'Failed to update post' });
   }
@@ -396,7 +403,7 @@ router.delete('/:id', async (req, res) => {
     await postService.delete(id);
     res.json({ message: 'Post deleted successfully' });
   } catch (error) {
-    console.error('Error deleting post:', error);
+    logger.error('Error deleting post:', error);
     res.status(500).json({ error: 'Failed to delete post' });
   }
 });

@@ -1,7 +1,14 @@
-import type { Block, TextFullData, ImageFullData, TextImageData } from '../../types/block';
+import type {
+  Block,
+  TextFullData,
+  ImageFullData,
+  TextImageData,
+  ThreeImagesData,
+} from '../../types/block';
 import TextFullBlock from './TextFullBlock';
 import ImageFullBlock from './ImageFullBlock';
 import TextImageBlock from './TextImageBlock';
+import ThreeImagesBlock from './ThreeImagesBlock';
 
 interface BlockRendererProps {
   blocks: Block[];
@@ -24,6 +31,8 @@ export default function BlockRenderer({ blocks }: BlockRendererProps) {
             );
           case 'image_text':
             return <TextImageBlock key={block.id} data={block.data as TextImageData} mirrored />;
+          case 'three_images':
+            return <ThreeImagesBlock key={block.id} data={block.data as ThreeImagesData} />;
           default:
             return null;
         }

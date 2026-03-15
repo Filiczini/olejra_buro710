@@ -1,6 +1,7 @@
 import { supabase } from '../config/supabase';
 import { blockService } from './blockService';
 import { storageService } from './storageService';
+import { ConflictError, NotFoundError } from '../lib/errors';
 import type {
   Post,
   PostStatus,
@@ -14,6 +15,7 @@ interface CreatePostParams extends PostHero {
   title: string;
   slug: string;
   status?: PostStatus;
+  featured?: boolean;
   seo_title?: string;
   seo_description?: string;
   og_image_url?: string;
@@ -29,6 +31,7 @@ interface UpdatePostParams extends Partial<PostHero> {
   title?: string;
   slug?: string;
   status?: PostStatus;
+  featured?: boolean;
   seo_title?: string;
   seo_description?: string;
   og_image_url?: string;
@@ -185,7 +188,7 @@ export const postService = {
       .single();
 
     if (postError) throw postError;
-    if (!post) throw new Error('Failed to create post');
+    if (!post) throw new NotFoundError('Failed to create post');
 
     if (blocks && blocks.length > 0) {
       await blockService.create({ postId: post.id, blocks });
@@ -206,7 +209,7 @@ export const postService = {
         .single();
 
       if (existing) {
-        throw new Error('Slug already exists');
+        throw new ConflictError('Slug already exists');
       }
     }
 
@@ -218,7 +221,7 @@ export const postService = {
       .single();
 
     if (postError) throw postError;
-    if (!post) throw new Error('Failed to update post');
+    if (!post) throw new NotFoundError('Failed to update post');
 
     if (blocks !== undefined) {
       await blockService.syncBlocks(id, blocks);
@@ -257,6 +260,19 @@ export const postService = {
     }
 
     await supabase.from('posts').delete().eq('id', id);
+  },
+
+  getFeatured: async (): Promise<Post[]> => {
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('featured', true)
+      .eq('status', 'published')
+      .order('created_at', { ascending: false })
+      .limit(6);
+
+    if (error) throw error;
+    return (data || []) as Post[];
   },
 
   generateSlug,

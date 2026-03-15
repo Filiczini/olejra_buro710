@@ -1,6 +1,13 @@
 import type { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../config/jwt';
 
+export const adminMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  if (req.user?.role !== 'admin') {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+  next();
+};
+
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 

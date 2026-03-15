@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { logger } from '../../lib/logger';
+import { postCreateSchema } from '@buro710/shared';
+import type { ZodIssue } from 'zod';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
 import { postService } from '../../services/api';
@@ -50,6 +52,7 @@ export default function EditPostPage() {
   const [blockFiles, setBlockFiles] = useState<BlockWithFile[]>([]);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [galleryNewFiles, setGalleryNewFiles] = useState<File[]>([]);
+  const [featured, setFeatured] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const blocksDataRef = useRef<BlocksDataRef>({ blocks: [] });
@@ -78,6 +81,7 @@ export default function EditPostPage() {
           heroImage: undefined,
         });
 
+        setFeatured(post.featured || false);
         setGalleryImages(post.gallery_images || []);
 
         blocksDataRef.current.blocks = loadedBlocks.map((b, index) => ({
@@ -165,43 +169,45 @@ export default function EditPostPage() {
     blocksDataRef.current.blocks = updatedBlocks;
   };
 
-  const handleBlockImageChange = (blockId: string, file: File | null) => {
+  const handleBlockImageChange = (blockId: string, file: File | null, field?: string) => {
+    const key = field ? `${blockId}__${field}` : blockId;
     setBlockFiles((prev) => {
-      const existing = prev.find((bf) => bf.id === blockId);
+      const existing = prev.find((bf) => bf.id === key);
       if (existing) {
-        return prev.map((bf) => (bf.id === blockId ? { ...bf, file } : bf));
+        return prev.map((bf) => (bf.id === key ? { ...bf, file } : bf));
       }
-      return [...prev, { id: blockId, file }];
+      return [...prev, { id: key, file }];
     });
   };
 
   const validate = (): boolean => {
-    const newErrors: Record<string, string> = {};
+    const result = postCreateSchema.safeParse({
+      title,
+      slug,
+      status,
+      seo_title: seoTitle,
+      seo_description: seoDescription,
+      hero_title: heroData.hero_title,
+      hero_subtitle: heroData.hero_subtitle,
+      hero_tags: heroData.hero_tags,
+      hero_location: heroData.hero_location,
+      hero_year: heroData.hero_year,
+    });
 
-    if (!title.trim()) {
-      newErrors.title = "Назва обов'язкова";
+    if (!result.success) {
+      const newErrors: Record<string, string> = {};
+      result.error.issues.forEach((issue: ZodIssue) => {
+        const field = issue.path[0] as string;
+        if (field && !newErrors[field]) {
+          newErrors[field] = issue.message;
+        }
+      });
+      setErrors(newErrors);
+      return false;
     }
 
-    if (!slug.trim()) {
-      newErrors.slug = "Slug обов'язковий";
-    } else if (!/^[a-z0-9-]+$/.test(slug)) {
-      newErrors.slug = 'Slug може містити лише латинські літери, цифри та дефіси';
-    }
-
-    if (seoTitle && seoTitle.length > 60) {
-      newErrors.seo_title = 'SEO title не може бути довшим за 60 символів';
-    }
-
-    if (seoDescription && seoDescription.length > 160) {
-      newErrors.seo_description = 'SEO description не може бути довшим за 160 символів';
-    }
-
-    if (heroData.hero_title && heroData.hero_title.length > 200) {
-      newErrors.hero_title = 'Hero title не може бути довшим за 200 символів';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors({});
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -218,6 +224,7 @@ export default function EditPostPage() {
       formData.append('seo_title', seoTitle);
       formData.append('seo_description', seoDescription);
 
+      formData.append('featured', String(featured));
       formData.append('hero_title', heroData.hero_title || '');
       formData.append('hero_subtitle', heroData.hero_subtitle || '');
       formData.append('hero_tags', JSON.stringify(heroData.hero_tags || []));
@@ -230,6 +237,26 @@ export default function EditPostPage() {
 
       const blocksData = blocksDataRef.current.blocks.map((block) => {
         const blockId = block.id || block._tempId;
+
+        if (block.type === 'three_images') {
+          const newImageSlots: number[] = [];
+          for (let i = 0; i < 3; i++) {
+            const key = `${blockId}__images.${i}`;
+            const bf = blockFiles.find((f) => f.id === key);
+            if (bf?.file) newImageSlots.push(i);
+          }
+          return {
+            id: block.id?.startsWith('temp-') ? undefined : block.id,
+            _tempId: block._tempId,
+            type: block.type,
+            data: {
+              ...block.data,
+              _newImageSlots: newImageSlots.length > 0 ? newImageSlots : undefined,
+            },
+            sort_order: block.sort_order,
+          };
+        }
+
         const blockFile = blockFiles.find((bf) => bf.id === blockId);
         return {
           id: block.id?.startsWith('temp-') ? undefined : block.id,
@@ -248,10 +275,17 @@ export default function EditPostPage() {
         formData.append('ogImage', ogImageFile);
       }
 
-      const imageBlocks = blockFiles.filter((bf) => bf.file);
-      imageBlocks.forEach((bf) => {
-        if (bf.file) {
-          formData.append('blockImages', bf.file);
+      blocksDataRef.current.blocks.forEach((block) => {
+        const blockId = block.id || block._tempId;
+        if (block.type === 'three_images') {
+          for (let i = 0; i < 3; i++) {
+            const key = `${blockId}__images.${i}`;
+            const bf = blockFiles.find((f) => f.id === key);
+            if (bf?.file) formData.append('blockImages', bf.file);
+          }
+        } else {
+          const bf = blockFiles.find((f) => f.id === blockId);
+          if (bf?.file) formData.append('blockImages', bf.file);
         }
       });
 
@@ -269,7 +303,7 @@ export default function EditPostPage() {
 
       navigate('/admin/posts');
     } catch (error) {
-      console.error('Error saving post:', error);
+      logger.error('Error saving post:', error);
       setErrors({ submit: 'Помилка збереження посту' });
     } finally {
       setSaving(false);
@@ -343,6 +377,23 @@ export default function EditPostPage() {
               </label>
             </div>
           </div>
+
+          <label className="flex items-center gap-3 cursor-pointer select-none">
+            <div
+              onClick={() => setFeatured((v) => !v)}
+              className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${featured ? 'bg-zinc-900' : 'bg-zinc-200'}`}
+            >
+              <span
+                className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${featured ? 'translate-x-5' : 'translate-x-0'}`}
+              />
+            </div>
+            <span className="text-sm font-medium text-zinc-700">
+              Вибраний пост{' '}
+              <span className="text-zinc-400 font-normal">
+                (відображається на головній, макс. 6)
+              </span>
+            </span>
+          </label>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">

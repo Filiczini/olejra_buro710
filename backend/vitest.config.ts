@@ -8,7 +8,12 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['src/middleware/apiKey.ts'],
+      include: [
+        'src/middleware/**/*.ts',
+        'src/services/**/*.ts',
+        'src/routes/**/*.ts',
+      ],
+      exclude: ['src/**/__tests__/**', 'src/**/*.test.ts'],
     },
   },
 });

@@ -58,6 +58,7 @@ docs
 # TypeScript compiled files
 backend/**/*.js
 !backend/src/index.js
+shared/src/**/*.js
 
 # TypeScript build info
 *.tsbuildinfo

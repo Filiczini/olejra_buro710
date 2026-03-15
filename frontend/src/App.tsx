@@ -1,14 +1,10 @@
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import HomePage from './pages/HomePage';
-import AllProjectsPage from './pages/AllProjectsPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
-import ProjectPage from './pages/ProjectPage';
 import PublicPostPage from './pages/PublicPostPage';
+import ProjectsPage from './pages/ProjectsPage';
 import LoginPage from './pages/admin/LoginPage';
-import DashboardPage from './pages/admin/DashboardPage';
-import CreateProjectPage from './pages/admin/CreateProjectPage';
-import EditProjectPage from './pages/admin/EditProjectPage';
 import PostsPage from './pages/admin/PostsPage';
 import EditPostPage from './pages/admin/EditPostPage';
 import ActivityLogPage from './pages/admin/ActivityLogPage';
@@ -16,6 +12,7 @@ import UsersPage from './pages/admin/UsersPage';
 import SettingsPage from './pages/admin/SettingsPage';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 import AdminLayout from './layouts/AdminLayout';
+import NotFoundPage from './pages/NotFoundPage';
 
 function AdminWrapper() {
   return (
@@ -33,18 +30,14 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<HomePage />} />
-        <Route path="/projects" element={<AllProjectsPage />} />
+        <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
-        <Route path="/project/:id" element={<ProjectPage />} />
         <Route path="/page/:slug" element={<PublicPostPage />} />
         <Route path="/admin/login" element={<LoginPage />} />
 
         {/* Admin routes with AdminLayout */}
         <Route element={<AdminWrapper />}>
-          <Route path="/admin/dashboard" element={<DashboardPage />} />
-          <Route path="/admin/projects/create" element={<CreateProjectPage />} />
-          <Route path="/admin/projects/edit/:id" element={<EditProjectPage />} />
           <Route path="/admin/posts" element={<PostsPage />} />
           <Route path="/admin/posts/create" element={<EditPostPage />} />
           <Route path="/admin/posts/edit/:id" element={<EditPostPage />} />
@@ -52,6 +45,9 @@ function App() {
           <Route path="/admin/users" element={<UsersPage />} />
           <Route path="/admin/settings" element={<SettingsPage />} />
         </Route>
+
+        {/* 404 */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );

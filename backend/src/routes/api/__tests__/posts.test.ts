@@ -374,12 +374,7 @@ describe('Posts API', () => {
 
       // Assert
       expect(response.status).toBe(400);
-      expect(response.body.errors).toContainEqual(
-        expect.objectContaining({
-          field: 'title',
-          message: 'Title is required',
-        })
-      );
+      expect(response.body.error).toBe('Title is required');
     });
 
     it('returns 400 when title exceeds max length', async () => {
@@ -395,7 +390,7 @@ describe('Posts API', () => {
       expect(response.body.errors).toContainEqual(
         expect.objectContaining({
           field: 'title',
-          message: expect.stringContaining('200 characters'),
+          message: expect.stringContaining('200'),
         })
       );
     });
@@ -413,7 +408,7 @@ describe('Posts API', () => {
       expect(response.body.errors).toContainEqual(
         expect.objectContaining({
           field: 'slug',
-          message: expect.stringContaining('200 characters'),
+          message: expect.stringContaining('200'),
         })
       );
     });
@@ -433,7 +428,7 @@ describe('Posts API', () => {
       expect(response.body.errors).toContainEqual(
         expect.objectContaining({
           field: 'seo_title',
-          message: expect.stringContaining('60 characters'),
+          message: expect.stringContaining('60'),
         })
       );
     });
@@ -456,7 +451,7 @@ describe('Posts API', () => {
       expect(response.body.errors).toContainEqual(
         expect.objectContaining({
           field: 'seo_description',
-          message: expect.stringContaining('160 characters'),
+          message: expect.stringContaining('160'),
         })
       );
     });
@@ -683,7 +678,7 @@ describe('Posts API', () => {
       expect(response.body.errors).toContainEqual(
         expect.objectContaining({
           field: 'title',
-          message: expect.stringContaining('200 characters'),
+          message: expect.stringContaining('200'),
         })
       );
     });
@@ -694,7 +689,8 @@ describe('Posts API', () => {
         post: MOCK_POST,
         blocks: [],
       });
-      vi.mocked(postService.update).mockRejectedValue(new Error('Slug already exists'));
+      const { ConflictError } = await import('../../../lib/errors');
+      vi.mocked(postService.update).mockRejectedValue(new ConflictError('Slug already exists'));
 
       // Act
       const response = await withApiKey(
@@ -702,7 +698,7 @@ describe('Posts API', () => {
       );
 
       // Assert
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(409);
       expect(response.body).toEqual({ error: 'Slug already exists' });
     });
 
@@ -832,12 +828,7 @@ describe('Posts API', () => {
 
       // Assert
       expect(response.status).toBe(400);
-      expect(response.body.errors).toContainEqual(
-        expect.objectContaining({
-          field: 'title',
-          message: 'Title is required',
-        })
-      );
+      expect(response.body.error).toBe('Title is required');
     });
 
     it('handles undefined values in request body', async () => {

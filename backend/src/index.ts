@@ -1,10 +1,11 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import path from 'path';
 import type { Request, Response } from 'express';
+import { env } from './config/env';
 import authRoutes from './routes/auth';
-import portfolioRoutes from './routes/portfolio';
 import activityLogsRoutes from './routes/activityLogs';
 import postsRoutes from './routes/posts';
 import contactRoutes from './routes/contact';
@@ -12,18 +13,19 @@ import apiPostsRoutes from './routes/api/posts';
 import { swaggerSpec } from './docs/swagger';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = env.PORT;
 
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: env.FRONTEND_URL,
     credentials: true,
   })
 );
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 
 app.use('/api/admin', authRoutes);
-app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/logs', activityLogsRoutes);
 app.use('/api/posts', postsRoutes);
 app.use('/api/contact', contactRoutes);

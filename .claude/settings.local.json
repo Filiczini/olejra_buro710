@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npm install:*)",
+      "WebFetch(domain:docs.dokploy.com)",
+      "Bash(git push:*)",
+      "Bash(git add:*)",
+      "Bash(cd C:/CODE/buro710/frontend && npx vitest run 2>&1 | tail -10)",
+      "Bash(cd C:/CODE/buro710/backend && npx vitest run 2>&1)",
+      "Bash(npx tsx:*)",
+      "Bash(npm ls:*)",
+      "Bash(npx vitest:*)",
+      "Bash(find /c/CODE/buro710 -path \"*/node_modules/.vitest\" -o -path \"*/.vitest\" 2>/dev/null | head -5)",
+      "Bash(npx tsc:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}

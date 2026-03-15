@@ -31,6 +31,12 @@ const BLOCK_TYPES: { type: BlockType; label: string; icon: string; description: 
     icon: 'solar:layout-right-linear',
     description: 'Зображення зліва, текст справа',
   },
+  {
+    type: 'three_images',
+    label: 'Три зображення',
+    icon: 'solar:gallery-minimalistic-linear',
+    description: 'Три зображення в ряд',
+  },
 ];
 
 export default function AddBlockMenu({ onAddBlock }: AddBlockMenuProps) {
