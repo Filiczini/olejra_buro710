@@ -50,10 +50,9 @@ app.use('/api/contact', contactRoutes);
 // External API v1
 app.use('/api/v1/posts', apiPostsRoutes);
 
-// API Documentation - only in non-production environments
-if (process.env.NODE_ENV !== 'production') {
-  app.get('/api/docs', (_req: Request, res: Response) => {
-    const html = `<!DOCTYPE html>
+// API Documentation
+app.get('/api/docs', (_req: Request, res: Response) => {
+  const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -81,14 +80,18 @@ if (process.env.NODE_ENV !== 'production') {
   </script>
 </body>
 </html>`;
-    res.setHeader('Content-Type', 'text/html');
-    res.send(html);
-  });
-  app.get('/api/docs.json', (_req: Request, res: Response) => {
-    res.setHeader('Content-Type', 'application/json');
-    res.send(swaggerSpec);
-  });
-}
+  res.setHeader('Content-Type', 'text/html');
+  res.send(html);
+});
+app.get('/api/docs.json', (_req: Request, res: Response) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
+// Healthcheck endpoints
+app.get('/ping', (_req: Request, res: Response) => {
+  res.send('pong');
+});
 
 app.get('/health', async (_req: Request, res: Response) => {
   try {
