@@ -45,17 +45,17 @@
   - `backend/src/routes/posts.ts:31-60`
   - `backend/src/routes/api/posts.validation.ts:30-62`
 
-- [ ] **3.2 Консолідувати обробку блоків** — майже ідентичний код в двох файлах, винести в спільний модуль
+- [x] **3.2 Консолідувати обробку блоків** — майже ідентичний код в двох файлах, винести в спільний модуль
   - `backend/src/routes/posts.ts:172-207`
   - `backend/src/routes/api/posts.ts:115-132`
 
 - [x] **3.3 Кастомні Error класи** — замість `(error as Error).message === 'Slug already exists'`
   - Створити `ValidationError`, `NotFoundError`, `ConflictError`
 
-- [ ] **3.4 Консистентні response формати** — зараз `{ error }` vs `{ errors: [] }` vs `{ success, message, data }`
+- [x] **3.4 Консистентні response формати** — зараз `{ error }` vs `{ errors: [] }` vs `{ success, message, data }`
   - Визначити єдиний `ApiResponse<T>` envelope
 
-- [ ] **3.5 Soft delete для постів** — зараз hard delete без можливості відновлення
+- [x] **3.5 Soft delete для постів** — зараз hard delete без можливості відновлення
   - `backend/src/services/postService.ts:232-261`
 
 - [x] **3.6 Shared package: прибрати .js файли з git** — залишити тільки .ts

@@ -66,14 +66,20 @@ export const activityLogService = {
   },
 
   getUniqueUsers: async (): Promise<string[]> => {
-    const { data, error } = await supabase
-      .from('activity_logs')
-      .select('user_email')
-      .order('user_email', { ascending: true });
+    const { data, error } = await supabase.rpc('get_unique_user_emails');
 
-    if (error) throw error;
+    if (error) {
+      // Fallback if RPC not available: fetch with deduplication
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('activity_logs')
+        .select('user_email')
+        .order('user_email', { ascending: true });
 
-    const uniqueEmails = [...new Set(data?.map((log: any) => log.user_email))];
-    return uniqueEmails;
+      if (fallbackError) throw fallbackError;
+
+      return [...new Set(fallbackData?.map((log: any) => log.user_email))] as string[];
+    }
+
+    return (data?.map((row: any) => row.user_email) || []) as string[];
   },
 };

@@ -130,17 +130,14 @@ export const postService = {
   },
 
   getById: async (id: string): Promise<{ post: Post; blocks: Block[] }> => {
-    const { data: post, error: postError } = await supabase
-      .from('posts')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const [postResult, blocks] = await Promise.all([
+      supabase.from('posts').select('*').eq('id', id).single(),
+      blockService.getByPostId(id),
+    ]);
 
-    if (postError) throw postError;
+    if (postResult.error) throw postResult.error;
 
-    const blocks = await blockService.getByPostId(id);
-
-    return { post: post as Post, blocks };
+    return { post: postResult.data as Post, blocks };
   },
 
   getBySlug: async (slug: string): Promise<{ post: Post; blocks: Block[] }> => {

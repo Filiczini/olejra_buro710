@@ -126,12 +126,9 @@ router.post(
 
       const galleryImageFiles = files?.['galleryImages'] || [];
       const existingGalleryUrls = gallery_images ? JSON.parse(gallery_images) : [];
-      const newGalleryUrls: string[] = [];
-
-      for (const file of galleryImageFiles) {
-        const url = await storageService.uploadImage(file, 'blocks');
-        newGalleryUrls.push(url);
-      }
+      const newGalleryUrls = await Promise.all(
+        galleryImageFiles.map((file) => storageService.uploadImage(file, 'blocks'))
+      );
 
       const finalGalleryImages = [...existingGalleryUrls, ...newGalleryUrls];
 
@@ -157,33 +154,35 @@ router.post(
         }[],
       });
 
-      for (const upload of blockUploads) {
-        const imageUrl = await storageService.uploadImage(upload.file, 'blocks');
+      await Promise.all(
+        blockUploads.map(async (upload) => {
+          const imageUrl = await storageService.uploadImage(upload.file, 'blocks');
 
-        const { data: blockRecord } = await supabase
-          .from('blocks')
-          .select('id, data')
-          .eq('post_id', post.id)
-          .eq('sort_order', upload.sort_order)
-          .single();
+          const { data: blockRecord } = await supabase
+            .from('blocks')
+            .select('id, data')
+            .eq('post_id', post.id)
+            .eq('sort_order', upload.sort_order)
+            .single();
 
-        if (blockRecord) {
-          const currentData = (blockRecord.data as Record<string, unknown>) || {};
-          if (upload.imageSlot !== undefined) {
-            const images = [...((currentData.images as { url: string; alt: string }[]) || [])];
-            images[upload.imageSlot] = { ...images[upload.imageSlot], url: imageUrl };
-            await supabase
-              .from('blocks')
-              .update({ data: { ...currentData, images } })
-              .eq('id', blockRecord.id);
-          } else {
-            await supabase
-              .from('blocks')
-              .update({ data: { ...currentData, image_url: imageUrl } })
-              .eq('id', blockRecord.id);
+          if (blockRecord) {
+            const currentData = (blockRecord.data as Record<string, unknown>) || {};
+            if (upload.imageSlot !== undefined) {
+              const images = [...((currentData.images as { url: string; alt: string }[]) || [])];
+              images[upload.imageSlot] = { ...images[upload.imageSlot], url: imageUrl };
+              await supabase
+                .from('blocks')
+                .update({ data: { ...currentData, images } })
+                .eq('id', blockRecord.id);
+            } else {
+              await supabase
+                .from('blocks')
+                .update({ data: { ...currentData, image_url: imageUrl } })
+                .eq('id', blockRecord.id);
+            }
           }
-        }
-      }
+        })
+      );
 
       const heroFields: string[] = [];
       if (heroImageUrl) heroFields.push('hero_image');
@@ -272,12 +271,18 @@ router.put(
       let parsedBlocks = extracted.blocks;
       const blockUploadsForUpdate = extracted.uploads;
 
-      // Upload block images and apply URLs to block data
+      // Upload block images in parallel and apply URLs to block data
+      const blockUploadResults = await Promise.all(
+        blockUploadsForUpdate.map(async (upload) => ({
+          sort_order: upload.sort_order,
+          url: await storageService.uploadImage(upload.file, 'blocks'),
+          slot: upload.imageSlot,
+        }))
+      );
       const blockImageUploads: Record<number, { url: string; slot?: number }[]> = {};
-      for (const upload of blockUploadsForUpdate) {
-        const url = await storageService.uploadImage(upload.file, 'blocks');
-        if (!blockImageUploads[upload.sort_order]) blockImageUploads[upload.sort_order] = [];
-        blockImageUploads[upload.sort_order].push({ url, slot: upload.imageSlot });
+      for (const result of blockUploadResults) {
+        if (!blockImageUploads[result.sort_order]) blockImageUploads[result.sort_order] = [];
+        blockImageUploads[result.sort_order].push({ url: result.url, slot: result.slot });
       }
 
       if (parsedBlocks) {
@@ -303,12 +308,9 @@ router.put(
       const existingGalleryUrls = gallery_images
         ? JSON.parse(gallery_images)
         : existing.post.gallery_images || [];
-      const newGalleryUrls: string[] = [];
-
-      for (const file of galleryImageFiles) {
-        const url = await storageService.uploadImage(file, 'blocks');
-        newGalleryUrls.push(url);
-      }
+      const newGalleryUrls = await Promise.all(
+        galleryImageFiles.map((file) => storageService.uploadImage(file, 'blocks'))
+      );
 
       const finalGalleryImages = [...existingGalleryUrls, ...newGalleryUrls];
 

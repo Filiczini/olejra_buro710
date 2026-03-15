@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
 import { postService } from '../../services/api';
 import type { Post } from '../../types/post';
 
-export default function FeaturedPostsSection() {
+export default memo(function FeaturedPostsSection() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -34,6 +34,7 @@ export default function FeaturedPostsSection() {
                 <img
                   src={post.hero_image_url}
                   alt={post.title}
+                  loading="lazy"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
               ) : (
@@ -60,4 +61,4 @@ export default function FeaturedPostsSection() {
       </div>
     </section>
   );
-}
+});

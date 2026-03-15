@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
 import { postService } from '../../services/api';
 import type { Post } from '../../types/post';
 
-export default function ProjectsGallerySection() {
+export default memo(function ProjectsGallerySection() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,6 +44,7 @@ export default function ProjectsGallerySection() {
                   <img
                     src={post.hero_image_url}
                     alt={post.title}
+                    loading="lazy"
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out group-hover:scale-105"
                   />
                 ) : (
@@ -76,4 +77,4 @@ export default function ProjectsGallerySection() {
       </div>
     </section>
   );
-}
+});
