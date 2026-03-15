@@ -16,6 +16,7 @@ const createChainMock = (
   chain.delete = vi.fn().mockReturnValue(self());
   chain.eq = vi.fn().mockReturnValue(self());
   chain.neq = vi.fn().mockReturnValue(self());
+  chain.is = vi.fn().mockReturnValue(self());
   chain.ilike = vi.fn().mockReturnValue(self());
   chain.order = vi.fn().mockReturnValue(self());
   chain.range = vi.fn().mockResolvedValue(resolvedValue);
@@ -262,97 +263,23 @@ describe('postService', () => {
     });
   });
 
-  describe('delete', () => {
-    it('removes a post and cleans up images', async () => {
-      const mockPost = {
-        hero_image_url: 'https://example.com/hero.jpg',
-        gallery_images: ['https://example.com/gallery1.jpg'],
-      };
-
-      // select().eq().single() for fetching post data
-      mockChain.single = vi.fn().mockResolvedValueOnce({ data: mockPost, error: null });
-      // delete().eq() for actual deletion
-      const origEq = mockChain.eq as (...args: unknown[]) => unknown;
-      let eqCallCount = 0;
-      mockChain.eq = vi.fn((...args: unknown[]) => {
-        eqCallCount++;
-        // After single() resolves (select chain done), the delete chain's eq resolves directly
-        if (eqCallCount > 1) {
-          return Promise.resolve({ error: null });
-        }
-        return origEq(...args);
-      });
-
-      mockedBlockService.getByPostId.mockResolvedValue([]);
-      mockedStorageService.deleteImages.mockResolvedValue(undefined as never);
+  describe('delete (soft)', () => {
+    it('sets deleted_at instead of removing the post', async () => {
+      mockChain.eq = vi.fn().mockResolvedValue({ error: null });
 
       await postService.delete('p1');
 
-      expect(mockedBlockService.getByPostId).toHaveBeenCalledWith('p1');
-      expect(mockedStorageService.deleteImages).toHaveBeenCalledWith([
-        'https://example.com/hero.jpg',
-        'https://example.com/gallery1.jpg',
-      ]);
-    });
-
-    it('collects image URLs from blocks for cleanup', async () => {
-      mockChain.single = vi
-        .fn()
-        .mockResolvedValueOnce({
-          data: { hero_image_url: null, gallery_images: null },
-          error: null,
-        });
-      const origEq2 = mockChain.eq as (...args: unknown[]) => unknown;
-      let eqCallCount2 = 0;
-      mockChain.eq = vi.fn((...args: unknown[]) => {
-        eqCallCount2++;
-        if (eqCallCount2 > 1) {
-          return Promise.resolve({ error: null });
-        }
-        return origEq2(...args);
-      });
-
-      mockedBlockService.getByPostId.mockResolvedValue([
-        {
-          id: 'b1',
-          post_id: 'p1',
-          type: 'image_full' as const,
-          data: { image_url: 'https://example.com/block-img.jpg' },
-          sort_order: 0,
-          created_at: '2024-01-01',
-        },
-      ]);
-      mockedStorageService.deleteImages.mockResolvedValue(undefined as never);
-
-      await postService.delete('p1');
-
-      expect(mockedStorageService.deleteImages).toHaveBeenCalledWith([
-        'https://example.com/block-img.jpg',
-      ]);
-    });
-
-    it('does not call deleteImages when there are no images', async () => {
-      mockChain.single = vi
-        .fn()
-        .mockResolvedValueOnce({
-          data: { hero_image_url: null, gallery_images: null },
-          error: null,
-        });
-      const origEq3 = mockChain.eq as (...args: unknown[]) => unknown;
-      let eqCallCount3 = 0;
-      mockChain.eq = vi.fn((...args: unknown[]) => {
-        eqCallCount3++;
-        if (eqCallCount3 > 1) {
-          return Promise.resolve({ error: null });
-        }
-        return origEq3(...args);
-      });
-
-      mockedBlockService.getByPostId.mockResolvedValue([]);
-
-      await postService.delete('p1');
-
+      expect(mockChain.update).toHaveBeenCalledWith(
+        expect.objectContaining({ deleted_at: expect.any(String) })
+      );
+      expect(mockChain.eq).toHaveBeenCalledWith('id', 'p1');
       expect(mockedStorageService.deleteImages).not.toHaveBeenCalled();
+    });
+
+    it('throws when supabase returns an error', async () => {
+      mockChain.eq = vi.fn().mockResolvedValue({ error: new Error('DB error') });
+
+      await expect(postService.delete('p1')).rejects.toThrow('DB error');
     });
   });
 

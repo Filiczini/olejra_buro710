@@ -387,7 +387,7 @@ describe('Posts API', () => {
 
       // Assert
       expect(response.status).toBe(400);
-      expect(response.body.errors).toContainEqual(
+      expect(response.body.details).toContainEqual(
         expect.objectContaining({
           field: 'title',
           message: expect.stringContaining('200'),
@@ -405,7 +405,7 @@ describe('Posts API', () => {
 
       // Assert
       expect(response.status).toBe(400);
-      expect(response.body.errors).toContainEqual(
+      expect(response.body.details).toContainEqual(
         expect.objectContaining({
           field: 'slug',
           message: expect.stringContaining('200'),
@@ -425,7 +425,7 @@ describe('Posts API', () => {
 
       // Assert
       expect(response.status).toBe(400);
-      expect(response.body.errors).toContainEqual(
+      expect(response.body.details).toContainEqual(
         expect.objectContaining({
           field: 'seo_title',
           message: expect.stringContaining('60'),
@@ -448,7 +448,7 @@ describe('Posts API', () => {
 
       // Assert
       expect(response.status).toBe(400);
-      expect(response.body.errors).toContainEqual(
+      expect(response.body.details).toContainEqual(
         expect.objectContaining({
           field: 'seo_description',
           message: expect.stringContaining('160'),
@@ -675,7 +675,7 @@ describe('Posts API', () => {
 
       // Assert
       expect(response.status).toBe(400);
-      expect(response.body.errors).toContainEqual(
+      expect(response.body.details).toContainEqual(
         expect.objectContaining({
           field: 'title',
           message: expect.stringContaining('200'),

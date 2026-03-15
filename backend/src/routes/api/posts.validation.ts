@@ -70,3 +70,89 @@ export const parseJsonField = <T>(value: string | undefined, fieldName: string):
     throw new Error(`Invalid ${fieldName} format`);
   }
 };
+
+export interface RawBlock {
+  id?: string;
+  _tempId?: string;
+  type: string;
+  data: Record<string, unknown>;
+  sort_order?: number;
+}
+
+export interface ProcessedBlock {
+  id?: string;
+  type: string;
+  data: Record<string, unknown>;
+  sort_order: number;
+}
+
+export const parseBlocksJson = (blocksJson: string | undefined): RawBlock[] => {
+  if (!blocksJson) return [];
+
+  const parsed = parseJsonField<RawBlock[]>(blocksJson, 'blocks');
+  return parsed || [];
+};
+
+export const cleanBlockData = (block: RawBlock, index: number): ProcessedBlock => {
+  const data = { ...block.data };
+  delete data._hasNewImage;
+  delete data._newImageSlots;
+
+  return {
+    id: block.id,
+    type: block.type,
+    data,
+    sort_order: block.sort_order ?? index,
+  };
+};
+
+export const processBlocks = (blocksJson: string | undefined): ProcessedBlock[] => {
+  return parseBlocksJson(blocksJson).map(cleanBlockData);
+};
+
+const IMAGE_BLOCK_TYPES = ['image_full', 'text_image', 'image_text'];
+
+export interface BlockImageUpload {
+  sort_order: number;
+  file: Express.Multer.File;
+  imageSlot?: number;
+}
+
+export const extractBlockImageUploads = (
+  rawBlocks: RawBlock[],
+  imageFiles: Express.Multer.File[]
+): { blocks: ProcessedBlock[]; uploads: BlockImageUpload[] } => {
+  const uploads: BlockImageUpload[] = [];
+  let fileIndex = 0;
+
+  const blocks = rawBlocks.map((block, index) => {
+    const data = { ...block.data };
+
+    if (block.type === 'three_images') {
+      const newImageSlots = (data._newImageSlots as number[]) || [];
+      for (const slot of newImageSlots) {
+        if (imageFiles[fileIndex]) {
+          uploads.push({ sort_order: index, file: imageFiles[fileIndex], imageSlot: slot });
+          fileIndex++;
+        }
+      }
+    } else if (IMAGE_BLOCK_TYPES.includes(block.type) && data._hasNewImage === true) {
+      if (imageFiles[fileIndex]) {
+        uploads.push({ sort_order: index, file: imageFiles[fileIndex] });
+        fileIndex++;
+      }
+    }
+
+    delete data._hasNewImage;
+    delete data._newImageSlots;
+
+    return {
+      id: block.id,
+      type: block.type,
+      data,
+      sort_order: block.sort_order ?? index,
+    };
+  });
+
+  return { blocks, uploads };
+};

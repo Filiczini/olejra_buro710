@@ -8,7 +8,12 @@ import { activityLogService } from '../services/activityLogService';
 import { uploadBlockMedia, uploadGalleryImages } from '../middleware/multer';
 import { supabase } from '../config/supabase';
 import type { BlockType, BlockData } from '../types/block';
-import { validatePostInput, type PostBody } from './api/posts.validation';
+import {
+  validatePostInput,
+  parseBlocksJson,
+  extractBlockImageUploads,
+  type PostBody,
+} from './api/posts.validation';
 
 const router = Router();
 
@@ -93,7 +98,7 @@ router.post(
 
       const validationErrors = validatePostInput(body, true);
       if (validationErrors.length > 0) {
-        return res.status(400).json({ errors: validationErrors });
+        return res.status(400).json({ error: 'Validation failed', details: validationErrors });
       }
 
       if (!title) {
@@ -112,64 +117,12 @@ router.post(
         ogImageUrl = await storageService.uploadImage(files['ogImage'][0], 'blocks');
       }
 
-      let parsedBlocks: {
-        id?: string;
-        _tempId?: string;
-        type: BlockType;
-        data: Record<string, unknown>;
-        sort_order?: number;
-      }[] = [];
-      if (blocks) {
-        try {
-          parsedBlocks = JSON.parse(blocks);
-        } catch {
-          return res.status(400).json({ error: 'Invalid blocks format' });
-        }
-      }
-
+      const rawBlocks = parseBlocksJson(blocks);
       const blockImageFiles = files?.['blockImages'] || [];
-      const blockUploads: { sort_order: number; file: Express.Multer.File; imageSlot?: number }[] =
-        [];
-      let blockImageIndex = 0;
-
-      const processedBlocks = parsedBlocks.map((block, index) => {
-        const data = { ...block.data };
-
-        if (block.type === 'three_images') {
-          const newImageSlots = (data._newImageSlots as number[]) || [];
-          for (const slot of newImageSlots) {
-            if (blockImageFiles[blockImageIndex]) {
-              blockUploads.push({
-                sort_order: index,
-                file: blockImageFiles[blockImageIndex],
-                imageSlot: slot,
-              });
-              blockImageIndex++;
-            }
-          }
-          delete data._newImageSlots;
-        } else {
-          const needsImage =
-            block.type === 'image_full' ||
-            block.type === 'text_image' ||
-            block.type === 'image_text';
-          const hasNewImage = data._hasNewImage === true;
-
-          if (needsImage && hasNewImage && blockImageFiles[blockImageIndex]) {
-            blockUploads.push({ sort_order: index, file: blockImageFiles[blockImageIndex] });
-            blockImageIndex++;
-          }
-        }
-        delete data._hasNewImage;
-        delete data._newImageSlots;
-
-        return {
-          id: block.id,
-          type: block.type,
-          data,
-          sort_order: block.sort_order ?? index,
-        };
-      });
+      const { blocks: processedBlocks, uploads: blockUploads } = extractBlockImageUploads(
+        rawBlocks,
+        blockImageFiles
+      );
 
       const galleryImageFiles = files?.['galleryImages'] || [];
       const existingGalleryUrls = gallery_images ? JSON.parse(gallery_images) : [];
@@ -288,7 +241,7 @@ router.put(
 
       const validationErrors = validatePostInput(body, false);
       if (validationErrors.length > 0) {
-        return res.status(400).json({ errors: validationErrors });
+        return res.status(400).json({ error: 'Validation failed', details: validationErrors });
       }
 
       const existing = await postService.getById(id);
@@ -310,63 +263,21 @@ router.put(
         ogImageUrl = await storageService.uploadImage(files['ogImage'][0], 'blocks');
       }
 
-      let parsedBlocks:
-        | {
-            id?: string;
-            _tempId?: string;
-            type: BlockType;
-            data: Record<string, unknown>;
-            sort_order: number;
-          }[]
-        | undefined;
-      if (blocks) {
-        try {
-          parsedBlocks = JSON.parse(blocks);
-        } catch {
-          return res.status(400).json({ error: 'Invalid blocks format' });
-        }
-      }
-
+      const rawBlocks = blocks ? parseBlocksJson(blocks) : undefined;
       const blockImageFiles = files?.['blockImages'] || [];
+
+      const extracted = rawBlocks
+        ? extractBlockImageUploads(rawBlocks, blockImageFiles)
+        : { blocks: undefined, uploads: [] };
+      let parsedBlocks = extracted.blocks;
+      const blockUploadsForUpdate = extracted.uploads;
+
+      // Upload block images and apply URLs to block data
       const blockImageUploads: Record<number, { url: string; slot?: number }[]> = {};
-
-      if (parsedBlocks && blockImageFiles.length > 0) {
-        let blockImageIndex = 0;
-        for (const block of parsedBlocks) {
-          if (block.type === 'three_images') {
-            const newImageSlots = (block.data._newImageSlots as number[]) || [];
-            for (const slot of newImageSlots) {
-              if (blockImageFiles[blockImageIndex]) {
-                const url = await storageService.uploadImage(
-                  blockImageFiles[blockImageIndex],
-                  'blocks'
-                );
-                if (!blockImageUploads[block.sort_order]) blockImageUploads[block.sort_order] = [];
-                blockImageUploads[block.sort_order].push({ url, slot });
-                blockImageIndex++;
-              }
-            }
-            delete block.data._newImageSlots;
-          } else {
-            const needsImage =
-              block.type === 'image_full' ||
-              block.type === 'text_image' ||
-              block.type === 'image_text';
-            const hasNewImage = block.data._hasNewImage === true;
-
-            if (needsImage && hasNewImage && blockImageFiles[blockImageIndex]) {
-              const url = await storageService.uploadImage(
-                blockImageFiles[blockImageIndex],
-                'blocks'
-              );
-              if (!blockImageUploads[block.sort_order]) blockImageUploads[block.sort_order] = [];
-              blockImageUploads[block.sort_order].push({ url });
-              blockImageIndex++;
-            }
-          }
-          delete block.data._hasNewImage;
-          delete block.data._newImageSlots;
-        }
+      for (const upload of blockUploadsForUpdate) {
+        const url = await storageService.uploadImage(upload.file, 'blocks');
+        if (!blockImageUploads[upload.sort_order]) blockImageUploads[upload.sort_order] = [];
+        blockImageUploads[upload.sort_order].push({ url, slot: upload.imageSlot });
       }
 
       if (parsedBlocks) {

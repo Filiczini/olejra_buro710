@@ -98,7 +98,7 @@ export const postService = {
   getAll: async (params?: PostPaginationParams): Promise<PaginatedResponse<Post>> => {
     const { page = 1, limit = 10, status, search } = params || {};
 
-    let query = supabase.from('posts').select('*', { count: 'exact' });
+    let query = supabase.from('posts').select('*', { count: 'exact' }).is('deleted_at', null);
 
     if (status) {
       query = query.eq('status', status);
@@ -149,6 +149,7 @@ export const postService = {
       .select('*')
       .eq('slug', slug)
       .eq('status', 'published')
+      .is('deleted_at', null)
       .single();
 
     if (postError) throw postError;
@@ -168,6 +169,7 @@ export const postService = {
         .from('posts')
         .select('id')
         .eq('slug', uniqueSlug)
+        .is('deleted_at', null)
         .single();
 
       if (!existing) break;
@@ -206,6 +208,7 @@ export const postService = {
         .select('id')
         .eq('slug', postData.slug)
         .neq('id', id)
+        .is('deleted_at', null)
         .single();
 
       if (existing) {
@@ -231,6 +234,29 @@ export const postService = {
   },
 
   delete: async (id: string): Promise<void> => {
+    const { error } = await supabase
+      .from('posts')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id);
+
+    if (error) throw error;
+  },
+
+  restore: async (id: string): Promise<Post> => {
+    const { data: post, error } = await supabase
+      .from('posts')
+      .update({ deleted_at: null })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    if (!post) throw new NotFoundError('Post not found');
+
+    return post as Post;
+  },
+
+  permanentDelete: async (id: string): Promise<void> => {
     const { data: post } = await supabase
       .from('posts')
       .select('hero_image_url, gallery_images')
@@ -268,6 +294,7 @@ export const postService = {
       .select('*')
       .eq('featured', true)
       .eq('status', 'published')
+      .is('deleted_at', null)
       .order('created_at', { ascending: false })
       .limit(6);
 
