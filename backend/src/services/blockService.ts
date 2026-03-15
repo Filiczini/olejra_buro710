@@ -97,22 +97,35 @@ export const blockService = {
       }
     }
 
-    if (toDelete.length > 0) {
-      await Promise.all(toDelete.map((b) => blockService.delete(b.id)));
-    }
+    const deletePromise =
+      toDelete.length > 0
+        ? Promise.all(toDelete.map((b) => blockService.delete(b.id)))
+        : Promise.resolve([]);
 
-    if (toCreate.length > 0) {
-      await blockService.create({ postId, blocks: toCreate });
-    }
+    const createPromise =
+      toCreate.length > 0
+        ? blockService.create({ postId, blocks: toCreate })
+        : Promise.resolve([] as Block[]);
 
-    for (const block of toUpdate) {
-      await blockService.update(block.id, {
-        type: block.type,
-        data: block.data,
-        sort_order: block.sort_order,
-      });
-    }
+    const updatePromise =
+      toUpdate.length > 0
+        ? Promise.all(
+            toUpdate.map((block) =>
+              blockService.update(block.id, {
+                type: block.type,
+                data: block.data,
+                sort_order: block.sort_order,
+              })
+            )
+          )
+        : Promise.resolve([] as Block[]);
 
-    return blockService.getByPostId(postId);
+    const [, createdBlocks, updatedBlocks] = await Promise.all([
+      deletePromise,
+      createPromise,
+      updatePromise,
+    ]);
+
+    return [...createdBlocks, ...updatedBlocks].sort((a, b) => a.sort_order - b.sort_order);
   },
 };

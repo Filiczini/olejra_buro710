@@ -206,16 +206,11 @@ describe('blockService', () => {
       const createSpy = vi.spyOn(blockService, 'create');
       const updateSpy = vi.spyOn(blockService, 'update');
 
-      // First call: get existing blocks. Last call: return final state.
-      getByPostIdSpy.mockResolvedValueOnce(existingBlocks as never).mockResolvedValueOnce([
-        {
-          id: 'b1',
-          post_id: 'p1',
-          type: 'text_full',
-          data: { content: 'Updated' },
-          sort_order: 0,
-          created_at: '2024-01-01',
-        },
+      // First call: get existing blocks (no second call — syncBlocks returns combined results)
+      getByPostIdSpy.mockResolvedValueOnce(existingBlocks as never);
+
+      deleteSpy.mockResolvedValue(undefined);
+      createSpy.mockResolvedValue([
         {
           id: 'b3',
           post_id: 'p1',
@@ -225,10 +220,14 @@ describe('blockService', () => {
           created_at: '2024-01-01',
         },
       ] as never);
-
-      deleteSpy.mockResolvedValue(undefined);
-      createSpy.mockResolvedValue([] as never);
-      updateSpy.mockResolvedValue({} as never);
+      updateSpy.mockResolvedValue({
+        id: 'b1',
+        post_id: 'p1',
+        type: 'text_full',
+        data: { content: 'Updated' },
+        sort_order: 0,
+        created_at: '2024-01-01',
+      } as never);
 
       const incomingBlocks = [
         { id: 'b1', type: 'text_full' as const, data: { content: 'Updated' }, sort_order: 0 },

@@ -77,9 +77,9 @@ export const activityLogService = {
 
       if (fallbackError) throw fallbackError;
 
-      return [...new Set(fallbackData?.map((log: any) => log.user_email))] as string[];
+      return [...new Set(fallbackData?.map((log: { user_email: string }) => log.user_email))];
     }
 
-    return (data?.map((row: any) => row.user_email) || []) as string[];
+    return data?.map((row: { user_email: string }) => row.user_email) || [];
   },
 };

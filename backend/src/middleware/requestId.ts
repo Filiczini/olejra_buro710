@@ -25,7 +25,7 @@ export function requestIdMiddleware(req: Request, res: Response, next: NextFunct
       url: req.originalUrl,
       statusCode: res.statusCode,
       duration: `${duration}ms`,
-      userId: (req as any).user?.userId,
+      userId: req.user?.userId,
     });
   });
 

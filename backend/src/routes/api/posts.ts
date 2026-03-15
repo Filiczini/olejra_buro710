@@ -5,6 +5,7 @@
  */
 import { Router } from 'express';
 import multer from 'multer';
+import rateLimit from 'express-rate-limit';
 import { logger } from '../../lib/logger';
 import { memoryStorage } from 'multer';
 import type { FileFilterCallback } from 'multer';
@@ -19,6 +20,7 @@ import {
   processBlocks,
   validatePostInput,
   type PostBody,
+  type ProcessedBlock,
 } from './posts.validation';
 
 const router = Router();
@@ -115,7 +117,17 @@ export const processUploadedFiles = async (
 // Routes - All protected by API Key
 // ============================================================================
 
+const apiRateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+  skip: () => process.env.NODE_ENV === 'test',
+});
+
 router.use(apiKeyMiddleware);
+router.use(apiRateLimiter);
 
 /**
  * GET /api/v1/posts

@@ -2,33 +2,44 @@ import { Icon } from '@iconify-icon/react';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { postService } from '../../services/api';
+import { logger } from '../../lib/logger';
 import type { Post } from '../../types/post';
+
+const SLIDE_INTERVAL_MS = 6000;
 
 export default function HeroSlider() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     const fetchPosts = async () => {
       try {
         const response = await postService.getAll({ status: 'published', limit: 10 });
+        if (cancelled) return;
         const featuredPosts = response.data.filter((p) => p.hero_image_url).slice(0, 5);
         setPosts(featuredPosts);
-      } catch (error) {
-        console.error('Failed to fetch posts:', error);
+      } catch (err) {
+        if (cancelled) return;
+        logger.error('Failed to fetch posts', err);
+        setError(true);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
     fetchPosts();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
     if (posts.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % posts.length);
-    }, 6000);
+    }, SLIDE_INTERVAL_MS);
     return () => clearInterval(interval);
   }, [posts.length]);
 
@@ -40,11 +51,24 @@ export default function HeroSlider() {
     setCurrentSlide((prev) => (prev - 1 + posts.length) % posts.length);
   };
 
-  if (loading || posts.length === 0) {
+  if (loading) {
     return (
       <section className="relative w-full h-screen overflow-hidden bg-zinc-900 text-white">
         <div className="flex items-center justify-center h-full">
           <div className="text-zinc-400">Завантаження...</div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error || posts.length === 0) {
+    return (
+      <section className="relative w-full h-screen overflow-hidden bg-zinc-900 text-white">
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <h1 className="text-5xl md:text-7xl font-semibold tracking-tight mb-4">Buro 710</h1>
+            <p className="text-zinc-400 text-lg">Архітектура та дизайн</p>
+          </div>
         </div>
       </section>
     );
@@ -113,6 +137,7 @@ export default function HeroSlider() {
               <div className="flex gap-2 ml-4">
                 <button
                   onClick={prevSlide}
+                  aria-label="Попередній слайд"
                   className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white hover:text-black hover:border-white hover:scale-110 hover:shadow-lg hover:shadow-white/20 transition-all duration-300 backdrop-blur-sm group cursor-pointer"
                 >
                   <Icon
@@ -123,6 +148,7 @@ export default function HeroSlider() {
                 </button>
                 <button
                   onClick={nextSlide}
+                  aria-label="Наступний слайд"
                   className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white hover:text-black hover:border-white hover:scale-110 hover:shadow-lg hover:shadow-white/20 transition-all duration-300 backdrop-blur-sm group cursor-pointer"
                 >
                   <Icon

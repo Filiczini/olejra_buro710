@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Icon } from '@iconify-icon/react';
 import ImageLightbox from '../ui/ImageLightbox';
 
@@ -15,14 +15,20 @@ export default function PostGalleryBlock({ images, title }: PostGalleryBlockProp
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
-  const checkScrollButtons = () => {
+  const checkScrollButtonsRaw = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = container;
     setCanScrollLeft(scrollLeft > 0);
     setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-  };
+  }, []);
+
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const checkScrollButtons = useCallback(() => {
+    clearTimeout(scrollTimerRef.current);
+    scrollTimerRef.current = setTimeout(checkScrollButtonsRaw, 50);
+  }, [checkScrollButtonsRaw]);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);

@@ -6,11 +6,19 @@ import { postService } from '../../services/api';
 import type { Post } from '../../types/post';
 import Pagination from '../../components/admin/Pagination';
 
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 10;
+
 export default function PostsPage() {
   const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
+  const [pagination, setPagination] = useState({
+    page: DEFAULT_PAGE,
+    limit: DEFAULT_LIMIT,
+    total: 0,
+    totalPages: 0,
+  });
   const [statusFilter, setStatusFilter] = useState<'draft' | 'published' | ''>('');
   const [searchQuery, setSearchQuery] = useState('');
 

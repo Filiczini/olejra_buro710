@@ -4,10 +4,18 @@ import { ChevronDown } from 'lucide-react';
 import { activityLogService } from '../../services/api';
 import type { ActivityLog, ActivityLogsParams } from '../../types/activityLog';
 
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 20;
+
 export default function ActivityLogPage() {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 0 });
+  const [pagination, setPagination] = useState({
+    page: DEFAULT_PAGE,
+    limit: DEFAULT_LIMIT,
+    total: 0,
+    totalPages: 0,
+  });
   const [filters, setFilters] = useState<ActivityLogsParams>({});
   const [uniqueUsers, setUniqueUsers] = useState<string[]>([]);
 

@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { authMiddleware, adminMiddleware } from '../middleware/auth';
 import { logger } from '../lib/logger';
 import type { AuthenticatedRequest } from '../types/express.js';
@@ -16,6 +17,17 @@ import {
 } from './api/posts.validation';
 
 const router = Router();
+
+const adminRateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+  skip: () => process.env.NODE_ENV === 'test',
+});
+
+router.use(adminRateLimiter);
 
 router.get('/', async (req, res) => {
   try {
@@ -154,35 +166,39 @@ router.post(
         }[],
       });
 
-      await Promise.all(
-        blockUploads.map(async (upload) => {
-          const imageUrl = await storageService.uploadImage(upload.file, 'blocks');
+      if (blockUploads.length > 0) {
+        // Prefetch all blocks once to avoid N+1 queries
+        const { data: allBlocks } = await supabase
+          .from('blocks')
+          .select('id, data, sort_order')
+          .eq('post_id', post.id);
 
-          const { data: blockRecord } = await supabase
-            .from('blocks')
-            .select('id, data')
-            .eq('post_id', post.id)
-            .eq('sort_order', upload.sort_order)
-            .single();
+        const blocksByOrder = new Map((allBlocks || []).map((b) => [b.sort_order, b]));
 
-          if (blockRecord) {
-            const currentData = (blockRecord.data as Record<string, unknown>) || {};
-            if (upload.imageSlot !== undefined) {
-              const images = [...((currentData.images as { url: string; alt: string }[]) || [])];
-              images[upload.imageSlot] = { ...images[upload.imageSlot], url: imageUrl };
-              await supabase
-                .from('blocks')
-                .update({ data: { ...currentData, images } })
-                .eq('id', blockRecord.id);
-            } else {
-              await supabase
-                .from('blocks')
-                .update({ data: { ...currentData, image_url: imageUrl } })
-                .eq('id', blockRecord.id);
+        await Promise.all(
+          blockUploads.map(async (upload) => {
+            const imageUrl = await storageService.uploadImage(upload.file, 'blocks');
+            const blockRecord = blocksByOrder.get(upload.sort_order);
+
+            if (blockRecord) {
+              const currentData = (blockRecord.data as Record<string, unknown>) || {};
+              if (upload.imageSlot !== undefined) {
+                const images = [...((currentData.images as { url: string; alt: string }[]) || [])];
+                images[upload.imageSlot] = { ...images[upload.imageSlot], url: imageUrl };
+                await supabase
+                  .from('blocks')
+                  .update({ data: { ...currentData, images } })
+                  .eq('id', blockRecord.id);
+              } else {
+                await supabase
+                  .from('blocks')
+                  .update({ data: { ...currentData, image_url: imageUrl } })
+                  .eq('id', blockRecord.id);
+              }
             }
-          }
-        })
-      );
+          })
+        );
+      }
 
       const heroFields: string[] = [];
       if (heroImageUrl) heroFields.push('hero_image');
@@ -199,7 +215,7 @@ router.post(
         entity_id: post.id,
         entity_title: post.title,
         changes: {
-          blocks_count: parsedBlocks.length,
+          blocks_count: rawBlocks.length,
           hero_updated: heroFields.length > 0,
           hero_fields: heroFields.length > 0 ? heroFields : undefined,
         },
@@ -450,8 +466,14 @@ router.delete(
       const id = req.params.id as string;
       const { image_url } = req.body as { image_url?: string };
 
-      if (!image_url) {
+      if (!image_url || typeof image_url !== 'string') {
         return res.status(400).json({ error: 'Image URL is required' });
+      }
+
+      try {
+        new URL(image_url);
+      } catch {
+        return res.status(400).json({ error: 'Invalid image URL format' });
       }
 
       const existing = await postService.getById(id);

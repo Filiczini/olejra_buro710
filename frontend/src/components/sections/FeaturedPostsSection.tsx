@@ -1,23 +1,12 @@
-import { memo, useEffect, useState } from 'react';
+import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
-import { logger } from '../../lib/logger';
-import { postService } from '../../services/api';
-import type { Post } from '../../types/post';
+import { useFetchPosts } from '../../hooks/useFetchPosts';
 
 export default memo(function FeaturedPostsSection() {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { posts, loading, error } = useFetchPosts({ featured: true });
 
-  useEffect(() => {
-    postService
-      .getFeatured()
-      .then(setPosts)
-      .catch((err) => logger.error('Failed to load featured posts', err))
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading || posts.length === 0) return null;
+  if (loading || error || posts.length === 0) return null;
 
   return (
     <section className="max-w-[1800px] mx-auto px-6 mb-40">

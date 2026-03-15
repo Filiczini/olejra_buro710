@@ -2,6 +2,7 @@ import { supabase } from '../config/supabase';
 import { blockService } from './blockService';
 import { storageService } from './storageService';
 import { ConflictError, NotFoundError } from '../lib/errors';
+import { generateSlug } from '@buro710/shared';
 import type {
   Post,
   PostStatus,
@@ -42,56 +43,6 @@ interface UpdatePostParams extends Partial<PostHero> {
     data: Block['data'];
     sort_order: number;
   }[];
-}
-
-function generateSlug(title: string): string {
-  const transliterate = (str: string): string => {
-    const map: Record<string, string> = {
-      а: 'a',
-      б: 'b',
-      в: 'v',
-      г: 'h',
-      ґ: 'g',
-      д: 'd',
-      е: 'e',
-      є: 'ye',
-      ж: 'zh',
-      з: 'z',
-      и: 'y',
-      і: 'i',
-      ї: 'yi',
-      й: 'y',
-      к: 'k',
-      л: 'l',
-      м: 'm',
-      н: 'n',
-      о: 'o',
-      п: 'p',
-      р: 'r',
-      с: 's',
-      т: 't',
-      у: 'u',
-      ф: 'f',
-      х: 'kh',
-      ц: 'ts',
-      ч: 'ch',
-      ш: 'sh',
-      щ: 'shch',
-      ь: '',
-      ю: 'yu',
-      я: 'ya',
-    };
-    return str
-      .toLowerCase()
-      .split('')
-      .map((char) => map[char] || char)
-      .join('');
-  };
-
-  return transliterate(title)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
 }
 
 export const postService = {

@@ -3,6 +3,7 @@
  */
 
 import type { PostStatus } from '../../types/post';
+import type { BlockType } from '../../types/block';
 import { postUpdateSchema } from '@buro710/shared';
 
 export interface PostBody {
@@ -28,7 +29,7 @@ export interface ValidationError {
   message: string;
 }
 
-export const validatePostInput = (data: PostBody, isCreate: boolean): ValidationError[] => {
+export const validatePostInput = (data: PostBody, _isCreate: boolean): ValidationError[] => {
   const dataToValidate: Record<string, unknown> = {};
 
   if (data.title !== undefined) dataToValidate.title = data.title;
@@ -81,7 +82,7 @@ export interface RawBlock {
 
 export interface ProcessedBlock {
   id?: string;
-  type: string;
+  type: BlockType;
   data: Record<string, unknown>;
   sort_order: number;
 }
@@ -100,7 +101,7 @@ export const cleanBlockData = (block: RawBlock, index: number): ProcessedBlock =
 
   return {
     id: block.id,
-    type: block.type,
+    type: block.type as BlockType,
     data,
     sort_order: block.sort_order ?? index,
   };
@@ -148,7 +149,7 @@ export const extractBlockImageUploads = (
 
     return {
       id: block.id,
-      type: block.type,
+      type: block.type as BlockType,
       data,
       sort_order: block.sort_order ?? index,
     };

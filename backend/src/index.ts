@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import path from 'path';
 import type { Request, Response } from 'express';
 import { env } from './config/env';
+import { logger } from './lib/logger';
 import { requestIdMiddleware } from './middleware/requestId';
 import authRoutes from './routes/auth';
 import activityLogsRoutes from './routes/activityLogs';
@@ -17,7 +18,20 @@ const app = express();
 const PORT = env.PORT;
 
 app.use(requestIdMiddleware);
-app.use(helmet({ contentSecurityPolicy: false }));
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com'],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com'],
+        imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'"],
+      },
+    },
+  })
+);
 app.use(
   cors({
     origin: env.FRONTEND_URL,
@@ -87,5 +101,5 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  logger.info(`Server running on port ${PORT}`);
 });

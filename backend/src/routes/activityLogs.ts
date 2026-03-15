@@ -1,9 +1,21 @@
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { authMiddleware, adminMiddleware } from '../middleware/auth';
 import { activityLogService } from '../services/activityLogService';
 import { logger } from '../lib/logger';
 
 const router = Router();
+
+const logsRateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+  skip: () => process.env.NODE_ENV === 'test',
+});
+
+router.use(logsRateLimiter);
 
 router.get('/', authMiddleware, adminMiddleware, async (req, res) => {
   try {
