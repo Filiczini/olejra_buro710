@@ -7,6 +7,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import rateLimit from 'express-rate-limit';
 import { logger } from '../../lib/logger';
+import { activityLogService } from '../../services/activityLogService';
 import { memoryStorage } from 'multer';
 import type { FileFilterCallback } from 'multer';
 import { apiKeyMiddleware } from '../../middleware/apiKey';
@@ -246,6 +247,14 @@ router.post('/', uploadPostMedia, async (req, res) => {
       }[],
     });
 
+    await activityLogService.log({
+      user_email: 'api',
+      action: 'create',
+      entity_type: 'post',
+      entity_id: post.id,
+      entity_title: post.title,
+    });
+
     res.status(201).json(post);
   } catch (error) {
     logger.error('Error creating post:', error);
@@ -367,6 +376,14 @@ router.put('/:id', uploadPostMedia, async (req, res) => {
       }[],
     });
 
+    await activityLogService.log({
+      user_email: 'api',
+      action: 'update',
+      entity_type: 'post',
+      entity_id: post.id,
+      entity_title: post.title,
+    });
+
     res.json(post);
   } catch (error) {
     logger.error('Error updating post:', error);
@@ -385,13 +402,23 @@ router.delete('/:id', async (req, res) => {
   try {
     const id = req.params.id as string;
 
+    let post;
     try {
-      await postService.getById(id);
+      ({ post } = await postService.getById(id));
     } catch {
       return res.status(404).json({ error: 'Post not found' });
     }
 
     await postService.delete(id);
+
+    await activityLogService.log({
+      user_email: 'api',
+      action: 'delete',
+      entity_type: 'post',
+      entity_id: id,
+      entity_title: post.title,
+    });
+
     res.json({ message: 'Post deleted successfully' });
   } catch (error) {
     logger.error('Error deleting post:', error);
