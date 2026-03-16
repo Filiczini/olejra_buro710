@@ -5,7 +5,12 @@ interface ThreeImagesBlockProps {
 }
 
 export default function ThreeImagesBlock({ data }: ThreeImagesBlockProps) {
-  const { images } = data;
+  const images =
+    data.images ??
+    [1, 2, 3].map((i) => ({
+      url: (data as Record<string, string>)[`image_url_${i}`] ?? '',
+      alt: (data as Record<string, string>)[`alt_${i}`] ?? '',
+    }));
 
   if (!images || images.every((img) => !img.url)) return null;
 
