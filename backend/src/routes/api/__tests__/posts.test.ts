@@ -34,6 +34,12 @@ vi.mock('../../../services/storageService', () => ({
   },
 }));
 
+vi.mock('../../../services/activityLogService', () => ({
+  activityLogService: {
+    log: vi.fn().mockResolvedValue({}),
+  },
+}));
+
 // Import after mocking
 import postsRouter from '../posts';
 import { postService } from '../../../services/postService';
