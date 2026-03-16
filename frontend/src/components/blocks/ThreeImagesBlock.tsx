@@ -5,16 +5,21 @@ interface ThreeImagesBlockProps {
 }
 
 export default function ThreeImagesBlock({ data }: ThreeImagesBlockProps) {
-  const { images } = data;
+  const images =
+    data.images ??
+    [1, 2, 3].map((i) => ({
+      url: (data as unknown as Record<string, string>)[`image_url_${i}`] ?? '',
+      alt: (data as unknown as Record<string, string>)[`alt_${i}`] ?? '',
+    }));
 
   if (!images || images.every((img) => !img.url)) return null;
 
   return (
     <section className="py-12 px-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-        {images.map((image) =>
+        {images.map((image, index) =>
           image.url ? (
-            <div key={image.url} className="overflow-hidden group">
+            <div key={`${image.url}-${index}`} className="overflow-hidden group">
               <img
                 src={image.url}
                 alt={image.alt || ''}

@@ -108,7 +108,7 @@ export default function PostGalleryBlock({ images, title }: PostGalleryBlockProp
       >
         {images.map((image, index) => (
           <div
-            key={image}
+            key={`${image}-${index}`}
             onClick={() => openLightbox(index)}
             className="gallery-item aspect-[2/3] w-[calc(100vw-48px)] md:w-auto md:min-w-[240px] md:max-w-[400px] bg-zinc-100 overflow-hidden group cursor-pointer flex-shrink-0 snap-center md:snap-none"
           >
