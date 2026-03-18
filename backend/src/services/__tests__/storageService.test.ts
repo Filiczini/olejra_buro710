@@ -1,35 +1,37 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import path from 'path';
 
-// Mock storage chain for supabase.storage.from()
-const mockUpload = vi.fn();
-const mockRemove = vi.fn();
-const mockGetPublicUrl = vi.fn();
+// Mock fs/promises
+const mockMkdir = vi.fn().mockResolvedValue(undefined);
+const mockWriteFile = vi.fn().mockResolvedValue(undefined);
+const mockUnlink = vi.fn().mockResolvedValue(undefined);
 
-vi.mock('../../config/supabase', () => ({
-  supabase: {
-    storage: {
-      from: vi.fn(() => ({
-        upload: mockUpload,
-        remove: mockRemove,
-        getPublicUrl: mockGetPublicUrl,
-      })),
-    },
+vi.mock('fs/promises', () => ({
+  default: {
+    mkdir: (...args: unknown[]) => mockMkdir(...args),
+    writeFile: (...args: unknown[]) => mockWriteFile(...args),
+    unlink: (...args: unknown[]) => mockUnlink(...args),
   },
 }));
 
 import { storageService } from '../storageService';
-import { supabase } from '../../config/supabase';
 
-const mockedStorageFrom = vi.mocked(supabase.storage.from);
+// Valid JPEG magic bytes (FF D8 FF) followed by dummy data
+const JPEG_MAGIC = Buffer.from([0xff, 0xd8, 0xff, 0xe0, ...Array(20).fill(0)]);
+// Valid PNG magic bytes (89 50 4E 47) followed by dummy data
+const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, ...Array(20).fill(0)]);
 
 function createMockFile(overrides: Partial<Express.Multer.File> = {}): Express.Multer.File {
+  const mimetype = overrides.mimetype || 'image/jpeg';
+  const defaultBuffer = mimetype === 'image/png' ? PNG_MAGIC : JPEG_MAGIC;
+
   return {
     fieldname: 'image',
     originalname: 'photo.jpg',
     encoding: '7bit',
-    mimetype: 'image/jpeg',
+    mimetype,
     size: 1024,
-    buffer: Buffer.from('fake-image-data'),
+    buffer: defaultBuffer,
     destination: '',
     filename: '',
     path: '',
@@ -41,9 +43,6 @@ function createMockFile(overrides: Partial<Express.Multer.File> = {}): Express.M
 describe('storageService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetPublicUrl.mockReturnValue({
-      data: { publicUrl: 'https://storage.example.com/projects/media/test.jpg' },
-    });
   });
 
   describe('generateSafeFileName', () => {
@@ -72,38 +71,26 @@ describe('storageService', () => {
 
   describe('uploadImage', () => {
     it('uploads a file and returns public URL', async () => {
-      mockUpload.mockResolvedValue({ error: null });
-      mockGetPublicUrl.mockReturnValue({
-        data: { publicUrl: 'https://storage.example.com/projects/media/123-abc.jpg' },
-      });
-
       const file = createMockFile();
       const result = await storageService.uploadImage(file);
 
-      expect(mockedStorageFrom).toHaveBeenCalledWith('projects');
-      expect(mockUpload).toHaveBeenCalledWith(
-        expect.stringMatching(/^projects\/media\/\d+-[a-z0-9]{6}\.jpg$/),
-        file.buffer,
-        { contentType: 'image/jpeg' }
+      expect(mockMkdir).toHaveBeenCalled();
+      expect(mockWriteFile).toHaveBeenCalledWith(
+        expect.stringContaining(path.join('posts')),
+        file.buffer
       );
-      expect(result).toBe('https://storage.example.com/projects/media/123-abc.jpg');
+      expect(result).toMatch(/^\/uploads\/posts\/\d+-[a-z0-9]{6}\.jpg$/);
     });
 
-    it('uses the blocks bucket when bucket is "blocks"', async () => {
-      mockUpload.mockResolvedValue({ error: null });
-      mockGetPublicUrl.mockReturnValue({
-        data: { publicUrl: 'https://storage.example.com/blocks/blocks/123.jpg' },
-      });
-
+    it('uses the blocks folder when bucket is "blocks"', async () => {
       const file = createMockFile();
-      await storageService.uploadImage(file, 'blocks');
+      const result = await storageService.uploadImage(file, 'blocks');
 
-      expect(mockedStorageFrom).toHaveBeenCalledWith('blocks');
-      expect(mockUpload).toHaveBeenCalledWith(
-        expect.stringMatching(/^blocks\/\d+-[a-z0-9]{6}\.jpg$/),
-        file.buffer,
-        { contentType: 'image/jpeg' }
+      expect(mockWriteFile).toHaveBeenCalledWith(
+        expect.stringContaining(path.join('blocks')),
+        file.buffer
       );
+      expect(result).toMatch(/^\/uploads\/blocks\/\d+-[a-z0-9]{6}\.jpg$/);
     });
 
     it('throws on disallowed file extension', async () => {
@@ -112,53 +99,43 @@ describe('storageService', () => {
       await expect(storageService.uploadImage(file)).rejects.toThrow(
         "File extension '.gif' is not allowed"
       );
-      expect(mockUpload).not.toHaveBeenCalled();
+      expect(mockWriteFile).not.toHaveBeenCalled();
     });
 
     it('allows .png files', async () => {
-      mockUpload.mockResolvedValue({ error: null });
       const file = createMockFile({ originalname: 'image.png', mimetype: 'image/png' });
 
       await storageService.uploadImage(file);
 
-      expect(mockUpload).toHaveBeenCalled();
+      expect(mockWriteFile).toHaveBeenCalled();
     });
 
     it('allows .jpeg files', async () => {
-      mockUpload.mockResolvedValue({ error: null });
       const file = createMockFile({ originalname: 'image.jpeg', mimetype: 'image/jpeg' });
 
       await storageService.uploadImage(file);
 
-      expect(mockUpload).toHaveBeenCalled();
+      expect(mockWriteFile).toHaveBeenCalled();
     });
 
-    it('throws when supabase upload returns an error', async () => {
-      const uploadError = new Error('Upload failed');
-      mockUpload.mockResolvedValue({ error: uploadError });
+    it('throws when write fails', async () => {
+      mockWriteFile.mockRejectedValueOnce(new Error('Disk full'));
 
       const file = createMockFile();
 
-      await expect(storageService.uploadImage(file)).rejects.toThrow('Upload failed');
+      await expect(storageService.uploadImage(file)).rejects.toThrow('Disk full');
     });
 
-    it('uses default "projects" bucket when no bucket specified', async () => {
-      mockUpload.mockResolvedValue({ error: null });
-
+    it('uses default "posts" folder when no bucket specified', async () => {
       const file = createMockFile();
-      await storageService.uploadImage(file);
+      const result = await storageService.uploadImage(file);
 
-      expect(mockedStorageFrom).toHaveBeenCalledWith('projects');
+      expect(result).toContain('/uploads/posts/');
     });
   });
 
   describe('uploadImages', () => {
     it('uploads multiple files and returns all URLs', async () => {
-      mockUpload.mockResolvedValue({ error: null });
-      mockGetPublicUrl
-        .mockReturnValueOnce({ data: { publicUrl: 'https://example.com/1.jpg' } })
-        .mockReturnValueOnce({ data: { publicUrl: 'https://example.com/2.jpg' } });
-
       const files = [
         createMockFile({ originalname: 'a.jpg' }),
         createMockFile({ originalname: 'b.jpg' }),
@@ -172,12 +149,9 @@ describe('storageService', () => {
     });
 
     it('returns partial success when some uploads fail', async () => {
-      mockUpload
-        .mockResolvedValueOnce({ error: null })
-        .mockResolvedValueOnce({ error: new Error('Quota exceeded') });
-      mockGetPublicUrl.mockReturnValue({
-        data: { publicUrl: 'https://example.com/1.jpg' },
-      });
+      mockWriteFile
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error('Quota exceeded'));
 
       const files = [
         createMockFile({ originalname: 'a.jpg' }),
@@ -189,7 +163,7 @@ describe('storageService', () => {
       expect(result.success).toBe(true);
       expect(result.urls).toHaveLength(1);
       expect(result.errors).toHaveLength(1);
-      expect(result.errors[0]).toBe('Upload failed: Quota exceeded');
+      expect(result.errors[0]).toBe('Quota exceeded');
     });
 
     it('returns success false when all uploads fail', async () => {
@@ -207,62 +181,53 @@ describe('storageService', () => {
   });
 
   describe('deleteImage', () => {
-    it('deletes a projects image by extracting the path', async () => {
-      mockRemove.mockResolvedValue({ error: null });
-
-      const url = 'https://storage.example.com/storage/v1/object/public/projects/media/123-abc.jpg';
+    it('deletes a local image by path', async () => {
+      const url = '/uploads/posts/123-abc.jpg';
       const result = await storageService.deleteImage(url);
 
       expect(result).toEqual({ success: true });
-      expect(mockedStorageFrom).toHaveBeenCalledWith('projects');
-      expect(mockRemove).toHaveBeenCalledWith(['media/123-abc.jpg']);
+      expect(mockUnlink).toHaveBeenCalled();
     });
 
-    it('deletes a blocks image by extracting the path', async () => {
-      mockRemove.mockResolvedValue({ error: null });
-
-      const url = 'https://storage.example.com/storage/v1/object/public/blocks/blocks/456-def.png';
+    it('deletes a blocks image by path', async () => {
+      const url = '/uploads/blocks/456-def.png';
       const result = await storageService.deleteImage(url);
 
       expect(result).toEqual({ success: true });
-      expect(mockedStorageFrom).toHaveBeenCalledWith('blocks');
-      expect(mockRemove).toHaveBeenCalledWith(['blocks/456-def.png']);
+      expect(mockUnlink).toHaveBeenCalled();
     });
 
     it('returns error for invalid URL format', async () => {
       const result = await storageService.deleteImage('https://example.com/random/image.jpg');
 
       expect(result).toEqual({ success: false, error: 'Invalid image URL format' });
-      expect(mockRemove).not.toHaveBeenCalled();
+      expect(mockUnlink).not.toHaveBeenCalled();
     });
 
-    it('returns error when supabase remove fails', async () => {
-      mockRemove.mockResolvedValue({ error: { message: 'Not found' } });
+    it('treats ENOENT as success (file already gone)', async () => {
+      const enoent = new Error('File not found') as NodeJS.ErrnoException;
+      enoent.code = 'ENOENT';
+      mockUnlink.mockRejectedValueOnce(enoent);
 
-      const url = 'https://storage.example.com/projects/media/123.jpg';
+      const url = '/uploads/posts/123.jpg';
       const result = await storageService.deleteImage(url);
 
-      expect(result).toEqual({ success: false, error: 'Not found' });
+      expect(result).toEqual({ success: true });
     });
 
-    it('catches unexpected exceptions', async () => {
-      mockRemove.mockRejectedValue(new Error('Network error'));
+    it('returns error on unexpected exceptions', async () => {
+      mockUnlink.mockRejectedValueOnce(new Error('Permission denied'));
 
-      const url = 'https://storage.example.com/projects/media/123.jpg';
+      const url = '/uploads/posts/123.jpg';
       const result = await storageService.deleteImage(url);
 
-      expect(result).toEqual({ success: false, error: 'Network error' });
+      expect(result).toEqual({ success: false, error: 'Permission denied' });
     });
   });
 
   describe('deleteImages', () => {
     it('deletes multiple images and returns success when all succeed', async () => {
-      mockRemove.mockResolvedValue({ error: null });
-
-      const urls = [
-        'https://storage.example.com/projects/media/1.jpg',
-        'https://storage.example.com/projects/media/2.jpg',
-      ];
+      const urls = ['/uploads/posts/1.jpg', '/uploads/posts/2.jpg'];
 
       const result = await storageService.deleteImages(urls);
 
@@ -271,14 +236,9 @@ describe('storageService', () => {
     });
 
     it('reports failed URLs when some deletions fail', async () => {
-      mockRemove
-        .mockResolvedValueOnce({ error: null })
-        .mockResolvedValueOnce({ error: { message: 'Failed' } });
+      mockUnlink.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error('Failed'));
 
-      const urls = [
-        'https://storage.example.com/projects/media/1.jpg',
-        'https://storage.example.com/projects/media/2.jpg',
-      ];
+      const urls = ['/uploads/posts/1.jpg', '/uploads/posts/2.jpg'];
 
       const result = await storageService.deleteImages(urls);
 

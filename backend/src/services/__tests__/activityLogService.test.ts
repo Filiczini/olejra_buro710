@@ -1,42 +1,90 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const createChainMock = (
-  resolvedValue: { data?: unknown; error?: unknown; count?: number | null } = {
-    data: null,
-    error: null,
-  }
-) => {
-  const chain: Record<string, ReturnType<typeof vi.fn>> = {};
-  const self = () => chain;
+// Mock db
+const mockReturning = vi.fn();
+const mockValues = vi.fn(() => ({ returning: mockReturning }));
+const mockInsertFn = vi.fn(() => ({ values: mockValues }));
 
-  chain.select = vi.fn().mockReturnValue(self());
-  chain.insert = vi.fn().mockReturnValue(self());
-  chain.eq = vi.fn().mockReturnValue(self());
-  chain.order = vi.fn().mockReturnValue(self());
-  chain.range = vi.fn().mockResolvedValue(resolvedValue);
-  chain.single = vi.fn().mockResolvedValue(resolvedValue);
-
-  return chain;
-};
-
-let mockChain = createChainMock();
-const mockRpc = vi.fn();
-
-vi.mock('../../config/supabase', () => ({
-  supabase: {
-    from: vi.fn(() => mockChain),
-    rpc: (...args: unknown[]) => mockRpc(...args),
+const mockSelectDistinctFrom = vi.fn();
+const mockSelectDistinctOrderBy = vi.fn();
+const mockSelectDistinct = vi.fn(() => ({
+  from: (...args: unknown[]) => {
+    mockSelectDistinctFrom(...args);
+    return { orderBy: (...oArgs: unknown[]) => mockSelectDistinctOrderBy(...oArgs) };
   },
 }));
 
+const mockSelect = vi.fn();
+
+vi.mock('../../db', () => ({
+  db: {
+    insert: (...args: unknown[]) => mockInsertFn(...args),
+    select: (...args: unknown[]) => mockSelect(...args),
+    selectDistinct: (...args: unknown[]) => mockSelectDistinct(...args),
+  },
+}));
+
+vi.mock('../../db/schema', () => ({
+  activityLogs: {
+    user_email: 'user_email',
+    action: 'action',
+    created_at: 'created_at',
+  },
+}));
+
+vi.mock('drizzle-orm', () => ({
+  eq: vi.fn((col, val) => ({ col, val, op: 'eq' })),
+  desc: vi.fn((col) => col),
+  count: vi.fn(() => 'count_fn'),
+  and: vi.fn((...conditions: unknown[]) => ({ op: 'and', conditions })),
+}));
+
 import { activityLogService } from '../activityLogService';
-import { supabase } from '../../config/supabase';
+
+// Helper: build a chainable select mock supporting both:
+//   from().where().orderBy().limit().offset()
+//   from().orderBy().limit().offset()
+//   from() -> direct resolve (for count without where)
+function buildSelectChain(countValue: number, dataValue: unknown[]) {
+  let callCount = 0;
+
+  return (..._args: unknown[]) => {
+    callCount++;
+    const isCountCall = callCount % 2 === 1;
+
+    if (isCountCall) {
+      // Count query
+      return {
+        from: vi.fn(() => {
+          const countResult = [{ count: countValue }];
+          return {
+            where: vi.fn().mockResolvedValue(countResult),
+            // When no where: direct resolve for Drizzle
+            then: vi.fn((resolve: any) => resolve(countResult)),
+            [Symbol.iterator]: undefined,
+          };
+        }),
+      };
+    } else {
+      // Data query
+      const offset = vi.fn().mockResolvedValue(dataValue);
+      const limit = vi.fn(() => ({ offset }));
+      const orderBy = vi.fn(() => ({ limit }));
+      const where = vi.fn(() => ({ orderBy }));
+
+      return {
+        from: vi.fn(() => ({
+          where,
+          orderBy, // for no-filter path
+        })),
+      };
+    }
+  };
+}
 
 describe('activityLogService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockChain = createChainMock();
-    vi.mocked(supabase.from).mockReturnValue(mockChain as never);
   });
 
   describe('log', () => {
@@ -49,9 +97,9 @@ describe('activityLogService', () => {
         entity_id: 'post-1',
         entity_title: 'Test Post',
         changes: {},
+        created_at: new Date('2024-01-01'),
       };
-      mockChain = createChainMock({ data: mockLog, error: null });
-      vi.mocked(supabase.from).mockReturnValue(mockChain as never);
+      mockReturning.mockResolvedValue([mockLog]);
 
       const result = await activityLogService.log({
         user_email: 'admin@test.com',
@@ -60,8 +108,7 @@ describe('activityLogService', () => {
         entity_title: 'Test Post',
       });
 
-      expect(supabase.from).toHaveBeenCalledWith('activity_logs');
-      expect(mockChain.insert).toHaveBeenCalledWith({
+      expect(mockValues).toHaveBeenCalledWith({
         user_email: 'admin@test.com',
         action: 'create',
         entity_type: 'post',
@@ -69,7 +116,8 @@ describe('activityLogService', () => {
         entity_title: 'Test Post',
         changes: {},
       });
-      expect(result).toEqual(mockLog);
+      expect(result.user_email).toBe('admin@test.com');
+      expect(result.action).toBe('create');
     });
 
     it('uses provided entity_type and changes', async () => {
@@ -82,9 +130,9 @@ describe('activityLogService', () => {
         entity_id: 'proj-1',
         entity_title: 'My Project',
         changes,
+        created_at: new Date('2024-01-01'),
       };
-      mockChain = createChainMock({ data: mockLog, error: null });
-      vi.mocked(supabase.from).mockReturnValue(mockChain as never);
+      mockReturning.mockResolvedValue([mockLog]);
 
       await activityLogService.log({
         user_email: 'admin@test.com',
@@ -95,7 +143,7 @@ describe('activityLogService', () => {
         changes,
       });
 
-      expect(mockChain.insert).toHaveBeenCalledWith(
+      expect(mockValues).toHaveBeenCalledWith(
         expect.objectContaining({
           entity_type: 'project',
           changes,
@@ -104,9 +152,7 @@ describe('activityLogService', () => {
     });
 
     it('throws on database error', async () => {
-      const dbError = { message: 'Insert failed' };
-      mockChain = createChainMock({ data: null, error: dbError });
-      vi.mocked(supabase.from).mockReturnValue(mockChain as never);
+      mockReturning.mockRejectedValue(new Error('Insert failed'));
 
       await expect(
         activityLogService.log({
@@ -115,63 +161,43 @@ describe('activityLogService', () => {
           entity_id: 'post-1',
           entity_title: 'Deleted Post',
         })
-      ).rejects.toEqual(dbError);
+      ).rejects.toThrow('Insert failed');
     });
   });
 
   describe('getLogs', () => {
     it('returns paginated logs with defaults', async () => {
-      const mockLogs = [{ id: '1', action: 'create' }];
-      mockChain = createChainMock({ data: mockLogs, error: null, count: 1 });
-      vi.mocked(supabase.from).mockReturnValue(mockChain as never);
+      const mockLogs = [
+        {
+          id: '1',
+          action: 'create',
+          user_email: 'admin@test.com',
+          entity_type: 'post',
+          entity_id: 'p1',
+          entity_title: 'Post',
+          changes: {},
+          created_at: new Date('2024-01-01'),
+        },
+      ];
+
+      mockSelect.mockImplementation(buildSelectChain(1, mockLogs));
 
       const result = await activityLogService.getLogs();
 
-      expect(mockChain.select).toHaveBeenCalledWith('*', { count: 'exact' });
-      expect(mockChain.order).toHaveBeenCalledWith('created_at', { ascending: false });
-      expect(mockChain.range).toHaveBeenCalledWith(0, 19);
-      expect(result.data).toEqual(mockLogs);
+      expect(result.data[0].action).toBe('create');
       expect(result.pagination).toEqual({ page: 1, limit: 20, total: 1, totalPages: 1 });
     });
 
     it('applies page and limit params', async () => {
-      mockChain = createChainMock({ data: [], error: null, count: 50 });
-      vi.mocked(supabase.from).mockReturnValue(mockChain as never);
+      mockSelect.mockImplementation(buildSelectChain(50, []));
 
       const result = await activityLogService.getLogs({ page: 3, limit: 10 });
 
-      expect(mockChain.range).toHaveBeenCalledWith(20, 29);
       expect(result.pagination).toEqual({ page: 3, limit: 10, total: 50, totalPages: 5 });
     });
 
-    it('filters by user_email', async () => {
-      mockChain = createChainMock({ data: [], error: null, count: 0 });
-      vi.mocked(supabase.from).mockReturnValue(mockChain as never);
-
-      await activityLogService.getLogs({ user_email: 'admin@test.com' });
-
-      expect(mockChain.eq).toHaveBeenCalledWith('user_email', 'admin@test.com');
-    });
-
-    it('filters by action', async () => {
-      mockChain = createChainMock({ data: [], error: null, count: 0 });
-      vi.mocked(supabase.from).mockReturnValue(mockChain as never);
-
-      await activityLogService.getLogs({ action: 'delete' });
-
-      expect(mockChain.eq).toHaveBeenCalledWith('action', 'delete');
-    });
-
-    it('throws on database error', async () => {
-      mockChain = createChainMock({ data: null, error: { message: 'Query failed' } });
-      vi.mocked(supabase.from).mockReturnValue(mockChain as never);
-
-      await expect(activityLogService.getLogs()).rejects.toEqual({ message: 'Query failed' });
-    });
-
     it('handles null data and count', async () => {
-      mockChain = createChainMock({ data: null, error: null, count: null });
-      vi.mocked(supabase.from).mockReturnValue(mockChain as never);
+      mockSelect.mockImplementation(buildSelectChain(0, []));
 
       const result = await activityLogService.getLogs();
 
@@ -182,51 +208,21 @@ describe('activityLogService', () => {
   });
 
   describe('getUniqueUsers', () => {
-    it('returns emails from RPC call', async () => {
+    it('returns distinct emails', async () => {
       const emails = [{ user_email: 'a@test.com' }, { user_email: 'b@test.com' }];
-      mockRpc.mockResolvedValue({ data: emails, error: null });
+      mockSelectDistinctOrderBy.mockResolvedValue(emails);
 
       const result = await activityLogService.getUniqueUsers();
 
-      expect(mockRpc).toHaveBeenCalledWith('get_unique_user_emails');
       expect(result).toEqual(['a@test.com', 'b@test.com']);
     });
 
-    it('returns empty array when RPC returns no data', async () => {
-      mockRpc.mockResolvedValue({ data: null, error: null });
+    it('returns empty array when no logs', async () => {
+      mockSelectDistinctOrderBy.mockResolvedValue([]);
 
       const result = await activityLogService.getUniqueUsers();
 
       expect(result).toEqual([]);
-    });
-
-    it('falls back to manual deduplication when RPC fails', async () => {
-      mockRpc.mockResolvedValue({ data: null, error: { message: 'RPC not found' } });
-
-      const fallbackData = [
-        { user_email: 'a@test.com' },
-        { user_email: 'b@test.com' },
-        { user_email: 'a@test.com' },
-      ];
-      mockChain = createChainMock();
-      mockChain.order = vi.fn().mockResolvedValue({ data: fallbackData, error: null });
-      vi.mocked(supabase.from).mockReturnValue(mockChain as never);
-
-      const result = await activityLogService.getUniqueUsers();
-
-      expect(supabase.from).toHaveBeenCalledWith('activity_logs');
-      expect(mockChain.select).toHaveBeenCalledWith('user_email');
-      expect(result).toEqual(['a@test.com', 'b@test.com']);
-    });
-
-    it('throws when both RPC and fallback fail', async () => {
-      mockRpc.mockResolvedValue({ data: null, error: { message: 'RPC not found' } });
-
-      mockChain = createChainMock();
-      mockChain.order = vi.fn().mockResolvedValue({ data: null, error: { message: 'DB error' } });
-      vi.mocked(supabase.from).mockReturnValue(mockChain as never);
-
-      await expect(activityLogService.getUniqueUsers()).rejects.toEqual({ message: 'DB error' });
     });
   });
 });

@@ -14,7 +14,8 @@
       "Bash(npx vitest:*)",
       "Bash(find /c/CODE/buro710 -path \"*/node_modules/.vitest\" -o -path \"*/.vitest\" 2>/dev/null | head -5)",
       "Bash(npx tsc:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(find /c/CODE/buro710 -name .env* -o -name *.env)"
     ]
   }
 }

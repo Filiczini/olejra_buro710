@@ -4,13 +4,11 @@
  * Supports both JSON and multipart/form-data requests
  */
 import { Router } from 'express';
-import multer from 'multer';
 import rateLimit from 'express-rate-limit';
 import { logger } from '../../lib/logger';
 import { activityLogService } from '../../services/activityLogService';
-import { memoryStorage } from 'multer';
-import type { FileFilterCallback } from 'multer';
 import { apiKeyMiddleware } from '../../middleware/apiKey';
+import { uploadMiddleware } from '../../middleware/multer';
 import { postService } from '../../services/postService';
 import { storageService } from '../../services/storageService';
 import type { BlockType, BlockData } from '../../types/block';
@@ -26,28 +24,7 @@ import {
 
 const router = Router();
 
-// ============================================================================
-// Multer Configuration for API uploads
-// ============================================================================
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ALLOWED_MIMETYPES = ['image/jpeg', 'image/png', 'image/jpg'];
-
-const fileFilter = (_req: unknown, file: Express.Multer.File, cb: FileFilterCallback) => {
-  if (ALLOWED_MIMETYPES.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error('Only JPEG and PNG files are allowed'));
-  }
-};
-
-const upload = multer({
-  storage: memoryStorage(),
-  limits: { fileSize: MAX_FILE_SIZE },
-  fileFilter,
-});
-
-const uploadPostMedia = upload.fields([
+const uploadPostMedia = uploadMiddleware.fields([
   { name: 'hero_image', maxCount: 1 },
   { name: 'og_image', maxCount: 1 },
   { name: 'gallery_images', maxCount: 20 },

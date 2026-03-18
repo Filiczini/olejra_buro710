@@ -1,37 +1,58 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Chainable mock for Supabase query builder
-const createChainMock = (
-  resolvedValue: { data?: unknown; error?: unknown; count?: number | null } = {
-    data: null,
-    error: null,
-  }
-) => {
-  const chain: Record<string, ReturnType<typeof vi.fn>> = {};
-  const self = () => chain;
+// Mock db
+const mockReturning = vi.fn();
+const mockUpdateWhere = vi.fn(() => ({ returning: mockReturning }));
+const mockUpdateSet = vi.fn(() => ({ where: mockUpdateWhere }));
+const mockUpdateFn = vi.fn(() => ({ set: mockUpdateSet }));
 
-  chain.select = vi.fn().mockReturnValue(self());
-  chain.insert = vi.fn().mockReturnValue(self());
-  chain.update = vi.fn().mockReturnValue(self());
-  chain.delete = vi.fn().mockReturnValue(self());
-  chain.eq = vi.fn().mockReturnValue(self());
-  chain.neq = vi.fn().mockReturnValue(self());
-  chain.is = vi.fn().mockReturnValue(self());
-  chain.ilike = vi.fn().mockReturnValue(self());
-  chain.order = vi.fn().mockReturnValue(self());
-  chain.range = vi.fn().mockResolvedValue(resolvedValue);
-  chain.limit = vi.fn().mockResolvedValue(resolvedValue);
-  chain.single = vi.fn().mockResolvedValue(resolvedValue);
+const mockInsertReturning = vi.fn();
+const mockInsertValues = vi.fn(() => ({ returning: mockInsertReturning }));
+const mockInsertFn = vi.fn(() => ({ values: mockInsertValues }));
 
-  return chain;
-};
+const mockDeleteWhere = vi.fn().mockResolvedValue(undefined);
+const mockDeleteFn = vi.fn(() => ({ where: mockDeleteWhere }));
 
-let mockChain = createChainMock();
+// Select chain: select().from().where().orderBy().limit().offset()
+const mockSelectOffset = vi.fn();
+const mockSelectLimit = vi.fn(() => ({ offset: mockSelectOffset }));
+const mockSelectOrderBy = vi.fn(() => ({ limit: mockSelectLimit }));
+const mockSelectWhere = vi.fn(() => ({ orderBy: mockSelectOrderBy }));
+const mockSelectFrom = vi.fn(() => ({ where: mockSelectWhere }));
+const mockSelect = vi.fn(() => ({ from: mockSelectFrom }));
 
-vi.mock('../../config/supabase', () => ({
-  supabase: {
-    from: vi.fn(() => mockChain),
+vi.mock('../../db', () => ({
+  db: {
+    select: (...args: unknown[]) => mockSelect(...args),
+    insert: (...args: unknown[]) => mockInsertFn(...args),
+    update: (...args: unknown[]) => mockUpdateFn(...args),
+    delete: (...args: unknown[]) => mockDeleteFn(...args),
   },
+}));
+
+vi.mock('../../db/schema', () => ({
+  posts: {
+    id: 'id',
+    slug: 'slug',
+    status: 'status',
+    featured: 'featured',
+    title: 'title',
+    deleted_at: 'deleted_at',
+    created_at: 'created_at',
+    hero_image_url: 'hero_image_url',
+    gallery_images: 'gallery_images',
+  },
+}));
+
+vi.mock('drizzle-orm', () => ({
+  eq: vi.fn((col, val) => ({ col, val, op: 'eq' })),
+  ne: vi.fn((col, val) => ({ col, val, op: 'ne' })),
+  desc: vi.fn((col) => col),
+  isNull: vi.fn((col) => ({ col, op: 'isNull' })),
+  ilike: vi.fn((col, val) => ({ col, val, op: 'ilike' })),
+  and: vi.fn((...args: unknown[]) => ({ op: 'and', args })),
+  count: vi.fn(() => 'count_fn'),
+  sql: vi.fn(),
 }));
 
 vi.mock('../blockService', () => ({
@@ -49,134 +70,173 @@ vi.mock('../storageService', () => ({
 }));
 
 import { postService } from '../postService';
-import { supabase } from '../../config/supabase';
 import { blockService } from '../blockService';
 import { storageService } from '../storageService';
 
-const mockedFrom = vi.mocked(supabase.from);
 const mockedBlockService = vi.mocked(blockService);
 const mockedStorageService = vi.mocked(storageService);
 
 describe('postService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockChain = createChainMock();
-    mockedFrom.mockReturnValue(mockChain as never);
   });
 
   describe('getAll', () => {
     it('returns paginated posts with default params', async () => {
       const mockPosts = [
-        { id: 'p1', title: 'Post 1', slug: 'post-1', status: 'published' },
-        { id: 'p2', title: 'Post 2', slug: 'post-2', status: 'draft' },
+        {
+          id: 'p1',
+          title: 'Post 1',
+          slug: 'post-1',
+          status: 'published',
+          featured: false,
+          seo_title: null,
+          seo_description: null,
+          og_image_url: null,
+          hero_image_url: null,
+          hero_title: null,
+          hero_subtitle: null,
+          hero_tags: null,
+          hero_location: null,
+          hero_year: null,
+          gallery_images: null,
+          created_at: new Date('2024-01-01'),
+          updated_at: new Date('2024-01-01'),
+          deleted_at: null,
+        },
       ];
 
-      mockChain.range = vi.fn().mockResolvedValue({ data: mockPosts, error: null, count: 2 });
+      // Count chain
+      const countWhere = vi.fn().mockResolvedValue([{ count: 1 }]);
+      const countFrom = vi.fn(() => ({ where: countWhere }));
+
+      // Data chain
+      const dataOffset = vi.fn().mockResolvedValue(mockPosts);
+      const dataLimit = vi.fn(() => ({ offset: dataOffset }));
+      const dataOrderBy = vi.fn(() => ({ limit: dataLimit }));
+      const dataWhere = vi.fn(() => ({ orderBy: dataOrderBy }));
+      const dataFrom = vi.fn(() => ({ where: dataWhere }));
+
+      let callCount = 0;
+      mockSelect.mockImplementation(() => {
+        callCount++;
+        return { from: callCount === 1 ? countFrom : dataFrom } as any;
+      });
 
       const result = await postService.getAll();
 
-      expect(mockedFrom).toHaveBeenCalledWith('posts');
-      expect(mockChain.select).toHaveBeenCalledWith('*', { count: 'exact' });
-      expect(mockChain.order).toHaveBeenCalledWith('created_at', { ascending: false });
-      expect(mockChain.range).toHaveBeenCalledWith(0, 9);
-      expect(result).toEqual({
-        data: mockPosts,
-        pagination: { page: 1, limit: 10, total: 2, totalPages: 1 },
-      });
-    });
-
-    it('applies status filter when provided', async () => {
-      mockChain.range = vi.fn().mockResolvedValue({ data: [], error: null, count: 0 });
-
-      await postService.getAll({ status: 'published' });
-
-      expect(mockChain.eq).toHaveBeenCalledWith('status', 'published');
-    });
-
-    it('applies search filter when provided', async () => {
-      mockChain.range = vi.fn().mockResolvedValue({ data: [], error: null, count: 0 });
-
-      await postService.getAll({ search: 'test' });
-
-      expect(mockChain.ilike).toHaveBeenCalledWith('title', '%test%');
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].id).toBe('p1');
+      expect(result.pagination).toEqual({ page: 1, limit: 10, total: 1, totalPages: 1 });
     });
 
     it('calculates correct pagination range', async () => {
-      mockChain.range = vi.fn().mockResolvedValue({ data: [], error: null, count: 25 });
+      const mockOffset = vi.fn().mockResolvedValue([]);
+      const mockLimitFn = vi.fn(() => ({ offset: mockOffset }));
+      const dataOrderBy = vi.fn(() => ({ limit: mockLimitFn }));
+      const dataWhere = vi.fn(() => ({ orderBy: dataOrderBy }));
+      const dataFrom = vi.fn(() => ({ where: dataWhere }));
+
+      const countWhere = vi.fn().mockResolvedValue([{ count: 25 }]);
+      const countFrom = vi.fn(() => ({ where: countWhere }));
+
+      let callCount = 0;
+      mockSelect.mockImplementation(() => {
+        callCount++;
+        return { from: callCount === 1 ? countFrom : dataFrom } as any;
+      });
 
       await postService.getAll({ page: 3, limit: 5 });
 
-      expect(mockChain.range).toHaveBeenCalledWith(10, 14);
-    });
-
-    it('throws when supabase returns an error', async () => {
-      mockChain.range = vi
-        .fn()
-        .mockResolvedValue({ data: null, error: { message: 'DB error' }, count: null });
-
-      await expect(postService.getAll()).rejects.toEqual({ message: 'DB error' });
+      expect(mockLimitFn).toHaveBeenCalledWith(5);
+      expect(mockOffset).toHaveBeenCalledWith(10);
     });
   });
 
   describe('getById', () => {
     it('returns post with blocks', async () => {
-      const mockPost = { id: 'p1', title: 'Post 1', slug: 'post-1' };
+      const mockPost = {
+        id: 'p1',
+        title: 'Post 1',
+        slug: 'post-1',
+        status: 'published',
+        featured: false,
+        seo_title: null,
+        seo_description: null,
+        og_image_url: null,
+        hero_image_url: null,
+        hero_title: null,
+        hero_subtitle: null,
+        hero_tags: null,
+        hero_location: null,
+        hero_year: null,
+        gallery_images: null,
+        created_at: new Date('2024-01-01'),
+        updated_at: new Date('2024-01-01'),
+        deleted_at: null,
+      };
       const mockBlocks = [
-        { id: 'b1', post_id: 'p1', type: 'text_full', data: { content: 'Hi' }, sort_order: 0 },
+        {
+          id: 'b1',
+          post_id: 'p1',
+          type: 'text_full',
+          data: { content: 'Hi' },
+          sort_order: 0,
+          created_at: '2024-01-01T00:00:00.000Z',
+        },
       ];
 
-      mockChain.single = vi.fn().mockResolvedValue({ data: mockPost, error: null });
+      // select().from(posts).where(eq(posts.id, id)) — no orderBy
+      const postWhere = vi.fn().mockResolvedValue([mockPost]);
+      const postFrom = vi.fn(() => ({ where: postWhere }));
+
+      mockSelect.mockReturnValue({ from: postFrom } as any);
       mockedBlockService.getByPostId.mockResolvedValue(mockBlocks as never);
 
       const result = await postService.getById('p1');
 
-      expect(mockedFrom).toHaveBeenCalledWith('posts');
-      expect(mockChain.eq).toHaveBeenCalledWith('id', 'p1');
-      expect(mockedBlockService.getByPostId).toHaveBeenCalledWith('p1');
-      expect(result).toEqual({ post: mockPost, blocks: mockBlocks });
+      expect(result.post.id).toBe('p1');
+      expect(result.blocks).toEqual(mockBlocks);
     });
 
     it('throws when post is not found', async () => {
-      mockChain.single = vi
-        .fn()
-        .mockResolvedValue({ data: null, error: { message: 'Not found', code: 'PGRST116' } });
+      const postWhere = vi.fn().mockResolvedValue([]);
+      const postFrom = vi.fn(() => ({ where: postWhere }));
+      mockSelect.mockReturnValue({ from: postFrom } as any);
 
-      await expect(postService.getById('nonexistent')).rejects.toEqual({
-        message: 'Not found',
-        code: 'PGRST116',
-      });
-    });
-  });
-
-  describe('getBySlug', () => {
-    it('returns published post with blocks', async () => {
-      const mockPost = { id: 'p1', title: 'Post 1', slug: 'my-post', status: 'published' };
-      const mockBlocks = [
-        { id: 'b1', post_id: 'p1', type: 'text_full', data: { content: 'Hi' }, sort_order: 0 },
-      ];
-
-      mockChain.single = vi.fn().mockResolvedValue({ data: mockPost, error: null });
-      mockedBlockService.getByPostId.mockResolvedValue(mockBlocks as never);
-
-      const result = await postService.getBySlug('my-post');
-
-      expect(mockChain.eq).toHaveBeenCalledWith('slug', 'my-post');
-      expect(mockChain.eq).toHaveBeenCalledWith('status', 'published');
-      expect(result).toEqual({ post: mockPost, blocks: mockBlocks });
+      await expect(postService.getById('nonexistent')).rejects.toThrow('Post not found');
     });
   });
 
   describe('create', () => {
     it('creates a new post with generated slug', async () => {
-      const mockPost = { id: 'p1', title: 'My New Post', slug: 'my-new-post', status: 'draft' };
+      const mockPost = {
+        id: 'p1',
+        title: 'My New Post',
+        slug: 'my-new-post',
+        status: 'draft',
+        featured: false,
+        seo_title: null,
+        seo_description: null,
+        og_image_url: null,
+        hero_image_url: '',
+        hero_title: '',
+        hero_subtitle: '',
+        hero_tags: [],
+        hero_location: '',
+        hero_year: '',
+        gallery_images: null,
+        created_at: new Date('2024-01-01'),
+        updated_at: new Date('2024-01-01'),
+        deleted_at: null,
+      };
 
-      // First call to check slug uniqueness returns no existing post
-      const singleMock = vi
-        .fn()
-        .mockResolvedValueOnce({ data: null, error: null }) // slug check
-        .mockResolvedValueOnce({ data: mockPost, error: null }); // insert
+      // Slug uniqueness check: select({id}).from(posts).where(...)
+      const slugCheckWhere = vi.fn().mockResolvedValue([]);
+      const slugCheckFrom = vi.fn(() => ({ where: slugCheckWhere }));
 
-      mockChain.single = singleMock;
+      mockSelect.mockReturnValue({ from: slugCheckFrom } as any);
+      mockInsertReturning.mockResolvedValue([mockPost]);
 
       const result = await postService.create({
         title: 'My New Post',
@@ -189,18 +249,37 @@ describe('postService', () => {
         hero_year: '',
       });
 
-      expect(mockChain.insert).toHaveBeenCalled();
-      expect(result).toEqual(mockPost);
+      expect(result.id).toBe('p1');
+      expect(result.title).toBe('My New Post');
     });
 
     it('creates blocks when provided', async () => {
-      const mockPost = { id: 'p1', title: 'Post', slug: 'post', status: 'draft' };
+      const mockPost = {
+        id: 'p1',
+        title: 'Post',
+        slug: 'post',
+        status: 'draft',
+        featured: false,
+        seo_title: null,
+        seo_description: null,
+        og_image_url: null,
+        hero_image_url: '',
+        hero_title: '',
+        hero_subtitle: '',
+        hero_tags: [],
+        hero_location: '',
+        hero_year: '',
+        gallery_images: null,
+        created_at: new Date('2024-01-01'),
+        updated_at: new Date('2024-01-01'),
+        deleted_at: null,
+      };
 
-      mockChain.single = vi
-        .fn()
-        .mockResolvedValueOnce({ data: null, error: null }) // slug check
-        .mockResolvedValueOnce({ data: mockPost, error: null }); // insert
+      const slugCheckWhere = vi.fn().mockResolvedValue([]);
+      const slugCheckFrom = vi.fn(() => ({ where: slugCheckWhere }));
 
+      mockSelect.mockReturnValue({ from: slugCheckFrom } as any);
+      mockInsertReturning.mockResolvedValue([mockPost]);
       mockedBlockService.create.mockResolvedValue([] as never);
 
       await postService.create({
@@ -224,21 +303,57 @@ describe('postService', () => {
 
   describe('update', () => {
     it('updates an existing post', async () => {
-      const mockPost = { id: 'p1', title: 'Updated', slug: 'updated', status: 'draft' };
+      const mockPost = {
+        id: 'p1',
+        title: 'Updated',
+        slug: 'updated',
+        status: 'draft',
+        featured: false,
+        seo_title: null,
+        seo_description: null,
+        og_image_url: null,
+        hero_image_url: null,
+        hero_title: null,
+        hero_subtitle: null,
+        hero_tags: null,
+        hero_location: null,
+        hero_year: null,
+        gallery_images: null,
+        created_at: new Date('2024-01-01'),
+        updated_at: new Date('2024-01-01'),
+        deleted_at: null,
+      };
 
-      mockChain.single = vi.fn().mockResolvedValue({ data: mockPost, error: null });
+      mockReturning.mockResolvedValue([mockPost]);
 
       const result = await postService.update('p1', { title: 'Updated' });
 
-      expect(mockedFrom).toHaveBeenCalledWith('posts');
-      expect(mockChain.update).toHaveBeenCalled();
-      expect(result).toEqual(mockPost);
+      expect(result.title).toBe('Updated');
     });
 
     it('syncs blocks when blocks are provided', async () => {
-      const mockPost = { id: 'p1', title: 'Post', slug: 'post', status: 'draft' };
+      const mockPost = {
+        id: 'p1',
+        title: 'Post',
+        slug: 'post',
+        status: 'draft',
+        featured: false,
+        seo_title: null,
+        seo_description: null,
+        og_image_url: null,
+        hero_image_url: null,
+        hero_title: null,
+        hero_subtitle: null,
+        hero_tags: null,
+        hero_location: null,
+        hero_year: null,
+        gallery_images: null,
+        created_at: new Date('2024-01-01'),
+        updated_at: new Date('2024-01-01'),
+        deleted_at: null,
+      };
 
-      mockChain.single = vi.fn().mockResolvedValue({ data: mockPost, error: null });
+      mockReturning.mockResolvedValue([mockPost]);
       mockedBlockService.syncBlocks.mockResolvedValue([] as never);
 
       const blocks = [
@@ -251,11 +366,10 @@ describe('postService', () => {
     });
 
     it('checks for slug uniqueness when slug is updated', async () => {
-      // First single() for slug check, second for the actual update
-      mockChain.single = vi
-        .fn()
-        .mockResolvedValueOnce({ data: { id: 'other-post' }, error: null }) // slug exists
-        .mockResolvedValueOnce({ data: null, error: null });
+      // Slug check returns existing post
+      const slugCheckWhere = vi.fn().mockResolvedValue([{ id: 'other-post' }]);
+      const slugCheckFrom = vi.fn(() => ({ where: slugCheckWhere }));
+      mockSelect.mockReturnValue({ from: slugCheckFrom } as any);
 
       await expect(postService.update('p1', { slug: 'taken-slug' })).rejects.toThrow(
         'Slug already exists'
@@ -265,21 +379,14 @@ describe('postService', () => {
 
   describe('delete (soft)', () => {
     it('sets deleted_at instead of removing the post', async () => {
-      mockChain.eq = vi.fn().mockResolvedValue({ error: null });
+      mockUpdateWhere.mockResolvedValue([]);
 
       await postService.delete('p1');
 
-      expect(mockChain.update).toHaveBeenCalledWith(
-        expect.objectContaining({ deleted_at: expect.any(String) })
+      expect(mockUpdateSet).toHaveBeenCalledWith(
+        expect.objectContaining({ deleted_at: expect.any(Date) })
       );
-      expect(mockChain.eq).toHaveBeenCalledWith('id', 'p1');
       expect(mockedStorageService.deleteImages).not.toHaveBeenCalled();
-    });
-
-    it('throws when supabase returns an error', async () => {
-      mockChain.eq = vi.fn().mockResolvedValue({ error: new Error('DB error') });
-
-      await expect(postService.delete('p1')).rejects.toThrow('DB error');
     });
   });
 

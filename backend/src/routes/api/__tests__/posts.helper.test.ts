@@ -7,10 +7,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Mock dependencies before importing the helper
-vi.mock('../../../config/supabase', () => ({
-  supabase: {
-    from: vi.fn(),
-  },
+vi.mock('../../../db', () => ({
+  db: {},
 }));
 
 vi.mock('../../../services/postService', () => ({

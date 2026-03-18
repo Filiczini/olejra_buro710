@@ -1,29 +1,31 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const createChainMock = (
-  resolvedValue: { data?: unknown; error?: unknown; count?: number | null } = {
-    data: null,
-    error: null,
-  }
-) => {
-  const chain: Record<string, ReturnType<typeof vi.fn>> = {};
-  const self = () => chain;
+// Mock db with chainable builder
+const mockReturning = vi.fn();
+const mockValues = vi.fn(() => ({ returning: mockReturning }));
+const mockInsert = vi.fn(() => ({ values: mockValues }));
 
-  chain.select = vi.fn().mockReturnValue(self());
-  chain.insert = vi.fn().mockReturnValue(self());
-  chain.order = vi.fn().mockReturnValue(self());
-  chain.range = vi.fn().mockResolvedValue(resolvedValue);
-  chain.single = vi.fn().mockResolvedValue(resolvedValue);
+const mockOffset = vi.fn();
+const mockLimit = vi.fn(() => ({ offset: mockOffset }));
+const mockOrderBy = vi.fn(() => ({ limit: mockLimit }));
 
-  return chain;
-};
+const mockSelectFrom = vi.fn();
+const mockSelect = vi.fn(() => ({ from: mockSelectFrom }));
 
-let mockChain = createChainMock();
-
-vi.mock('../../config/supabase', () => ({
-  supabase: {
-    from: vi.fn(() => mockChain),
+vi.mock('../../db', () => ({
+  db: {
+    insert: (...args: unknown[]) => mockInsert(...args),
+    select: (...args: unknown[]) => mockSelect(...args),
   },
+}));
+
+vi.mock('../../db/schema', () => ({
+  contactMessages: { created_at: 'created_at' },
+}));
+
+vi.mock('drizzle-orm', () => ({
+  desc: vi.fn((col) => col),
+  count: vi.fn(() => 'count_fn'),
 }));
 
 vi.mock('../telegramService', () => ({
@@ -42,7 +44,6 @@ vi.mock('../../lib/logger.js', () => ({
 
 import { contactService } from '../contactService';
 import { telegramService } from '../telegramService';
-import { supabase } from '../../config/supabase';
 
 const mockSendMessage = vi.mocked(telegramService.sendMessage);
 
@@ -56,22 +57,18 @@ const contactData = {
 describe('contactService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockChain = createChainMock();
-    vi.mocked(supabase.from).mockReturnValue(mockChain as never);
   });
 
   describe('create', () => {
     it('sends telegram and saves message to database', async () => {
       mockSendMessage.mockResolvedValue({ success: true, messageId: '123' });
       const savedMsg = { id: '1', ...contactData, telegram_sent: true, telegram_message_id: '123' };
-      mockChain = createChainMock({ data: savedMsg, error: null });
-      vi.mocked(supabase.from).mockReturnValue(mockChain as never);
+      mockReturning.mockResolvedValue([savedMsg]);
 
       const result = await contactService.create(contactData);
 
       expect(mockSendMessage).toHaveBeenCalledWith(contactData);
-      expect(supabase.from).toHaveBeenCalledWith('contact_messages');
-      expect(mockChain.insert).toHaveBeenCalledWith({
+      expect(mockValues).toHaveBeenCalledWith({
         name: contactData.name,
         email: contactData.email,
         subject: contactData.subject,
@@ -87,12 +84,11 @@ describe('contactService', () => {
     it('saves message even when telegram fails', async () => {
       mockSendMessage.mockResolvedValue({ success: false, error: 'Not configured' });
       const savedMsg = { id: '2', ...contactData, telegram_sent: false, telegram_message_id: null };
-      mockChain = createChainMock({ data: savedMsg, error: null });
-      vi.mocked(supabase.from).mockReturnValue(mockChain as never);
+      mockReturning.mockResolvedValue([savedMsg]);
 
       const result = await contactService.create(contactData);
 
-      expect(mockChain.insert).toHaveBeenCalledWith(
+      expect(mockValues).toHaveBeenCalledWith(
         expect.objectContaining({
           telegram_sent: false,
           telegram_message_id: null,
@@ -104,11 +100,11 @@ describe('contactService', () => {
 
     it('throws when database insert fails', async () => {
       mockSendMessage.mockResolvedValue({ success: true, messageId: '123' });
-      const dbError = { message: 'Insert failed' };
-      mockChain = createChainMock({ data: null, error: dbError });
-      vi.mocked(supabase.from).mockReturnValue(mockChain as never);
+      mockReturning.mockResolvedValue([]);
 
-      await expect(contactService.create(contactData)).rejects.toEqual(dbError);
+      await expect(contactService.create(contactData)).rejects.toThrow(
+        'Failed to insert contact message'
+      );
     });
   });
 
@@ -116,17 +112,18 @@ describe('contactService', () => {
     it('returns paginated messages with defaults', async () => {
       const messages = [{ id: '1', name: 'Test' }];
 
-      // Count query: select('*', { count, head }) resolves directly (no .order/.range)
-      const countChain = createChainMock();
-      countChain.select = vi.fn().mockResolvedValue({ count: 5, error: null });
-
-      // Data query: select → order → range
-      const dataChain = createChainMock({ data: messages, error: null });
+      // count query
+      const countFrom = vi.fn().mockResolvedValue([{ count: 5 }]);
+      // data query
+      const dataOrderBy = vi.fn(() => ({
+        limit: vi.fn(() => ({ offset: vi.fn().mockResolvedValue(messages) })),
+      }));
+      const dataFrom = vi.fn(() => ({ orderBy: dataOrderBy }));
 
       let callCount = 0;
-      vi.mocked(supabase.from).mockImplementation(() => {
+      mockSelect.mockImplementation((...args: unknown[]) => {
         callCount++;
-        return (callCount === 1 ? countChain : dataChain) as never;
+        return { from: callCount === 1 ? countFrom : dataFrom } as any;
       });
 
       const result = await contactService.getAll();
@@ -136,33 +133,37 @@ describe('contactService', () => {
     });
 
     it('applies pagination params', async () => {
-      const countChain = createChainMock();
-      countChain.select = vi.fn().mockResolvedValue({ count: 50, error: null });
-
-      const dataChain = createChainMock({ data: [], error: null });
+      const mockOffsetFn = vi.fn().mockResolvedValue([]);
+      const mockLimitFn = vi.fn(() => ({ offset: mockOffsetFn }));
+      const dataOrderBy = vi.fn(() => ({ limit: mockLimitFn }));
+      const dataFrom = vi.fn(() => ({ orderBy: dataOrderBy }));
+      const countFrom = vi.fn().mockResolvedValue([{ count: 50 }]);
 
       let callCount = 0;
-      vi.mocked(supabase.from).mockImplementation(() => {
+      mockSelect.mockImplementation(() => {
         callCount++;
-        return (callCount === 1 ? countChain : dataChain) as never;
+        return { from: callCount === 1 ? countFrom : dataFrom } as any;
       });
 
       const result = await contactService.getAll({ page: 3, limit: 10 });
 
-      expect(dataChain.range).toHaveBeenCalledWith(20, 29);
+      expect(mockLimitFn).toHaveBeenCalledWith(10);
+      expect(mockOffsetFn).toHaveBeenCalledWith(20);
       expect(result.pagination).toEqual({ total: 50, page: 3, limit: 10, totalPages: 5 });
     });
 
     it('handles empty results', async () => {
-      const countChain = createChainMock();
-      countChain.select = vi.fn().mockResolvedValue({ count: 0, error: null });
-
-      const dataChain = createChainMock({ data: null, error: null });
+      const countFrom = vi.fn().mockResolvedValue([{ count: 0 }]);
+      const dataFrom = vi.fn(() => ({
+        orderBy: vi.fn(() => ({
+          limit: vi.fn(() => ({ offset: vi.fn().mockResolvedValue([]) })),
+        })),
+      }));
 
       let callCount = 0;
-      vi.mocked(supabase.from).mockImplementation(() => {
+      mockSelect.mockImplementation(() => {
         callCount++;
-        return (callCount === 1 ? countChain : dataChain) as never;
+        return { from: callCount === 1 ? countFrom : dataFrom } as any;
       });
 
       const result = await contactService.getAll();

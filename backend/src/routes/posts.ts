@@ -8,7 +8,7 @@ import { postService } from '../services/postService';
 import { storageService } from '../services/storageService';
 import { activityLogService } from '../services/activityLogService';
 import { uploadBlockMedia, uploadGalleryImages } from '../middleware/multer';
-import { supabase } from '../config/supabase';
+import { blockService } from '../services/blockService';
 import type { BlockType, BlockData } from '../types/block';
 import {
   validatePostInput,
@@ -22,6 +22,15 @@ const router = Router();
 const adminRateLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+  skip: () => process.env.NODE_ENV === 'test',
+});
+
+const publicRateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests, please try again later' },
@@ -58,7 +67,7 @@ router.get('/', optionalAuthMiddleware, async (req, res) => {
   }
 });
 
-router.get('/featured', async (_req, res) => {
+router.get('/featured', publicRateLimiter, async (_req, res) => {
   try {
     const posts = await postService.getFeatured();
     res.json(posts);
@@ -68,7 +77,7 @@ router.get('/featured', async (_req, res) => {
   }
 });
 
-router.get('/public/:slug', async (req, res) => {
+router.get('/public/:slug', publicRateLimiter, async (req, res) => {
   try {
     const slug = req.params.slug as string;
     const result = await postService.getBySlug(slug);
@@ -145,7 +154,15 @@ router.post(
       );
 
       const galleryImageFiles = files?.['galleryImages'] || [];
-      const existingGalleryUrls = gallery_images ? JSON.parse(gallery_images) : [];
+      const existingGalleryUrls: string[] = [];
+      if (gallery_images) {
+        const parsed = JSON.parse(gallery_images);
+        if (Array.isArray(parsed)) {
+          existingGalleryUrls.push(
+            ...parsed.filter((url): url is string => typeof url === 'string')
+          );
+        }
+      }
       const newGalleryUrls = await Promise.all(
         galleryImageFiles.map((file) => storageService.uploadImage(file, 'blocks'))
       );
@@ -176,12 +193,9 @@ router.post(
 
       if (blockUploads.length > 0) {
         // Prefetch all blocks once to avoid N+1 queries
-        const { data: allBlocks } = await supabase
-          .from('blocks')
-          .select('id, data, sort_order')
-          .eq('post_id', post.id);
+        const allBlocks = await blockService.getByPostId(post.id);
 
-        const blocksByOrder = new Map((allBlocks || []).map((b) => [b.sort_order, b]));
+        const blocksByOrder = new Map(allBlocks.map((b) => [b.sort_order, b]));
 
         await Promise.all(
           blockUploads.map(async (upload) => {
@@ -193,15 +207,13 @@ router.post(
               if (upload.imageSlot !== undefined) {
                 const images = [...((currentData.images as { url: string; alt: string }[]) || [])];
                 images[upload.imageSlot] = { ...images[upload.imageSlot], url: imageUrl };
-                await supabase
-                  .from('blocks')
-                  .update({ data: { ...currentData, images } })
-                  .eq('id', blockRecord.id);
+                await blockService.update(blockRecord.id, {
+                  data: { ...currentData, images } as BlockData,
+                });
               } else {
-                await supabase
-                  .from('blocks')
-                  .update({ data: { ...currentData, image_url: imageUrl } })
-                  .eq('id', blockRecord.id);
+                await blockService.update(blockRecord.id, {
+                  data: { ...currentData, image_url: imageUrl } as BlockData,
+                });
               }
             }
           })

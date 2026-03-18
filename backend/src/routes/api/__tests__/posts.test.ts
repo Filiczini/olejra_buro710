@@ -146,7 +146,7 @@ describe('Posts API', () => {
       expect(response.body).toEqual({ error: 'Invalid API key' });
     });
 
-    it('returns 500 when API_KEY environment variable is not configured', async () => {
+    it('returns 401 when API_KEY environment variable is not configured', async () => {
       // Arrange
       delete process.env.API_KEY;
 
@@ -154,8 +154,8 @@ describe('Posts API', () => {
       const response = await withApiKey(request(app).get('/api/v1/posts'), TEST_API_KEY);
 
       // Assert
-      expect(response.status).toBe(500);
-      expect(response.body).toEqual({ error: 'API key not configured' });
+      expect(response.status).toBe(401);
+      expect(response.body).toEqual({ error: 'API key authentication unavailable' });
     });
 
     it('allows access with valid X-API-Key', async () => {

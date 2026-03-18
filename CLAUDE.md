@@ -33,12 +33,17 @@ cd frontend && npm run test:run  # Single run
 
 Tests live at `backend/src/**/*.test.ts` and `frontend/src/**/*.test.{ts,tsx}`.
 
-### Database Utilities
+### Database
 ```bash
 npm run seed:admin       # Create admin user (delegates to backend)
 npm run seed:posts       # Seed blog posts (delegates to backend)
 npm run seed:clean:posts # Clear posts (delegates to backend)
 npm run validate:i18n    # Validate i18n keys
+
+# Drizzle migrations
+cd backend && npx drizzle-kit generate   # Generate migration from schema changes
+cd backend && npx drizzle-kit migrate    # Apply migrations
+cd backend && npx drizzle-kit studio     # Open Drizzle Studio (DB browser)
 ```
 
 ### Code Quality
@@ -63,14 +68,16 @@ Express 5 server with TypeScript, running on port 3000.
 **Key modules:**
 - `src/index.ts` — Express app entry, route mounting, Swagger UI served inline
 - `src/routes/` — Route handlers; `routes/api/` contains the external v1 API
-- `src/services/` — Business logic (`projectService`, `postService`, `blockService`, `storageService`, `userService`, `activityLogService`, `contactService`, `telegramService`)
+- `src/services/` — Business logic (`postService`, `blockService`, `storageService`, `userService`, `activityLogService`, `contactService`, `telegramService`)
 - `src/middleware/` — `auth.ts` (JWT), `apiKey.ts` (API key), `multer.ts` (file uploads), `validate.ts`
-- `src/config/` — Supabase client and JWT config
-- `src/migrations/` — Database migration scripts
+- `src/db/` — Drizzle ORM schema (`schema.ts`) and database connection (`index.ts`)
+- `src/config/` — JWT config, env validation
 
-**Storage:** Supabase Storage via `storageService`. Images uploaded via multer (memory storage) then pushed to Supabase buckets. File uploads support both binary multipart and URL strings — file takes priority over URL.
+**Database:** PostgreSQL 16 via Drizzle ORM + `node-postgres` (pg). Connection configured via `DATABASE_URL` env var. Schema defined in `src/db/schema.ts` with 5 tables: `posts`, `blocks`, `users`, `activityLogs`, `contactMessages`.
 
-**Content blocks:** Posts use a block-based content system (`blockService`). Block types: `text_full`, `text_image`, `image_full`, `post_gallery`, `post_hero`. Blocks have `type`, `data` (JSON), and `sort_order`.
+**Storage:** Local filesystem via `storageService`. Images uploaded via multer (memory storage) then written to `UPLOADS_DIR` (default `/app/uploads`). URLs are `/uploads/{folder}/{filename}`. File uploads support both binary multipart and URL strings — file takes priority over URL.
+
+**Content blocks:** Posts use a block-based content system (`blockService`). Block types: `text_full`, `text_image`, `image_full`, `image_text`, `three_images`. Blocks have `type`, `data` (JSONB), and `sort_order`.
 
 ### Frontend (`frontend/src/`)
 
@@ -90,13 +97,13 @@ React 19 + TypeScript + Vite + Tailwind CSS 4, served on port 5173 in dev.
 
 **Styling:** Tailwind CSS 4 utility classes only. Color palette: `zinc` as primary grayscale. Icons via `@iconify-icon/react`.
 
-### Database (Supabase/PostgreSQL)
+### Database (PostgreSQL 16)
 
-Tables: `projects`, `posts`, `post_blocks`, `users`, `activity_logs`, `contacts`. DB columns use `snake_case`. Supabase RLS policies are in place.
+Tables: `posts`, `blocks`, `users`, `activity_logs`, `contact_messages`. DB columns use `snake_case`. Drizzle schema in `backend/src/db/schema.ts`.
 
 ### Production
 
-In production, the backend serves the frontend's built `dist/` as static files. Docker Compose orchestrates frontend + backend containers. See `docs/DEPLOYMENT.md` for VPS deployment details.
+Docker Compose orchestrates PostgreSQL, backend, frontend/nginx, and backup containers. Uploaded files stored in a shared `uploads` volume (backend rw, nginx ro). Daily PostgreSQL backups at 3:00 AM with 7-day retention via `scripts/backup.sh`. See `docs/DEPLOYMENT.md` for VPS deployment details.
 
 ## Additional Conventions
 

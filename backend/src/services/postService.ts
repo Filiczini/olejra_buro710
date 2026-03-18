@@ -1,4 +1,6 @@
-import { supabase } from '../config/supabase';
+import { eq, desc, isNull, ilike, and, ne, count, sql } from 'drizzle-orm';
+import { db } from '../db';
+import { posts } from '../db/schema';
 import { blockService } from './blockService';
 import { storageService } from './storageService';
 import { ConflictError, NotFoundError } from '../lib/errors';
@@ -45,66 +47,93 @@ interface UpdatePostParams extends Partial<PostHero> {
   }[];
 }
 
+function toPost(row: typeof posts.$inferSelect): Post {
+  return {
+    id: row.id,
+    title: row.title,
+    slug: row.slug,
+    status: row.status as PostStatus,
+    featured: row.featured ?? undefined,
+    seo_title: row.seo_title ?? undefined,
+    seo_description: row.seo_description ?? undefined,
+    og_image_url: row.og_image_url ?? undefined,
+    hero_image_url: row.hero_image_url ?? undefined,
+    hero_title: row.hero_title ?? undefined,
+    hero_subtitle: row.hero_subtitle ?? undefined,
+    hero_tags: row.hero_tags ?? undefined,
+    hero_location: row.hero_location ?? undefined,
+    hero_year: row.hero_year ?? undefined,
+    gallery_images: row.gallery_images ?? undefined,
+    created_at: row.created_at.toISOString(),
+    updated_at: row.updated_at.toISOString(),
+    deleted_at: row.deleted_at?.toISOString() ?? null,
+  };
+}
+
 export const postService = {
   getAll: async (params?: PostPaginationParams): Promise<PaginatedResponse<Post>> => {
     const { page = 1, limit = 10, status, search } = params || {};
 
-    let query = supabase.from('posts').select('*', { count: 'exact' }).is('deleted_at', null);
+    const conditions = [isNull(posts.deleted_at)];
 
     if (status) {
-      query = query.eq('status', status);
+      conditions.push(eq(posts.status, status));
     }
 
     if (search) {
-      query = query.ilike('title', `%${search}%`);
+      const sanitizedSearch = search.replace(/[%_\\]/g, '\\$&');
+      conditions.push(ilike(posts.title, `%${sanitizedSearch}%`));
     }
 
-    query = query.order('created_at', { ascending: false });
-
+    const where = and(...conditions);
     const from = (page - 1) * limit;
-    const to = from + limit - 1;
-    query = query.range(from, to);
 
-    const { data, error, count } = await query;
+    const [countResult, dataResult] = await Promise.all([
+      db.select({ count: count() }).from(posts).where(where),
+      db
+        .select()
+        .from(posts)
+        .where(where)
+        .orderBy(desc(posts.created_at))
+        .limit(limit)
+        .offset(from),
+    ]);
 
-    if (error) throw error;
+    const total = countResult[0]?.count || 0;
 
     return {
-      data: (data || []) as Post[],
+      data: dataResult.map(toPost),
       pagination: {
         page,
         limit,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit),
+        total,
+        totalPages: Math.ceil(total / limit),
       },
     };
   },
 
   getById: async (id: string): Promise<{ post: Post; blocks: Block[] }> => {
-    const [postResult, blocks] = await Promise.all([
-      supabase.from('posts').select('*').eq('id', id).single(),
+    const [postResult, blocksList] = await Promise.all([
+      db.select().from(posts).where(eq(posts.id, id)),
       blockService.getByPostId(id),
     ]);
 
-    if (postResult.error) throw postResult.error;
+    if (postResult.length === 0) throw new NotFoundError('Post not found');
 
-    return { post: postResult.data as Post, blocks };
+    return { post: toPost(postResult[0]), blocks: blocksList };
   },
 
   getBySlug: async (slug: string): Promise<{ post: Post; blocks: Block[] }> => {
-    const { data: post, error: postError } = await supabase
-      .from('posts')
-      .select('*')
-      .eq('slug', slug)
-      .eq('status', 'published')
-      .is('deleted_at', null)
-      .single();
+    const result = await db
+      .select()
+      .from(posts)
+      .where(and(eq(posts.slug, slug), eq(posts.status, 'published'), isNull(posts.deleted_at)));
 
-    if (postError) throw postError;
+    if (result.length === 0) throw new NotFoundError('Post not found');
 
-    const blocks = await blockService.getByPostId(post.id);
+    const blocksList = await blockService.getByPostId(result[0].id);
 
-    return { post: post as Post, blocks };
+    return { post: toPost(result[0]), blocks: blocksList };
   },
 
   create: async (params: CreatePostParams): Promise<Post> => {
@@ -113,119 +142,105 @@ export const postService = {
     let uniqueSlug = slug;
     let counter = 1;
     while (true) {
-      const { data: existing } = await supabase
-        .from('posts')
-        .select('id')
-        .eq('slug', uniqueSlug)
-        .is('deleted_at', null)
-        .single();
+      const existing = await db
+        .select({ id: posts.id })
+        .from(posts)
+        .where(and(eq(posts.slug, uniqueSlug), isNull(posts.deleted_at)));
 
-      if (!existing) break;
+      if (existing.length === 0) break;
       uniqueSlug = `${slug}-${counter}`;
       counter++;
     }
 
-    const { blocks, ...postData } = params;
+    const { blocks: blockData, ...postData } = params;
 
-    const { data: post, error: postError } = await supabase
-      .from('posts')
-      .insert({
+    const [post] = await db
+      .insert(posts)
+      .values({
         ...postData,
         slug: uniqueSlug,
         status: params.status || 'draft',
       })
-      .select()
-      .single();
+      .returning();
 
-    if (postError) throw postError;
     if (!post) throw new NotFoundError('Failed to create post');
 
-    if (blocks && blocks.length > 0) {
-      await blockService.create({ postId: post.id, blocks });
+    if (blockData && blockData.length > 0) {
+      await blockService.create({ postId: post.id, blocks: blockData });
     }
 
-    return post as Post;
+    return toPost(post);
   },
 
   update: async (id: string, params: UpdatePostParams): Promise<Post> => {
-    const { blocks, ...postData } = params;
+    const { blocks: blockData, ...postData } = params;
 
     if (postData.slug) {
-      const { data: existing } = await supabase
-        .from('posts')
-        .select('id')
-        .eq('slug', postData.slug)
-        .neq('id', id)
-        .is('deleted_at', null)
-        .single();
+      const existing = await db
+        .select({ id: posts.id })
+        .from(posts)
+        .where(and(eq(posts.slug, postData.slug), ne(posts.id, id), isNull(posts.deleted_at)));
 
-      if (existing) {
+      if (existing.length > 0) {
         throw new ConflictError('Slug already exists');
       }
     }
 
-    const { data: post, error: postError } = await supabase
-      .from('posts')
-      .update(postData)
-      .eq('id', id)
-      .select()
-      .single();
+    const [post] = await db
+      .update(posts)
+      .set({ ...postData, updated_at: new Date() })
+      .where(eq(posts.id, id))
+      .returning();
 
-    if (postError) throw postError;
     if (!post) throw new NotFoundError('Failed to update post');
 
-    if (blocks !== undefined) {
-      await blockService.syncBlocks(id, blocks);
+    if (blockData !== undefined) {
+      await blockService.syncBlocks(id, blockData);
     }
 
-    return post as Post;
+    return toPost(post);
   },
 
   delete: async (id: string): Promise<void> => {
-    const { error } = await supabase
-      .from('posts')
-      .update({ deleted_at: new Date().toISOString() })
-      .eq('id', id);
-
-    if (error) throw error;
+    await db
+      .update(posts)
+      .set({ deleted_at: new Date(), updated_at: new Date() })
+      .where(eq(posts.id, id));
   },
 
   restore: async (id: string): Promise<Post> => {
-    const { data: post, error } = await supabase
-      .from('posts')
-      .update({ deleted_at: null })
-      .eq('id', id)
-      .select()
-      .single();
+    const [post] = await db
+      .update(posts)
+      .set({ deleted_at: null, updated_at: new Date() })
+      .where(eq(posts.id, id))
+      .returning();
 
-    if (error) throw error;
     if (!post) throw new NotFoundError('Post not found');
 
-    return post as Post;
+    return toPost(post);
   },
 
   permanentDelete: async (id: string): Promise<void> => {
-    const { data: post } = await supabase
-      .from('posts')
-      .select('hero_image_url, gallery_images')
-      .eq('id', id)
-      .single();
+    const postResult = await db
+      .select({ hero_image_url: posts.hero_image_url, gallery_images: posts.gallery_images })
+      .from(posts)
+      .where(eq(posts.id, id));
 
-    const blocks = await blockService.getByPostId(id);
+    const blocksList = await blockService.getByPostId(id);
 
     const imageUrls: string[] = [];
 
-    if (post?.hero_image_url) {
-      imageUrls.push(post.hero_image_url);
+    if (postResult[0]?.hero_image_url) {
+      imageUrls.push(postResult[0].hero_image_url);
     }
 
-    if (post?.gallery_images && Array.isArray(post.gallery_images)) {
-      imageUrls.push(...post.gallery_images.filter((url): url is string => !!url));
+    if (postResult[0]?.gallery_images && Array.isArray(postResult[0].gallery_images)) {
+      imageUrls.push(...postResult[0].gallery_images.filter((url): url is string => !!url));
     }
 
-    for (const block of blocks) {
+    for (const block of blocksList) {
       if ('image_url' in block.data && block.data.image_url) {
-        imageUrls.push(block.data.image_url);
+        imageUrls.push(block.data.image_url as string);
       }
     }
 
@@ -233,21 +248,18 @@ export const postService = {
       await storageService.deleteImages(imageUrls);
     }
 
-    await supabase.from('posts').delete().eq('id', id);
+    await db.delete(posts).where(eq(posts.id, id));
   },
 
   getFeatured: async (): Promise<Post[]> => {
-    const { data, error } = await supabase
-      .from('posts')
-      .select('*')
-      .eq('featured', true)
-      .eq('status', 'published')
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false })
+    const result = await db
+      .select()
+      .from(posts)
+      .where(and(eq(posts.featured, true), eq(posts.status, 'published'), isNull(posts.deleted_at)))
+      .orderBy(desc(posts.created_at))
       .limit(6);
 
-    if (error) throw error;
-    return (data || []) as Post[];
+    return result.map(toPost);
   },
 
   generateSlug,

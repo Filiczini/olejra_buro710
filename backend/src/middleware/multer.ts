@@ -6,6 +6,20 @@ const storage = memoryStorage();
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_MIMETYPES = ['image/jpeg', 'image/png', 'image/jpg'];
 
+// Magic bytes for allowed image types
+const MAGIC_BYTES: Record<string, number[][]> = {
+  'image/jpeg': [[0xff, 0xd8, 0xff]],
+  'image/jpg': [[0xff, 0xd8, 0xff]],
+  'image/png': [[0x89, 0x50, 0x4e, 0x47]],
+};
+
+export function validateFileSignature(buffer: Buffer, mimetype: string): boolean {
+  const signatures = MAGIC_BYTES[mimetype];
+  if (!signatures) return false;
+
+  return signatures.some((sig) => sig.every((byte, i) => buffer.length > i && buffer[i] === byte));
+}
+
 const fileFilter = (_req: unknown, file: Express.Multer.File, cb: FileFilterCallback) => {
   if (ALLOWED_MIMETYPES.includes(file.mimetype)) {
     cb(null, true);

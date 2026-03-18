@@ -1,5 +1,6 @@
 import path from 'path';
-import { supabase } from '../config/supabase';
+import fs from 'fs/promises';
+import { validateFileSignature } from '../middleware/multer';
 
 const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png'];
 
@@ -25,6 +26,8 @@ interface BulkDeleteResult {
   failed: string[];
 }
 
+const uploadsDir = process.env.UPLOADS_DIR || '/app/uploads';
+
 export const storageService = {
   /**
    * Generate a safe filename with latin characters only
@@ -37,9 +40,10 @@ export const storageService = {
   },
 
   /**
-   * Upload a single image to Supabase storage
+   * Upload a single image to local storage
    * @param file - Express.Multer.File object
-   * @returns Public URL of uploaded image
+   * @param bucket - Subfolder name (e.g. 'posts', 'blocks')
+   * @returns Public URL path of uploaded image
    */
   uploadImage: async (file: Express.Multer.File, bucket?: string): Promise<string> => {
     const ext = path.extname(file.originalname).toLowerCase();
@@ -49,26 +53,24 @@ export const storageService = {
       );
     }
 
-    const targetBucket = bucket || 'projects';
+    // Validate file signature (magic bytes) to prevent MIME spoofing
+    if (!validateFileSignature(file.buffer, file.mimetype)) {
+      throw new Error('File content does not match its declared type');
+    }
+
+    const folder = bucket || 'posts';
     const fileName = storageService.generateSafeFileName(file.originalname);
-    const folder = bucket === 'blocks' ? 'blocks' : 'projects/media';
-    const filePath = `${folder}/${fileName}`;
+    const dirPath = path.join(uploadsDir, folder);
+    const filePath = path.join(dirPath, fileName);
 
-    const { error: uploadError } = await supabase.storage
-      .from(targetBucket)
-      .upload(filePath, file.buffer, {
-        contentType: file.mimetype,
-      });
+    await fs.mkdir(dirPath, { recursive: true });
+    await fs.writeFile(filePath, file.buffer);
 
-    if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`);
-
-    const { data } = supabase.storage.from(targetBucket).getPublicUrl(filePath);
-
-    return data.publicUrl;
+    return `/uploads/${folder}/${fileName}`;
   },
 
   /**
-   * Upload multiple images to Supabase storage
+   * Upload multiple images to local storage
    * @param files - Array of Express.Multer.File objects
    * @returns Object with success status, array of URLs, and array of errors
    */
@@ -107,42 +109,48 @@ export const storageService = {
   },
 
   /**
-   * Delete a single image from Supabase storage
-   * @param imageUrl - Public URL of image to delete
+   * Delete a single image from local storage
+   * @param imageUrl - URL path of image to delete (e.g. /uploads/posts/123-abc.jpg)
    * @returns Object with success status and optional error
    */
   deleteImage: async (imageUrl: string): Promise<DeleteResult> => {
     try {
-      let bucket = 'projects';
       let filePath: string | null = null;
 
-      if (imageUrl.includes('/blocks/')) {
-        bucket = 'blocks';
-        filePath = imageUrl.split('/blocks/')[1];
-      } else if (imageUrl.includes('/projects/')) {
-        filePath = imageUrl.split('/projects/')[1];
+      if (imageUrl.startsWith('/uploads/')) {
+        // Local path: /uploads/posts/file.jpg
+        filePath = path.join(uploadsDir, imageUrl.replace('/uploads/', ''));
+      } else if (imageUrl.includes('/uploads/')) {
+        // Full URL with /uploads/ in it
+        filePath = path.join(uploadsDir, imageUrl.split('/uploads/')[1]);
       }
 
       if (!filePath) {
         return { success: false, error: 'Invalid image URL format' };
       }
 
-      const { error: deleteError } = await supabase.storage.from(bucket).remove([filePath]);
-
-      if (deleteError) {
-        return { success: false, error: deleteError.message };
+      // Prevent path traversal attacks
+      const resolvedPath = path.resolve(filePath);
+      const resolvedUploads = path.resolve(uploadsDir);
+      if (!resolvedPath.startsWith(resolvedUploads)) {
+        return { success: false, error: 'Invalid file path' };
       }
 
+      await fs.unlink(filePath);
       return { success: true };
     } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+        // File already gone — treat as success
+        return { success: true };
+      }
       const errorMessage = error instanceof Error ? error.message : 'Unknown delete error';
       return { success: false, error: errorMessage };
     }
   },
 
   /**
-   * Delete multiple images from Supabase storage
-   * @param imageUrls - Array of public URLs to delete
+   * Delete multiple images from local storage
+   * @param imageUrls - Array of URL paths to delete
    * @returns Object with success status and array of failed URLs
    */
   deleteImages: async (imageUrls: string[]): Promise<BulkDeleteResult> => {

@@ -1,4 +1,6 @@
-import { supabase } from '../config/supabase';
+import { desc, count } from 'drizzle-orm';
+import { db } from '../db';
+import { contactMessages } from '../db/schema';
 import { telegramService } from './telegramService';
 import { logger } from '../lib/logger.js';
 
@@ -13,9 +15,9 @@ export const contactService = {
   create: async (data: CreateContactData) => {
     const telegramResult = await telegramService.sendMessage(data);
 
-    const { data: insertedMessage, error } = await supabase
-      .from('contact_messages')
-      .insert({
+    const [insertedMessage] = await db
+      .insert(contactMessages)
+      .values({
         name: data.name,
         email: data.email,
         subject: data.subject,
@@ -23,12 +25,12 @@ export const contactService = {
         telegram_sent: telegramResult.success,
         telegram_message_id: telegramResult.messageId || null,
       })
-      .select()
-      .single();
+      .returning();
 
-    if (error) {
-      logger.error('Error saving contact message', error);
-      throw error;
+    if (!insertedMessage) {
+      const err = new Error('Failed to insert contact message');
+      logger.error('Error saving contact message', err);
+      throw err;
     }
 
     return {
@@ -46,17 +48,18 @@ export const contactService = {
     const offset = (page - 1) * limit;
 
     const [countResult, dataResult] = await Promise.all([
-      supabase.from('contact_messages').select('*', { count: 'exact', head: true }),
-      supabase
-        .from('contact_messages')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1),
+      db.select({ count: count() }).from(contactMessages),
+      db
+        .select()
+        .from(contactMessages)
+        .orderBy(desc(contactMessages.created_at))
+        .limit(limit)
+        .offset(offset),
     ]);
 
-    const total = countResult.count || 0;
+    const total = countResult[0]?.count || 0;
     return {
-      data: dataResult.data || [],
+      data: dataResult,
       pagination: {
         total,
         page,

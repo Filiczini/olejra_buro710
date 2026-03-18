@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { timingSafeEqual } from 'crypto';
 
-type ValidationResult = { valid: true } | { valid: false; error: string; statusCode: 401 | 500 };
+type ValidationResult = { valid: true } | { valid: false; error: string; statusCode: 401 };
 
 /**
  * Pure function to validate API key
@@ -11,7 +11,7 @@ export const validateApiKey = (
   expectedKey: string | undefined
 ): ValidationResult => {
   if (!expectedKey) {
-    return { valid: false, error: 'API key not configured', statusCode: 500 };
+    return { valid: false, error: 'API key authentication unavailable', statusCode: 401 };
   }
 
   if (!providedKey) {
