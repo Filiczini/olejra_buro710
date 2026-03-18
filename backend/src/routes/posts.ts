@@ -203,7 +203,7 @@ router.post(
             const blockRecord = blocksByOrder.get(upload.sort_order);
 
             if (blockRecord) {
-              const currentData = (blockRecord.data as Record<string, unknown>) || {};
+              const currentData = (blockRecord.data as unknown as Record<string, unknown>) || {};
               if (upload.imageSlot !== undefined) {
                 const images = [...((currentData.images as { url: string; alt: string }[]) || [])];
                 images[upload.imageSlot] = { ...images[upload.imageSlot], url: imageUrl };

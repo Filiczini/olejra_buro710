@@ -74,7 +74,13 @@ describe('Contact Route', () => {
       const mockResult = {
         success: true,
         message: 'Повідомлення надіслано успішно',
-        data: { id: 'c1', ...VALID_CONTACT },
+        data: {
+          id: 'c1',
+          ...VALID_CONTACT,
+          created_at: new Date(),
+          telegram_sent: true,
+          telegram_message_id: null,
+        },
       };
       mockedContactService.create.mockResolvedValue(mockResult);
 

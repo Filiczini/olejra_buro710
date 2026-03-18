@@ -37,13 +37,6 @@ app.use(
       },
     },
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-    permissionsPolicy: {
-      features: {
-        camera: [],
-        microphone: [],
-        geolocation: [],
-      },
-    },
   })
 );
 app.use(

@@ -23,10 +23,10 @@ const mockSelect = vi.fn(() => ({ from: mockSelectFrom }));
 
 vi.mock('../../db', () => ({
   db: {
-    select: (...args: unknown[]) => mockSelect(...args),
-    insert: (...args: unknown[]) => mockInsertFn(...args),
-    update: (...args: unknown[]) => mockUpdateFn(...args),
-    delete: (...args: unknown[]) => mockDeleteFn(...args),
+    select: mockSelect,
+    insert: mockInsertFn,
+    update: mockUpdateFn,
+    delete: mockDeleteFn,
   },
 }));
 
@@ -50,7 +50,7 @@ vi.mock('drizzle-orm', () => ({
   desc: vi.fn((col) => col),
   isNull: vi.fn((col) => ({ col, op: 'isNull' })),
   ilike: vi.fn((col, val) => ({ col, val, op: 'ilike' })),
-  and: vi.fn((...args: unknown[]) => ({ op: 'and', args })),
+  and: vi.fn((...args: any[]) => ({ op: 'and', args })),
   count: vi.fn(() => 'count_fn'),
   sql: vi.fn(),
 }));
@@ -379,7 +379,7 @@ describe('postService', () => {
 
   describe('delete (soft)', () => {
     it('sets deleted_at instead of removing the post', async () => {
-      mockUpdateWhere.mockResolvedValue([]);
+      mockReturning.mockResolvedValue([]);
 
       await postService.delete('p1');
 

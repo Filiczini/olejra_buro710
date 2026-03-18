@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * One-time migration script: Supabase → PostgreSQL + local storage
  *

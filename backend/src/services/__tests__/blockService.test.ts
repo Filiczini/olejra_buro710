@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock db
 const mockReturning = vi.fn();
-const mockWhere = vi.fn();
 const mockInsertValues = vi.fn(() => ({ returning: mockReturning }));
 const mockInsertFn = vi.fn(() => ({ values: mockInsertValues }));
 const mockUpdateSet = vi.fn(() => ({ where: vi.fn(() => ({ returning: mockReturning })) }));
@@ -17,10 +16,10 @@ const mockSelect = vi.fn(() => ({ from: mockSelectFrom }));
 
 vi.mock('../../db', () => ({
   db: {
-    select: (...args: unknown[]) => mockSelect(...args),
-    insert: (...args: unknown[]) => mockInsertFn(...args),
-    update: (...args: unknown[]) => mockUpdateFn(...args),
-    delete: (...args: unknown[]) => mockDeleteFn(...args),
+    select: mockSelect,
+    insert: mockInsertFn,
+    update: mockUpdateFn,
+    delete: mockDeleteFn,
   },
 }));
 
