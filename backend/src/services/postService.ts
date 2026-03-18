@@ -1,4 +1,4 @@
-import { eq, desc, isNull, ilike, and, ne, count, sql } from 'drizzle-orm';
+import { eq, desc, isNull, ilike, and, ne, count } from 'drizzle-orm';
 import { db } from '../db';
 import { posts } from '../db/schema';
 import { blockService } from './blockService';

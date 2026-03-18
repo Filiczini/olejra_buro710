@@ -6,7 +6,7 @@ const mockWhere = vi.fn();
 
 vi.mock('../../db', () => ({
   db: {
-    select: (...args: unknown[]) => {
+    select: (...args: any[]) => {
       mockSelect(...args);
       return {
         from: (...fArgs: unknown[]) => {

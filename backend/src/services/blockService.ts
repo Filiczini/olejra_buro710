@@ -22,7 +22,7 @@ function toBlock(row: typeof blocks.$inferSelect): Block {
     id: row.id,
     post_id: row.post_id,
     type: row.type as BlockType,
-    data: row.data as BlockData,
+    data: row.data as unknown as BlockData,
     sort_order: row.sort_order,
     created_at: row.created_at.toISOString(),
   };
@@ -43,7 +43,7 @@ export const blockService = {
     const values = params.blocks.map((block, index) => ({
       post_id: params.postId,
       type: block.type,
-      data: block.data as Record<string, unknown>,
+      data: block.data as unknown as Record<string, unknown>,
       sort_order: block.sort_order ?? index,
     }));
 

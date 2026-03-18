@@ -8,7 +8,7 @@ const mockInsertFn = vi.fn(() => ({ values: mockValues }));
 const mockSelectDistinctFrom = vi.fn();
 const mockSelectDistinctOrderBy = vi.fn();
 const mockSelectDistinct = vi.fn(() => ({
-  from: (...args: unknown[]) => {
+  from: (...args: any[]) => {
     mockSelectDistinctFrom(...args);
     return { orderBy: (...oArgs: unknown[]) => mockSelectDistinctOrderBy(...oArgs) };
   },
@@ -18,9 +18,9 @@ const mockSelect = vi.fn();
 
 vi.mock('../../db', () => ({
   db: {
-    insert: (...args: unknown[]) => mockInsertFn(...args),
-    select: (...args: unknown[]) => mockSelect(...args),
-    selectDistinct: (...args: unknown[]) => mockSelectDistinct(...args),
+    insert: mockInsertFn,
+    select: mockSelect,
+    selectDistinct: mockSelectDistinct,
   },
 }));
 

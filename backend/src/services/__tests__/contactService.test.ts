@@ -5,17 +5,13 @@ const mockReturning = vi.fn();
 const mockValues = vi.fn(() => ({ returning: mockReturning }));
 const mockInsert = vi.fn(() => ({ values: mockValues }));
 
-const mockOffset = vi.fn();
-const mockLimit = vi.fn(() => ({ offset: mockOffset }));
-const mockOrderBy = vi.fn(() => ({ limit: mockLimit }));
-
 const mockSelectFrom = vi.fn();
 const mockSelect = vi.fn(() => ({ from: mockSelectFrom }));
 
 vi.mock('../../db', () => ({
   db: {
-    insert: (...args: unknown[]) => mockInsert(...args),
-    select: (...args: unknown[]) => mockSelect(...args),
+    insert: mockInsert,
+    select: mockSelect,
   },
 }));
 
@@ -121,7 +117,7 @@ describe('contactService', () => {
       const dataFrom = vi.fn(() => ({ orderBy: dataOrderBy }));
 
       let callCount = 0;
-      mockSelect.mockImplementation((...args: unknown[]) => {
+      mockSelect.mockImplementation((..._args: any[]) => {
         callCount++;
         return { from: callCount === 1 ? countFrom : dataFrom } as any;
       });
