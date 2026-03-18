@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import bcrypt from 'bcryptjs';
-import { supabase } from './config/supabase';
+import { eq } from 'drizzle-orm';
+import { db, pool } from './db';
+import { users } from './db/schema';
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
@@ -17,34 +19,31 @@ const seedAdmin = async () => {
   try {
     const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 10);
 
-    const { data: existingUser } = await supabase
-      .from('users')
-      .select('id')
-      .eq('email', ADMIN_EMAIL)
-      .single();
+    const existing = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, ADMIN_EMAIL));
 
-    if (existingUser) {
-      const { error } = await supabase
-        .from('users')
-        .update({ password_hash: passwordHash })
-        .eq('email', ADMIN_EMAIL);
-
-      if (error) throw error;
+    if (existing.length > 0) {
+      await db
+        .update(users)
+        .set({ password_hash: passwordHash })
+        .where(eq(users.email, ADMIN_EMAIL));
       console.log('Admin user password updated successfully');
     } else {
-      const { error } = await supabase.from('users').insert({
+      await db.insert(users).values({
         email: ADMIN_EMAIL,
         password_hash: passwordHash,
         role: 'admin',
       });
-
-      if (error) throw error;
       console.log('Admin user created successfully');
     }
 
+    await pool.end();
     process.exit(0);
   } catch (error) {
     console.error('Error seeding admin:', error);
+    await pool.end();
     process.exit(1);
   }
 };

@@ -19,7 +19,7 @@ describe('apiKey middleware', () => {
     });
 
     describe('Edge Cases', () => {
-      it('returns 500 error when expected key is undefined (API_KEY not configured)', () => {
+      it('returns 401 error when expected key is undefined (API_KEY not configured)', () => {
         // Arrange
         const providedKey = 'some-key';
         const expectedKey = undefined;
@@ -30,8 +30,8 @@ describe('apiKey middleware', () => {
         // Assert
         expect(result).toEqual({
           valid: false,
-          error: 'API key not configured',
-          statusCode: 500,
+          error: 'API key authentication unavailable',
+          statusCode: 401,
         });
       });
 
@@ -83,7 +83,7 @@ describe('apiKey middleware', () => {
         });
       });
 
-      it('returns 500 error when both keys are undefined', () => {
+      it('returns 401 error when both keys are undefined', () => {
         // Arrange
         const providedKey = undefined;
         const expectedKey = undefined;
@@ -94,8 +94,8 @@ describe('apiKey middleware', () => {
         // Assert
         expect(result).toEqual({
           valid: false,
-          error: 'API key not configured',
-          statusCode: 500,
+          error: 'API key authentication unavailable',
+          statusCode: 401,
         });
       });
     });
@@ -257,7 +257,7 @@ describe('apiKey middleware', () => {
         expect(mockRes.json).toHaveBeenCalledWith({ error: 'Invalid API key' });
       });
 
-      it('returns 500 with error message when API_KEY environment variable is not set', () => {
+      it('returns 401 with error message when API_KEY environment variable is not set', () => {
         // Arrange
         delete process.env.API_KEY;
         mockReq.headers = { 'x-api-key': 'any-key' };
@@ -267,8 +267,8 @@ describe('apiKey middleware', () => {
 
         // Assert
         expect(mockNext).not.toHaveBeenCalled();
-        expect(mockRes.status).toHaveBeenCalledWith(500);
-        expect(mockRes.json).toHaveBeenCalledWith({ error: 'API key not configured' });
+        expect(mockRes.status).toHaveBeenCalledWith(401);
+        expect(mockRes.json).toHaveBeenCalledWith({ error: 'API key authentication unavailable' });
       });
     });
 

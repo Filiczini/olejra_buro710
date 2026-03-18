@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { User, LogOut, Menu } from 'lucide-react';
+import { authService } from '../../services/api';
 
 interface TopBarProps {
   onMobileMenuClick?: () => void;
@@ -8,7 +9,12 @@ interface TopBarProps {
 export default function TopBar({ onMobileMenuClick }: TopBarProps) {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+    } catch {
+      // Continue with local cleanup even if API call fails
+    }
     localStorage.removeItem('token');
     navigate('/');
   };

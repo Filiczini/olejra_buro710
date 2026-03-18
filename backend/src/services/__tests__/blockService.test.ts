@@ -1,44 +1,47 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Build a chainable mock for the Supabase query builder
-const createChainMock = (
-  resolvedValue: { data?: unknown; error?: unknown } = { data: null, error: null }
-) => {
-  const chain: Record<string, ReturnType<typeof vi.fn>> = {};
-  const self = () => chain;
+// Mock db
+const mockReturning = vi.fn();
+const mockWhere = vi.fn();
+const mockInsertValues = vi.fn(() => ({ returning: mockReturning }));
+const mockInsertFn = vi.fn(() => ({ values: mockInsertValues }));
+const mockUpdateSet = vi.fn(() => ({ where: vi.fn(() => ({ returning: mockReturning })) }));
+const mockUpdateFn = vi.fn(() => ({ set: mockUpdateSet }));
+const mockDeleteWhere = vi.fn().mockResolvedValue(undefined);
+const mockDeleteFn = vi.fn(() => ({ where: mockDeleteWhere }));
 
-  chain.select = vi.fn().mockReturnValue(self());
-  chain.insert = vi.fn().mockReturnValue(self());
-  chain.update = vi.fn().mockReturnValue(self());
-  chain.delete = vi.fn().mockReturnValue(self());
-  chain.eq = vi.fn().mockReturnValue(self());
-  chain.order = vi.fn().mockReturnValue(self());
-  chain.single = vi.fn().mockResolvedValue(resolvedValue);
+const mockSelectOrderBy = vi.fn();
+const mockSelectWhere = vi.fn(() => ({ orderBy: mockSelectOrderBy }));
+const mockSelectFrom = vi.fn(() => ({ where: mockSelectWhere }));
+const mockSelect = vi.fn(() => ({ from: mockSelectFrom }));
 
-  // Make the chain itself thenable for queries that don't end with .single()
-  chain.then = vi.fn((resolve: (val: unknown) => void) => resolve(resolvedValue));
-
-  return chain;
-};
-
-let mockChain = createChainMock();
-
-vi.mock('../../config/supabase', () => ({
-  supabase: {
-    from: vi.fn(() => mockChain),
+vi.mock('../../db', () => ({
+  db: {
+    select: (...args: unknown[]) => mockSelect(...args),
+    insert: (...args: unknown[]) => mockInsertFn(...args),
+    update: (...args: unknown[]) => mockUpdateFn(...args),
+    delete: (...args: unknown[]) => mockDeleteFn(...args),
   },
 }));
 
-import { blockService } from '../blockService';
-import { supabase } from '../../config/supabase';
+vi.mock('../../db/schema', () => ({
+  blocks: {
+    id: 'id',
+    post_id: 'post_id',
+    sort_order: 'sort_order',
+  },
+}));
 
-const mockedFrom = vi.mocked(supabase.from);
+vi.mock('drizzle-orm', () => ({
+  eq: vi.fn((col, val) => ({ col, val, op: 'eq' })),
+  asc: vi.fn((col) => col),
+}));
+
+import { blockService } from '../blockService';
 
 describe('blockService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockChain = createChainMock();
-    mockedFrom.mockReturnValue(mockChain as never);
   });
 
   describe('getByPostId', () => {
@@ -50,7 +53,7 @@ describe('blockService', () => {
           type: 'text_full',
           data: { content: 'A' },
           sort_order: 0,
-          created_at: '2024-01-01',
+          created_at: new Date('2024-01-01'),
         },
         {
           id: 'b2',
@@ -58,34 +61,31 @@ describe('blockService', () => {
           type: 'image_full',
           data: { image_url: 'x.jpg' },
           sort_order: 1,
-          created_at: '2024-01-01',
+          created_at: new Date('2024-01-01'),
         },
       ];
 
-      // Override order to resolve with data
-      mockChain.order = vi.fn().mockResolvedValue({ data: mockBlocks, error: null });
+      mockSelectOrderBy.mockResolvedValue(mockBlocks);
 
       const result = await blockService.getByPostId('p1');
 
-      expect(mockedFrom).toHaveBeenCalledWith('blocks');
-      expect(mockChain.select).toHaveBeenCalledWith('*');
-      expect(mockChain.eq).toHaveBeenCalledWith('post_id', 'p1');
-      expect(mockChain.order).toHaveBeenCalledWith('sort_order', { ascending: true });
-      expect(result).toEqual(mockBlocks);
+      expect(result).toHaveLength(2);
+      expect(result[0].id).toBe('b1');
+      expect(result[0].created_at).toBe('2024-01-01T00:00:00.000Z');
     });
 
     it('returns empty array when no blocks exist', async () => {
-      mockChain.order = vi.fn().mockResolvedValue({ data: null, error: null });
+      mockSelectOrderBy.mockResolvedValue([]);
 
       const result = await blockService.getByPostId('p1');
 
       expect(result).toEqual([]);
     });
 
-    it('throws when supabase returns an error', async () => {
-      mockChain.order = vi.fn().mockResolvedValue({ data: null, error: { message: 'DB error' } });
+    it('throws when database returns an error', async () => {
+      mockSelectOrderBy.mockRejectedValue(new Error('DB error'));
 
-      await expect(blockService.getByPostId('p1')).rejects.toEqual({ message: 'DB error' });
+      await expect(blockService.getByPostId('p1')).rejects.toThrow('DB error');
     });
   });
 
@@ -98,84 +98,79 @@ describe('blockService', () => {
           type: 'text_full',
           data: { content: 'Hello' },
           sort_order: 0,
-          created_at: '2024-01-01',
+          created_at: new Date('2024-01-01'),
         },
       ];
 
-      mockChain.select = vi.fn().mockResolvedValue({ data: mockCreated, error: null });
+      mockReturning.mockResolvedValue(mockCreated);
 
       const result = await blockService.create({
         postId: 'p1',
         blocks: [{ type: 'text_full', data: { content: 'Hello' } }],
       });
 
-      expect(mockedFrom).toHaveBeenCalledWith('blocks');
-      expect(mockChain.insert).toHaveBeenCalledWith([
+      expect(mockInsertValues).toHaveBeenCalledWith([
         { post_id: 'p1', type: 'text_full', data: { content: 'Hello' }, sort_order: 0 },
       ]);
-      expect(result).toEqual(mockCreated);
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('b1');
     });
 
     it('uses provided sort_order when specified', async () => {
-      mockChain.select = vi.fn().mockResolvedValue({ data: [], error: null });
+      mockReturning.mockResolvedValue([]);
 
       await blockService.create({
         postId: 'p1',
         blocks: [{ type: 'text_full', data: { content: 'Hello' }, sort_order: 5 }],
       });
 
-      expect(mockChain.insert).toHaveBeenCalledWith([
+      expect(mockInsertValues).toHaveBeenCalledWith([
         { post_id: 'p1', type: 'text_full', data: { content: 'Hello' }, sort_order: 5 },
       ]);
     });
 
-    it('throws when supabase returns an error', async () => {
-      mockChain.select = vi
-        .fn()
-        .mockResolvedValue({ data: null, error: { message: 'Insert failed' } });
+    it('throws when database returns an error', async () => {
+      mockReturning.mockRejectedValue(new Error('Insert failed'));
 
       await expect(
         blockService.create({
           postId: 'p1',
           blocks: [{ type: 'text_full', data: { content: 'x' } }],
         })
-      ).rejects.toEqual({ message: 'Insert failed' });
+      ).rejects.toThrow('Insert failed');
     });
   });
 
   describe('delete', () => {
     it('removes a block by id', async () => {
-      mockChain.eq = vi.fn().mockResolvedValue({ error: null });
+      mockDeleteWhere.mockResolvedValue(undefined);
 
       await blockService.delete('b1');
 
-      expect(mockedFrom).toHaveBeenCalledWith('blocks');
-      expect(mockChain.delete).toHaveBeenCalled();
-      expect(mockChain.eq).toHaveBeenCalledWith('id', 'b1');
+      expect(mockDeleteFn).toHaveBeenCalled();
+      expect(mockDeleteWhere).toHaveBeenCalled();
     });
 
-    it('throws when supabase returns an error', async () => {
-      mockChain.eq = vi.fn().mockResolvedValue({ error: { message: 'Delete failed' } });
+    it('throws when database returns an error', async () => {
+      mockDeleteWhere.mockRejectedValue(new Error('Delete failed'));
 
-      await expect(blockService.delete('b1')).rejects.toEqual({ message: 'Delete failed' });
+      await expect(blockService.delete('b1')).rejects.toThrow('Delete failed');
     });
   });
 
   describe('deleteByPostId', () => {
     it('removes all blocks for a post', async () => {
-      mockChain.eq = vi.fn().mockResolvedValue({ error: null });
+      mockDeleteWhere.mockResolvedValue(undefined);
 
       await blockService.deleteByPostId('p1');
 
-      expect(mockedFrom).toHaveBeenCalledWith('blocks');
-      expect(mockChain.delete).toHaveBeenCalled();
-      expect(mockChain.eq).toHaveBeenCalledWith('post_id', 'p1');
+      expect(mockDeleteFn).toHaveBeenCalled();
     });
 
-    it('throws when supabase returns an error', async () => {
-      mockChain.eq = vi.fn().mockResolvedValue({ error: { message: 'Delete failed' } });
+    it('throws when database returns an error', async () => {
+      mockDeleteWhere.mockRejectedValue(new Error('Delete failed'));
 
-      await expect(blockService.deleteByPostId('p1')).rejects.toEqual({ message: 'Delete failed' });
+      await expect(blockService.deleteByPostId('p1')).rejects.toThrow('Delete failed');
     });
   });
 
@@ -188,7 +183,7 @@ describe('blockService', () => {
           type: 'text_full',
           data: { content: 'Old' },
           sort_order: 0,
-          created_at: '2024-01-01',
+          created_at: '2024-01-01T00:00:00.000Z',
         },
         {
           id: 'b2',
@@ -196,17 +191,15 @@ describe('blockService', () => {
           type: 'image_full',
           data: { image_url: 'x.jpg' },
           sort_order: 1,
-          created_at: '2024-01-01',
+          created_at: '2024-01-01T00:00:00.000Z',
         },
       ];
 
-      // We need to spy on the service methods since syncBlocks calls them internally
       const getByPostIdSpy = vi.spyOn(blockService, 'getByPostId');
       const deleteSpy = vi.spyOn(blockService, 'delete');
       const createSpy = vi.spyOn(blockService, 'create');
       const updateSpy = vi.spyOn(blockService, 'update');
 
-      // First call: get existing blocks (no second call — syncBlocks returns combined results)
       getByPostIdSpy.mockResolvedValueOnce(existingBlocks as never);
 
       deleteSpy.mockResolvedValue(undefined);
@@ -217,7 +210,7 @@ describe('blockService', () => {
           type: 'text_full',
           data: { content: 'New' },
           sort_order: 2,
-          created_at: '2024-01-01',
+          created_at: '2024-01-01T00:00:00.000Z',
         },
       ] as never);
       updateSpy.mockResolvedValue({
@@ -226,7 +219,7 @@ describe('blockService', () => {
         type: 'text_full',
         data: { content: 'Updated' },
         sort_order: 0,
-        created_at: '2024-01-01',
+        created_at: '2024-01-01T00:00:00.000Z',
       } as never);
 
       const incomingBlocks = [

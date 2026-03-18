@@ -12,8 +12,8 @@ const envSchema = z.object({
       'FRONTEND_URL must use HTTPS in production'
     ),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
-  SUPABASE_URL: z.string().url('SUPABASE_URL must be a valid URL'),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, 'SUPABASE_SERVICE_ROLE_KEY is required'),
+  DATABASE_URL: z.string().url('DATABASE_URL must be a valid URL'),
+  UPLOADS_DIR: z.string().default('/app/uploads'),
   API_KEY: z.string().min(1, 'API_KEY is required').optional(),
   ADMIN_EMAIL: z.string().email().optional(),
   ADMIN_PASSWORD: z.string().optional(),

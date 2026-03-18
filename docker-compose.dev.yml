@@ -1,4 +1,20 @@
 services:
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: buro710
+      POSTGRES_USER: buro710
+      POSTGRES_PASSWORD: devpassword
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U buro710"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   frontend:
     build:
       context: ./frontend
@@ -21,8 +37,18 @@ services:
       - "3000:3000"
     volumes:
       - ./backend/src:/app/src
+      - uploads_dev:/app/uploads
     env_file:
       - ./backend/.env
     environment:
       - NODE_ENV=development
       - FRONTEND_URL=http://localhost:5173
+      - DATABASE_URL=postgresql://buro710:devpassword@db:5432/buro710
+      - UPLOADS_DIR=/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata_dev:
+  uploads_dev:

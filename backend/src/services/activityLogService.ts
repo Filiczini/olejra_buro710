@@ -1,4 +1,6 @@
-import { supabase } from '../config/supabase';
+import { eq, desc, count, and } from 'drizzle-orm';
+import { db } from '../db';
+import { activityLogs } from '../db/schema';
 import type { ActivityLog, ActivityChanges, ActivityLogsParams } from '../types/activityLog';
 
 interface LogParams {
@@ -12,74 +14,82 @@ interface LogParams {
 
 export const activityLogService = {
   log: async (params: LogParams): Promise<ActivityLog> => {
-    const { data, error } = await supabase
-      .from('activity_logs')
-      .insert({
+    const [data] = await db
+      .insert(activityLogs)
+      .values({
         user_email: params.user_email,
         action: params.action,
         entity_type: params.entity_type || 'post',
         entity_id: params.entity_id,
         entity_title: params.entity_title,
-        changes: params.changes || {},
+        changes: (params.changes || {}) as Record<string, unknown>,
       })
-      .select()
-      .single();
+      .returning();
 
-    if (error) throw error;
-    return data as ActivityLog;
+    if (!data) throw new Error('Failed to insert activity log');
+
+    return {
+      ...data,
+      action: data.action as ActivityLog['action'],
+      changes: (data.changes || {}) as ActivityChanges,
+      created_at: data.created_at.toISOString(),
+    };
   },
 
   getLogs: async (params?: ActivityLogsParams) => {
     const { page = 1, limit = 20, user_email, action } = params || {};
 
-    let query = supabase
-      .from('activity_logs')
-      .select('*', { count: 'exact' })
-      .order('created_at', { ascending: false });
+    const conditions = [];
+    if (user_email) conditions.push(eq(activityLogs.user_email, user_email));
+    if (action) conditions.push(eq(activityLogs.action, action));
 
-    if (user_email) {
-      query = query.eq('user_email', user_email);
-    }
-
-    if (action) {
-      query = query.eq('action', action);
-    }
-
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
     const from = (page - 1) * limit;
-    const to = from + limit - 1;
 
-    query = query.range(from, to);
+    const [countResult, dataResult] = await Promise.all([
+      where
+        ? db.select({ count: count() }).from(activityLogs).where(where)
+        : db.select({ count: count() }).from(activityLogs),
+      where
+        ? db
+            .select()
+            .from(activityLogs)
+            .where(where)
+            .orderBy(desc(activityLogs.created_at))
+            .limit(limit)
+            .offset(from)
+        : db
+            .select()
+            .from(activityLogs)
+            .orderBy(desc(activityLogs.created_at))
+            .limit(limit)
+            .offset(from),
+    ]);
 
-    const { data, error, count } = await query;
-
-    if (error) throw error;
+    const total = countResult[0]?.count || 0;
 
     return {
-      data: data || [],
+      data: dataResult.map((row) => ({
+        ...row,
+        action: row.action as ActivityLog['action'],
+        changes: (row.changes || {}) as ActivityChanges,
+        created_at: row.created_at.toISOString(),
+      })),
       pagination: {
         page,
         limit,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit),
+        total,
+        totalPages: Math.ceil(total / limit),
       },
     };
   },
 
   getUniqueUsers: async (): Promise<string[]> => {
-    const { data, error } = await supabase.rpc('get_unique_user_emails');
+    const result = await db
+      .selectDistinct({ user_email: activityLogs.user_email })
+      .from(activityLogs)
+      .orderBy(activityLogs.user_email);
 
-    if (error) {
-      // Fallback if RPC not available: fetch with deduplication
-      const { data: fallbackData, error: fallbackError } = await supabase
-        .from('activity_logs')
-        .select('user_email')
-        .order('user_email', { ascending: true });
-
-      if (fallbackError) throw fallbackError;
-
-      return [...new Set(fallbackData?.map((log: { user_email: string }) => log.user_email))];
-    }
-
-    return data?.map((row: { user_email: string }) => row.user_email) || [];
+    return result.map((row) => row.user_email);
   },
 };

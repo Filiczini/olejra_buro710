@@ -1,14 +1,28 @@
 import { useState, useEffect, useCallback } from 'react';
+import api from '../api/client';
 
 export function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       const token = localStorage.getItem('token');
-      setIsAuthenticated(!!token);
-      setIsLoading(false);
+      if (!token) {
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        await api.get('/admin/me');
+        setIsAuthenticated(true);
+      } catch {
+        localStorage.removeItem('token');
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     checkAuth();
@@ -23,7 +37,12 @@ export function useAuth() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback(async () => {
+    try {
+      await api.post('/admin/logout');
+    } catch {
+      // Continue with local cleanup
+    }
     localStorage.removeItem('token');
     setIsAuthenticated(false);
   }, []);
