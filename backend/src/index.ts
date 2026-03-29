@@ -22,6 +22,7 @@ import { swaggerSpec } from './docs/swagger';
 const app = express();
 const PORT = env.PORT;
 
+app.set('trust proxy', 1);
 app.use(requestIdMiddleware);
 app.use(
   helmet({

@@ -88,20 +88,16 @@ Express 5 server with TypeScript, running on port 3000.
 **Key modules:**
 - `src/index.ts` — Express app entry, route mounting, middleware stack, Swagger UI
 - `src/routes/` — Route handlers; `routes/api/` contains the external v1 API
-- `src/services/` — Business logic: `postService`, `blockService`, `storageService`, `userService`, `activityLogService`, `contactService`, `telegramService`
-- `src/middleware/` — `auth.ts` (JWT: `authMiddleware`, `adminMiddleware`, `optionalAuthMiddleware`), `apiKey.ts`, `multer.ts` (file uploads), `requestId.ts`, `validate.ts`
-- `src/db/` — Drizzle ORM schema (`schema.ts`), connection (`index.ts`), migrations in `db/migrations/`
-- `src/config/` — `env.ts` (env validation), `jwt.ts` (token generation/verification)
-- `src/lib/` — `logger.ts` (structured logging), `errors.ts` (AppError, NotFoundError, ConflictError)
-- `src/docs/swagger.ts` — OpenAPI specification
+- `src/services/` — Business logic (`postService`, `blockService`, `storageService`, `userService`, `activityLogService`, `contactService`, `telegramService`)
+- `src/middleware/` — `auth.ts` (JWT), `apiKey.ts` (API key), `multer.ts` (file uploads), `validate.ts`
+- `src/db/` — Drizzle ORM schema (`schema.ts`) and database connection (`index.ts`)
+- `src/config/` — JWT config, env validation
 
-**Database:** PostgreSQL 16 via Drizzle ORM + `node-postgres` (pg). Connection configured via `DATABASE_URL` env var. Schema in `src/db/schema.ts` — 5 tables (see below).
+**Database:** PostgreSQL 16 via Drizzle ORM + `node-postgres` (pg). Connection configured via `DATABASE_URL` env var. Schema defined in `src/db/schema.ts` with 5 tables: `posts`, `blocks`, `users`, `activityLogs`, `contactMessages`.
 
-**Storage:** Local filesystem via `storageService`. Images uploaded via multer (memory storage) then written to `UPLOADS_DIR` (default `/app/uploads`). URLs are `/uploads/{folder}/{filename}`. Validates magic bytes (JPEG/PNG only, 5 MB max). Prevents path traversal.
+**Storage:** Local filesystem via `storageService`. Images uploaded via multer (memory storage) then written to `UPLOADS_DIR` (default `/app/uploads`). URLs are `/uploads/{folder}/{filename}`. File uploads support both binary multipart and URL strings — file takes priority over URL.
 
-**Content blocks:** Posts use a block-based content system (`blockService`). Block types: `text_full`, `text_image`, `image_full`, `image_text`, `three_images`. Blocks have `type`, `data` (JSONB), and `sort_order`. `syncBlocks()` handles create/update/delete in one call.
-
-**Telegram integration:** Contact form submissions are forwarded via `telegramService` to a configured Telegram bot (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`).
+**Content blocks:** Posts use a block-based content system (`blockService`). Block types: `text_full`, `text_image`, `image_full`, `image_text`, `three_images`. Blocks have `type`, `data` (JSONB), and `sort_order`.
 
 ### Frontend (`frontend/src/`)
 
@@ -135,25 +131,13 @@ Admin pages are lazy-loaded.
 
 DB columns use `snake_case`. Drizzle schema in `backend/src/db/schema.ts`.
 
-| Table | Key columns |
-|---|---|
-| `posts` | id, title, slug, status (draft/published), featured, seo_title, seo_description, og_image_url, hero_image_url, hero_title, hero_subtitle, hero_tags[], hero_location, hero_year, gallery_images[], created_at, updated_at, deleted_at |
-| `blocks` | id, post_id (FK cascade), type, data (JSONB), sort_order, created_at |
-| `users` | id, email, password_hash, role (default 'admin'), created_at |
-| `activity_logs` | id, user_email, action (create/update/delete), entity_type, entity_id, entity_title, changes (JSONB), created_at |
-| `contact_messages` | id, name, email, subject, message, telegram_sent, telegram_message_id, created_at |
+### Database (PostgreSQL 16)
 
-Posts use soft delete (`deleted_at`). `restore()` and `permanentDelete()` are available on `postService`.
+Tables: `posts`, `blocks`, `users`, `activity_logs`, `contact_messages`. DB columns use `snake_case`. Drizzle schema in `backend/src/db/schema.ts`.
 
 ### Production
 
-Docker Compose (`docker-compose.yml`) orchestrates 4 services: `db` (PostgreSQL 16), `backend` (port 3000), `frontend` (nginx, port 80), `backup` (daily 3 AM cron, 7-day retention). Development stack is in `docker-compose.dev.yml`.
-
-Uploaded files live in a shared `uploads` volume (backend rw, nginx ro). External reverse proxy connects via `dokploy-network`.
-
-Required env vars: `DB_PASSWORD`, `JWT_SECRET`, `FRONTEND_URL`, `API_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`.
-
-See `docs/DEPLOYMENT.md` for VPS deployment details.
+Docker Compose orchestrates PostgreSQL, backend, frontend/nginx, and backup containers. Uploaded files stored in a shared `uploads` volume (backend rw, nginx ro). Daily PostgreSQL backups at 3:00 AM with 7-day retention via `scripts/backup.sh`. See `docs/DEPLOYMENT.md` for VPS deployment details.
 
 ## Additional Conventions
 
