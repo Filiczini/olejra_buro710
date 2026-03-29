@@ -12,6 +12,7 @@ export const swaggerSpec = {
   },
   servers: [
     { url: '/api/v1', description: 'Поточний сервер' },
+    { url: 'https://api-staging.b710.design/api/v1', description: 'Staging сервер' },
     { url: 'http://localhost:3000/api/v1', description: 'Development сервер' },
   ],
   components: {
