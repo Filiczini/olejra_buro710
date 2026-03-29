@@ -38,7 +38,7 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.buro710-staging-frontend.rule=Host(`staging.domain.com`)"
+      - "traefik.http.routers.buro710-staging-frontend.rule=Host(`staging.b710.design`)"
       - "traefik.http.routers.buro710-staging-frontend.entrypoints=websecure"
       - "traefik.http.routers.buro710-staging-frontend.tls.certresolver=letsencrypt"
       - "traefik.http.services.buro710-staging-frontend.loadbalancer.server.port=80"
@@ -58,8 +58,8 @@ services:
       - DATABASE_URL=postgresql://buro710:${DB_PASSWORD}@db:5432/buro710
       - UPLOADS_DIR=/app/uploads
       - JWT_SECRET=${JWT_SECRET}
-      - FRONTEND_URL=https://staging.domain.com
-      - BETTER_AUTH_URL=https://api-staging.domain.com
+      - FRONTEND_URL=https://staging.b710.design
+      - BETTER_AUTH_URL=https://api-staging.b710.design
       - API_KEY=${API_KEY}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
@@ -69,7 +69,7 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.buro710-staging-backend.rule=Host(`api-staging.domain.com`)"
+      - "traefik.http.routers.buro710-staging-backend.rule=Host(`api-staging.b710.design`)"
       - "traefik.http.routers.buro710-staging-backend.entrypoints=websecure"
       - "traefik.http.routers.buro710-staging-backend.tls.certresolver=letsencrypt"
       - "traefik.http.services.buro710-staging-backend.loadbalancer.server.port=3000"
