@@ -1,0 +1,106 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: buro710
+      POSTGRES_USER: buro710
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata-staging:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U buro710"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - default
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_URL: /api
+    volumes:
+      - uploads-staging:/uploads:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:80/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    depends_on:
+      db:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.buro710-staging-frontend.rule=Host(`staging.domain.com`)"
+      - "traefik.http.routers.buro710-staging-frontend.entrypoints=websecure"
+      - "traefik.http.routers.buro710-staging-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.buro710-staging-frontend.loadbalancer.server.port=80"
+    networks:
+      - dokploy-network
+      - default
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    volumes:
+      - uploads-staging:/app/uploads
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=postgresql://buro710:${DB_PASSWORD}@db:5432/buro710
+      - UPLOADS_DIR=/app/uploads
+      - JWT_SECRET=${JWT_SECRET}
+      - FRONTEND_URL=https://staging.domain.com
+      - BETTER_AUTH_URL=https://api-staging.domain.com
+      - API_KEY=${API_KEY}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.buro710-staging-backend.rule=Host(`api-staging.domain.com`)"
+      - "traefik.http.routers.buro710-staging-backend.entrypoints=websecure"
+      - "traefik.http.routers.buro710-staging-backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.buro710-staging-backend.loadbalancer.server.port=3000"
+    networks:
+      - dokploy-network
+      - default
+
+  backup:
+    image: postgres:16-alpine
+    volumes:
+      - ./scripts/backup.sh:/backup.sh:ro
+      - backups-staging:/backups
+      - uploads-staging:/uploads:ro
+    environment:
+      - PGHOST=db
+      - PGUSER=buro710
+      - PGPASSWORD=${DB_PASSWORD}
+      - PGDATABASE=buro710
+    entrypoint: ["/bin/sh", "-c", "chmod +x /backup.sh && echo '0 3 * * * /backup.sh' | crontab - && crond -f"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - default
+
+volumes:
+  pgdata-staging:
+  uploads-staging:
+  backups-staging:
+
+networks:
+  dokploy-network:
+    external: true
