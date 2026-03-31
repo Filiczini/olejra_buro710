@@ -1,8 +1,15 @@
 import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import { eq } from 'drizzle-orm';
-import { db, pool } from './db';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import pg from 'pg';
 import { users } from './db/schema';
+
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 1,
+});
+const db = drizzle(pool);
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
