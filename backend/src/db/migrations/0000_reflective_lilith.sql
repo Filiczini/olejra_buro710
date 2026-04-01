@@ -1,7 +1,16 @@
-CREATE TYPE "public"."activity_action" AS ENUM('create', 'update', 'delete');--> statement-breakpoint
-CREATE TYPE "public"."block_type" AS ENUM('text_full', 'image_full', 'text_image', 'image_text', 'three_images');--> statement-breakpoint
-CREATE TYPE "public"."post_status" AS ENUM('draft', 'published');--> statement-breakpoint
-CREATE TABLE "activity_logs" (
+DO $$ BEGIN
+CREATE TYPE "public"."activity_action" AS ENUM('create', 'update', 'delete');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+CREATE TYPE "public"."block_type" AS ENUM('text_full', 'image_full', 'text_image', 'image_text', 'three_images');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+CREATE TYPE "public"."post_status" AS ENUM('draft', 'published');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "activity_logs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_email" varchar(255) NOT NULL,
 	"action" "activity_action" NOT NULL,
@@ -12,7 +21,7 @@ CREATE TABLE "activity_logs" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "blocks" (
+CREATE TABLE IF NOT EXISTS "blocks" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"post_id" uuid NOT NULL,
 	"type" "block_type" NOT NULL,
@@ -21,7 +30,7 @@ CREATE TABLE "blocks" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "contact_messages" (
+CREATE TABLE IF NOT EXISTS "contact_messages" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"email" varchar(255) NOT NULL,
@@ -32,7 +41,7 @@ CREATE TABLE "contact_messages" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "posts" (
+CREATE TABLE IF NOT EXISTS "posts" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"title" varchar(500) NOT NULL,
 	"slug" varchar(500) NOT NULL,
@@ -53,7 +62,7 @@ CREATE TABLE "posts" (
 	"deleted_at" timestamp with time zone
 );
 --> statement-breakpoint
-CREATE TABLE "users" (
+CREATE TABLE IF NOT EXISTS "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"email" varchar(255) NOT NULL,
 	"password_hash" text NOT NULL,
@@ -62,4 +71,7 @@ CREATE TABLE "users" (
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
+DO $$ BEGIN
 ALTER TABLE "blocks" ADD CONSTRAINT "blocks_post_id_posts_id_fk" FOREIGN KEY ("post_id") REFERENCES "public"."posts"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
