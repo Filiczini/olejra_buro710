@@ -5,6 +5,7 @@ services:
       dockerfile: frontend/Dockerfile
       args:
         VITE_API_URL: /api
+        BACKEND_HOST: buro710-staging-backend
     volumes:
       - uploads-staging:/uploads:ro
     healthcheck:
@@ -43,7 +44,9 @@ services:
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
     restart: unless-stopped
     networks:
-      - default
+      default:
+        aliases:
+          - buro710-staging-backend
 
 volumes:
   uploads-staging:
