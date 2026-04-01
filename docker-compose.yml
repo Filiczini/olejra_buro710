@@ -61,7 +61,6 @@ services:
         condition: service_healthy
     restart: unless-stopped
     networks:
-      - dokploy-network
       - default
 
   backup:

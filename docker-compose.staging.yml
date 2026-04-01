@@ -36,12 +36,6 @@ services:
       backend:
         condition: service_started
     restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.buro710-staging-frontend.rule=Host(`staging.b710.design`)"
-      - "traefik.http.routers.buro710-staging-frontend.entrypoints=websecure"
-      - "traefik.http.routers.buro710-staging-frontend.tls.certresolver=letsencrypt"
-      - "traefik.http.services.buro710-staging-frontend.loadbalancer.server.port=80"
     networks:
       - dokploy-network
       - default
@@ -67,14 +61,7 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.buro710-staging-backend.rule=Host(`api-staging.b710.design`)"
-      - "traefik.http.routers.buro710-staging-backend.entrypoints=websecure"
-      - "traefik.http.routers.buro710-staging-backend.tls.certresolver=letsencrypt"
-      - "traefik.http.services.buro710-staging-backend.loadbalancer.server.port=3000"
     networks:
-      - dokploy-network
       - default
 
   backup:
