@@ -46,21 +46,6 @@ export function usePostForm() {
   const [featured, setFeatured] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const isDirtyRef = useRef(false);
-  const [isDirty, setIsDirty] = useState(false);
-
-  const markDirty = () => {
-    isDirtyRef.current = true;
-    setIsDirty(true);
-  };
-
-  const clearDirty = () => {
-    isDirtyRef.current = false;
-    setIsDirty(false);
-  };
-
-  const getIsDirty = useCallback(() => isDirtyRef.current, []);
-
   const blocksDataRef = useRef<EditBlock[]>([]);
 
   const loadPost = useCallback(
@@ -97,8 +82,6 @@ export function usePostForm() {
           data: b.data,
           sort_order: index,
         }));
-
-        clearDirty();
       } catch (error) {
         logger.error('Error loading post', error);
         navigate('/admin/posts');
@@ -117,7 +100,6 @@ export function usePostForm() {
 
   const handleTitleChange = (value: string) => {
     setTitle(value);
-    markDirty();
     if (!slugLocked) {
       setSlug(generateSlug(value));
     }
@@ -126,20 +108,17 @@ export function usePostForm() {
   const handleSlugChange = (value: string) => {
     setSlug(value);
     setSlugLocked(true);
-    markDirty();
   };
 
   const handleSlugUnlock = () => {
     setSlugLocked(false);
     setSlug(generateSlug(title));
-    markDirty();
   };
 
   const handleBlocksChange = (
     updatedBlocks: { id?: string; type: BlockType; data: BlockData; sort_order: number }[]
   ) => {
     blocksDataRef.current = updatedBlocks;
-    markDirty();
   };
 
   const handleBlockImageChange = (blockId: string, file: File | null, field?: string) => {
@@ -151,7 +130,6 @@ export function usePostForm() {
       }
       return [...prev, { id: key, file }];
     });
-    markDirty();
   };
 
   const validate = (): boolean => {
@@ -275,7 +253,6 @@ export function usePostForm() {
         await postService.create(formData);
       }
 
-      clearDirty();
       navigate('/admin/posts');
     } catch (error) {
       logger.error('Error saving post:', error);
@@ -303,9 +280,6 @@ export function usePostForm() {
     galleryNewFiles,
     featured,
     errors,
-    isDirty,
-    markDirty,
-    getIsDirty,
     setStatus,
     setSeoTitle,
     setSeoDescription,

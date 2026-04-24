@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { useNavigate, useBlocker } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
@@ -29,9 +28,6 @@ export default function EditPostPage() {
     galleryNewFiles,
     featured,
     errors,
-    isDirty,
-    markDirty,
-    getIsDirty,
     setStatus,
     setSeoTitle,
     setSeoDescription,
@@ -47,17 +43,6 @@ export default function EditPostPage() {
     handleBlockImageChange,
     handleSubmit,
   } = usePostForm();
-
-  const blocker = useBlocker(getIsDirty);
-
-  useEffect(() => {
-    if (!isDirty) return;
-    const handler = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-    };
-    window.addEventListener('beforeunload', handler);
-    return () => window.removeEventListener('beforeunload', handler);
-  }, [isDirty]);
 
   if (loading) {
     return (
@@ -136,10 +121,7 @@ export default function EditPostPage() {
                   name="status"
                   value="draft"
                   checked={status === 'draft'}
-                  onChange={() => {
-                    setStatus('draft');
-                    markDirty();
-                  }}
+                  onChange={() => setStatus('draft')}
                   className="w-4 h-4 text-zinc-900"
                 />
                 <span className="text-zinc-700">Чернетка</span>
@@ -150,10 +132,7 @@ export default function EditPostPage() {
                   name="status"
                   value="published"
                   checked={status === 'published'}
-                  onChange={() => {
-                    setStatus('published');
-                    markDirty();
-                  }}
+                  onChange={() => setStatus('published')}
                   className="w-4 h-4 text-zinc-900"
                 />
                 <span className="text-zinc-700">Опубліковано</span>
@@ -163,10 +142,7 @@ export default function EditPostPage() {
 
           <label className="flex items-center gap-3 cursor-pointer select-none">
             <div
-              onClick={() => {
-                setFeatured((v) => !v);
-                markDirty();
-              }}
+              onClick={() => setFeatured((v) => !v)}
               className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${featured ? 'bg-zinc-900' : 'bg-zinc-200'}`}
             >
               <span
@@ -184,14 +160,7 @@ export default function EditPostPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           <div className="lg:col-span-3">
-            <PostHeroForm
-              data={heroData}
-              onChange={(data) => {
-                setHeroData(data);
-                markDirty();
-              }}
-              errors={errors}
-            />
+            <PostHeroForm data={heroData} onChange={setHeroData} errors={errors} />
           </div>
           <div className="lg:col-span-2">
             <PostHeroPreview data={heroData} />
@@ -201,18 +170,9 @@ export default function EditPostPage() {
         <SeoFields
           seoTitle={seoTitle}
           seoDescription={seoDescription}
-          onSeoTitleChange={(v) => {
-            setSeoTitle(v);
-            markDirty();
-          }}
-          onSeoDescriptionChange={(v) => {
-            setSeoDescription(v);
-            markDirty();
-          }}
-          onOgImageChange={(f) => {
-            setOgImageFile(f);
-            markDirty();
-          }}
+          onSeoTitleChange={setSeoTitle}
+          onSeoDescriptionChange={setSeoDescription}
+          onOgImageChange={setOgImageFile}
           errors={{ seo_title: errors.seo_title, seo_description: errors.seo_description }}
         />
 
@@ -228,15 +188,9 @@ export default function EditPostPage() {
 
         <GalleryUploader
           images={galleryImages}
-          onImagesChange={(imgs) => {
-            setGalleryImages(imgs);
-            markDirty();
-          }}
+          onImagesChange={setGalleryImages}
           newFiles={galleryNewFiles}
-          onNewFilesChange={(files) => {
-            setGalleryNewFiles(files);
-            markDirty();
-          }}
+          onNewFilesChange={setGalleryNewFiles}
         />
 
         <div className="flex gap-4 justify-end">
@@ -248,25 +202,6 @@ export default function EditPostPage() {
           </Button>
         </div>
       </form>
-
-      {blocker.state === 'blocked' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full space-y-4">
-            <h3 className="text-lg font-semibold text-zinc-900">Незбережені зміни</h3>
-            <p className="text-sm text-zinc-500 leading-relaxed">
-              Ви маєте незбережені зміни. Якщо вийдете зараз — вони будуть втрачені.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <Button type="button" variant="secondary" onClick={() => blocker.reset?.()}>
-                Залишитися
-              </Button>
-              <Button type="button" onClick={() => blocker.proceed?.()}>
-                Вийти без збереження
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
