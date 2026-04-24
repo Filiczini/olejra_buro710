@@ -18,6 +18,7 @@ export default function EditPostPage() {
     saving,
     title,
     slug,
+    slugLocked,
     status,
     seoTitle,
     seoDescription,
@@ -27,7 +28,6 @@ export default function EditPostPage() {
     galleryNewFiles,
     featured,
     errors,
-    setSlug,
     setStatus,
     setSeoTitle,
     setSeoDescription,
@@ -37,6 +37,8 @@ export default function EditPostPage() {
     setGalleryNewFiles,
     setFeatured,
     handleTitleChange,
+    handleSlugChange,
+    handleSlugUnlock,
     handleBlocksChange,
     handleBlockImageChange,
     handleSubmit,
@@ -74,13 +76,41 @@ export default function EditPostPage() {
             placeholder="Введіть назву сторінки"
           />
 
-          <Input
-            label="URL Slug"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            error={errors.slug}
-            placeholder="url-adresa-storinky"
-          />
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-zinc-700">URL Slug</label>
+              {slugLocked ? (
+                <button
+                  type="button"
+                  onClick={handleSlugUnlock}
+                  className="inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-md text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors"
+                  title="Синхронізувати slug з назвою"
+                >
+                  <Icon icon="solar:link-broken-bold" width={12} />
+                  Вручну
+                </button>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-500">
+                  <Icon icon="solar:link-bold" width={12} />
+                  Авто
+                </span>
+              )}
+            </div>
+            <input
+              className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent ${
+                errors.slug ? 'border-red-500' : 'border-zinc-200'
+              }`}
+              value={slug}
+              onChange={(e) => handleSlugChange(e.target.value)}
+              placeholder="url-adresa-storinky"
+            />
+            {errors.slug && <span className="text-sm text-red-500">{errors.slug}</span>}
+            {slug && (
+              <p className="text-xs text-zinc-400">
+                /page/<span className="font-medium text-zinc-500">{slug}</span>
+              </p>
+            )}
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-zinc-700 mb-2">Статус</label>

@@ -33,6 +33,7 @@ export function usePostForm() {
   const [saving, setSaving] = useState(false);
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
+  const [slugLocked, setSlugLocked] = useState(isEditing);
   const [status, setStatus] = useState<PostStatus>('draft');
   const [seoTitle, setSeoTitle] = useState('');
   const [seoDescription, setSeoDescription] = useState('');
@@ -56,6 +57,7 @@ export function usePostForm() {
 
         setTitle(post.title);
         setSlug(post.slug);
+        setSlugLocked(true);
         setStatus(post.status);
         setSeoTitle(post.seo_title || '');
         setSeoDescription(post.seo_description || '');
@@ -98,9 +100,19 @@ export function usePostForm() {
 
   const handleTitleChange = (value: string) => {
     setTitle(value);
-    if (!isEditing && !slug) {
+    if (!slugLocked) {
       setSlug(generateSlug(value));
     }
+  };
+
+  const handleSlugChange = (value: string) => {
+    setSlug(value);
+    setSlugLocked(true);
+  };
+
+  const handleSlugUnlock = () => {
+    setSlugLocked(false);
+    setSlug(generateSlug(title));
   };
 
   const handleBlocksChange = (
@@ -257,6 +269,7 @@ export function usePostForm() {
     saving,
     title,
     slug,
+    slugLocked,
     status,
     seoTitle,
     seoDescription,
@@ -267,7 +280,6 @@ export function usePostForm() {
     galleryNewFiles,
     featured,
     errors,
-    setSlug,
     setStatus,
     setSeoTitle,
     setSeoDescription,
@@ -277,6 +289,8 @@ export function usePostForm() {
     setGalleryNewFiles,
     setFeatured,
     handleTitleChange,
+    handleSlugChange,
+    handleSlugUnlock,
     handleBlocksChange,
     handleBlockImageChange,
     handleSubmit,

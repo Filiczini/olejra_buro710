@@ -52,11 +52,21 @@ describe('usePostForm', () => {
     expect(result.current.isEditing).toBe(false);
     expect(result.current.title).toBe('');
     expect(result.current.slug).toBe('');
+    expect(result.current.slugLocked).toBe(false);
     expect(result.current.status).toBe('draft');
     expect(result.current.loading).toBe(false);
     expect(result.current.saving).toBe(false);
     expect(result.current.errors).toEqual({});
     expect(result.current.featured).toBe(false);
+  });
+
+  it('slugLocked is true initially when editing', () => {
+    mockUseParams.mockReturnValue({ id: 'post-123' });
+    vi.mocked(postService.getById).mockReturnValue(new Promise(() => {}));
+
+    const { result } = renderHook(() => usePostForm());
+
+    expect(result.current.slugLocked).toBe(true);
   });
 
   it('sets isEditing to true when id param exists', () => {
@@ -80,6 +90,20 @@ describe('usePostForm', () => {
     expect(result.current.slug).toBe('my-new-post');
   });
 
+  it('handleTitleChange continuously updates slug while unlocked', () => {
+    const { result } = renderHook(() => usePostForm());
+
+    act(() => {
+      result.current.handleTitleChange('First');
+    });
+    expect(result.current.slug).toBe('first');
+
+    act(() => {
+      result.current.handleTitleChange('First Second');
+    });
+    expect(result.current.slug).toBe('first-second');
+  });
+
   it('handleTitleChange does not overwrite slug when editing', () => {
     mockUseParams.mockReturnValue({ id: 'post-123' });
     vi.mocked(postService.getById).mockReturnValue(new Promise(() => {}));
@@ -91,22 +115,58 @@ describe('usePostForm', () => {
     });
 
     expect(result.current.title).toBe('Updated Title');
-    // slug should not auto-generate when editing
+    expect(result.current.slug).toBe('');
   });
 
   it('handleTitleChange does not overwrite manually set slug', () => {
     const { result } = renderHook(() => usePostForm());
 
     act(() => {
-      result.current.setSlug('custom-slug');
+      result.current.handleSlugChange('custom-slug');
     });
 
     act(() => {
       result.current.handleTitleChange('Some Title');
     });
 
-    // Slug was already set, so it should not be overwritten
     expect(result.current.slug).toBe('custom-slug');
+    expect(result.current.slugLocked).toBe(true);
+  });
+
+  it('handleSlugChange locks slug and stops auto-generation', () => {
+    const { result } = renderHook(() => usePostForm());
+
+    act(() => {
+      result.current.handleSlugChange('my-custom-slug');
+    });
+
+    expect(result.current.slug).toBe('my-custom-slug');
+    expect(result.current.slugLocked).toBe(true);
+
+    act(() => {
+      result.current.handleTitleChange('Any Title');
+    });
+
+    expect(result.current.slug).toBe('my-custom-slug');
+  });
+
+  it('handleSlugUnlock regenerates slug from current title and unlocks', () => {
+    const { result } = renderHook(() => usePostForm());
+
+    act(() => {
+      result.current.handleTitleChange('My Post Title');
+    });
+    act(() => {
+      result.current.handleSlugChange('old-manual-slug');
+    });
+    expect(result.current.slugLocked).toBe(true);
+
+    act(() => {
+      result.current.handleSlugUnlock();
+    });
+
+    expect(result.current.slugLocked).toBe(false);
+    expect(result.current.slug).toBe('my-post-title');
   });
 
   it('setStatus updates status', () => {
