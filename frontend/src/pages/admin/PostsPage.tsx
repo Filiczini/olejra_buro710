@@ -1,16 +1,20 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { logger } from '../../lib/logger';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Search, ChevronDown, PlusCircle, Pencil, Eye, Trash2, CheckCircle } from 'lucide-react';
 import { postService } from '../../services/api';
 import type { Post } from '../../types/post';
 import Pagination from '../../components/admin/Pagination';
+import Toast from '../../components/ui/Toast';
+import { useToast } from '../../hooks/useToast';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 10;
 
 export default function PostsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { toast, showToast, dismissToast } = useToast();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
@@ -24,6 +28,13 @@ export default function PostsPage() {
 
   const previousPostsRef = useRef<Post[]>([]);
   const previousPaginationRef = useRef(pagination);
+
+  useEffect(() => {
+    if (location.state?.saved) {
+      showToast('Пост збережено', 'success');
+      navigate('/admin/posts', { replace: true, state: {} });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadPosts = useCallback(
     async (page: number) => {
@@ -103,6 +114,9 @@ export default function PostsPage() {
 
   return (
     <div>
+      {toast && (
+        <Toast key={toast.key} message={toast.message} type={toast.type} onDismiss={dismissToast} />
+      )}
       <div className="mx-auto max-w-7xl ">
         {/* Toolbar */}
         <div className="mb-6">

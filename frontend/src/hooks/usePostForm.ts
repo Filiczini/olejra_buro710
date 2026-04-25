@@ -293,8 +293,7 @@ export function usePostForm() {
       }
 
       clearDirty();
-      showToast('Пост збережено', 'success');
-      setTimeout(() => navigate('/admin/posts'), 1500);
+      navigate('/admin/posts', { state: { saved: true } });
     } catch (error) {
       logger.error('Error saving post:', error);
       showToast('Помилка збереження', 'error');
