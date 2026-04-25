@@ -63,12 +63,12 @@ export const postService = {
   },
 
   create: async (data: FormData) => {
-    const response = await api.post('/posts', data);
+    const response = await api.post('/posts', data, { timeout: 120000 });
     return response.data as Post;
   },
 
   update: async (id: string, data: FormData) => {
-    const response = await api.put(`/posts/${id}`, data);
+    const response = await api.put(`/posts/${id}`, data, { timeout: 120000 });
     return response.data as Post;
   },
 
