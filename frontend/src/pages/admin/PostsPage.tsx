@@ -7,6 +7,7 @@ import type { Post } from '../../types/post';
 import Pagination from '../../components/admin/Pagination';
 import Toast from '../../components/ui/Toast';
 import { useToast } from '../../hooks/useToast';
+import Button from '../../components/ui/Button';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 10;
@@ -15,6 +16,7 @@ export default function PostsPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast, showToast, dismissToast } = useToast();
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
@@ -75,8 +77,10 @@ export default function PostsPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Ви впевнені, що хочете видалити цей пост?')) return;
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    const { id } = deleteTarget;
+    setDeleteTarget(null);
 
     previousPostsRef.current = posts;
     previousPaginationRef.current = pagination;
@@ -280,7 +284,7 @@ export default function PostsPage() {
                             </a>
                           )}
                           <button
-                            onClick={() => handleDelete(post.id)}
+                            onClick={() => setDeleteTarget({ id: post.id, title: post.title })}
                             className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
                             title="Видалити"
                           >
@@ -304,6 +308,29 @@ export default function PostsPage() {
           />
         </div>
       </div>
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full space-y-4">
+            <h3 className="text-lg font-semibold text-zinc-900">Підтвердження видалення</h3>
+            <p className="text-sm text-zinc-500 leading-relaxed">
+              Видалити <span className="font-medium text-zinc-900">«{deleteTarget.title}»</span>? Цю
+              дію не можна скасувати.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button type="button" variant="secondary" onClick={() => setDeleteTarget(null)}>
+                Скасувати
+              </Button>
+              <button
+                type="button"
+                onClick={handleDeleteConfirm}
+                className="px-5 py-2.5 rounded-full font-medium transition-all cursor-pointer bg-red-600 text-white hover:bg-red-700"
+              >
+                Видалити
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
