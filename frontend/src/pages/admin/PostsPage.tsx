@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { logger } from '../../lib/logger';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Search, ChevronDown, PlusCircle, Pencil, Eye, Trash2, CheckCircle } from 'lucide-react';
+import { Search, ChevronDown, PlusCircle, Pencil, Eye, Trash2, CheckCircle, X } from 'lucide-react';
+import type { PostStatus } from '../../types/post';
 import { postService } from '../../services/api';
 import type { Post } from '../../types/post';
 import Pagination from '../../components/admin/Pagination';
@@ -17,6 +18,10 @@ export default function PostsPage() {
   const location = useLocation();
   const { toast, showToast, dismissToast } = useToast();
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
+  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
+  const [bulkLoading, setBulkLoading] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
@@ -38,9 +43,36 @@ export default function PostsPage() {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const allSelected = posts.length > 0 && posts.every((p) => selectedIds.has(p.id));
+  const someSelected = posts.some((p) => selectedIds.has(p.id));
+
+  const postCountLabel = (n: number) => {
+    if (n === 1) return '1 пост';
+    if (n >= 2 && n <= 4) return `${n} пости`;
+    return `${n} постів`;
+  };
+
+  const handleSelectAll = () => {
+    if (allSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(posts.map((p) => p.id)));
+    }
+  };
+
+  const handleToggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   const loadPosts = useCallback(
     async (page: number) => {
       setLoading(true);
+      setSelectedIds(new Set());
       try {
         const result = await postService.getAll({
           page,
@@ -94,6 +126,44 @@ export default function PostsPage() {
       logger.error('Error deleting post', error);
       setPosts(previousPostsRef.current);
       setPagination(previousPaginationRef.current);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    setBulkLoading(true);
+    const ids = [...selectedIds];
+    try {
+      await Promise.all(ids.map((id) => postService.delete(id)));
+      setPosts((prev) => prev.filter((p) => !selectedIds.has(p.id)));
+      setPagination((prev) => ({ ...prev, total: Math.max(0, prev.total - ids.length) }));
+      setSelectedIds(new Set());
+      setBulkDeleteConfirm(false);
+    } catch (error) {
+      logger.error('Error bulk deleting posts', error);
+      loadPosts(pagination.page);
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  const handleBulkStatusChange = async (status: PostStatus) => {
+    setStatusDropdownOpen(false);
+    setBulkLoading(true);
+    try {
+      await Promise.all(
+        [...selectedIds].map((id) => {
+          const fd = new FormData();
+          fd.append('status', status);
+          return postService.update(id, fd);
+        })
+      );
+      setPosts((prev) => prev.map((p) => (selectedIds.has(p.id) ? { ...p, status } : p)));
+      setSelectedIds(new Set());
+    } catch (error) {
+      logger.error('Error bulk updating status', error);
+      loadPosts(pagination.page);
+    } finally {
+      setBulkLoading(false);
     }
   };
 
@@ -177,6 +247,17 @@ export default function PostsPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/50">
+                  <th className="py-4 pl-6 pr-2 w-10">
+                    <input
+                      type="checkbox"
+                      checked={allSelected}
+                      ref={(el) => {
+                        if (el) el.indeterminate = someSelected && !allSelected;
+                      }}
+                      onChange={handleSelectAll}
+                      className="w-4 h-4 rounded border-gray-300 text-zinc-900 cursor-pointer"
+                    />
+                  </th>
                   <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">
                     Назва
                   </th>
@@ -215,7 +296,18 @@ export default function PostsPage() {
                   </tr>
                 ) : (
                   posts.map((post) => (
-                    <tr key={post.id} className="group hover:bg-gray-50/80 transition-colors">
+                    <tr
+                      key={post.id}
+                      className={`group hover:bg-gray-50/80 transition-colors ${selectedIds.has(post.id) ? 'bg-zinc-50' : ''}`}
+                    >
+                      <td className="py-4 pl-6 pr-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(post.id)}
+                          onChange={() => handleToggleSelect(post.id)}
+                          className="w-4 h-4 rounded border-gray-300 text-zinc-900 cursor-pointer"
+                        />
+                      </td>
                       <td className="py-4 px-6">
                         {post.status === 'published' ? (
                           <a
@@ -308,6 +400,93 @@ export default function PostsPage() {
           />
         </div>
       </div>
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 bg-zinc-900 text-white px-5 py-3 rounded-2xl shadow-2xl">
+          <span className="text-sm font-medium">{postCountLabel(selectedIds.size)} обрано</span>
+          <div className="w-px h-5 bg-zinc-700" />
+
+          <div className="relative">
+            <button
+              type="button"
+              disabled={bulkLoading}
+              onClick={() => setStatusDropdownOpen((v) => !v)}
+              className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+            >
+              Змінити статус
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+            {statusDropdownOpen && (
+              <div className="absolute bottom-full mb-2 left-0 bg-white text-zinc-900 rounded-lg shadow-lg overflow-hidden min-w-36">
+                <button
+                  type="button"
+                  onClick={() => handleBulkStatusChange('published')}
+                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-zinc-50 transition-colors cursor-pointer"
+                >
+                  Опублікувати
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleBulkStatusChange('draft')}
+                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-zinc-50 transition-colors cursor-pointer"
+                >
+                  В чернетку
+                </button>
+              </div>
+            )}
+          </div>
+
+          <button
+            type="button"
+            disabled={bulkLoading}
+            onClick={() => setBulkDeleteConfirm(true)}
+            className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            Видалити
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedIds(new Set())}
+            className="text-zinc-400 hover:text-white transition-colors cursor-pointer"
+            title="Зняти виділення"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {bulkDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full space-y-4">
+            <h3 className="text-lg font-semibold text-zinc-900">Підтвердження видалення</h3>
+            <p className="text-sm text-zinc-500 leading-relaxed">
+              Видалити{' '}
+              <span className="font-medium text-zinc-900">{postCountLabel(selectedIds.size)}</span>?{' '}
+              Цю дію не можна скасувати.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setBulkDeleteConfirm(false)}
+                disabled={bulkLoading}
+              >
+                Скасувати
+              </Button>
+              <button
+                type="button"
+                onClick={handleBulkDelete}
+                disabled={bulkLoading}
+                className="px-5 py-2.5 rounded-full font-medium transition-all cursor-pointer bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {bulkLoading ? 'Видалення...' : `Видалити ${postCountLabel(selectedIds.size)}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full space-y-4">
