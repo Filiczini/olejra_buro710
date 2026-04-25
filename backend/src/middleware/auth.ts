@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../config/jwt';
+import { userService } from '../services/userService';
 
 export const adminMiddleware = (req: Request, res: Response, next: NextFunction) => {
   if (req.user?.role !== 'admin') {
@@ -22,7 +23,7 @@ export const optionalAuthMiddleware = (req: Request, _res: Response, next: NextF
   next();
 };
 
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -33,6 +34,10 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
 
   try {
     const decoded = verifyToken(token);
+    const dbVersion = await userService.getTokenVersion(decoded.userId);
+    if (dbVersion === -1 || decoded.tokenVersion !== dbVersion) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
     req.user = decoded;
     next();
   } catch {

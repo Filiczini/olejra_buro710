@@ -39,7 +39,13 @@ router.post(
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
-      const token = generateToken({ userId: user.id, email: user.email, role: user.role });
+      const tokenVersion = await userService.getTokenVersion(user.id);
+      const token = generateToken({
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+        tokenVersion,
+      });
 
       res.json({
         token,
@@ -56,7 +62,12 @@ router.post(
   }
 );
 
-router.post('/logout', authMiddleware, (_req: Request, res: Response) => {
+router.post('/logout', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    await userService.incrementTokenVersion(req.user!.userId);
+  } catch {
+    // best-effort: still clear client token even if DB update fails
+  }
   res.json({ message: 'Logged out successfully' });
 });
 
