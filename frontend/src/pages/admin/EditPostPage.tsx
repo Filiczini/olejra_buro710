@@ -3,6 +3,7 @@ import { useNavigate, useBlocker } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
+import Toast from '../../components/ui/Toast';
 import SeoFields from '../../components/admin/SeoFields';
 import PostHeroForm from '../../components/admin/PostHeroForm';
 import PostHeroPreview from '../../components/admin/PostHeroPreview';
@@ -30,6 +31,8 @@ export default function EditPostPage() {
     featured,
     errors,
     isDirty,
+    toast,
+    dismissToast,
     markDirty,
     getIsDirty,
     setStatus,
@@ -269,6 +272,10 @@ export default function EditPostPage() {
           </Button>
         </div>
       </form>
+
+      {toast && (
+        <Toast key={toast.key} message={toast.message} type={toast.type} onDismiss={dismissToast} />
+      )}
 
       {blocker.state === 'blocked' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">

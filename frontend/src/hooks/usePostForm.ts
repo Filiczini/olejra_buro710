@@ -8,6 +8,7 @@ import { postService } from '../services/api';
 import type { PostHeroFormData } from '../components/admin/PostHeroForm';
 import type { PostStatus } from '../types/post';
 import type { Block, BlockType, BlockData, EditBlock } from '../types/block';
+import { useToast } from './useToast';
 
 interface BlockWithFile {
   id: string;
@@ -45,6 +46,8 @@ export function usePostForm() {
   const [galleryNewFiles, setGalleryNewFiles] = useState<File[]>([]);
   const [featured, setFeatured] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const { toast, showToast, dismissToast } = useToast();
 
   const isDirtyRef = useRef(false);
   const [isDirty, setIsDirty] = useState(false);
@@ -285,14 +288,17 @@ export function usePostForm() {
 
       if (isEditing && id) {
         await postService.update(id, formData);
+        clearDirty();
+        showToast('Пост збережено', 'success');
       } else {
-        await postService.create(formData);
+        const newPost = await postService.create(formData);
+        clearDirty();
+        showToast('Пост збережено', 'success');
+        navigate(`/admin/posts/edit/${newPost.id}`, { replace: true });
       }
-
-      clearDirty();
-      navigate('/admin/posts');
     } catch (error) {
       logger.error('Error saving post:', error);
+      showToast('Помилка збереження', 'error');
       const apiError = error as {
         response?: {
           data?: {
@@ -345,6 +351,8 @@ export function usePostForm() {
     featured,
     errors,
     isDirty,
+    toast,
+    dismissToast,
     markDirty,
     getIsDirty,
     setStatus,
