@@ -15,6 +15,27 @@ interface BlockWithFile {
   file: File | null;
 }
 
+interface DraftData {
+  title: string;
+  slug: string;
+  slugLocked: boolean;
+  status: PostStatus;
+  seoTitle: string;
+  seoDescription: string;
+  featured: boolean;
+  heroData: {
+    hero_image_url: string;
+    hero_title: string;
+    hero_subtitle: string;
+    hero_tags: string[];
+    hero_location: string;
+    hero_year: string;
+  };
+  blocks: EditBlock[];
+  galleryImages: string[];
+  savedAt: string;
+}
+
 const INITIAL_HERO_DATA: PostHeroFormData = {
   hero_image_url: '',
   hero_title: '',
@@ -49,6 +70,12 @@ export function usePostForm() {
 
   const { toast, showToast, dismissToast } = useToast();
 
+  const draftKey = `draft:${id || 'new'}`;
+  const [draftBanner, setDraftBanner] = useState<{ savedAt: string } | null>(null);
+  const [pageBuilderKey, setPageBuilderKey] = useState(0);
+  const draftDataRef = useRef<DraftData | null>(null);
+  const formSnapshotRef = useRef<(() => Omit<DraftData, 'savedAt'>) | null>(null);
+
   const isDirtyRef = useRef(false);
   const [isDirty, setIsDirty] = useState(false);
 
@@ -82,7 +109,97 @@ export function usePostForm() {
   // avoiding stale closure issues when clearDirty() is called just before navigate().
   const getIsDirty = useCallback(() => isDirtyRef.current, []);
 
+  const saveDraft = useCallback(() => {
+    const snapshot = formSnapshotRef.current?.();
+    if (!snapshot) return;
+    try {
+      localStorage.setItem(
+        draftKey,
+        JSON.stringify({ ...snapshot, savedAt: new Date().toISOString() })
+      );
+    } catch {
+      // ignore localStorage quota errors
+    }
+  }, [draftKey]);
+
+  const dismissDraft = useCallback(() => {
+    localStorage.removeItem(draftKey);
+    draftDataRef.current = null;
+    setDraftBanner(null);
+  }, [draftKey]);
+
+  const restoreDraft = useCallback(() => {
+    const data = draftDataRef.current;
+    if (!data) return;
+    setTitle(data.title);
+    setSlug(data.slug);
+    setSlugLocked(data.slugLocked);
+    setStatus(data.status);
+    setSeoTitle(data.seoTitle);
+    setSeoDescription(data.seoDescription);
+    setFeatured(data.featured);
+    setHeroData({ ...data.heroData, heroImage: undefined });
+    setInitialBlocks(data.blocks as unknown as Block[]);
+    blocksDataRef.current = data.blocks;
+    setGalleryImages(data.galleryImages);
+    setPageBuilderKey((k) => k + 1);
+    dismissDraft();
+    markDirty();
+  }, [dismissDraft]);
+
+  // Load draft for new posts on mount
+  useEffect(() => {
+    if (!id) {
+      try {
+        const saved = localStorage.getItem('draft:new');
+        if (saved) {
+          const data = JSON.parse(saved) as DraftData;
+          draftDataRef.current = data;
+          setDraftBanner({ savedAt: data.savedAt });
+        }
+      } catch {
+        // ignore invalid JSON
+      }
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Autosave every 30s when dirty
+  useEffect(() => {
+    if (!isDirty) return;
+    const interval = setInterval(saveDraft, 30000);
+    return () => clearInterval(interval);
+  }, [isDirty, saveDraft]);
+
+  // Save draft before page unload
+  useEffect(() => {
+    const handler = () => {
+      if (isDirtyRef.current) saveDraft();
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [saveDraft]);
+
   const blocksDataRef = useRef<EditBlock[]>([]);
+
+  formSnapshotRef.current = () => ({
+    title,
+    slug,
+    slugLocked,
+    status,
+    seoTitle,
+    seoDescription,
+    featured,
+    heroData: {
+      hero_image_url: heroData.hero_image_url || '',
+      hero_title: heroData.hero_title || '',
+      hero_subtitle: heroData.hero_subtitle || '',
+      hero_tags: heroData.hero_tags || [],
+      hero_location: heroData.hero_location || '',
+      hero_year: heroData.hero_year || '',
+    },
+    blocks: blocksDataRef.current,
+    galleryImages,
+  });
 
   const loadPost = useCallback(
     async (postId: string) => {
@@ -120,6 +237,17 @@ export function usePostForm() {
         }));
 
         clearDirty();
+
+        try {
+          const saved = localStorage.getItem(`draft:${postId}`);
+          if (saved) {
+            const data = JSON.parse(saved) as DraftData;
+            draftDataRef.current = data;
+            setDraftBanner({ savedAt: data.savedAt });
+          }
+        } catch {
+          // ignore invalid JSON
+        }
       } catch (error) {
         logger.error('Error loading post', error);
         navigate('/admin/posts');
@@ -323,6 +451,7 @@ export function usePostForm() {
       }
 
       clearDirty();
+      dismissDraft();
       navigate('/admin/posts', { state: { saved: true } });
     } catch (error) {
       logger.error('Error saving post:', error);
@@ -379,10 +508,14 @@ export function usePostForm() {
     featured,
     errors,
     isDirty,
+    draftBanner,
+    pageBuilderKey,
     toast,
     dismissToast,
     markDirty,
     validateField,
+    restoreDraft,
+    dismissDraft,
     getIsDirty,
     setStatus,
     setSeoTitle,

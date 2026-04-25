@@ -31,10 +31,14 @@ export default function EditPostPage() {
     featured,
     errors,
     isDirty,
+    draftBanner,
+    pageBuilderKey,
     toast,
     dismissToast,
     markDirty,
     validateField,
+    restoreDraft,
+    dismissDraft,
     getIsDirty,
     setStatus,
     setSeoTitle,
@@ -79,6 +83,35 @@ export default function EditPostPage() {
           {isEditing ? 'Редагувати сторінку' : 'Нова сторінка'}
         </h1>
       </div>
+
+      {draftBanner && (
+        <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between gap-4">
+          <p className="text-sm text-amber-800">
+            <span className="font-medium">Знайдено незбережену версію</span> від{' '}
+            {new Date(draftBanner.savedAt).toLocaleTimeString('uk-UA', {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+            . Відновити?
+          </p>
+          <div className="flex gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={restoreDraft}
+              className="px-3 py-1.5 text-sm font-medium bg-amber-700 text-white rounded-lg hover:bg-amber-800 transition-colors cursor-pointer"
+            >
+              Відновити
+            </button>
+            <button
+              type="button"
+              onClick={dismissDraft}
+              className="px-3 py-1.5 text-sm font-medium text-amber-700 hover:text-amber-900 transition-colors cursor-pointer"
+            >
+              Ігнорувати
+            </button>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {errors.submit && (
@@ -242,7 +275,7 @@ export default function EditPostPage() {
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-lg font-medium text-zinc-900 mb-4">Блоки контенту</h2>
           <PageBuilder
-            key={`${id || 'new'}-${initialBlocks.length}`}
+            key={`${id || 'new'}-${pageBuilderKey}`}
             initialBlocks={initialBlocks}
             onChange={handleBlocksChange}
             onImageChange={handleBlockImageChange}
