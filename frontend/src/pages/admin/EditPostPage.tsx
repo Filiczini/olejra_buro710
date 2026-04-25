@@ -34,6 +34,7 @@ export default function EditPostPage() {
     toast,
     dismissToast,
     markDirty,
+    validateField,
     getIsDirty,
     setStatus,
     setSeoTitle,
@@ -91,8 +92,10 @@ export default function EditPostPage() {
             id="post-title"
             name="title"
             label="Назва сторінки"
+            required
             value={title}
             onChange={(e) => handleTitleChange(e.target.value)}
+            onBlur={(e) => validateField('title', e.target.value)}
             error={errors.title}
             placeholder="Введіть назву сторінки"
           />
@@ -132,6 +135,7 @@ export default function EditPostPage() {
               }`}
               value={slug}
               onChange={(e) => handleSlugChange(e.target.value)}
+              onBlur={(e) => validateField('slug', e.target.value)}
               placeholder="url-adresa-storinky"
             />
             {errors.slug && <span className="text-sm text-red-500">{errors.slug}</span>}
@@ -208,6 +212,7 @@ export default function EditPostPage() {
                 markDirty();
               }}
               errors={errors}
+              onBlurField={validateField}
             />
           </div>
           <div className="lg:col-span-2">
@@ -230,6 +235,7 @@ export default function EditPostPage() {
             setOgImageFile(f);
             markDirty();
           }}
+          onBlurField={validateField}
           errors={{ seo_title: errors.seo_title, seo_description: errors.seo_description }}
         />
 

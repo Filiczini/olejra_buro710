@@ -8,6 +8,7 @@ interface SeoFieldsProps {
   onSeoTitleChange: (value: string) => void;
   onSeoDescriptionChange: (value: string) => void;
   onOgImageChange?: (file: File | null) => void;
+  onBlurField?: (field: string, value: string) => void;
   errors?: {
     seo_title?: string;
     seo_description?: string;
@@ -21,6 +22,7 @@ export default function SeoFields({
   onSeoTitleChange,
   onSeoDescriptionChange,
   onOgImageChange,
+  onBlurField,
   errors,
 }: SeoFieldsProps) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -89,6 +91,7 @@ export default function SeoFields({
               type="text"
               value={seoTitle}
               onChange={(e) => onSeoTitleChange(e.target.value)}
+              onBlur={(e) => onBlurField?.('seo_title', e.target.value)}
               placeholder="Заголовок для пошукових систем"
               className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 ${
                 errors?.seo_title ? 'border-red-500' : 'border-zinc-200'
@@ -110,6 +113,7 @@ export default function SeoFields({
               name="seo_description"
               value={seoDescription}
               onChange={(e) => onSeoDescriptionChange(e.target.value)}
+              onBlur={(e) => onBlurField?.('seo_description', e.target.value)}
               placeholder="Опис для пошукових систем"
               rows={3}
               className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 resize-none ${

@@ -5,7 +5,14 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
 }
 
-export default function Input({ label, error, className = '', id, ...props }: InputProps) {
+export default function Input({
+  label,
+  error,
+  className = '',
+  id,
+  required,
+  ...props
+}: InputProps) {
   const baseStyles =
     'w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent';
   const errorStyles = error ? 'border-red-500' : '';
@@ -15,9 +22,15 @@ export default function Input({ label, error, className = '', id, ...props }: In
       {label && (
         <label htmlFor={id} className="text-sm font-medium text-zinc-700">
           {label}
+          {required && <span className="text-red-500 ml-0.5">*</span>}
         </label>
       )}
-      <input id={id} className={`${baseStyles} ${errorStyles} ${className}`} {...props} />
+      <input
+        id={id}
+        required={required}
+        className={`${baseStyles} ${errorStyles} ${className}`}
+        {...props}
+      />
       {error && <span className="text-sm text-red-500">{error}</span>}
     </div>
   );

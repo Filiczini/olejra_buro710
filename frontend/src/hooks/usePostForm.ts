@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { logger } from '../lib/logger';
 import { postCreateSchema } from '@buro710/shared';
 import { generateSlug } from '@buro710/shared';
-import type { ZodIssue } from 'zod';
+import type { ZodIssue, ZodTypeAny } from 'zod';
 import { postService } from '../services/api';
 import type { PostHeroFormData } from '../components/admin/PostHeroForm';
 import type { PostStatus } from '../types/post';
@@ -56,6 +56,22 @@ export function usePostForm() {
     isDirtyRef.current = true;
     setIsDirty(true);
   };
+
+  const validateField = useCallback((field: string, value: unknown) => {
+    const shape = postCreateSchema.shape as Record<string, ZodTypeAny>;
+    const fieldSchema = shape[field];
+    if (!fieldSchema) return;
+    const result = fieldSchema.safeParse(value);
+    if (!result.success) {
+      setErrors((prev) => ({ ...prev, [field]: result.error.issues[0]?.message ?? 'Помилка' }));
+    } else {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  }, []);
 
   const clearDirty = () => {
     isDirtyRef.current = false;
@@ -126,12 +142,26 @@ export function usePostForm() {
     if (!slugLocked) {
       setSlug(generateSlug(value));
     }
+    if (errors.title) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.title;
+        return next;
+      });
+    }
   };
 
   const handleSlugChange = (value: string) => {
     setSlug(value);
     setSlugLocked(true);
     markDirty();
+    if (errors.slug) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.slug;
+        return next;
+      });
+    }
   };
 
   const handleSlugUnlock = () => {
@@ -352,6 +382,7 @@ export function usePostForm() {
     toast,
     dismissToast,
     markDirty,
+    validateField,
     getIsDirty,
     setStatus,
     setSeoTitle,

@@ -11,9 +11,10 @@ interface PostHeroFormProps {
   data: PostHeroFormData;
   onChange: (data: PostHeroFormData) => void;
   errors?: Record<string, string>;
+  onBlurField?: (field: string, value: string) => void;
 }
 
-export default function PostHeroForm({ data, onChange, errors }: PostHeroFormProps) {
+export default function PostHeroForm({ data, onChange, errors, onBlurField }: PostHeroFormProps) {
   const handleChange = (
     field: keyof PostHeroFormData,
     value: string | File | string[] | undefined
@@ -44,6 +45,7 @@ export default function PostHeroForm({ data, onChange, errors }: PostHeroFormPro
           placeholder="Введіть заголовок hero секції"
           value={data.hero_title || ''}
           onChange={(e) => handleChange('hero_title', e.target.value)}
+          onBlur={(e) => onBlurField?.('hero_title', e.target.value)}
           error={errors?.hero_title}
         />
 
@@ -56,10 +58,14 @@ export default function PostHeroForm({ data, onChange, errors }: PostHeroFormPro
             name="hero_subtitle"
             value={data.hero_subtitle || ''}
             onChange={(e) => handleChange('hero_subtitle', e.target.value)}
+            onBlur={(e) => onBlurField?.('hero_subtitle', e.target.value)}
             placeholder="Короткий опис сторінки"
             rows={3}
-            className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 resize-none"
+            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 resize-none ${errors?.hero_subtitle ? 'border-red-500' : 'border-zinc-200'}`}
           />
+          {errors?.hero_subtitle && (
+            <span className="text-sm text-red-500 mt-1 block">{errors.hero_subtitle}</span>
+          )}
         </div>
 
         <TagInput
@@ -78,6 +84,8 @@ export default function PostHeroForm({ data, onChange, errors }: PostHeroFormPro
             placeholder="Київ, Україна"
             value={data.hero_location || ''}
             onChange={(e) => handleChange('hero_location', e.target.value)}
+            onBlur={(e) => onBlurField?.('hero_location', e.target.value)}
+            error={errors?.hero_location}
           />
 
           <Input
@@ -87,6 +95,8 @@ export default function PostHeroForm({ data, onChange, errors }: PostHeroFormPro
             placeholder="2024"
             value={data.hero_year || ''}
             onChange={(e) => handleChange('hero_year', e.target.value)}
+            onBlur={(e) => onBlurField?.('hero_year', e.target.value)}
+            error={errors?.hero_year}
           />
         </div>
       </div>
