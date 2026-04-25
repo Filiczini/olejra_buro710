@@ -288,14 +288,13 @@ export function usePostForm() {
 
       if (isEditing && id) {
         await postService.update(id, formData);
-        clearDirty();
-        showToast('Пост збережено', 'success');
       } else {
-        const newPost = await postService.create(formData);
-        clearDirty();
-        showToast('Пост збережено', 'success');
-        navigate(`/admin/posts/edit/${newPost.id}`, { replace: true });
+        await postService.create(formData);
       }
+
+      clearDirty();
+      showToast('Пост збережено', 'success');
+      setTimeout(() => navigate('/admin/posts'), 1500);
     } catch (error) {
       logger.error('Error saving post:', error);
       showToast('Помилка збереження', 'error');
