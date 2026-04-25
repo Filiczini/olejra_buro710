@@ -46,6 +46,23 @@ export function usePostForm() {
   const [featured, setFeatured] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const isDirtyRef = useRef(false);
+  const [isDirty, setIsDirty] = useState(false);
+
+  const markDirty = () => {
+    isDirtyRef.current = true;
+    setIsDirty(true);
+  };
+
+  const clearDirty = () => {
+    isDirtyRef.current = false;
+    setIsDirty(false);
+  };
+
+  // Stable callback for useBlocker — reads ref synchronously at navigation time,
+  // avoiding stale closure issues when clearDirty() is called just before navigate().
+  const getIsDirty = useCallback(() => isDirtyRef.current, []);
+
   const blocksDataRef = useRef<EditBlock[]>([]);
 
   const loadPost = useCallback(
@@ -82,6 +99,8 @@ export function usePostForm() {
           data: b.data,
           sort_order: index,
         }));
+
+        clearDirty();
       } catch (error) {
         logger.error('Error loading post', error);
         navigate('/admin/posts');
@@ -100,6 +119,7 @@ export function usePostForm() {
 
   const handleTitleChange = (value: string) => {
     setTitle(value);
+    markDirty();
     if (!slugLocked) {
       setSlug(generateSlug(value));
     }
@@ -108,17 +128,24 @@ export function usePostForm() {
   const handleSlugChange = (value: string) => {
     setSlug(value);
     setSlugLocked(true);
+    markDirty();
   };
 
   const handleSlugUnlock = () => {
     setSlugLocked(false);
     setSlug(generateSlug(title));
+    markDirty();
+  };
+
+  const handleSlugLock = () => {
+    setSlugLocked(true);
   };
 
   const handleBlocksChange = (
     updatedBlocks: { id?: string; type: BlockType; data: BlockData; sort_order: number }[]
   ) => {
     blocksDataRef.current = updatedBlocks;
+    markDirty();
   };
 
   const handleBlockImageChange = (blockId: string, file: File | null, field?: string) => {
@@ -130,6 +157,14 @@ export function usePostForm() {
       }
       return [...prev, { id: key, file }];
     });
+    markDirty();
+  };
+
+  const scrollToFirstError = () => {
+    setTimeout(() => {
+      const el = document.querySelector<HTMLElement>('.bg-red-50, .border-red-500, .text-red-500');
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 50);
   };
 
   const validate = (): boolean => {
@@ -155,6 +190,7 @@ export function usePostForm() {
         }
       });
       setErrors(newErrors);
+      scrollToFirstError();
       return false;
     }
 
@@ -253,10 +289,38 @@ export function usePostForm() {
         await postService.create(formData);
       }
 
+      clearDirty();
       navigate('/admin/posts');
     } catch (error) {
       logger.error('Error saving post:', error);
-      setErrors({ submit: 'Помилка збереження посту' });
+      const apiError = error as {
+        response?: {
+          data?: {
+            error?: string;
+            field?: string;
+            details?: { field: string; message: string }[];
+          };
+        };
+      };
+      const data = apiError?.response?.data;
+
+      if (data?.details && data.details.length > 0) {
+        const fieldErrors: Record<string, string> = {};
+        data.details.forEach(({ field, message }) => {
+          if (field && !fieldErrors[field]) fieldErrors[field] = message;
+        });
+        setErrors(fieldErrors);
+      } else if (data?.field && data?.error) {
+        const message =
+          data.field === 'slug' && data.error === 'Slug already exists'
+            ? 'Такий URL вже існує'
+            : data.error;
+        setErrors({ [data.field]: message });
+      } else {
+        setErrors({ submit: 'Помилка збереження посту' });
+      }
+
+      scrollToFirstError();
     } finally {
       setSaving(false);
     }
@@ -280,6 +344,9 @@ export function usePostForm() {
     galleryNewFiles,
     featured,
     errors,
+    isDirty,
+    markDirty,
+    getIsDirty,
     setStatus,
     setSeoTitle,
     setSeoDescription,
@@ -291,6 +358,7 @@ export function usePostForm() {
     handleTitleChange,
     handleSlugChange,
     handleSlugUnlock,
+    handleSlugLock,
     handleBlocksChange,
     handleBlockImageChange,
     handleSubmit,

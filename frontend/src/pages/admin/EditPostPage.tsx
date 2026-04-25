@@ -1,4 +1,5 @@
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate, useBlocker } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
@@ -28,6 +29,9 @@ export default function EditPostPage() {
     galleryNewFiles,
     featured,
     errors,
+    isDirty,
+    markDirty,
+    getIsDirty,
     setStatus,
     setSeoTitle,
     setSeoDescription,
@@ -39,10 +43,22 @@ export default function EditPostPage() {
     handleTitleChange,
     handleSlugChange,
     handleSlugUnlock,
+    handleSlugLock,
     handleBlocksChange,
     handleBlockImageChange,
     handleSubmit,
   } = usePostForm();
+
+  const blocker = useBlocker(getIsDirty);
+
+  useEffect(() => {
+    if (!isDirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [isDirty]);
 
   if (loading) {
     return (
@@ -69,6 +85,8 @@ export default function EditPostPage() {
 
         <div className="bg-white rounded-xl shadow-lg p-6 space-y-4">
           <Input
+            id="post-title"
+            name="title"
             label="Назва сторінки"
             value={title}
             onChange={(e) => handleTitleChange(e.target.value)}
@@ -78,25 +96,34 @@ export default function EditPostPage() {
 
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-zinc-700">URL Slug</label>
+              <label htmlFor="post-slug" className="text-sm font-medium text-zinc-700">
+                URL Slug
+              </label>
               {slugLocked ? (
                 <button
                   type="button"
                   onClick={handleSlugUnlock}
                   className="inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-md text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors"
-                  title="Синхронізувати slug з назвою"
+                  title="Синхронізувати slug з назвою автоматично"
                 >
                   <Icon icon="solar:link-broken-bold" width={12} />
-                  Вручну
+                  Синхронізувати
                 </button>
               ) : (
-                <span className="inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-500">
+                <button
+                  type="button"
+                  onClick={handleSlugLock}
+                  className="inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-500 hover:text-zinc-700 hover:bg-zinc-200 transition-colors"
+                  title="Заблокувати slug і редагувати вручну"
+                >
                   <Icon icon="solar:link-bold" width={12} />
                   Авто
-                </span>
+                </button>
               )}
             </div>
             <input
+              id="post-slug"
+              name="slug"
               className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent ${
                 errors.slug ? 'border-red-500' : 'border-zinc-200'
               }`}
@@ -113,7 +140,7 @@ export default function EditPostPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-zinc-700 mb-2">Статус</label>
+            <p className="block text-sm font-medium text-zinc-700 mb-2">Статус</p>
             <div className="flex gap-4">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -121,7 +148,10 @@ export default function EditPostPage() {
                   name="status"
                   value="draft"
                   checked={status === 'draft'}
-                  onChange={() => setStatus('draft')}
+                  onChange={() => {
+                    setStatus('draft');
+                    markDirty();
+                  }}
                   className="w-4 h-4 text-zinc-900"
                 />
                 <span className="text-zinc-700">Чернетка</span>
@@ -132,7 +162,10 @@ export default function EditPostPage() {
                   name="status"
                   value="published"
                   checked={status === 'published'}
-                  onChange={() => setStatus('published')}
+                  onChange={() => {
+                    setStatus('published');
+                    markDirty();
+                  }}
                   className="w-4 h-4 text-zinc-900"
                 />
                 <span className="text-zinc-700">Опубліковано</span>
@@ -140,9 +173,14 @@ export default function EditPostPage() {
             </div>
           </div>
 
-          <label className="flex items-center gap-3 cursor-pointer select-none">
+          <div
+            className="flex items-center gap-3 cursor-pointer select-none"
+            onClick={() => {
+              setFeatured((v) => !v);
+              markDirty();
+            }}
+          >
             <div
-              onClick={() => setFeatured((v) => !v)}
               className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${featured ? 'bg-zinc-900' : 'bg-zinc-200'}`}
             >
               <span
@@ -155,12 +193,19 @@ export default function EditPostPage() {
                 (відображається на головній, макс. 6)
               </span>
             </span>
-          </label>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           <div className="lg:col-span-3">
-            <PostHeroForm data={heroData} onChange={setHeroData} errors={errors} />
+            <PostHeroForm
+              data={heroData}
+              onChange={(data) => {
+                setHeroData(data);
+                markDirty();
+              }}
+              errors={errors}
+            />
           </div>
           <div className="lg:col-span-2">
             <PostHeroPreview data={heroData} />
@@ -170,9 +215,18 @@ export default function EditPostPage() {
         <SeoFields
           seoTitle={seoTitle}
           seoDescription={seoDescription}
-          onSeoTitleChange={setSeoTitle}
-          onSeoDescriptionChange={setSeoDescription}
-          onOgImageChange={setOgImageFile}
+          onSeoTitleChange={(v) => {
+            setSeoTitle(v);
+            markDirty();
+          }}
+          onSeoDescriptionChange={(v) => {
+            setSeoDescription(v);
+            markDirty();
+          }}
+          onOgImageChange={(f) => {
+            setOgImageFile(f);
+            markDirty();
+          }}
           errors={{ seo_title: errors.seo_title, seo_description: errors.seo_description }}
         />
 
@@ -188,9 +242,15 @@ export default function EditPostPage() {
 
         <GalleryUploader
           images={galleryImages}
-          onImagesChange={setGalleryImages}
+          onImagesChange={(imgs) => {
+            setGalleryImages(imgs);
+            markDirty();
+          }}
           newFiles={galleryNewFiles}
-          onNewFilesChange={setGalleryNewFiles}
+          onNewFilesChange={(files) => {
+            setGalleryNewFiles(files);
+            markDirty();
+          }}
         />
 
         <div className="flex gap-4 justify-end">
@@ -202,6 +262,25 @@ export default function EditPostPage() {
           </Button>
         </div>
       </form>
+
+      {blocker.state === 'blocked' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full space-y-4">
+            <h3 className="text-lg font-semibold text-zinc-900">Незбережені зміни</h3>
+            <p className="text-sm text-zinc-500 leading-relaxed">
+              Ви маєте незбережені зміни. Якщо вийдете зараз — вони будуть втрачені.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button type="button" variant="secondary" onClick={() => blocker.reset?.()}>
+                Залишитися
+              </Button>
+              <Button type="button" onClick={() => blocker.proceed?.()}>
+                Вийти без збереження
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

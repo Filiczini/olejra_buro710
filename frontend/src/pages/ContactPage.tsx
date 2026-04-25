@@ -234,8 +234,11 @@ export default function ContactPage() {
                   disabled={loading}
                 />
                 <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-zinc-700">Повідомлення</label>
+                  <label htmlFor="contact-message" className="text-sm font-medium text-zinc-700">
+                    Повідомлення
+                  </label>
                   <textarea
+                    id="contact-message"
                     name="message"
                     value={formData.message}
                     onChange={handleChange}

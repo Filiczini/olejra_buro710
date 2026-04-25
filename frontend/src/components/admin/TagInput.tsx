@@ -37,7 +37,7 @@ export default function TagInput({
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-sm font-medium text-zinc-700">
+      <label htmlFor="tag-input" className="text-sm font-medium text-zinc-700">
         {label}{' '}
         {maxTags && (
           <span className="text-zinc-400">
@@ -67,6 +67,8 @@ export default function TagInput({
         ))}
         {canAddMore && (
           <input
+            id="tag-input"
+            name="tag-input"
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}

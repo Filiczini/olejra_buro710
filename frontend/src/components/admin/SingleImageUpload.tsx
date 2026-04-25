@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { compressImage } from '../../lib/compressImage';
 
 interface SingleImageUploadProps {
   image?: File;
@@ -36,6 +37,8 @@ export default function SingleImageUpload({
   const [preview, setPreview] = useState<ImagePreview | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [compressMsg, setCompressMsg] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const generatePreview = async () => {
@@ -54,24 +57,22 @@ export default function SingleImageUpload({
 
   const validateFile = (file: File): string | null => {
     const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 10 * 1024 * 1024;
 
     if (!validTypes.includes(file.type)) {
-      return 'Only JPEG and PNG files are allowed';
+      return 'Дозволені формати: JPEG, PNG';
     }
-
     if (file.size > maxSize) {
-      return 'File size must be less than 5MB';
+      return 'Розмір файлу не повинен перевищувати 10 МБ';
     }
-
     return null;
   };
 
   const handleFiles = useCallback(
-    (files: FileList | null) => {
+    async (files: FileList | null) => {
       if (!files || files.length === 0) return;
 
-      const file = files[0];
+      const file = files[0]; // capture synchronously before any await
       const validationError = validateFile(file);
 
       if (validationError) {
@@ -80,7 +81,9 @@ export default function SingleImageUpload({
       }
 
       setErrorMessage(null);
-      onImageChange(file);
+      const compressed = await compressImage(file, setCompressMsg);
+      onImageChange(compressed);
+      setTimeout(() => setCompressMsg(null), 3000);
     },
     [onImageChange]
   );
@@ -88,6 +91,7 @@ export default function SingleImageUpload({
   const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       handleFiles(e.target.files);
+      e.target.value = '';
     },
     [handleFiles]
   );
@@ -113,19 +117,32 @@ export default function SingleImageUpload({
   const handleRemove = useCallback(() => {
     onImageChange(null);
     setErrorMessage(null);
+    setCompressMsg(null);
   }, [onImageChange]);
 
   const handleReplace = useCallback(() => {
-    document.getElementById('single-image-upload')?.click();
+    fileInputRef.current?.click();
   }, []);
 
   const displayError = error || errorMessage;
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-sm font-medium text-zinc-700">{label}</label>
+      <label htmlFor="single-image-upload" className="text-sm font-medium text-zinc-700">
+        {label}
+      </label>
 
-      {/* Image Preview */}
+      {/* Always in DOM so htmlFor works and handleReplace always finds it */}
+      <input
+        ref={fileInputRef}
+        id="single-image-upload"
+        name="single-image-upload"
+        type="file"
+        accept="image/jpeg,image/png,image/jpg"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
       {preview ? (
         <div className="relative w-full aspect-video bg-zinc-100 rounded-lg overflow-hidden">
           <img src={preview.previewUrl} alt="Preview" className="w-full h-full object-cover" />
@@ -154,7 +171,6 @@ export default function SingleImageUpload({
           </button>
         </div>
       ) : (
-        /* Drop zone when no image */
         <div
           onDrop={handleDrop}
           onDragOver={handleDragOver}
@@ -163,13 +179,6 @@ export default function SingleImageUpload({
             isDragging ? 'border-zinc-900 bg-zinc-50' : 'border-zinc-300 hover:border-zinc-400'
           } ${displayError ? 'border-red-500' : ''}`}
         >
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/jpg"
-            onChange={handleFileChange}
-            className="hidden"
-            id="single-image-upload"
-          />
           <label
             htmlFor="single-image-upload"
             className="cursor-pointer flex flex-col items-center gap-3"
@@ -188,16 +197,53 @@ export default function SingleImageUpload({
               />
             </svg>
             <div className="flex flex-col gap-1">
-              <p className="text-sm text-zinc-600">
-                {placeholder}, or <span className="text-zinc-900 font-medium">browse</span>
+              <p className="text-sm text-zinc-600">{placeholder}</p>
+              <p className="text-xs text-zinc-400">
+                Формати: <span className="font-medium">JPEG, PNG</span> · Авто-стиснення до{' '}
+                <span className="font-medium">1 МБ</span>
               </p>
-              <p className="text-xs text-zinc-400">JPEG, PNG up to 5MB</p>
             </div>
           </label>
         </div>
       )}
 
-      {/* Error message */}
+      {compressMsg && (
+        <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+          {compressMsg.includes('→') ? (
+            <svg
+              className="w-3.5 h-3.5 text-green-500 flex-shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          ) : (
+            <svg className="w-3.5 h-3.5 animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24">
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+          )}
+          <span>{compressMsg}</span>
+        </div>
+      )}
+
       {displayError && (
         <div className="flex items-start gap-2 text-sm text-red-500 mt-1">
           <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">

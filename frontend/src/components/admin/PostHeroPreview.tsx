@@ -6,7 +6,9 @@ interface PostHeroPreviewProps {
 }
 
 export default function PostHeroPreview({ data }: PostHeroPreviewProps) {
-  const imageUrl = data.heroImage ? URL.createObjectURL(data.heroImage) : data.hero_image_url;
+  const imageUrl = data.heroImage
+    ? URL.createObjectURL(data.heroImage)
+    : data.hero_image_url || null;
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-4 sticky top-8">

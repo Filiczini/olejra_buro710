@@ -3,7 +3,8 @@ import { memoryStorage } from 'multer';
 import type { FileFilterCallback } from 'multer';
 
 const storage = memoryStorage();
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_FIELD_SIZE = 10 * 1024 * 1024;
 const ALLOWED_MIMETYPES = ['image/jpeg', 'image/png', 'image/jpg'];
 
 // Magic bytes for allowed image types
@@ -30,7 +31,7 @@ const fileFilter = (_req: unknown, file: Express.Multer.File, cb: FileFilterCall
 
 export const uploadMiddleware = multer({
   storage,
-  limits: { fileSize: MAX_FILE_SIZE },
+  limits: { fileSize: MAX_FILE_SIZE, fieldSize: MAX_FIELD_SIZE },
   fileFilter,
 });
 

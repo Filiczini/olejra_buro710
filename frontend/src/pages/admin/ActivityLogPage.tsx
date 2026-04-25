@@ -154,9 +154,13 @@ export default function ActivityLogPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end pb-6 border-b border-gray-100">
           <div className="md:col-span-3">
-            <label className="block text-xs font-medium text-gray-500 mb-2">Користувач</label>
+            <label htmlFor="filter-user" className="block text-xs font-medium text-gray-500 mb-2">
+              Користувач
+            </label>
             <div className="relative">
               <select
+                id="filter-user"
+                name="filter_user"
                 className="appearance-none w-full bg-gray-50 border border-gray-200 text-gray-900 py-2.5 pl-4 pr-10 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-900/5 focus:border-gray-300 transition-all cursor-pointer"
                 value={filters.user_email || ''}
                 onChange={(e) => handleFilterChange('user_email', e.target.value)}
@@ -175,9 +179,13 @@ export default function ActivityLogPage() {
           </div>
 
           <div className="md:col-span-3">
-            <label className="block text-xs font-medium text-gray-500 mb-2">Тип дії</label>
+            <label htmlFor="filter-action" className="block text-xs font-medium text-gray-500 mb-2">
+              Тип дії
+            </label>
             <div className="relative">
               <select
+                id="filter-action"
+                name="filter_action"
                 className="appearance-none w-full bg-gray-50 border border-gray-200 text-gray-900 py-2.5 pl-4 pr-10 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-900/5 focus:border-gray-300 transition-all cursor-pointer"
                 value={filters.action || ''}
                 onChange={(e) => handleFilterChange('action', e.target.value)}

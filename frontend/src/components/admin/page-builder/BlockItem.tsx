@@ -66,6 +66,7 @@ export default function BlockItem({
       case 'text_full':
         return (
           <TextFullEditor
+            blockId={block.id}
             data={block.data as TextFullData}
             onChange={(data) => onUpdate(block.id, data)}
           />
@@ -73,6 +74,7 @@ export default function BlockItem({
       case 'image_full':
         return (
           <ImageFullEditor
+            blockId={block.id}
             data={block.data as ImageFullData}
             onChange={(data) => onUpdate(block.id, data)}
             onImageChange={(file) => onImageChange(block.id, file)}
@@ -81,6 +83,7 @@ export default function BlockItem({
       case 'text_image':
         return (
           <TextImageEditor
+            blockId={block.id}
             data={block.data as TextImageData}
             onChange={(data) => onUpdate(block.id, data)}
             onImageChange={(file) => onImageChange(block.id, file)}
@@ -90,6 +93,7 @@ export default function BlockItem({
       case 'image_text':
         return (
           <TextImageEditor
+            blockId={block.id}
             data={block.data as TextImageData}
             onChange={(data) => onUpdate(block.id, data)}
             onImageChange={(file) => onImageChange(block.id, file)}
@@ -99,6 +103,7 @@ export default function BlockItem({
       case 'three_images':
         return (
           <ThreeImagesEditor
+            blockId={block.id}
             data={block.data as ThreeImagesData}
             onChange={(data) => onUpdate(block.id, data)}
             onImageChange={(file, field) => onImageChange(block.id, file, field)}

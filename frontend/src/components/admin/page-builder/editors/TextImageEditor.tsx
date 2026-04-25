@@ -2,8 +2,10 @@ import { useState, useRef } from 'react';
 import { Icon } from '@iconify-icon/react';
 import type { BlockData, TextImageData } from '../../../../types/block';
 import { BLOCK_ICONS } from '../../../../types/block';
+import { compressImage } from '../../../../lib/compressImage';
 
 interface TextImageEditorProps {
+  blockId: string;
   data: TextImageData;
   onChange: (data: BlockData) => void;
   onImageChange: (file: File | null) => void;
@@ -11,6 +13,7 @@ interface TextImageEditorProps {
 }
 
 export default function TextImageEditor({
+  blockId,
   data,
   onChange,
   onImageChange,
@@ -18,23 +21,31 @@ export default function TextImageEditor({
 }: TextImageEditorProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [hasNewImage, setHasNewImage] = useState(false);
+  const [compressMsg, setCompressMsg] = useState<string | null>(null);
   const [newFeature, setNewFeature] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const displayUrl = hasNewImage ? previewUrl : data.image_url;
+  const f = (name: string) => `${blockId}-${name}`;
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result as string);
-        setHasNewImage(true);
-      };
-      reader.onerror = () => setPreviewUrl(null);
-      reader.readAsDataURL(file);
-      onImageChange(file);
-    }
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]; // capture synchronously before any await
+    if (!file) return;
+
+    const compressed = await compressImage(file, setCompressMsg);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewUrl(reader.result as string);
+      setHasNewImage(true);
+      setTimeout(() => setCompressMsg(null), 3000);
+    };
+    reader.onerror = () => {
+      setPreviewUrl(null);
+      setCompressMsg(null);
+    };
+    reader.readAsDataURL(compressed);
+    onImageChange(compressed);
   };
 
   const handleRemove = () => {
@@ -77,8 +88,12 @@ export default function TextImageEditor({
       <div className={`${order.text} space-y-3`}>
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <label className="block text-xs font-medium text-zinc-600 mb-1">Іконка</label>
+            <label htmlFor={f('icon')} className="block text-xs font-medium text-zinc-600 mb-1">
+              Іконка
+            </label>
             <select
+              id={f('icon')}
+              name={f('icon')}
               value={data.icon || ''}
               onChange={(e) => updateField('icon', e.target.value)}
               className="w-full px-2 py-1.5 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
@@ -92,8 +107,12 @@ export default function TextImageEditor({
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-zinc-600 mb-1">Мітка</label>
+            <label htmlFor={f('label')} className="block text-xs font-medium text-zinc-600 mb-1">
+              Мітка
+            </label>
             <input
+              id={f('label')}
+              name={f('label')}
               type="text"
               value={data.label || ''}
               onChange={(e) => updateField('label', e.target.value)}
@@ -104,8 +123,12 @@ export default function TextImageEditor({
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-zinc-600 mb-1">Заголовок</label>
+          <label htmlFor={f('title')} className="block text-xs font-medium text-zinc-600 mb-1">
+            Заголовок
+          </label>
           <input
+            id={f('title')}
+            name={f('title')}
             type="text"
             value={data.title || ''}
             onChange={(e) => updateField('title', e.target.value)}
@@ -115,8 +138,12 @@ export default function TextImageEditor({
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-zinc-600 mb-1">Текст</label>
+          <label htmlFor={f('text')} className="block text-xs font-medium text-zinc-600 mb-1">
+            Текст
+          </label>
           <textarea
+            id={f('text')}
+            name={f('text')}
             value={data.text || ''}
             onChange={(e) => updateField('text', e.target.value)}
             placeholder="Введіть текст..."
@@ -126,11 +153,16 @@ export default function TextImageEditor({
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-zinc-600 mb-1">
+          <label
+            htmlFor={f('new-feature')}
+            className="block text-xs font-medium text-zinc-600 mb-1"
+          >
             Особливості (features)
           </label>
           <div className="flex gap-2 mb-2">
             <input
+              id={f('new-feature')}
+              name={f('new-feature')}
               type="text"
               value={newFeature}
               onChange={(e) => setNewFeature(e.target.value)}
@@ -167,7 +199,9 @@ export default function TextImageEditor({
       </div>
 
       <div className={order.image}>
-        <label className="block text-sm font-medium text-zinc-700 mb-2">Зображення</label>
+        <label htmlFor={f('image')} className="block text-sm font-medium text-zinc-700 mb-2">
+          Зображення
+        </label>
 
         {displayUrl ? (
           <div className="relative group mb-3">
@@ -190,10 +224,19 @@ export default function TextImageEditor({
             )}
           </div>
         ) : (
-          <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-zinc-300 rounded-lg cursor-pointer hover:border-zinc-400 hover:bg-zinc-50 transition-colors mb-3">
+          <label
+            htmlFor={f('image')}
+            className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-zinc-300 rounded-lg cursor-pointer hover:border-zinc-400 hover:bg-zinc-50 transition-colors mb-3"
+          >
             <Icon icon="solar:cloud-upload-linear" width={32} className="text-zinc-400" />
-            <span className="mt-1 text-sm text-zinc-500">Завантажити</span>
+            <span className="mt-1 text-sm text-zinc-500">Завантажити зображення</span>
+            <span className="text-xs text-zinc-400 mt-1">
+              Формати: <span className="font-medium">JPEG, PNG</span> · Максимум:{' '}
+              <span className="font-medium">10MB</span>
+            </span>
             <input
+              id={f('image')}
+              name={f('image')}
               ref={fileInputRef}
               type="file"
               accept="image/jpeg,image/png"
@@ -203,7 +246,27 @@ export default function TextImageEditor({
           </label>
         )}
 
+        {compressMsg && (
+          <div className="flex items-center gap-1.5 text-xs text-zinc-500 mb-2">
+            {compressMsg.includes('→') ? (
+              <Icon
+                icon="solar:check-circle-linear"
+                width={14}
+                className="text-green-500 flex-shrink-0"
+              />
+            ) : (
+              <Icon icon="solar:spinner-linear" width={14} className="animate-spin flex-shrink-0" />
+            )}
+            <span>{compressMsg}</span>
+          </div>
+        )}
+
+        <label htmlFor={f('image-alt')} className="sr-only">
+          Alt-текст
+        </label>
         <input
+          id={f('image-alt')}
+          name={f('image-alt')}
           type="text"
           value={data.image_alt || ''}
           onChange={(e) => updateField('image_alt', e.target.value)}

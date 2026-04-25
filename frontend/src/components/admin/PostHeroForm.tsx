@@ -33,11 +33,13 @@ export default function PostHeroForm({ data, onChange, errors }: PostHeroFormPro
           onImageChange={(img) => handleChange('heroImage', img || undefined)}
           initialImageUrl={data.hero_image_url}
           label="Головне зображення"
-          placeholder="Перетягніть зображення або натисніть для вибору"
+          placeholder="Перетягніть зображення або натисніть для вибору файлу"
           error={errors?.heroImage}
         />
 
         <Input
+          id="hero-title"
+          name="hero_title"
           label="Hero заголовок"
           placeholder="Введіть заголовок hero секції"
           value={data.hero_title || ''}
@@ -46,10 +48,12 @@ export default function PostHeroForm({ data, onChange, errors }: PostHeroFormPro
         />
 
         <div>
-          <label className="block text-sm font-medium text-zinc-700 mb-2">
+          <label htmlFor="hero-subtitle" className="block text-sm font-medium text-zinc-700 mb-2">
             Hero підзаголовок (опис)
           </label>
           <textarea
+            id="hero-subtitle"
+            name="hero_subtitle"
             value={data.hero_subtitle || ''}
             onChange={(e) => handleChange('hero_subtitle', e.target.value)}
             placeholder="Короткий опис сторінки"
@@ -68,6 +72,8 @@ export default function PostHeroForm({ data, onChange, errors }: PostHeroFormPro
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
+            id="hero-location"
+            name="hero_location"
             label="Локація"
             placeholder="Київ, Україна"
             value={data.hero_location || ''}
@@ -75,6 +81,8 @@ export default function PostHeroForm({ data, onChange, errors }: PostHeroFormPro
           />
 
           <Input
+            id="hero-year"
+            name="hero_year"
             label="Рік"
             placeholder="2024"
             value={data.hero_year || ''}

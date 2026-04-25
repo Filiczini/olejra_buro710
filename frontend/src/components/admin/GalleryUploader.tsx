@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { Icon } from '@iconify-icon/react';
+import { compressImage } from '../../lib/compressImage';
 
 interface GalleryUploaderProps {
   images: string[];
@@ -26,6 +27,8 @@ export default function GalleryUploader({
   const [isDragging, setIsDragging] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [reorderedItems, setReorderedItems] = useState<ImageItem[] | null>(null);
+  const [rejectedFiles, setRejectedFiles] = useState<string[]>([]);
+  const [compressMsg, setCompressMsg] = useState<string | null>(null);
   const prevBlobUrlsRef = useRef<Set<string>>(new Set());
 
   const computedItems: ImageItem[] = useMemo(
@@ -62,19 +65,51 @@ export default function GalleryUploader({
 
   const imageItems = reorderedItems ?? computedItems;
 
-  const validateFile = (file: File): boolean => {
-    const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    const maxSize = 5 * 1024 * 1024;
-
-    return validTypes.includes(file.type) && file.size <= maxSize;
-  };
-
   const handleFiles = useCallback(
-    (files: FileList | null) => {
+    async (files: FileList | null) => {
       if (!files) return;
 
-      const validFiles = Array.from(files).filter(validateFile);
-      onNewFilesChange([...newFiles, ...validFiles]);
+      const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      const maxSize = 10 * 1024 * 1024;
+      const valid: File[] = [];
+      const rejected: string[] = [];
+
+      Array.from(files).forEach((file) => {
+        if (!validTypes.includes(file.type)) {
+          rejected.push(`${file.name}: тільки JPEG та PNG`);
+        } else if (file.size > maxSize) {
+          rejected.push(`${file.name}: перевищує 10 МБ`);
+        } else {
+          valid.push(file);
+        }
+      });
+
+      setRejectedFiles(rejected);
+      if (valid.length === 0) return;
+
+      const needsCompression = valid.filter((f) => f.size > 1 * 1024 * 1024);
+      if (needsCompression.length > 0) {
+        setCompressMsg(`Стискаємо ${needsCompression.length} з ${valid.length} фото...`);
+      }
+
+      let totalOriginal = 0;
+      let totalCompressed = 0;
+      const compressed = await Promise.all(
+        valid.map(async (file) => {
+          const result = await compressImage(file);
+          totalOriginal += file.size;
+          totalCompressed += result.size;
+          return result;
+        })
+      );
+
+      if (needsCompression.length > 0) {
+        const fmtMb = (b: number) => (b / (1024 * 1024)).toFixed(1) + ' МБ';
+        setCompressMsg(`${fmtMb(totalOriginal)} → ${fmtMb(totalCompressed)}`);
+        setTimeout(() => setCompressMsg(null), 3000);
+      }
+
+      onNewFilesChange([...newFiles, ...compressed]);
     },
     [newFiles, onNewFilesChange]
   );
@@ -222,10 +257,38 @@ export default function GalleryUploader({
                 Перетягніть зображення або{' '}
                 <span className="text-zinc-900 font-medium">виберіть файли</span>
               </p>
-              <p className="text-xs text-zinc-400">JPEG, PNG до 5MB кожне</p>
+              <p className="text-xs text-zinc-400">
+                Формати: <span className="font-medium">JPEG, PNG</span> · Максимальний розмір:{' '}
+                <span className="font-medium">10MB</span> на файл
+              </p>
             </div>
           </label>
         </div>
+
+        {rejectedFiles.length > 0 && (
+          <div className="flex flex-col gap-1">
+            {rejectedFiles.map((msg) => (
+              <p key={msg} className="text-xs text-red-500">
+                {msg}
+              </p>
+            ))}
+          </div>
+        )}
+
+        {compressMsg && (
+          <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+            {compressMsg.includes('→') ? (
+              <Icon
+                icon="solar:check-circle-linear"
+                width={14}
+                className="text-green-500 flex-shrink-0"
+              />
+            ) : (
+              <Icon icon="solar:spinner-linear" width={14} className="animate-spin flex-shrink-0" />
+            )}
+            <span>{compressMsg}</span>
+          </div>
+        )}
 
         <p className="text-xs text-zinc-500 text-center">
           Перетягніть зображення для зміни порядку. Галерея відображається внизу сторінки.

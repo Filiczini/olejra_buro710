@@ -78,10 +78,14 @@ export default function SeoFields({
         <div className="p-4 pt-0 space-y-4 border-t border-zinc-100">
           <div>
             <div className="flex justify-between items-center mb-1">
-              <label className="block text-sm font-medium text-zinc-700">SEO Title</label>
+              <label htmlFor="seo-title" className="block text-sm font-medium text-zinc-700">
+                SEO Title
+              </label>
               <span className={`text-xs ${titleColor}`}>{titleLength}/60</span>
             </div>
             <input
+              id="seo-title"
+              name="seo_title"
               type="text"
               value={seoTitle}
               onChange={(e) => onSeoTitleChange(e.target.value)}
@@ -96,10 +100,14 @@ export default function SeoFields({
 
           <div>
             <div className="flex justify-between items-center mb-1">
-              <label className="block text-sm font-medium text-zinc-700">SEO Description</label>
+              <label htmlFor="seo-description" className="block text-sm font-medium text-zinc-700">
+                SEO Description
+              </label>
               <span className={`text-xs ${descColor}`}>{descLength}/160</span>
             </div>
             <textarea
+              id="seo-description"
+              name="seo_description"
               value={seoDescription}
               onChange={(e) => onSeoDescriptionChange(e.target.value)}
               placeholder="Опис для пошукових систем"
@@ -116,7 +124,10 @@ export default function SeoFields({
 
           {onOgImageChange && (
             <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-2">
+              <label
+                htmlFor="og-image-upload"
+                className="block text-sm font-medium text-zinc-700 mb-2"
+              >
                 OG Image (для соціальних мереж)
               </label>
 
@@ -136,10 +147,15 @@ export default function SeoFields({
                   </button>
                 </div>
               ) : (
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-zinc-300 rounded-lg cursor-pointer hover:border-zinc-400 hover:bg-zinc-50 transition-colors">
+                <label
+                  htmlFor="og-image-upload"
+                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-zinc-300 rounded-lg cursor-pointer hover:border-zinc-400 hover:bg-zinc-50 transition-colors"
+                >
                   <Icon icon="solar:cloud-upload-linear" width={32} className="text-zinc-400" />
                   <span className="mt-2 text-sm text-zinc-500">Завантажити зображення</span>
                   <input
+                    id="og-image-upload"
+                    name="og_image"
                     type="file"
                     accept="image/jpeg,image/png"
                     onChange={handleFileChange}
