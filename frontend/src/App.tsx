@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import ErrorBoundary from './components/ErrorBoundary';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
@@ -17,6 +17,10 @@ const ActivityLogPage = lazy(() => import('./pages/admin/ActivityLogPage'));
 const UsersPage = lazy(() => import('./pages/admin/UsersPage'));
 const SettingsPage = lazy(() => import('./pages/admin/SettingsPage'));
 
+const loadingFallback = (
+  <div className="flex items-center justify-center py-32 text-gray-400">Завантаження...</div>
+);
+
 function AdminWrapper() {
   return (
     <ProtectedRoute>
@@ -27,111 +31,73 @@ function AdminWrapper() {
   );
 }
 
+const router = createBrowserRouter([
+  { path: '/', element: <HomePage /> },
+  { path: '/projects', element: <ProjectsPage /> },
+  { path: '/about', element: <AboutPage /> },
+  { path: '/contact', element: <ContactPage /> },
+  { path: '/page/:slug', element: <PublicPostPage /> },
+  { path: '/admin/login', element: <LoginPage /> },
+  {
+    element: <AdminWrapper />,
+    children: [
+      {
+        path: '/admin/posts',
+        element: (
+          <Suspense fallback={loadingFallback}>
+            <PostsPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/admin/posts/create',
+        element: (
+          <Suspense fallback={loadingFallback}>
+            <EditPostPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/admin/posts/edit/:id',
+        element: (
+          <Suspense fallback={loadingFallback}>
+            <EditPostPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/admin/logs',
+        element: (
+          <Suspense fallback={loadingFallback}>
+            <ActivityLogPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/admin/users',
+        element: (
+          <Suspense fallback={loadingFallback}>
+            <UsersPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/admin/settings',
+        element: (
+          <Suspense fallback={loadingFallback}>
+            <SettingsPage />
+          </Suspense>
+        ),
+      },
+    ],
+  },
+  { path: '*', element: <NotFoundPage /> },
+]);
+
 function App() {
   return (
     <ErrorBoundary>
-      <BrowserRouter>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/projects" element={<ProjectsPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/page/:slug" element={<PublicPostPage />} />
-          <Route path="/admin/login" element={<LoginPage />} />
-
-          {/* Admin routes with AdminLayout — lazy-loaded */}
-          <Route element={<AdminWrapper />}>
-            <Route
-              path="/admin/posts"
-              element={
-                <Suspense
-                  fallback={
-                    <div className="flex items-center justify-center py-32 text-gray-400">
-                      Завантаження...
-                    </div>
-                  }
-                >
-                  <PostsPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/admin/posts/create"
-              element={
-                <Suspense
-                  fallback={
-                    <div className="flex items-center justify-center py-32 text-gray-400">
-                      Завантаження...
-                    </div>
-                  }
-                >
-                  <EditPostPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/admin/posts/edit/:id"
-              element={
-                <Suspense
-                  fallback={
-                    <div className="flex items-center justify-center py-32 text-gray-400">
-                      Завантаження...
-                    </div>
-                  }
-                >
-                  <EditPostPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/admin/logs"
-              element={
-                <Suspense
-                  fallback={
-                    <div className="flex items-center justify-center py-32 text-gray-400">
-                      Завантаження...
-                    </div>
-                  }
-                >
-                  <ActivityLogPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/admin/users"
-              element={
-                <Suspense
-                  fallback={
-                    <div className="flex items-center justify-center py-32 text-gray-400">
-                      Завантаження...
-                    </div>
-                  }
-                >
-                  <UsersPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/admin/settings"
-              element={
-                <Suspense
-                  fallback={
-                    <div className="flex items-center justify-center py-32 text-gray-400">
-                      Завантаження...
-                    </div>
-                  }
-                >
-                  <SettingsPage />
-                </Suspense>
-              }
-            />
-          </Route>
-
-          {/* 404 */}
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </BrowserRouter>
+      <RouterProvider router={router} />
     </ErrorBoundary>
   );
 }
