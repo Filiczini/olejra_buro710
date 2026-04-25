@@ -11,7 +11,7 @@ export default function Button({
   className = '',
   ...props
 }: ButtonProps) {
-  const baseStyles = 'rounded-full font-medium transition-all cursor-pointer';
+  const baseStyles = 'px-5 py-2.5 rounded-full font-medium transition-all cursor-pointer';
 
   const variants = {
     primary: 'bg-zinc-900 text-white hover:bg-zinc-800',

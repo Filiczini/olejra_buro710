@@ -253,11 +253,18 @@ export default function EditPostPage() {
           }}
         />
 
+        {(errors.submit || Object.keys(errors).some((k) => k !== 'submit')) && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {errors.submit || 'Виправте помилки у формі перед збереженням'}
+          </div>
+        )}
+
         <div className="flex gap-4 justify-end">
           <Button type="button" variant="secondary" onClick={() => navigate('/admin/posts')}>
             Скасувати
           </Button>
-          <Button type="submit" disabled={saving}>
+          <Button type="submit" disabled={saving} className="flex items-center gap-2">
+            {saving && <Icon icon="solar:spinner-linear" width={16} className="animate-spin" />}
             {saving ? 'Збереження...' : 'Зберегти'}
           </Button>
         </div>
