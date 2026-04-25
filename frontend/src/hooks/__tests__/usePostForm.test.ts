@@ -241,7 +241,7 @@ describe('usePostForm', () => {
     });
 
     expect(postService.create).toHaveBeenCalledWith(expect.any(FormData));
-    expect(mockNavigate).toHaveBeenCalledWith('/admin/posts');
+    expect(mockNavigate).toHaveBeenCalledWith('/admin/posts', { state: { saved: true } });
   });
 
   it('handleSubmit updates existing post when editing', async () => {
@@ -272,7 +272,7 @@ describe('usePostForm', () => {
     });
 
     expect(postService.update).toHaveBeenCalledWith('post-123', expect.any(FormData));
-    expect(mockNavigate).toHaveBeenCalledWith('/admin/posts');
+    expect(mockNavigate).toHaveBeenCalledWith('/admin/posts', { state: { saved: true } });
   });
 
   it('handleSubmit sets error on save failure', async () => {

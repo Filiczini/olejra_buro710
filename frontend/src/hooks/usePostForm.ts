@@ -1,50 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { logger } from '../lib/logger';
-import { postCreateSchema } from '@buro710/shared';
-import { generateSlug } from '@buro710/shared';
-import type { ZodIssue, ZodTypeAny } from 'zod';
 import { postService } from '../services/api';
-import type { PostHeroFormData } from '../components/admin/PostHeroForm';
-import type { PostStatus } from '../types/post';
 import type { Block, BlockType, BlockData, EditBlock } from '../types/block';
 import { useToast } from './useToast';
-
-interface BlockWithFile {
-  id: string;
-  file: File | null;
-}
-
-interface DraftData {
-  title: string;
-  slug: string;
-  slugLocked: boolean;
-  status: PostStatus;
-  seoTitle: string;
-  seoDescription: string;
-  featured: boolean;
-  heroData: {
-    hero_image_url: string;
-    hero_title: string;
-    hero_subtitle: string;
-    hero_tags: string[];
-    hero_location: string;
-    hero_year: string;
-  };
-  blocks: EditBlock[];
-  galleryImages: string[];
-  savedAt: string;
-}
-
-const INITIAL_HERO_DATA: PostHeroFormData = {
-  hero_image_url: '',
-  hero_title: '',
-  hero_subtitle: '',
-  hero_tags: [],
-  hero_location: '',
-  hero_year: '',
-  heroImage: undefined,
-};
+import { usePostDraft } from './usePostDraft';
+import { usePostFiles } from './usePostFiles';
+import { usePostFormState } from './usePostFormState';
+import { usePostValidation } from './usePostValidation';
+import { buildPostFormData } from '../lib/buildPostFormData';
 
 export function usePostForm() {
   const navigate = useNavigate();
@@ -53,135 +17,73 @@ export function usePostForm() {
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [title, setTitle] = useState('');
-  const [slug, setSlug] = useState('');
-  const [slugLocked, setSlugLocked] = useState(isEditing);
-  const [status, setStatus] = useState<PostStatus>('draft');
-  const [seoTitle, setSeoTitle] = useState('');
-  const [seoDescription, setSeoDescription] = useState('');
-  const [ogImageFile, setOgImageFile] = useState<File | null>(null);
-  const [heroData, setHeroData] = useState<PostHeroFormData>(INITIAL_HERO_DATA);
   const [initialBlocks, setInitialBlocks] = useState<Block[]>([]);
-  const [blockFiles, setBlockFiles] = useState<BlockWithFile[]>([]);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
-  const [galleryNewFiles, setGalleryNewFiles] = useState<File[]>([]);
-  const [featured, setFeatured] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [pageBuilderKey, setPageBuilderKey] = useState(0);
 
   const { toast, showToast, dismissToast } = useToast();
 
-  const draftKey = `draft:${id || 'new'}`;
-  const [draftBanner, setDraftBanner] = useState<{ savedAt: string } | null>(null);
-  const [pageBuilderKey, setPageBuilderKey] = useState(0);
-  const draftDataRef = useRef<DraftData | null>(null);
-  const formSnapshotRef = useRef<(() => Omit<DraftData, 'savedAt'>) | null>(null);
+  const state = usePostFormState(isEditing);
+  const {
+    title,
+    slug,
+    slugLocked,
+    status,
+    seoTitle,
+    seoDescription,
+    heroData,
+    featured,
+    setStatus,
+    setSeoTitle,
+    setSeoDescription,
+    setHeroData,
+    setFeatured,
+    updateTitle,
+    updateSlug,
+    unlockSlug,
+    lockSlug,
+    applyFields,
+  } = state;
+
+  const validation = usePostValidation();
+  const { errors, setErrors, clearFieldError, validateField, validate, scrollToFirstError } =
+    validation;
+
+  const files = usePostFiles();
+  const {
+    ogImageFile,
+    setOgImageFile,
+    blockFiles,
+    galleryNewFiles,
+    setGalleryNewFiles,
+    handleBlockImageChange: fileBlockImageChange,
+  } = files;
+
+  const draft = usePostDraft(`draft:${id || 'new'}`);
+  const {
+    banner: draftBanner,
+    dataRef: draftDataRef,
+    save: draftSave,
+    dismiss: draftDismiss,
+  } = draft;
 
   const isDirtyRef = useRef(false);
   const [isDirty, setIsDirty] = useState(false);
+  const blocksDataRef = useRef<EditBlock[]>([]);
 
   const markDirty = () => {
     isDirtyRef.current = true;
     setIsDirty(true);
   };
-
-  const validateField = useCallback((field: string, value: unknown) => {
-    const shape = postCreateSchema.shape as Record<string, ZodTypeAny>;
-    const fieldSchema = shape[field];
-    if (!fieldSchema) return;
-    const result = fieldSchema.safeParse(value);
-    if (!result.success) {
-      setErrors((prev) => ({ ...prev, [field]: result.error.issues[0]?.message ?? 'Помилка' }));
-    } else {
-      setErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
-    }
-  }, []);
-
   const clearDirty = () => {
     isDirtyRef.current = false;
     setIsDirty(false);
   };
-
-  // Stable callback for useBlocker — reads ref synchronously at navigation time,
-  // avoiding stale closure issues when clearDirty() is called just before navigate().
   const getIsDirty = useCallback(() => isDirtyRef.current, []);
 
-  const saveDraft = useCallback(() => {
-    const snapshot = formSnapshotRef.current?.();
-    if (!snapshot) return;
-    try {
-      localStorage.setItem(
-        draftKey,
-        JSON.stringify({ ...snapshot, savedAt: new Date().toISOString() })
-      );
-    } catch {
-      // ignore localStorage quota errors
-    }
-  }, [draftKey]);
-
-  const dismissDraft = useCallback(() => {
-    localStorage.removeItem(draftKey);
-    draftDataRef.current = null;
-    setDraftBanner(null);
-  }, [draftKey]);
-
-  const restoreDraft = useCallback(() => {
-    const data = draftDataRef.current;
-    if (!data) return;
-    setTitle(data.title);
-    setSlug(data.slug);
-    setSlugLocked(data.slugLocked);
-    setStatus(data.status);
-    setSeoTitle(data.seoTitle);
-    setSeoDescription(data.seoDescription);
-    setFeatured(data.featured);
-    setHeroData({ ...data.heroData, heroImage: undefined });
-    setInitialBlocks(data.blocks as unknown as Block[]);
-    blocksDataRef.current = data.blocks;
-    setGalleryImages(data.galleryImages);
-    setPageBuilderKey((k) => k + 1);
-    dismissDraft();
-    markDirty();
-  }, [dismissDraft]);
-
-  // Load draft for new posts on mount
-  useEffect(() => {
-    if (!id) {
-      try {
-        const saved = localStorage.getItem('draft:new');
-        if (saved) {
-          const data = JSON.parse(saved) as DraftData;
-          draftDataRef.current = data;
-          setDraftBanner({ savedAt: data.savedAt });
-        }
-      } catch {
-        // ignore invalid JSON
-      }
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Autosave every 30s when dirty
-  useEffect(() => {
-    if (!isDirty) return;
-    const interval = setInterval(saveDraft, 30000);
-    return () => clearInterval(interval);
-  }, [isDirty, saveDraft]);
-
-  // Save draft before page unload
-  useEffect(() => {
-    const handler = () => {
-      if (isDirtyRef.current) saveDraft();
-    };
-    window.addEventListener('beforeunload', handler);
-    return () => window.removeEventListener('beforeunload', handler);
-  }, [saveDraft]);
-
-  const blocksDataRef = useRef<EditBlock[]>([]);
-
-  formSnapshotRef.current = () => ({
+  // Always-fresh snapshot — updated each render so autosave never captures stale values
+  const snapshotRef = useRef<() => Parameters<typeof draftSave>[0]>(null!);
+  snapshotRef.current = () => ({
     title,
     slug,
     slugLocked,
@@ -201,53 +103,73 @@ export function usePostForm() {
     galleryImages,
   });
 
+  useEffect(() => {
+    if (!isDirty) return;
+    const tid = setInterval(() => draftSave(snapshotRef.current()), 30000);
+    return () => clearInterval(tid);
+  }, [isDirty, draftSave]);
+
+  useEffect(() => {
+    const h = () => {
+      if (isDirtyRef.current) draftSave(snapshotRef.current());
+    };
+    window.addEventListener('beforeunload', h);
+    return () => window.removeEventListener('beforeunload', h);
+  }, [draftSave]);
+
+  const restoreDraft = useCallback(() => {
+    const data = draftDataRef.current;
+    if (!data) return;
+    applyFields({
+      title: data.title,
+      slug: data.slug,
+      slugLocked: data.slugLocked,
+      status: data.status,
+      seoTitle: data.seoTitle,
+      seoDescription: data.seoDescription,
+      featured: data.featured,
+      heroData: { ...data.heroData, heroImage: undefined },
+    });
+    setInitialBlocks(data.blocks as unknown as Block[]);
+    blocksDataRef.current = data.blocks;
+    setGalleryImages(data.galleryImages);
+    setPageBuilderKey((k) => k + 1);
+    draftDismiss();
+    markDirty();
+  }, [applyFields, draftDataRef, draftDismiss]);
+
   const loadPost = useCallback(
     async (postId: string) => {
       setLoading(true);
       try {
-        const result = await postService.getById(postId);
-        const { post, blocks: loadedBlocks } = result;
-
-        setTitle(post.title);
-        setSlug(post.slug);
-        setSlugLocked(true);
-        setStatus(post.status);
-        setSeoTitle(post.seo_title || '');
-        setSeoDescription(post.seo_description || '');
-        setInitialBlocks(loadedBlocks);
-
-        setHeroData({
-          hero_image_url: post.hero_image_url || '',
-          hero_title: post.hero_title || '',
-          hero_subtitle: post.hero_subtitle || '',
-          hero_tags: post.hero_tags || [],
-          hero_location: post.hero_location || '',
-          hero_year: post.hero_year || '',
-          heroImage: undefined,
+        const { post, blocks: lb } = await postService.getById(postId);
+        applyFields({
+          title: post.title,
+          slug: post.slug,
+          slugLocked: true,
+          status: post.status,
+          seoTitle: post.seo_title || '',
+          seoDescription: post.seo_description || '',
+          featured: post.featured || false,
+          heroData: {
+            hero_image_url: post.hero_image_url || '',
+            hero_title: post.hero_title || '',
+            hero_subtitle: post.hero_subtitle || '',
+            hero_tags: post.hero_tags || [],
+            hero_location: post.hero_location || '',
+            hero_year: post.hero_year || '',
+            heroImage: undefined,
+          },
         });
-
-        setFeatured(post.featured || false);
+        setInitialBlocks(lb);
         setGalleryImages(post.gallery_images || []);
-
-        blocksDataRef.current = loadedBlocks.map((b, index) => ({
+        blocksDataRef.current = lb.map((b, i) => ({
           id: b.id,
           type: b.type,
           data: b.data,
-          sort_order: index,
+          sort_order: i,
         }));
-
         clearDirty();
-
-        try {
-          const saved = localStorage.getItem(`draft:${postId}`);
-          if (saved) {
-            const data = JSON.parse(saved) as DraftData;
-            draftDataRef.current = data;
-            setDraftBanner({ savedAt: data.savedAt });
-          }
-        } catch {
-          // ignore invalid JSON
-        }
       } catch (error) {
         logger.error('Error loading post', error);
         navigate('/admin/posts');
@@ -255,53 +177,28 @@ export function usePostForm() {
         setLoading(false);
       }
     },
-    [navigate]
+    [navigate, applyFields]
   );
 
   useEffect(() => {
-    if (id) {
-      loadPost(id);
-    }
+    if (id) loadPost(id);
   }, [id, loadPost]);
 
   const handleTitleChange = (value: string) => {
-    setTitle(value);
+    updateTitle(value);
     markDirty();
-    if (!slugLocked) {
-      setSlug(generateSlug(value));
-    }
-    if (errors.title) {
-      setErrors((prev) => {
-        const next = { ...prev };
-        delete next.title;
-        return next;
-      });
-    }
+    clearFieldError('title');
   };
-
   const handleSlugChange = (value: string) => {
-    setSlug(value);
-    setSlugLocked(true);
+    updateSlug(value);
     markDirty();
-    if (errors.slug) {
-      setErrors((prev) => {
-        const next = { ...prev };
-        delete next.slug;
-        return next;
-      });
-    }
+    clearFieldError('slug');
   };
-
   const handleSlugUnlock = () => {
-    setSlugLocked(false);
-    setSlug(generateSlug(title));
+    unlockSlug();
     markDirty();
   };
-
-  const handleSlugLock = () => {
-    setSlugLocked(true);
-  };
-
+  const handleSlugLock = () => lockSlug();
   const handleBlocksChange = (
     updatedBlocks: { id?: string; type: BlockType; data: BlockData; sort_order: number }[]
   ) => {
@@ -309,180 +206,72 @@ export function usePostForm() {
     markDirty();
   };
 
-  const handleBlockImageChange = (blockId: string, file: File | null, field?: string) => {
-    const key = field ? `${blockId}__${field}` : blockId;
-    setBlockFiles((prev) => {
-      const existing = prev.find((bf) => bf.id === key);
-      if (existing) {
-        return prev.map((bf) => (bf.id === key ? { ...bf, file } : bf));
-      }
-      return [...prev, { id: key, file }];
-    });
-    markDirty();
-  };
-
-  const scrollToFirstError = () => {
-    setTimeout(() => {
-      const el = document.querySelector<HTMLElement>('.bg-red-50, .border-red-500, .text-red-500');
-      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 50);
-  };
-
-  const validate = (): boolean => {
-    const result = postCreateSchema.safeParse({
-      title,
-      slug,
-      status,
-      seo_title: seoTitle,
-      seo_description: seoDescription,
-      hero_title: heroData.hero_title,
-      hero_subtitle: heroData.hero_subtitle,
-      hero_tags: heroData.hero_tags,
-      hero_location: heroData.hero_location,
-      hero_year: heroData.hero_year,
-    });
-
-    if (!result.success) {
-      const newErrors: Record<string, string> = {};
-      result.error.issues.forEach((issue: ZodIssue) => {
-        const field = issue.path[0] as string;
-        if (field && !newErrors[field]) {
-          newErrors[field] = issue.message;
-        }
-      });
-      setErrors(newErrors);
-      scrollToFirstError();
-      return false;
-    }
-
-    setErrors({});
-    return true;
-  };
+  const handleBlockImageChange = useCallback(
+    (blockId: string, file: File | null, field?: string) => {
+      fileBlockImageChange(blockId, file, field);
+      markDirty();
+    },
+    [fileBlockImageChange]
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validate()) return;
+    if (!validate({ title, slug, status, seoTitle, seoDescription, heroData })) return;
 
     setSaving(true);
     try {
-      const formData = new FormData();
-      formData.append('title', title);
-      formData.append('slug', slug);
-      formData.append('status', status);
-      formData.append('seo_title', seoTitle);
-      formData.append('seo_description', seoDescription);
-
-      formData.append('featured', String(featured));
-      formData.append('hero_title', heroData.hero_title || '');
-      formData.append('hero_subtitle', heroData.hero_subtitle || '');
-      formData.append('hero_tags', JSON.stringify(heroData.hero_tags || []));
-      formData.append('hero_location', heroData.hero_location || '');
-      formData.append('hero_year', heroData.hero_year || '');
-
-      if (heroData.heroImage) {
-        formData.append('heroImage', heroData.heroImage);
-      }
-
-      const blocksData = blocksDataRef.current.map((block) => {
-        const blockId = block.id || block._tempId;
-
-        if (block.type === 'three_images') {
-          const newImageSlots: number[] = [];
-          for (let i = 0; i < 3; i++) {
-            const key = `${blockId}__images.${i}`;
-            const bf = blockFiles.find((f) => f.id === key);
-            if (bf?.file) newImageSlots.push(i);
-          }
-          return {
-            id: block.id?.startsWith('temp-') ? undefined : block.id,
-            _tempId: block._tempId,
-            type: block.type,
-            data: {
-              ...block.data,
-              _newImageSlots: newImageSlots.length > 0 ? newImageSlots : undefined,
-            },
-            sort_order: block.sort_order,
-          };
-        }
-
-        const blockFile = blockFiles.find((bf) => bf.id === blockId);
-        return {
-          id: block.id?.startsWith('temp-') ? undefined : block.id,
-          _tempId: block._tempId,
-          type: block.type,
-          data: {
-            ...block.data,
-            _hasNewImage: !!blockFile?.file,
-          },
-          sort_order: block.sort_order,
-        };
+      const formData = buildPostFormData({
+        title,
+        slug,
+        status,
+        seoTitle,
+        seoDescription,
+        featured,
+        heroData,
+        ogImageFile,
+        blocksData: blocksDataRef.current,
+        blockFiles,
+        galleryImages,
+        galleryNewFiles,
       });
-      formData.append('blocks', JSON.stringify(blocksData));
-
-      if (ogImageFile) {
-        formData.append('ogImage', ogImageFile);
-      }
-
-      blocksDataRef.current.forEach((block) => {
-        const blockId = block.id || block._tempId;
-        if (block.type === 'three_images') {
-          for (let i = 0; i < 3; i++) {
-            const key = `${blockId}__images.${i}`;
-            const bf = blockFiles.find((f) => f.id === key);
-            if (bf?.file) formData.append('blockImages', bf.file);
-          }
-        } else {
-          const bf = blockFiles.find((f) => f.id === blockId);
-          if (bf?.file) formData.append('blockImages', bf.file);
-        }
-      });
-
-      formData.append('gallery_images', JSON.stringify(galleryImages));
-
-      galleryNewFiles.forEach((file) => {
-        formData.append('galleryImages', file);
-      });
-
       if (isEditing && id) {
         await postService.update(id, formData);
       } else {
         await postService.create(formData);
       }
-
       clearDirty();
-      dismissDraft();
+      draftDismiss();
       navigate('/admin/posts', { state: { saved: true } });
     } catch (error) {
       logger.error('Error saving post:', error);
       showToast('Помилка збереження', 'error');
-      const apiError = error as {
-        response?: {
-          data?: {
-            error?: string;
-            field?: string;
-            details?: { field: string; message: string }[];
+      const data = (
+        error as {
+          response?: {
+            data?: {
+              error?: string;
+              field?: string;
+              details?: { field: string; message: string }[];
+            };
           };
-        };
-      };
-      const data = apiError?.response?.data;
-
-      if (data?.details && data.details.length > 0) {
-        const fieldErrors: Record<string, string> = {};
+        }
+      )?.response?.data;
+      if (data?.details?.length) {
+        const fe: Record<string, string> = {};
         data.details.forEach(({ field, message }) => {
-          if (field && !fieldErrors[field]) fieldErrors[field] = message;
+          if (field && !fe[field]) fe[field] = message;
         });
-        setErrors(fieldErrors);
+        setErrors(fe);
       } else if (data?.field && data?.error) {
-        const message =
-          data.field === 'slug' && data.error === 'Slug already exists'
-            ? 'Такий URL вже існує'
-            : data.error;
-        setErrors({ [data.field]: message });
+        setErrors({
+          [data.field]:
+            data.field === 'slug' && data.error === 'Slug already exists'
+              ? 'Такий URL вже існує'
+              : data.error,
+        });
       } else {
         setErrors({ submit: 'Помилка збереження посту' });
       }
-
       scrollToFirstError();
     } finally {
       setSaving(false);
@@ -494,29 +283,29 @@ export function usePostForm() {
     isEditing,
     loading,
     saving,
+    initialBlocks,
+    galleryImages,
+    pageBuilderKey,
+    isDirty,
+    toast,
+    dismissToast,
+    getIsDirty,
+    draftBanner,
     title,
     slug,
     slugLocked,
     status,
     seoTitle,
     seoDescription,
-    ogImageFile,
     heroData,
-    initialBlocks,
-    galleryImages,
-    galleryNewFiles,
     featured,
+    ogImageFile,
+    galleryNewFiles,
     errors,
-    isDirty,
-    draftBanner,
-    pageBuilderKey,
-    toast,
-    dismissToast,
     markDirty,
-    validateField,
     restoreDraft,
-    dismissDraft,
-    getIsDirty,
+    dismissDraft: draftDismiss,
+    validateField,
     setStatus,
     setSeoTitle,
     setSeoDescription,
