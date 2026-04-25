@@ -1,13 +1,16 @@
 #!/bin/sh
 set -e
 
+# Fix uploads volume ownership — Docker volume may be root-owned on existing deployments
+chown -R app:app /app/uploads 2>/dev/null || true
+
 echo "Running migrations..."
-npx tsx src/migrate.ts
+su-exec app npx tsx src/migrate.ts
 
 if [ -n "$ADMIN_EMAIL" ] && [ -n "$ADMIN_PASSWORD" ]; then
   echo "Seeding admin user..."
-  npx tsx src/seed-admin.ts
+  su-exec app npx tsx src/seed-admin.ts
 fi
 
 echo "Starting server..."
-exec npm start
+exec su-exec app npm start
