@@ -16,6 +16,8 @@ export default function TopBar({ onMobileMenuClick }: TopBarProps) {
       // Continue with local cleanup even if API call fails
     }
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
     navigate('/');
   };
 

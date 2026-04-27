@@ -19,6 +19,8 @@ export function useAuth() {
         setIsAuthenticated(true);
       } catch {
         localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
         setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
@@ -44,6 +46,8 @@ export function useAuth() {
       // Continue with local cleanup
     }
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
     setIsAuthenticated(false);
   }, []);
 

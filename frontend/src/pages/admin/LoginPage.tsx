@@ -29,6 +29,8 @@ export default function LoginPage() {
     try {
       const response = await authService.login(credentials.email, credentials.password);
       localStorage.setItem('token', response.token);
+      localStorage.setItem('refreshToken', response.refreshToken);
+      localStorage.setItem('user', JSON.stringify(response.user));
       navigate('/admin/posts');
     } catch {
       setError('Невірний email або пароль');
