@@ -62,11 +62,11 @@ export default function TextImageEditor({
     onChange({ ...data, [field]: value });
   };
 
-  const addFeature = () => {
-    if (newFeature.trim()) {
+  const addFeature = (value: string) => {
+    const trimmed = value.trim();
+    if (trimmed) {
       const features = data.features || [];
-      updateField('features', [...features, newFeature.trim()]);
-      setNewFeature('');
+      updateField('features', [...features, trimmed]);
     }
   };
 
@@ -76,6 +76,24 @@ export default function TextImageEditor({
       'features',
       features.filter((_, i) => i !== index)
     );
+  };
+
+  const handleFeatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.includes(',')) {
+      const parts = value.split(',');
+      addFeature(parts[0]);
+      setNewFeature(parts.slice(1).join(','));
+    } else {
+      setNewFeature(value);
+    }
+  };
+
+  const handleFeatureBlur = () => {
+    if (newFeature.trim()) {
+      addFeature(newFeature);
+      setNewFeature('');
+    }
   };
 
   const gridCols = 'md:grid-cols-[1fr_1fr]';
@@ -165,14 +183,28 @@ export default function TextImageEditor({
               name={f('new-feature')}
               type="text"
               value={newFeature}
-              onChange={(e) => setNewFeature(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
+              onChange={handleFeatureChange}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  if (newFeature.trim()) {
+                    addFeature(newFeature);
+                    setNewFeature('');
+                  }
+                }
+              }}
+              onBlur={handleFeatureBlur}
               placeholder="Додати особливість"
               className="flex-1 px-2 py-1.5 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
             />
             <button
               type="button"
-              onClick={addFeature}
+              onClick={() => {
+                if (newFeature.trim()) {
+                  addFeature(newFeature);
+                  setNewFeature('');
+                }
+              }}
               className="px-3 py-1.5 bg-zinc-100 text-zinc-700 rounded-lg hover:bg-zinc-200 text-sm cursor-pointer"
             >
               +
