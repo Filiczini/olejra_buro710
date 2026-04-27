@@ -78,6 +78,35 @@ export const postService = {
   },
 };
 
+export interface User {
+  id: string;
+  email: string;
+  role: string;
+  created_at: string;
+}
+
+export const userService = {
+  getAll: async () => {
+    const response = await api.get('/admin/users');
+    return response.data as User[];
+  },
+
+  create: async (data: { email: string; password: string; role: string }) => {
+    const response = await api.post('/admin/users', data);
+    return response.data as User;
+  },
+
+  delete: async (id: string) => {
+    const response = await api.delete(`/admin/users/${id}`);
+    return response.data;
+  },
+
+  updatePassword: async (id: string, password: string) => {
+    const response = await api.patch(`/admin/users/${id}/password`, { password });
+    return response.data;
+  },
+};
+
 export const contactService = {
   submit: async (data: ContactFormData): Promise<ContactSubmitResponse> => {
     const response = await api.post('/contact', data);

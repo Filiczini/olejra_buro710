@@ -11,6 +11,7 @@ import { AppError } from './lib/errors';
 import { requestIdMiddleware } from './middleware/requestId';
 import { authMiddleware } from './middleware/auth';
 import authRoutes from './routes/auth';
+import usersRoutes from './routes/users';
 import activityLogsRoutes from './routes/activityLogs';
 import postsRoutes from './routes/posts';
 import contactRoutes from './routes/contact';
@@ -53,6 +54,7 @@ app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 app.use('/uploads', express.static(env.UPLOADS_DIR));
 
 app.use('/api/admin', authRoutes);
+app.use('/api/admin', usersRoutes);
 app.use('/api/logs', activityLogsRoutes);
 app.use('/api/posts', postsRoutes);
 app.use('/api/contact', contactRoutes);
