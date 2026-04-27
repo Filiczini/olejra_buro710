@@ -18,16 +18,37 @@ export default function TagInput({
   const [inputValue, setInputValue] = useState('');
   const canAddMore = tags.length < maxTags;
 
+  const addTag = (value: string) => {
+    const trimmedValue = value.trim();
+    if (trimmedValue && !tags.includes(trimmedValue) && canAddMore) {
+      onTagsChange([...tags, trimmedValue]);
+      setInputValue('');
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      const trimmedValue = inputValue.trim();
-      if (trimmedValue && !tags.includes(trimmedValue) && canAddMore) {
-        onTagsChange([...tags, trimmedValue]);
-        setInputValue('');
-      }
+      addTag(inputValue);
     } else if (e.key === 'Backspace' && !inputValue && tags.length > 0) {
       onTagsChange(tags.slice(0, -1));
+    }
+  };
+
+  const handleBlur = () => {
+    addTag(inputValue);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Додати тег при введенні коми (корисно для тачскрінів та швидкого вводу)
+    if (value.includes(',')) {
+      const parts = value.split(',');
+      const newTag = parts[0].trim();
+      addTag(newTag);
+      setInputValue(parts.slice(1).join(','));
+    } else {
+      setInputValue(value);
     }
   };
 
@@ -66,16 +87,29 @@ export default function TagInput({
           </span>
         ))}
         {canAddMore && (
-          <input
-            id="tag-input"
-            name="tag-input"
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={tags.length === 0 ? placeholder : ''}
-            className="flex-1 min-w-[120px] outline-none text-sm bg-transparent"
-          />
+          <div className="flex items-center flex-1 min-w-[120px] gap-1">
+            <input
+              id="tag-input"
+              name="tag-input"
+              type="text"
+              value={inputValue}
+              onChange={handleChange}
+              onKeyDown={handleKeyDown}
+              onBlur={handleBlur}
+              placeholder={tags.length === 0 ? placeholder : ''}
+              className="flex-1 outline-none text-sm bg-transparent"
+            />
+            {inputValue.trim() && (
+              <button
+                type="button"
+                onClick={() => addTag(inputValue)}
+                className="text-zinc-500 hover:text-zinc-900 cursor-pointer px-1"
+                title="Додати тег"
+              >
+                +
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>
