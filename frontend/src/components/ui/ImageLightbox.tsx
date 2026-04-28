@@ -89,6 +89,27 @@ export default function ImageLightbox({
     [handleClose]
   );
 
+  const touchStartX = useRef<number | null>(null);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.changedTouches[0].screenX;
+  }, []);
+
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (touchStartX.current === null) return;
+      const diff = touchStartX.current - e.changedTouches[0].screenX;
+      const threshold = 50;
+      if (diff > threshold) {
+        onNext();
+      } else if (diff < -threshold) {
+        onPrev();
+      }
+      touchStartX.current = null;
+    },
+    [onPrev, onNext]
+  );
+
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     document.body.style.overflow = 'hidden';
@@ -111,9 +132,11 @@ export default function ImageLightbox({
       aria-modal="true"
       aria-label="Перегляд зображення"
       tabIndex={-1}
-      className={`fixed inset-0 z-[70] group outline-none ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
+      className={`fixed inset-0 z-[70] group outline-none touch-none ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
       onAnimationEnd={handleAnimationEnd}
       onClick={handleBackdropClick}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       <div className="absolute inset-0 bg-black/95" />
 
@@ -134,7 +157,7 @@ export default function ImageLightbox({
 
       <button
         onClick={handlePrev}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center text-white/80 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center text-white/80 hover:text-white opacity-70 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer"
         aria-label="Попереднє"
       >
         <Icon icon="solar:arrow-left-linear" width={32} />
@@ -142,7 +165,7 @@ export default function ImageLightbox({
 
       <button
         onClick={handleNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center text-white/80 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center text-white/80 hover:text-white opacity-70 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer"
         aria-label="Наступне"
       >
         <Icon icon="solar:arrow-right-linear" width={32} />
