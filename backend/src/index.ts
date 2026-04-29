@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
+import fs from 'fs/promises';
 import type { Request, Response, NextFunction } from 'express';
 import { env } from './config/env';
 import { logger } from './lib/logger';
@@ -52,6 +53,20 @@ app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 
 // Serve uploaded files
 app.use('/uploads', express.static(env.UPLOADS_DIR));
+logger.info(`Serving uploads from: ${env.UPLOADS_DIR}`);
+
+// Verify uploads directory exists on startup
+(async () => {
+  try {
+    await fs.access(env.UPLOADS_DIR);
+    logger.info(`Uploads directory verified: ${env.UPLOADS_DIR}`);
+  } catch {
+    logger.warn(`Uploads directory does not exist: ${env.UPLOADS_DIR}`);
+    logger.warn(
+      'Images uploaded to this instance will not be accessible until the directory is created.'
+    );
+  }
+})();
 
 app.use('/api/admin', authRoutes);
 app.use('/api/admin', usersRoutes);

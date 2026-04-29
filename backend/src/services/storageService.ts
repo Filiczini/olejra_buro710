@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs/promises';
 import { validateFileSignature } from '../middleware/multer';
+import { logger } from '../lib/logger';
 
 const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png'];
 
@@ -65,6 +66,8 @@ export const storageService = {
 
     await fs.mkdir(dirPath, { recursive: true });
     await fs.writeFile(filePath, file.buffer);
+
+    logger.info(`Image uploaded: ${filePath}`);
 
     return `/uploads/${folder}/${fileName}`;
   },

@@ -13,7 +13,7 @@ export default function TextFullBlock({ data }: TextFullBlockProps) {
 
   return (
     <section className="bg-white py-24 md:py-32 px-6">
-      <div className="max-w-3xl mx-auto text-center">
+      <div className="max-w-[990px] mx-auto text-center">
         {label && (
           <span className="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-6 block">
             {label}
