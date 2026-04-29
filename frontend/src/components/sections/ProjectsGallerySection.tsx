@@ -51,7 +51,7 @@ export default memo(function ProjectsGallerySection() {
                   {meta && <div className="text-xs text-zinc-500 font-medium">{meta}</div>}
                   {post.hero_tags && post.hero_tags.length > 0 && (
                     <div className="text-xs text-zinc-800 mt-2 font-medium">
-                      {post.hero_tags[0]}
+                      {post.hero_tags.join(', ')}
                     </div>
                   )}
                 </div>

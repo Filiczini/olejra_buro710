@@ -38,12 +38,17 @@ export default function PostHeroBlock({ post }: PostHeroBlockProps) {
 
       <div className="relative z-10 p-6 md:p-12 w-full max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-8 mb-8">
         <div>
-          <div className="flex items-center gap-3 mb-6">
-            {hero_tags && hero_tags.length > 0 && (
-              <span className="bg-white/10 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-medium uppercase tracking-widest border border-white/10">
-                {hero_tags[0]}
-              </span>
-            )}
+          <div className="flex items-center gap-3 mb-6 flex-wrap">
+            {hero_tags &&
+              hero_tags.length > 0 &&
+              hero_tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="bg-white/10 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-medium uppercase tracking-widest border border-white/10"
+                >
+                  {tag}
+                </span>
+              ))}
             {(hero_location || hero_year) && (
               <span className="text-white/70 text-[10px] uppercase tracking-widest">
                 {hero_location}

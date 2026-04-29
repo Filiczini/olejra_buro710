@@ -37,7 +37,7 @@ export default function PostHeroPreview({ data }: PostHeroPreviewProps) {
           <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
             {Array.isArray(data.hero_tags) && data.hero_tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-4">
-                {data.hero_tags.slice(0, 3).map((tag, index) => (
+                {data.hero_tags.map((tag, index) => (
                   <span
                     key={index}
                     className="bg-white/10 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-medium uppercase tracking-widest border border-white/10"
