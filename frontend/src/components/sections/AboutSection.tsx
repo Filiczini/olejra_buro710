@@ -2,7 +2,7 @@ import { Icon } from '@iconify-icon/react';
 
 export default function AboutSection() {
   return (
-    <section className="max-w-[1800px] mx-auto px-6 py-24 md:py-32 border-b border-zinc-200">
+    <section className="max-w-[1800px] mx-auto px-6 py-24 md:py-32 border-zinc-200">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24">
         <div>
           <h2 className="text-3xl md:text-5xl font-medium tracking-tight leading-tight animate-reveal-up">
