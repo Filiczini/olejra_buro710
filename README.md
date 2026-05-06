@@ -12,7 +12,7 @@ buro710/
 │   ├── Dockerfile
 │   └── nginx.conf
 │
-├── backend/            # Express + Supabase
+├── backend/            # Express + PostgreSQL
 │   ├── src/
 │   ├── package.json
 │   └── Dockerfile
@@ -27,7 +27,7 @@ buro710/
 ```bash
 cd backend
 cp .env.example .env
-# Заповнити .env з вашими Supabase credentials
+# Заповнити .env з вашими credentials (JWT_SECRET, ADMIN_*, POSTGRES_*)
 npm install
 npm run dev
 ```
@@ -78,9 +78,10 @@ JWT_SECRET=<32+ chars random string>
 ADMIN_EMAIL=admin@yourdomain.com
 ADMIN_PASSWORD=<secure password>
 
-# Supabase
-SUPABASE_URL=https://xxx.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=xxx
+# PostgreSQL (self-hosted)
+POSTGRES_DB=bureau710
+POSTGRES_USER=bureau710_user
+POSTGRES_PASSWORD=<strong random password>
 
 # Telegram (опціонально)
 TELEGRAM_BOT_TOKEN=xxx
@@ -124,5 +125,5 @@ VITE_API_URL=/api
 **Backend:**
 - Node.js + Express 5
 - TypeScript
-- Supabase (PostgreSQL + Storage)
+- PostgreSQL 17 (self-hosted via Docker)
 - JWT Authentication

@@ -4,7 +4,6 @@
 
 1. Dokploy instance running
 2. GitHub repository with your code
-3. Supabase project set up
 
 ## Deployment Steps
 
@@ -27,10 +26,10 @@ In Dokploy dashboard, add these environment variables:
 ```bash
 NODE_ENV=production
 
-# Required: Supabase credentials
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+# Required: PostgreSQL credentials
+POSTGRES_DB=bureau710
+POSTGRES_USER=bureau710_user
+POSTGRES_PASSWORD=your-strong-random-password
 
 # Required: JWT configuration
 JWT_SECRET=your-super-secret-jwt-key-min-32-chars
@@ -83,8 +82,8 @@ TELEGRAM_CHAT_ID=your-chat-id
           └───────────────┘
                   │
           ┌───────▼────────┐
-          │    Supabase    │
-          │   (external)   │
+          │   PostgreSQL   │
+          │  (self-hosted) │
           └────────────────┘
 ```
 
@@ -101,9 +100,9 @@ TELEGRAM_CHAT_ID=your-chat-id
 - Verify VITE_API_URL is set to `/api`
 
 ### Database connection fails
-- Verify Supabase credentials
-- Check ALLOWED_ORIGINS includes your domain
-- Verify Supabase project is running
+- Verify PostgreSQL container is healthy: docker compose ps postgres
+- Check DATABASE_URL points to postgres:5432
+- Verify POSTGRES_PASSWORD matches between .env and container
 
 ## Production Checklist
 
@@ -111,5 +110,5 @@ TELEGRAM_CHAT_ID=your-chat-id
 - [ ] Change default admin credentials
 - [ ] Configure ALLOWED_ORIGINS
 - [ ] Enable HTTPS in Dokploy
-- [ ] Set up regular backups in Supabase
+- [ ] Verify backup container dumps PostgreSQL daily
 - [ ] Configure rate limiting if needed

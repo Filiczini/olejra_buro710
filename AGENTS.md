@@ -4,7 +4,7 @@
 
 Buro 710 is a portfolio website for an architecture studio built with:
 - **Frontend**: React 19 + TypeScript + Vite + Tailwind CSS 4
-- **Backend**: Node.js + Express + Supabase (PostgreSQL)
+- **Backend**: Node.js + Express + Drizzle ORM + PostgreSQL
 - **Auth**: JWT tokens
 - **Language**: Ukrainian
 
@@ -51,7 +51,7 @@ src/
 ├── layouts/                # Page layouts (AdminLayout, Layout)
 ├── pages/                  # Page components
 ├── server/                 # Backend code
-│   ├── config/             # Supabase, JWT config
+│   ├── config/             # Drizzle ORM, JWT config
 │   ├── middleware/         # Auth, multer middleware
 │   ├── routes/             # API route handlers
 │   └── services/           # Business logic services
@@ -151,7 +151,7 @@ export type { Project, CreateProjectData };
 // const API_URL = 'http://localhost:3000';
 // const PLACEHOLDER_IMAGE = 'https://...';
 
-// DB columns: snake_case (Supabase/PostgreSQL)
+// DB columns: snake_case (PostgreSQL)
 // created_at, photo_credits, hero_media
 
 // API endpoints: lowercase, dash-separated or with params
@@ -256,10 +256,11 @@ export const projectService = {
   create: async (data) => { ... },
 };
 
-// Use Supabase client from config/supabase.ts
-import { supabase } from '../config/supabase';
-const { data, error } = await supabase.from('projects').select('*');
-if (error) throw error;
+// Use Drizzle ORM for database queries
+import { db } from '../db';
+import { posts } from '../db/schema';
+import { eq } from 'drizzle-orm';
+const data = await db.select().from(posts).where(eq(posts.id, id));
 ```
 
 ## Styling (Tailwind CSS)
@@ -298,7 +299,7 @@ router.post('/', uploadProjectMedia, async (req, res) => {
   const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 });
 
-// Use Supabase storage for image uploads
+// Use local filesystem storage for image uploads
 // See src/server/services/storageService.ts
 ```
 
@@ -309,7 +310,7 @@ router.post('/', uploadProjectMedia, async (req, res) => {
 VITE_API_URL=http://localhost:3000/api
 
 # Backend (.env)
-DATABASE_URL=supabase_connection_string
+DATABASE_URL=postgresql://user:pass@postgres:5432/dbname
 JWT_SECRET=your_secret_here
 ```
 

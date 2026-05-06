@@ -1,4 +1,22 @@
 services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: bureau710_postgres_staging
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data_staging:/var/lib/postgresql/data
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   frontend:
     build:
       context: .
@@ -32,8 +50,6 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - DATABASE_URL=${DATABASE_URL}
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
       - UPLOADS_DIR=/app/uploads
       - JWT_SECRET=${JWT_SECRET}
       - FRONTEND_URL=https://staging.b710.design
@@ -47,9 +63,14 @@ services:
       default:
         aliases:
           - buro710-staging-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   uploads-staging:
+  postgres_data_staging:
+    driver: local
 
 networks:
   dokploy-network:
