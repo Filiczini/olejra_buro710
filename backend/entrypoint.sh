@@ -7,6 +7,11 @@ chown -R app:app /app/uploads 2>/dev/null || true
 echo "Running migrations..."
 su-exec app npx tsx src/migrate.ts
 
+if [ "$SEED_FROM_DUMP" = "true" ]; then
+  echo "Seeding from dump..."
+  su-exec app npx tsx src/seed-from-dump.ts
+fi
+
 if [ -n "$ADMIN_EMAIL" ] && [ -n "$ADMIN_PASSWORD" ]; then
   echo "Seeding admin user..."
   su-exec app npx tsx src/seed-admin.ts

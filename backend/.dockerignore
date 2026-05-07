@@ -9,7 +9,4 @@ dist
 coverage
 .nyc_output
 *.log
-src
-*.ts
-!*.json
 tsconfig.json
