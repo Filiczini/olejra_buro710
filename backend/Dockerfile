@@ -12,6 +12,9 @@ COPY backend/package*.json ./backend/
 # Install all dependencies (dev + prod)
 RUN npm install --workspace=shared --workspace=backend --ignore-scripts
 
+# Cache-busting: increment when you need to force a fresh build
+ARG CACHE_BUST=1
+
 # Copy source code
 COPY shared/ ./shared/
 COPY backend/ ./backend/
