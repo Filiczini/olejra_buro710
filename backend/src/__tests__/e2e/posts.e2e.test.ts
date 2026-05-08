@@ -1063,8 +1063,8 @@ describe('E2E: Posts API', () => {
         '测试中文标题', // Chinese
         'тест кирилиця', // Cyrillic (Ukrainian)
         '🚀🎉💻🔐', // Emojis
-        '\u200B\u200C\u200D', // Zero-width characters
-        'Test\u0000Null', // Null character
+        '​‌‍', // Zero-width characters
+        'Test Null', // Null character
       ];
 
       // Act & Assert
