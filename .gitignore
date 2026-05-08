@@ -72,3 +72,6 @@ backend/src/migrations/
 coverage/
 frontend/coverage/
 backend/coverage/
+
+# Playwright test results
+e2e/test-results/

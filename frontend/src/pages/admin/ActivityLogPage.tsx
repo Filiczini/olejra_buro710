@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { logger } from '../../lib/logger';
+import { formatDate } from '../../lib/date';
 import { ChevronDown } from 'lucide-react';
 import DataTable from '../../components/admin/DataTable';
 import type { ColumnDef } from '../../components/admin/DataTable';
@@ -155,9 +156,7 @@ export default function ActivityLogPage() {
       width: '180px',
       cell: (log) => (
         <div className="flex flex-col">
-          <span className="text-sm font-medium text-gray-900">
-            {new Date(log.created_at).toLocaleDateString('uk-UA')}
-          </span>
+          <span className="text-sm font-medium text-gray-900">{formatDate(log.created_at)}</span>
           <span className="text-sm text-gray-400 mt-0.5">
             {new Date(log.created_at).toLocaleTimeString('uk-UA')}
           </span>

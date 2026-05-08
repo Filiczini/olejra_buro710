@@ -7,6 +7,7 @@ import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import Toast from '../../components/ui/Toast';
 import { PlusCircle, Trash2, KeyRound } from 'lucide-react';
+import { formatDate } from '../../lib/date';
 import DataTable from '../../components/admin/DataTable';
 import type { ColumnDef } from '../../components/admin/DataTable';
 import ConfirmModal from '../../components/ui/ConfirmModal';
@@ -115,10 +116,6 @@ export default function UsersPage() {
     } finally {
       setPasswordLoading(false);
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('uk-UA');
   };
 
   const userColumns: ColumnDef<User>[] = [

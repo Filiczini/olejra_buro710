@@ -1,5 +1,9 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express';
 
+export function getParam(value: string | string[]): string {
+  return Array.isArray(value) ? value[0] : value;
+}
+
 export const asyncHandler = (
   fn: (req: Request, res: Response, next: NextFunction) => Promise<unknown>
 ): RequestHandler => {

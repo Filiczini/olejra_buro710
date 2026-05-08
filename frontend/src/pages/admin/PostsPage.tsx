@@ -9,6 +9,7 @@ import type { ColumnDef } from '../../components/admin/DataTable';
 import Toast from '../../components/ui/Toast';
 import { useToast } from '../../hooks/useToast';
 import ConfirmModal from '../../components/ui/ConfirmModal';
+import { formatDate } from '../../lib/date';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 10;
@@ -41,7 +42,7 @@ export default function PostsPage() {
       showToast('Пост збережено', 'success');
       navigate('/admin/posts', { replace: true, state: {} });
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [location.state?.saved, showToast, navigate]);
 
   const postCountLabel = (n: number) => {
     if (n === 1) return '1 пост';
@@ -160,10 +161,6 @@ export default function PostsPage() {
         Чернетка
       </span>
     );
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('uk-UA');
   };
 
   const postColumns: ColumnDef<Post>[] = [

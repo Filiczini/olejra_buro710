@@ -2,6 +2,7 @@ export {
   postCreateSchema,
   postUpdateSchema,
   blockSchema,
+  blockDataSchema,
   type PostCreateInput,
   type PostUpdateInput,
 } from "./schemas/post.js";

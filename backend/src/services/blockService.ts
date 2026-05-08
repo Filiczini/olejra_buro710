@@ -1,6 +1,7 @@
 import { eq, asc } from 'drizzle-orm';
 import { db } from '../db';
 import { blocks } from '../db/schema';
+import { blockDataSchema } from '@buro710/shared';
 import type { Block, BlockType, BlockData, UpdateBlockData } from '@buro710/shared';
 
 interface CreateBlocksParams {
@@ -22,7 +23,7 @@ function toBlock(row: typeof blocks.$inferSelect): Block {
     id: row.id,
     post_id: row.post_id,
     type: row.type as BlockType,
-    data: row.data as unknown as BlockData,
+    data: blockDataSchema.parse(row.data),
     sort_order: row.sort_order,
     created_at: row.created_at.toISOString(),
   };
@@ -43,7 +44,7 @@ export const blockService = {
     const values = params.blocks.map((block, index) => ({
       post_id: params.postId,
       type: block.type,
-      data: block.data as unknown as Record<string, unknown>,
+      data: blockDataSchema.parse(block.data),
       sort_order: block.sort_order ?? index,
     }));
 
@@ -97,9 +98,7 @@ export const blockService = {
 
     for (const block of incomingBlocks) {
       if (block.id && existingIds.has(block.id)) {
-        toUpdate.push(
-          block as { id: string; type: BlockType; data: BlockData; sort_order: number }
-        );
+        toUpdate.push({ ...block, id: block.id });
       } else {
         toCreate.push({ type: block.type, data: block.data, sort_order: block.sort_order });
       }

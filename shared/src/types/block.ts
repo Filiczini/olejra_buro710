@@ -11,12 +11,14 @@ export interface TextFullData {
   area?: string;
   months?: string;
   year?: string;
+  [key: string]: unknown;
 }
 
 export interface ImageFullData {
   image_url: string;
   alt?: string;
   caption?: string;
+  [key: string]: unknown;
 }
 
 export interface TextImageData {
@@ -27,10 +29,12 @@ export interface TextImageData {
   label?: string;
   title?: string;
   features?: string[];
+  [key: string]: unknown;
 }
 
 export interface ThreeImagesData {
   images: { url: string; alt: string }[];
+  [key: string]: unknown;
 }
 
 export type BlockData =

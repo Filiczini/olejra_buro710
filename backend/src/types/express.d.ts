@@ -16,3 +16,9 @@ declare module 'express' {
     user?: AuthenticatedUser;
   }
 }
+
+declare module 'express-serve-static-core' {
+  interface ParamsDictionary {
+    [key: string]: string;
+  }
+}

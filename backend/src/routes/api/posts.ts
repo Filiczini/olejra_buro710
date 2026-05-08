@@ -11,7 +11,7 @@ import { uploadMiddleware } from '../../middleware/multer';
 import { postService } from '../../services/postService';
 import { storageService } from '../../services/storageService';
 import type { BlockType, BlockData, PostStatus } from '@buro710/shared';
-import { asyncHandler } from '../../middleware/asyncHandler';
+import { asyncHandler, getParam } from '../../middleware/asyncHandler';
 import {
   parseJsonField,
   processBlocks,
@@ -137,7 +137,7 @@ router.get(
 router.get(
   '/:id',
   asyncHandler(async (req, res) => {
-    const id = req.params.id as string;
+    const id = getParam(req.params.id);
     const result = await postService.getById(id);
     res.json(result);
   })
@@ -151,7 +151,7 @@ router.post(
   '/',
   uploadPostMedia,
   asyncHandler(async (req, res) => {
-    const body = req.body as PostBody;
+    const body: PostBody = req.body;
     const {
       title,
       slug,
@@ -240,8 +240,8 @@ router.put(
   '/:id',
   uploadPostMedia,
   asyncHandler(async (req, res) => {
-    const id = req.params.id as string;
-    const body = req.body as PostBody;
+    const id = getParam(req.params.id);
+    const body: PostBody = req.body;
     const {
       title,
       slug,
@@ -362,7 +362,7 @@ router.put(
 router.delete(
   '/:id',
   asyncHandler(async (req, res) => {
-    const id = req.params.id as string;
+    const id = getParam(req.params.id);
 
     const { post } = await postService.getById(id);
 

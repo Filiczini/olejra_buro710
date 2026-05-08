@@ -98,8 +98,12 @@ export async function compressImage(
     blob = await toBlob(canvas, 0.1);
   }
 
+  if (!blob) {
+    throw new Error('Failed to compress image below 1 MB');
+  }
+
   const baseName = file.name.replace(/\.[^.]+$/, '');
-  const compressed = new File([blob!], `${baseName}.jpg`, {
+  const compressed = new File([blob], `${baseName}.jpg`, {
     type: 'image/jpeg',
     lastModified: Date.now(),
   });

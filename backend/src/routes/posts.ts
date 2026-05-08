@@ -8,7 +8,7 @@ import { activityLogService } from '../services/activityLogService';
 import { uploadBlockMedia, uploadGalleryImages } from '../middleware/multer';
 import { blockService } from '../services/blockService';
 import type { BlockType, BlockData } from '@buro710/shared';
-import { asyncHandler } from '../middleware/asyncHandler';
+import { asyncHandler, getParam } from '../middleware/asyncHandler';
 import {
   validatePostInput,
   parseBlocksJson,
@@ -50,9 +50,7 @@ router.get(
       : undefined;
 
     // Unauthenticated users can only see published posts
-    const effectiveStatus = (req as AuthenticatedRequest).user
-      ? (status as 'draft' | 'published')
-      : 'published';
+    const effectiveStatus = req.user ? (status as 'draft' | 'published') : 'published';
 
     const result = await postService.getAll({
       page: parsedPage,
@@ -78,7 +76,7 @@ router.get(
   '/public/:slug',
   publicRateLimiter,
   asyncHandler(async (req, res) => {
-    const slug = req.params.slug as string;
+    const slug = getParam(req.params.slug);
     const result = await postService.getBySlug(slug);
     res.json(result);
   })
@@ -89,7 +87,7 @@ router.get(
   authMiddleware,
   adminMiddleware,
   asyncHandler(async (req, res) => {
-    const id = req.params.id as string;
+    const id = getParam(req.params.id);
     const result = await postService.getById(id);
     res.json(result);
   })
@@ -101,7 +99,7 @@ router.post(
   adminMiddleware,
   uploadBlockMedia,
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const body = req.body as PostBody;
+    const body: PostBody = req.body;
     const {
       title,
       slug,
@@ -194,7 +192,7 @@ router.post(
           const blockRecord = blocksByOrder.get(upload.sort_order);
 
           if (blockRecord) {
-            const currentData = (blockRecord.data as unknown as Record<string, unknown>) || {};
+            const currentData = blockRecord.data as Record<string, unknown>;
             if (upload.imageSlot !== undefined) {
               const images = [...((currentData.images as { url: string; alt: string }[]) || [])];
               images[upload.imageSlot] = { ...images[upload.imageSlot], url: imageUrl };
@@ -242,8 +240,8 @@ router.put(
   adminMiddleware,
   uploadBlockMedia,
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const id = req.params.id as string;
-    const body = req.body as PostBody;
+    const id = getParam(req.params.id);
+    const body: PostBody = req.body;
     const {
       title,
       slug,
@@ -312,7 +310,7 @@ router.put(
         const uploads = blockImageUploads[block.sort_order];
         if (!uploads) return block;
 
-        const data = { ...block.data };
+        const data = { ...(block.data as Record<string, unknown>) };
         for (const upload of uploads) {
           if (upload.slot !== undefined) {
             const images = [...((data.images as { url: string; alt: string }[]) || [])];
@@ -322,7 +320,7 @@ router.put(
             data.image_url = upload.url;
           }
         }
-        return { ...block, data };
+        return { ...block, data: data as BlockData };
       });
     }
 
@@ -397,7 +395,7 @@ router.delete(
   authMiddleware,
   adminMiddleware,
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const id = req.params.id as string;
+    const id = getParam(req.params.id);
     const result = await postService.getById(id);
 
     await activityLogService.log({
@@ -421,7 +419,7 @@ router.post(
   adminMiddleware,
   uploadGalleryImages,
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const id = req.params.id as string;
+    const id = getParam(req.params.id);
     const files = req.files as Express.Multer.File[] | undefined;
 
     if (!files || files.length === 0) {
@@ -459,7 +457,7 @@ router.delete(
   authMiddleware,
   adminMiddleware,
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const id = req.params.id as string;
+    const id = getParam(req.params.id);
     const { image_url } = req.body as { image_url?: string };
 
     if (!image_url || typeof image_url !== 'string') {

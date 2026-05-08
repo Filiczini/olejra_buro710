@@ -6,7 +6,7 @@ import { authMiddleware, adminMiddleware } from '../middleware/auth';
 import { validateBody } from '../middleware/validate.js';
 import { userService } from '../services/userService';
 import { refreshTokenService } from '../services/refreshTokenService';
-import { asyncHandler } from '../middleware/asyncHandler';
+import { asyncHandler, getParam } from '../middleware/asyncHandler';
 
 const router = Router();
 
@@ -44,7 +44,7 @@ router.delete(
   authMiddleware,
   adminMiddleware,
   asyncHandler(async (req: Request, res: Response) => {
-    const id = req.params.id as string;
+    const id = getParam(req.params.id);
 
     if (id === req.user!.userId) {
       return res.status(400).json({ error: 'Не можна видалити власний акаунт' });
@@ -66,7 +66,7 @@ router.patch(
   authMiddleware,
   adminMiddleware,
   asyncHandler(async (req: Request, res: Response) => {
-    const id = req.params.id as string;
+    const id = getParam(req.params.id);
     const { password } = req.body;
 
     if (!password || typeof password !== 'string' || password.length < 6) {
