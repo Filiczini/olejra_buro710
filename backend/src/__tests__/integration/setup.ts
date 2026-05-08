@@ -9,11 +9,21 @@ let pool: pg.Pool;
 export let db: ReturnType<typeof drizzle>;
 
 export async function setupIntegrationTests() {
-  container = await new PostgreSqlContainer('postgres:17-alpine')
-    .withDatabase('test')
-    .withUsername('test')
-    .withPassword('test')
-    .start();
+  try {
+    container = await new PostgreSqlContainer('postgres:17-alpine')
+      .withDatabase('test')
+      .withUsername('test')
+      .withPassword('test')
+      .start();
+  } catch (err: any) {
+    if (err?.message?.includes('container runtime')) {
+      throw new Error(
+        'Docker не знайдено. Для інтеграційних тестів потрібен Docker Desktop (або альтернатива). ' +
+          'Встановіть і запустіть Docker, або запускайте тести в CI де Docker доступний автоматично.'
+      );
+    }
+    throw err;
+  }
 
   const databaseUrl = container.getConnectionUri();
 
