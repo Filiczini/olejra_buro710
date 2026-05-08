@@ -11,7 +11,8 @@
     "seed:from-dump": "tsx src/seed-from-dump.ts",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:integration": "vitest run --config vitest.integration.config.ts"
   },
   "dependencies": {
     "@buro710/shared": "*",
@@ -29,6 +30,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@testcontainers/postgresql": "^11.14.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",

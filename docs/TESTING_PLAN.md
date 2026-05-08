@@ -26,9 +26,9 @@
 
 Усі сервісні тести зараз мокують Drizzle. Треба додати шар тестів із реальною PostgreSQL (Testcontainers або in-memory pg), щоб ловити реальні SQL помилки, міграційні проблеми та race conditions.
 
-- [ ] Додати `testcontainers` або `pg-mem` як dev dependency
-- [ ] Написати інтеграційні тести для `postService`, `userService`, `contactService`
-- [ ] Запускати інтеграційні тести окремим скриптом (`npm run test:integration`)
+- [x] Додати `@testcontainers/postgresql` як dev dependency
+- [x] Написати інтеграційні тести для `postService`, `userService`, `contactService`
+- [x] Запускати інтеграційні тести окремим скриптом (`npm run test:integration`)
 
 ---
 
