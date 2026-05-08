@@ -1,18 +1,45 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mock db
-const mockReturning = vi.fn();
-const mockInsertValues = vi.fn(() => ({ returning: mockReturning }));
-const mockInsertFn = vi.fn(() => ({ values: mockInsertValues }));
-const mockUpdateSet = vi.fn(() => ({ where: vi.fn(() => ({ returning: mockReturning })) }));
-const mockUpdateFn = vi.fn(() => ({ set: mockUpdateSet }));
-const mockDeleteWhere = vi.fn().mockResolvedValue(undefined);
-const mockDeleteFn = vi.fn(() => ({ where: mockDeleteWhere }));
+const {
+  mockReturning,
+  mockInsertValues,
+  mockInsertFn,
+  mockUpdateSet,
+  mockUpdateFn,
+  mockDeleteWhere,
+  mockDeleteFn,
+  mockSelectOrderBy,
+  mockSelectWhere,
+  mockSelectFrom,
+  mockSelect,
+} = vi.hoisted(() => {
+  const mockReturning = vi.fn();
+  const mockInsertValues = vi.fn(() => ({ returning: mockReturning }));
+  const mockInsertFn = vi.fn(() => ({ values: mockInsertValues }));
+  const mockUpdateSet = vi.fn(() => ({ where: vi.fn(() => ({ returning: mockReturning })) }));
+  const mockUpdateFn = vi.fn(() => ({ set: mockUpdateSet }));
+  const mockDeleteWhere = vi.fn().mockResolvedValue(undefined);
+  const mockDeleteFn = vi.fn(() => ({ where: mockDeleteWhere }));
 
-const mockSelectOrderBy = vi.fn();
-const mockSelectWhere = vi.fn(() => ({ orderBy: mockSelectOrderBy }));
-const mockSelectFrom = vi.fn(() => ({ where: mockSelectWhere }));
-const mockSelect = vi.fn(() => ({ from: mockSelectFrom }));
+  const mockSelectOrderBy = vi.fn();
+  const mockSelectWhere = vi.fn(() => ({ orderBy: mockSelectOrderBy }));
+  const mockSelectFrom = vi.fn(() => ({ where: mockSelectWhere }));
+  const mockSelect = vi.fn(() => ({ from: mockSelectFrom }));
+
+  return {
+    mockReturning,
+    mockInsertValues,
+    mockInsertFn,
+    mockUpdateSet,
+    mockUpdateFn,
+    mockDeleteWhere,
+    mockDeleteFn,
+    mockSelectOrderBy,
+    mockSelectWhere,
+    mockSelectFrom,
+    mockSelect,
+  };
+});
 
 vi.mock('../../db', () => ({
   db: {

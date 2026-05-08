@@ -1,25 +1,59 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mock db
-const mockReturning = vi.fn();
-const mockUpdateWhere = vi.fn(() => ({ returning: mockReturning }));
-const mockUpdateSet = vi.fn(() => ({ where: mockUpdateWhere }));
-const mockUpdateFn = vi.fn(() => ({ set: mockUpdateSet }));
+const {
+  mockReturning,
+  mockUpdateWhere,
+  mockUpdateSet,
+  mockUpdateFn,
+  mockInsertReturning,
+  mockInsertValues,
+  mockInsertFn,
+  mockDeleteWhere,
+  mockDeleteFn,
+  mockSelectOffset,
+  mockSelectLimit,
+  mockSelectOrderBy,
+  mockSelectWhere,
+  mockSelectFrom,
+  mockSelect,
+} = vi.hoisted(() => {
+  const mockReturning = vi.fn();
+  const mockUpdateWhere = vi.fn(() => ({ returning: mockReturning }));
+  const mockUpdateSet = vi.fn(() => ({ where: mockUpdateWhere }));
+  const mockUpdateFn = vi.fn(() => ({ set: mockUpdateSet }));
 
-const mockInsertReturning = vi.fn();
-const mockInsertValues = vi.fn(() => ({ returning: mockInsertReturning }));
-const mockInsertFn = vi.fn(() => ({ values: mockInsertValues }));
+  const mockInsertReturning = vi.fn();
+  const mockInsertValues = vi.fn(() => ({ returning: mockInsertReturning }));
+  const mockInsertFn = vi.fn(() => ({ values: mockInsertValues }));
 
-const mockDeleteWhere = vi.fn().mockResolvedValue(undefined);
-const mockDeleteFn = vi.fn(() => ({ where: mockDeleteWhere }));
+  const mockDeleteWhere = vi.fn().mockResolvedValue(undefined);
+  const mockDeleteFn = vi.fn(() => ({ where: mockDeleteWhere }));
 
-// Select chain: select().from().where().orderBy().limit().offset()
-const mockSelectOffset = vi.fn();
-const mockSelectLimit = vi.fn(() => ({ offset: mockSelectOffset }));
-const mockSelectOrderBy = vi.fn(() => ({ limit: mockSelectLimit }));
-const mockSelectWhere = vi.fn(() => ({ orderBy: mockSelectOrderBy }));
-const mockSelectFrom = vi.fn(() => ({ where: mockSelectWhere }));
-const mockSelect = vi.fn(() => ({ from: mockSelectFrom }));
+  const mockSelectOffset = vi.fn();
+  const mockSelectLimit = vi.fn(() => ({ offset: mockSelectOffset }));
+  const mockSelectOrderBy = vi.fn(() => ({ limit: mockSelectLimit }));
+  const mockSelectWhere = vi.fn(() => ({ orderBy: mockSelectOrderBy }));
+  const mockSelectFrom = vi.fn(() => ({ where: mockSelectWhere }));
+  const mockSelect = vi.fn(() => ({ from: mockSelectFrom }));
+
+  return {
+    mockReturning,
+    mockUpdateWhere,
+    mockUpdateSet,
+    mockUpdateFn,
+    mockInsertReturning,
+    mockInsertValues,
+    mockInsertFn,
+    mockDeleteWhere,
+    mockDeleteFn,
+    mockSelectOffset,
+    mockSelectLimit,
+    mockSelectOrderBy,
+    mockSelectWhere,
+    mockSelectFrom,
+    mockSelect,
+  };
+});
 
 vi.mock('../../db', () => ({
   db: {

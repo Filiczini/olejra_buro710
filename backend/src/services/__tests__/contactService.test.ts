@@ -1,12 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mock db with chainable builder
-const mockReturning = vi.fn();
-const mockValues = vi.fn(() => ({ returning: mockReturning }));
-const mockInsert = vi.fn(() => ({ values: mockValues }));
+const { mockReturning, mockValues, mockInsert, mockSelectFrom, mockSelect } = vi.hoisted(() => {
+  const mockReturning = vi.fn();
+  const mockValues = vi.fn(() => ({ returning: mockReturning }));
+  const mockInsert = vi.fn(() => ({ values: mockValues }));
 
-const mockSelectFrom = vi.fn();
-const mockSelect = vi.fn(() => ({ from: mockSelectFrom }));
+  const mockSelectFrom = vi.fn();
+  const mockSelect = vi.fn(() => ({ from: mockSelectFrom }));
+
+  return {
+    mockReturning,
+    mockValues,
+    mockInsert,
+    mockSelectFrom,
+    mockSelect,
+  };
+});
 
 vi.mock('../../db', () => ({
   db: {

@@ -42,6 +42,17 @@ vi.mock('../../config/jwt', () => ({
   verifyToken: vi.fn(),
 }));
 
+vi.mock('../../middleware/auth', () => ({
+  authMiddleware: (req: any, res: any, next: any) => {
+    if (req.headers.authorization) {
+      req.user = { userId: 'user-123', email: 'admin@test.com', role: 'admin' };
+      next();
+    } else {
+      res.status(401).json({ error: 'Unauthorized' });
+    }
+  },
+}));
+
 // Import after mocking
 import authRouter from '../auth';
 import { userService } from '../../services/userService';
@@ -197,6 +208,87 @@ describe('Auth Routes', () => {
       const response = await request(app).post('/api/admin/logout');
 
       expect(response.status).toBe(401);
+    });
+
+    it('increments token version and revokes refresh tokens', async () => {
+      vi.mocked(userService.incrementTokenVersion).mockResolvedValue(undefined);
+      vi.mocked(refreshTokenService.revokeAllForUser).mockResolvedValue(undefined);
+
+      const response = await request(app)
+        .post('/api/admin/logout')
+        .set('Authorization', 'Bearer mock-token');
+
+      expect(response.status).toBe(200);
+      expect(response.body.message).toBe('Logged out successfully');
+      expect(userService.incrementTokenVersion).toHaveBeenCalledWith('user-123');
+      expect(refreshTokenService.revokeAllForUser).toHaveBeenCalledWith('user-123');
+    });
+
+    it('returns success even when revoke fails', async () => {
+      vi.mocked(userService.incrementTokenVersion).mockRejectedValue(new Error('DB error'));
+      vi.mocked(refreshTokenService.revokeAllForUser).mockRejectedValue(new Error('DB error'));
+
+      const response = await request(app)
+        .post('/api/admin/logout')
+        .set('Authorization', 'Bearer mock-token');
+
+      expect(response.status).toBe(200);
+    });
+  });
+
+  describe('GET /api/admin/me', () => {
+    it('returns current user', async () => {
+      vi.mocked(userService.findById).mockResolvedValue(MOCK_USER);
+
+      const response = await request(app)
+        .get('/api/admin/me')
+        .set('Authorization', 'Bearer mock-token');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        id: MOCK_USER.id,
+        email: MOCK_USER.email,
+        role: MOCK_USER.role,
+      });
+    });
+
+    it('returns 401 without auth', async () => {
+      const response = await request(app).get('/api/admin/me');
+
+      expect(response.status).toBe(401);
+    });
+
+    it('returns 404 when user not found', async () => {
+      vi.mocked(userService.findById).mockResolvedValue(null);
+
+      const response = await request(app)
+        .get('/api/admin/me')
+        .set('Authorization', 'Bearer mock-token');
+
+      expect(response.status).toBe(404);
+    });
+
+    it('returns 500 on service error', async () => {
+      vi.mocked(userService.findById).mockRejectedValue(new Error('DB error'));
+
+      const response = await request(app)
+        .get('/api/admin/me')
+        .set('Authorization', 'Bearer mock-token');
+
+      expect(response.status).toBe(500);
+    });
+  });
+
+  describe('POST /api/admin/login error handling', () => {
+    it('returns 500 on unexpected error', async () => {
+      vi.mocked(userService.findByEmail).mockRejectedValue(new Error('DB crash'));
+
+      const response = await request(app)
+        .post('/api/admin/login')
+        .send({ email: 'admin@test.com', password: 'password123' });
+
+      expect(response.status).toBe(500);
+      expect(response.body.error).toBe('Internal server error');
     });
   });
 });

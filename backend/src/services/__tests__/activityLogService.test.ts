@@ -1,20 +1,39 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mock db
-const mockReturning = vi.fn();
-const mockValues = vi.fn(() => ({ returning: mockReturning }));
-const mockInsertFn = vi.fn(() => ({ values: mockValues }));
+const {
+  mockReturning,
+  mockValues,
+  mockInsertFn,
+  mockSelectDistinctFrom,
+  mockSelectDistinctOrderBy,
+  mockSelectDistinct,
+  mockSelect,
+} = vi.hoisted(() => {
+  const mockReturning = vi.fn();
+  const mockValues = vi.fn(() => ({ returning: mockReturning }));
+  const mockInsertFn = vi.fn(() => ({ values: mockValues }));
 
-const mockSelectDistinctFrom = vi.fn();
-const mockSelectDistinctOrderBy = vi.fn();
-const mockSelectDistinct = vi.fn(() => ({
-  from: (...args: any[]) => {
-    mockSelectDistinctFrom(...args);
-    return { orderBy: (...oArgs: unknown[]) => mockSelectDistinctOrderBy(...oArgs) };
-  },
-}));
+  const mockSelectDistinctFrom = vi.fn();
+  const mockSelectDistinctOrderBy = vi.fn();
+  const mockSelectDistinct = vi.fn(() => ({
+    from: (...args: any[]) => {
+      mockSelectDistinctFrom(...args);
+      return { orderBy: (...oArgs: unknown[]) => mockSelectDistinctOrderBy(...oArgs) };
+    },
+  }));
 
-const mockSelect = vi.fn();
+  const mockSelect = vi.fn();
+
+  return {
+    mockReturning,
+    mockValues,
+    mockInsertFn,
+    mockSelectDistinctFrom,
+    mockSelectDistinctOrderBy,
+    mockSelectDistinct,
+    mockSelect,
+  };
+});
 
 vi.mock('../../db', () => ({
   db: {
