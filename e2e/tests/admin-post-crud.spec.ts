@@ -9,6 +9,7 @@ test.describe('Admin Post CRUD', () => {
 
     // 1. Login
     await page.goto('/admin/login');
+    await page.waitForLoadState('networkidle');
     await expect(page.locator('h1')).toHaveText('Вхід адміністратора');
 
     await page.fill('input[type="email"]', ADMIN_EMAIL);

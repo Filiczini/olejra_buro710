@@ -5,6 +5,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 
 async function login(page: any) {
   await page.goto('/admin/login');
+  await page.waitForLoadState('networkidle');
   await page.fill('input[type="email"]', ADMIN_EMAIL);
   await page.fill('input[type="password"]', ADMIN_PASSWORD);
   await page.click('button:has-text("Увійти")');
@@ -19,6 +20,7 @@ test.describe('Admin Users CRUD', () => {
 
     // Navigate to users page
     await page.goto('/admin/users');
+    await page.waitForLoadState('networkidle');
     await expect(page.locator('h3:has-text("Додати користувача")')).toBeVisible();
 
     // Create user

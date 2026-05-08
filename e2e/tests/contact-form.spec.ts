@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Contact Form', () => {
   test('submits contact form and shows success message', async ({ page }) => {
     await page.goto('/contact');
+    await page.waitForLoadState('networkidle');
 
     await page.fill('input[name="name"]', 'E2E Test User');
     await page.fill('input[name="email"]', 'e2e@test.com');
