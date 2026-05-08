@@ -44,5 +44,40 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
       - run: npm ci
-      - run: cd backend && npm run test:run
-      - run: cd backend && npm run test:coverage
+  test-e2e:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: bureau710_test
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: cd e2e && npx playwright install chromium
+      - run: cd e2e && npx playwright test
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/bureau710_test
+          JWT_SECRET: test-secret-that-is-at-least-32-chars-long-for-ci-only
+          ADMIN_EMAIL: admin@admin.com
+          ADMIN_PASSWORD: 11012580
+          API_KEY: ci-test-api-key-1234567890123456789012345678901234567890
+          TELEGRAM_BOT_TOKEN: ''
+          TELEGRAM_CHAT_ID: ''
+          FRONTEND_URL: http://localhost:5173
+          CI: true
