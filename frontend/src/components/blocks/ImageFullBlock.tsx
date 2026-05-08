@@ -1,4 +1,4 @@
-import type { ImageFullData } from '../../types/block';
+import type { ImageFullData } from '@buro710/shared';
 
 interface ImageFullBlockProps {
   data: ImageFullData;

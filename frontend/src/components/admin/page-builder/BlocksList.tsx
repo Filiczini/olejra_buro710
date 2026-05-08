@@ -12,7 +12,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import type { Block, BlockData } from '../../../types/block';
+import type { Block, BlockData } from '@buro710/shared';
 import BlockItem from './BlockItem';
 
 interface BlocksListProps {

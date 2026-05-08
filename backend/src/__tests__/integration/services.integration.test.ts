@@ -14,7 +14,6 @@ let db: ReturnType<typeof drizzle>;
 let userService: typeof import('../../services/userService').userService;
 let postService: typeof import('../../services/postService').postService;
 let contactService: typeof import('../../services/contactService').contactService;
-let blockService: typeof import('../../services/blockService').blockService;
 
 beforeAll(async () => {
   try {
@@ -78,7 +77,7 @@ beforeAll(async () => {
   vi.resetModules();
 
   // Re-import db with new DATABASE_URL
-  const dbModule = await import('../../db/index.ts');
+  await import('../../db/index');
   // Override the exported db and pool with our test instances
   vi.doMock('../../db', () => ({ db, pool, schema }));
 
@@ -86,12 +85,10 @@ beforeAll(async () => {
   const userMod = await import('../../services/userService');
   const postMod = await import('../../services/postService');
   const contactMod = await import('../../services/contactService');
-  const blockMod = await import('../../services/blockService');
 
   userService = userMod.userService;
   postService = postMod.postService;
   contactService = contactMod.contactService;
-  blockService = blockMod.blockService;
 }, 120_000);
 
 afterAll(async () => {

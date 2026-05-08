@@ -13,7 +13,7 @@ import { setupIntegrationTests, teardownIntegrationTests } from './setup';
 process.env.API_KEY = 'test-api-key';
 
 describe('API v1 contract tests', () => {
-  let app: Express.Application;
+  let app: any;
   let apiKey: string;
 
   beforeAll(async () => {

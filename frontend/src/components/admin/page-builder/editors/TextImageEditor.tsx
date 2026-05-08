@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { Icon } from '@iconify-icon/react';
-import type { BlockData, TextImageData } from '../../../../types/block';
-import { BLOCK_ICONS } from '../../../../types/block';
+import type { BlockData, TextImageData } from '@buro710/shared';
+import { BLOCK_ICONS } from '@buro710/shared';
 import { compressImage } from '../../../../lib/compressImage';
 
 interface TextImageEditorProps {

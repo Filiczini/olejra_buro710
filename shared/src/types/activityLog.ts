@@ -1,4 +1,4 @@
-export type ActivityAction = 'create' | 'update' | 'delete';
+export type ActivityAction = "create" | "update" | "delete";
 
 export interface ActivityLog {
   id: string;

@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import type { EditBlock } from '../types/block';
-import type { PostStatus } from '../types/post';
+import type { PostStatus } from '@buro710/shared';
 
 export interface DraftData {
   title: string;

@@ -1,4 +1,4 @@
-import type { ThreeImagesData } from '../../types/block';
+import type { ThreeImagesData } from '@buro710/shared';
 
 interface ThreeImagesBlockProps {
   data: ThreeImagesData;

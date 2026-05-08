@@ -2,8 +2,7 @@
  * Validation utilities for Posts API (shared between internal and external routes)
  */
 
-import type { PostStatus } from '../../types/post';
-import type { BlockType } from '../../types/block';
+import type { PostStatus, BlockType } from '@buro710/shared';
 import { postUpdateSchema } from '@buro710/shared';
 
 export interface PostBody {

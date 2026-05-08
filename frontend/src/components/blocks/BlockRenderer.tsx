@@ -5,7 +5,7 @@ import type {
   ImageFullData,
   TextImageData,
   ThreeImagesData,
-} from '../../types/block';
+} from '@buro710/shared';
 import TextFullBlock from './TextFullBlock';
 import ImageFullBlock from './ImageFullBlock';
 import TextImageBlock from './TextImageBlock';

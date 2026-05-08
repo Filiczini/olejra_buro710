@@ -1,7 +1,7 @@
 import { eq, sql } from 'drizzle-orm';
 import { db } from '../db';
 import { users } from '../db/schema';
-import type { User } from '../types/user';
+import type { User } from '@buro710/shared';
 
 export const userService = {
   findByEmail: async (email: string): Promise<User | null> => {

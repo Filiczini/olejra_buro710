@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import { authService } from '../../services/api';
-import type { LoginCredentials } from '../../types/auth';
+import type { LoginCredentials } from '@buro710/shared';
 
 export default function LoginPage() {
   const navigate = useNavigate();

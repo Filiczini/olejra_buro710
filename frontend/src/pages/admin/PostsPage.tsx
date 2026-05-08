@@ -2,13 +2,12 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { logger } from '../../lib/logger';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Search, ChevronDown, PlusCircle, Pencil, Eye, Trash2, CheckCircle, X } from 'lucide-react';
-import type { PostStatus } from '../../types/post';
+import type { PostStatus, Post } from '@buro710/shared';
 import { postService } from '../../services/api';
-import type { Post } from '../../types/post';
 import Pagination from '../../components/admin/Pagination';
 import Toast from '../../components/ui/Toast';
 import { useToast } from '../../hooks/useToast';
-import Button from '../../components/ui/Button';
+import ConfirmModal from '../../components/ui/ConfirmModal';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 10;
@@ -456,60 +455,37 @@ export default function PostsPage() {
         </div>
       )}
 
-      {bulkDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full space-y-4">
-            <h3 className="text-lg font-semibold text-zinc-900">Підтвердження видалення</h3>
-            <p className="text-sm text-zinc-500 leading-relaxed">
-              Видалити{' '}
-              <span className="font-medium text-zinc-900">{postCountLabel(selectedIds.size)}</span>?{' '}
-              Цю дію не можна скасувати.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setBulkDeleteConfirm(false)}
-                disabled={bulkLoading}
-              >
-                Скасувати
-              </Button>
-              <button
-                type="button"
-                onClick={handleBulkDelete}
-                disabled={bulkLoading}
-                className="px-5 py-2.5 rounded-full font-medium transition-all cursor-pointer bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
-              >
-                {bulkLoading ? 'Видалення...' : `Видалити ${postCountLabel(selectedIds.size)}`}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={bulkDeleteConfirm}
+        onClose={() => setBulkDeleteConfirm(false)}
+        onConfirm={handleBulkDelete}
+        title="Підтвердження видалення"
+        message={
+          <>
+            Видалити{' '}
+            <span className="font-medium text-zinc-900">{postCountLabel(selectedIds.size)}</span>?{' '}
+            Цю дію не можна скасувати.
+          </>
+        }
+        confirmText={bulkLoading ? 'Видалення...' : `Видалити ${postCountLabel(selectedIds.size)}`}
+        isLoading={bulkLoading}
+        variant="danger"
+      />
 
-      {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full space-y-4">
-            <h3 className="text-lg font-semibold text-zinc-900">Підтвердження видалення</h3>
-            <p className="text-sm text-zinc-500 leading-relaxed">
-              Видалити <span className="font-medium text-zinc-900">«{deleteTarget.title}»</span>? Цю
-              дію не можна скасувати.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <Button type="button" variant="secondary" onClick={() => setDeleteTarget(null)}>
-                Скасувати
-              </Button>
-              <button
-                type="button"
-                onClick={handleDeleteConfirm}
-                className="px-5 py-2.5 rounded-full font-medium transition-all cursor-pointer bg-red-600 text-white hover:bg-red-700"
-              >
-                Видалити
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDeleteConfirm}
+        title="Підтвердження видалення"
+        message={
+          <>
+            Видалити <span className="font-medium text-zinc-900">«{deleteTarget?.title}»</span>? Цю
+            дію не можна скасувати.
+          </>
+        }
+        confirmText="Видалити"
+        variant="danger"
+      />
     </div>
   );
 }

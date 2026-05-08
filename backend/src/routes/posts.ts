@@ -9,7 +9,7 @@ import { storageService } from '../services/storageService';
 import { activityLogService } from '../services/activityLogService';
 import { uploadBlockMedia, uploadGalleryImages } from '../middleware/multer';
 import { blockService } from '../services/blockService';
-import type { BlockType, BlockData } from '../types/block';
+import type { BlockType, BlockData } from '@buro710/shared';
 import {
   validatePostInput,
   parseBlocksJson,

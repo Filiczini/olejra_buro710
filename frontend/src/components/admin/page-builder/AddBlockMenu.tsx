@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Icon } from '@iconify-icon/react';
-import type { BlockType } from '../../../types/block';
+import type { BlockType } from '@buro710/shared';
 
 interface AddBlockMenuProps {
   onAddBlock: (type: BlockType) => void;

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import BlockRenderer from '../BlockRenderer';
-import type { Block } from '../../../types/block';
+import type { Block } from '@buro710/shared';
 
 vi.mock('@iconify-icon/react', () => ({
   Icon: ({ icon, ...props }: Record<string, unknown>) => (

@@ -1,4 +1,4 @@
-import type { BlockData, TextFullData } from '../../../../types/block';
+import type { BlockData, TextFullData } from '@buro710/shared';
 
 interface TextFullEditorProps {
   blockId: string;

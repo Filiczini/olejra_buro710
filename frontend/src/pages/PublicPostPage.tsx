@@ -7,8 +7,7 @@ import Header from '../components/layout/Header';
 import PostHeroBlock from '../components/blocks/PostHeroBlock';
 import BlockRenderer from '../components/blocks/BlockRenderer';
 import PostGalleryBlock from '../components/blocks/PostGalleryBlock';
-import type { Post } from '../types/post';
-import type { Block } from '../types/block';
+import type { Post, Block } from '@buro710/shared';
 
 export default function PostPage() {
   const { slug } = useParams<{ slug: string }>();

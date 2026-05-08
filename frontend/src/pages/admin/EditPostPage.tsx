@@ -3,6 +3,7 @@ import { useNavigate, useBlocker } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
+import Modal from '../../components/ui/Modal';
 import Toast from '../../components/ui/Toast';
 import SeoFields from '../../components/admin/SeoFields';
 import PostHeroForm from '../../components/admin/PostHeroForm';
@@ -316,24 +317,23 @@ export default function EditPostPage() {
         <Toast key={toast.key} message={toast.message} type={toast.type} onDismiss={dismissToast} />
       )}
 
-      {blocker.state === 'blocked' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full space-y-4">
-            <h3 className="text-lg font-semibold text-zinc-900">Незбережені зміни</h3>
-            <p className="text-sm text-zinc-500 leading-relaxed">
-              Ви маєте незбережені зміни. Якщо вийдете зараз — вони будуть втрачені.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <Button type="button" variant="secondary" onClick={() => blocker.reset?.()}>
-                Залишитися
-              </Button>
-              <Button type="button" onClick={() => blocker.proceed?.()}>
-                Вийти без збереження
-              </Button>
-            </div>
-          </div>
+      <Modal
+        isOpen={blocker.state === 'blocked'}
+        onClose={() => blocker.reset?.()}
+        title="Незбережені зміни"
+      >
+        <p className="text-sm text-zinc-500 leading-relaxed mb-6">
+          Ви маєте незбережені зміни. Якщо вийдете зараз — вони будуть втрачені.
+        </p>
+        <div className="flex gap-3 justify-end">
+          <Button type="button" variant="secondary" onClick={() => blocker.reset?.()}>
+            Залишитися
+          </Button>
+          <Button type="button" onClick={() => blocker.proceed?.()}>
+            Вийти без збереження
+          </Button>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

@@ -11,12 +11,12 @@ import type {
   PaginatedResponse,
   PostPaginationParams,
   PostHero,
-} from '../types/post';
-import type { Block } from '../types/block';
+  Block,
+} from '@buro710/shared';
 
 interface CreatePostParams extends PostHero {
   title: string;
-  slug: string;
+  slug?: string;
   status?: PostStatus;
   featured?: boolean;
   seo_title?: string;

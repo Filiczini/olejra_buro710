@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { postService } from '../services/api';
-import type { Post } from '../types/post';
+import type { Post } from '@buro710/shared';
 
 interface UseFetchPostsOptions {
   featured?: boolean;

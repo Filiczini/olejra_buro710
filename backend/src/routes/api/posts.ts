@@ -11,8 +11,7 @@ import { apiKeyMiddleware } from '../../middleware/apiKey';
 import { uploadMiddleware } from '../../middleware/multer';
 import { postService } from '../../services/postService';
 import { storageService } from '../../services/storageService';
-import type { BlockType, BlockData } from '../../types/block';
-import type { PostStatus } from '../../types/post';
+import type { BlockType, BlockData, PostStatus } from '@buro710/shared';
 import { AppError } from '../../lib/errors';
 import {
   parseJsonField,

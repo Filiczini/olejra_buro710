@@ -1,7 +1,7 @@
 import { eq, desc, count, and } from 'drizzle-orm';
 import { db } from '../db';
 import { activityLogs } from '../db/schema';
-import type { ActivityLog, ActivityChanges, ActivityLogsParams } from '../types/activityLog';
+import type { ActivityLog, ActivityChanges, ActivityLogsParams } from '@buro710/shared';
 
 interface LogParams {
   user_email: string;

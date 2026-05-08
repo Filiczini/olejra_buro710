@@ -3,7 +3,7 @@ import { logger } from '../../lib/logger';
 import { ChevronDown } from 'lucide-react';
 import Pagination from '../../components/admin/Pagination';
 import { activityLogService } from '../../services/api';
-import type { ActivityLog, ActivityLogsParams } from '../../types/activityLog';
+import type { ActivityLog, ActivityLogsParams } from '@buro710/shared';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;

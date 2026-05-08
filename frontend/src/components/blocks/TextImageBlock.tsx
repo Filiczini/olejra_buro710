@@ -1,5 +1,5 @@
 import { Icon } from '@iconify-icon/react';
-import type { TextImageData } from '../../types/block';
+import type { TextImageData } from '@buro710/shared';
 
 interface TextImageBlockProps {
   data: TextImageData;

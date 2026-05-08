@@ -1,6 +1,6 @@
 import type { EditBlock } from '../types/block';
 import type { PostHeroFormData } from '../components/admin/PostHeroForm';
-import type { PostStatus } from '../types/post';
+import type { PostStatus } from '@buro710/shared';
 
 interface BlockWithFile {
   id: string;

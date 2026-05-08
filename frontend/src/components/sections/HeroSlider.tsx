@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { postService } from '../../services/api';
 import { logger } from '../../lib/logger';
-import type { Post } from '../../types/post';
+import type { Post } from '@buro710/shared';
 
 const SLIDE_INTERVAL_MS = 6000;
 

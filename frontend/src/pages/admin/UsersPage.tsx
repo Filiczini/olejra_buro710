@@ -6,7 +6,9 @@ import type { User } from '../../services/api';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import Toast from '../../components/ui/Toast';
-import { PlusCircle, Trash2, KeyRound, X } from 'lucide-react';
+import { PlusCircle, Trash2, KeyRound } from 'lucide-react';
+import ConfirmModal from '../../components/ui/ConfirmModal';
+import Modal from '../../components/ui/Modal';
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -264,90 +266,70 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {/* Delete Modal */}
-      {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full space-y-4">
-            <h3 className="text-lg font-semibold text-zinc-900">Підтвердження видалення</h3>
-            <p className="text-sm text-zinc-500 leading-relaxed">
-              Видалити користувача{' '}
-              <span className="font-medium text-zinc-900">{deleteTarget.email}</span>? Цю дію не
-              можна скасувати.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <Button type="button" variant="secondary" onClick={() => setDeleteTarget(null)}>
-                Скасувати
-              </Button>
-              <button
-                type="button"
-                onClick={handleDelete}
-                className="px-5 py-2.5 rounded-full font-medium transition-all cursor-pointer bg-red-600 text-white hover:bg-red-700"
-              >
-                Видалити
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        title="Підтвердження видалення"
+        message={
+          <>
+            Видалити користувача{' '}
+            <span className="font-medium text-zinc-900">{deleteTarget?.email}</span>? Цю дію не
+            можна скасувати.
+          </>
+        }
+        confirmText="Видалити"
+        variant="danger"
+      />
 
-      {/* Change Password Modal */}
-      {passwordTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-zinc-900">Зміна пароля</h3>
-              <button
-                onClick={() => {
-                  setPasswordTarget(null);
-                  setNewPassword('');
-                  setPasswordError('');
-                }}
-                className="text-zinc-400 hover:text-zinc-600 cursor-pointer"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <p className="text-sm text-zinc-500">
-              Новий пароль для{' '}
-              <span className="font-medium text-zinc-900">{passwordTarget.email}</span>
-            </p>
-            <form onSubmit={handleUpdatePassword} className="space-y-4">
-              <Input
-                label="Новий пароль"
-                type="password"
-                value={newPassword}
-                onChange={(e) => {
-                  setNewPassword(e.target.value);
-                  setPasswordError('');
-                }}
-                error={passwordError}
-                placeholder="Мінімум 6 символів"
-                required
-              />
-              <div className="flex gap-3 justify-end">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => {
-                    setPasswordTarget(null);
-                    setNewPassword('');
-                    setPasswordError('');
-                  }}
-                >
-                  Скасувати
-                </Button>
-                <button
-                  type="submit"
-                  disabled={passwordLoading}
-                  className="px-5 py-2.5 rounded-full font-medium transition-all cursor-pointer bg-zinc-900 text-white hover:bg-zinc-800 disabled:opacity-50"
-                >
-                  {passwordLoading ? 'Збереження...' : 'Зберегти'}
-                </button>
-              </div>
-            </form>
+      <Modal
+        isOpen={!!passwordTarget}
+        onClose={() => {
+          setPasswordTarget(null);
+          setNewPassword('');
+          setPasswordError('');
+        }}
+        title="Зміна пароля"
+      >
+        <p className="text-sm text-zinc-500 mb-4">
+          Новий пароль для{' '}
+          <span className="font-medium text-zinc-900">{passwordTarget?.email}</span>
+        </p>
+        <form onSubmit={handleUpdatePassword} className="space-y-4">
+          <Input
+            label="Новий пароль"
+            type="password"
+            value={newPassword}
+            onChange={(e) => {
+              setNewPassword(e.target.value);
+              setPasswordError('');
+            }}
+            error={passwordError}
+            placeholder="Мінімум 6 символів"
+            required
+          />
+          <div className="flex gap-3 justify-end">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setPasswordTarget(null);
+                setNewPassword('');
+                setPasswordError('');
+              }}
+            >
+              Скасувати
+            </Button>
+            <button
+              type="submit"
+              disabled={passwordLoading}
+              className="px-5 py-2.5 rounded-full font-medium transition-all cursor-pointer bg-zinc-900 text-white hover:bg-zinc-800 disabled:opacity-50"
+            >
+              {passwordLoading ? 'Збереження...' : 'Зберегти'}
+            </button>
           </div>
-        </div>
-      )}
+        </form>
+      </Modal>
     </div>
   );
 }

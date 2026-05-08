@@ -10,7 +10,7 @@ import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } 
 import express from 'express';
 import request from 'supertest';
 import type { Application } from 'express';
-import type { Post, PaginatedResponse } from '../../types/post';
+import type { Post, PaginatedResponse } from '@buro710/shared';
 import { ConflictError } from '../../lib/errors';
 
 // ============================================================================

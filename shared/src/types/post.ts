@@ -1,6 +1,6 @@
-import type { Block, BlockType, BlockData } from './block';
+import type { Block, BlockType, BlockData } from "./block.js";
 
-export type PostStatus = 'draft' | 'published';
+export type PostStatus = "draft" | "published";
 
 export interface PostHero {
   hero_image_url?: string;
@@ -23,13 +23,15 @@ export interface Post extends PostHero {
   gallery_images?: string[];
   created_at: string;
   updated_at: string;
+  deleted_at?: string | null;
   blocks?: Block[];
 }
 
 export interface CreatePostData extends PostHero {
   title: string;
-  slug: string;
+  slug?: string;
   status?: PostStatus;
+  featured?: boolean;
   seo_title?: string;
   seo_description?: string;
   og_image_url?: string;
@@ -45,6 +47,7 @@ export interface UpdatePostData extends Partial<PostHero> {
   title?: string;
   slug?: string;
   status?: PostStatus;
+  featured?: boolean;
   seo_title?: string;
   seo_description?: string;
   og_image_url?: string;

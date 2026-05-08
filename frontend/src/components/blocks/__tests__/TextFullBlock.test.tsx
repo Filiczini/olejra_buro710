@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import TextFullBlock from '../TextFullBlock';
-import type { TextFullData } from '../../../types/block';
+import type { TextFullData } from '@buro710/shared';
 
 describe('TextFullBlock', () => {
   it('renders content in quotes', () => {

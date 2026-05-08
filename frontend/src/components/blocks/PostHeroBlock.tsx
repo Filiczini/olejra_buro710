@@ -1,5 +1,5 @@
 import { Icon } from '@iconify-icon/react';
-import type { Post } from '../../types/post';
+import type { Post } from '@buro710/shared';
 
 interface PostHeroBlockProps {
   post: Post;

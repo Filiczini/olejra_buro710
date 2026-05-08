@@ -1,7 +1,7 @@
 import { eq, asc } from 'drizzle-orm';
 import { db } from '../db';
 import { blocks } from '../db/schema';
-import type { Block, BlockType, BlockData, UpdateBlockData } from '../types/block';
+import type { Block, BlockType, BlockData, UpdateBlockData } from '@buro710/shared';
 
 interface CreateBlocksParams {
   postId: string;

@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Icon } from '@iconify-icon/react';
-import type { BlockData, ThreeImagesData } from '../../../../types/block';
+import type { BlockData, ThreeImagesData } from '@buro710/shared';
 import { compressImage } from '../../../../lib/compressImage';
 
 interface ThreeImagesEditorProps {

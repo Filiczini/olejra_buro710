@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { generateSlug } from '@buro710/shared';
 import type { PostHeroFormData } from '../components/admin/PostHeroForm';
-import type { PostStatus } from '../types/post';
+import type { PostStatus } from '@buro710/shared';
 
 export interface PostFormFields {
   title: string;

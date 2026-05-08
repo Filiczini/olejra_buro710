@@ -9,7 +9,7 @@ import type {
   ImageFullData,
   TextImageData,
   ThreeImagesData,
-} from '../../../types/block';
+} from '@buro710/shared';
 import TextFullEditor from './editors/TextFullEditor';
 import ImageFullEditor from './editors/ImageFullEditor';
 import TextImageEditor from './editors/TextImageEditor';

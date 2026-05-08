@@ -7,7 +7,7 @@ import type {
   ImageFullData,
   TextImageData,
   ThreeImagesData,
-} from '../../../types/block';
+} from '@buro710/shared';
 import BlocksList from './BlocksList';
 import AddBlockMenu from './AddBlockMenu';
 

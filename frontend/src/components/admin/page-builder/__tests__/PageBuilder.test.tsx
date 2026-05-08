@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import PageBuilder from '../PageBuilder';
-import type { Block, BlockType } from '../../../../types/block';
+import type { Block, BlockType } from '@buro710/shared';
 
 vi.mock('@iconify-icon/react', () => ({
   Icon: ({ icon, ...props }: Record<string, unknown>) => (

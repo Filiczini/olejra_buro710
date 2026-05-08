@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import ThreeImagesBlock from '../ThreeImagesBlock';
-import type { ThreeImagesData } from '../../../types/block';
+import type { ThreeImagesData } from '@buro710/shared';
 
 describe('ThreeImagesBlock', () => {
   it('renders 3 images in a grid', () => {

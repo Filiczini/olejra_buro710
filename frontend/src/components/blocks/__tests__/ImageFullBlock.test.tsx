@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import ImageFullBlock from '../ImageFullBlock';
-import type { ImageFullData } from '../../../types/block';
+import type { ImageFullData } from '@buro710/shared';
 
 describe('ImageFullBlock', () => {
   it('renders image with correct src and alt', () => {
