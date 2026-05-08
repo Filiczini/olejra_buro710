@@ -44,6 +44,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
       - run: npm ci
+      - run: cd backend && npm run test:run
+      - run: cd backend && npm run test:coverage
+
   test-e2e:
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
@@ -70,6 +73,7 @@ jobs:
           cache-dependency-path: package-lock.json
       - run: npm ci
       - run: cd e2e && npx playwright install chromium
+      - run: cd backend && npm run seed:admin
       - run: cd e2e && npx playwright test
         env:
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/bureau710_test

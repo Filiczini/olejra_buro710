@@ -5,7 +5,6 @@ const BACKEND_URL = process.env.E2E_BACKEND_URL || 'http://localhost:3000';
 const IS_CI = !!process.env.CI;
 
 export default defineConfig({
-  globalSetup: require.resolve('./global-setup'),
   testDir: './tests',
   fullyParallel: !IS_CI,
   forbidOnly: IS_CI,
@@ -25,7 +24,7 @@ export default defineConfig({
   webServer: [
     {
       command: 'cd .. && npm run dev:backend',
-      url: `${BACKEND_URL}/api/admin/me`,
+      url: `${BACKEND_URL}/api/v1/posts`,
       timeout: 120_000,
       reuseExistingServer: !IS_CI,
       env: {
