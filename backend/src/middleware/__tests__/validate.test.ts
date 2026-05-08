@@ -17,8 +17,8 @@ describe('validateBody', () => {
   let req: Partial<Request>;
   let res: Partial<Response>;
   let next: NextFunction;
-  let statusMock: ReturnType<typeof vi.fn>;
-  let jsonMock: ReturnType<typeof vi.fn>;
+  let statusMock: any;
+  let jsonMock: any;
 
   beforeEach(() => {
     statusMock = vi.fn().mockReturnThis();
@@ -101,8 +101,8 @@ describe('validateFormData', () => {
   let req: Partial<Request>;
   let res: Partial<Response>;
   let next: NextFunction;
-  let statusMock: ReturnType<typeof vi.fn>;
-  let jsonMock: ReturnType<typeof vi.fn>;
+  let statusMock: any;
+  let jsonMock: any;
 
   beforeEach(() => {
     statusMock = vi.fn().mockReturnThis();

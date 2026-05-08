@@ -4,13 +4,10 @@ const {
   mockReturning,
   mockInsertValues,
   mockInsertFn,
-  mockUpdateSet,
   mockUpdateFn,
   mockDeleteWhere,
   mockDeleteFn,
   mockSelectOrderBy,
-  mockSelectWhere,
-  mockSelectFrom,
   mockSelect,
 } = vi.hoisted(() => {
   const mockReturning = vi.fn();
@@ -30,13 +27,10 @@ const {
     mockReturning,
     mockInsertValues,
     mockInsertFn,
-    mockUpdateSet,
     mockUpdateFn,
     mockDeleteWhere,
     mockDeleteFn,
     mockSelectOrderBy,
-    mockSelectWhere,
-    mockSelectFrom,
     mockSelect,
   };
 });

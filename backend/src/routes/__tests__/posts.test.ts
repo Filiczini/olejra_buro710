@@ -340,7 +340,7 @@ describe('Internal Posts Routes', () => {
         blocks: [],
       } as any);
       vi.mocked(postService.update).mockResolvedValue(postWithGallery as any);
-      vi.mocked(storageService.deleteImage).mockResolvedValue(undefined);
+      vi.mocked(storageService.deleteImage).mockResolvedValue({ success: true } as any);
 
       const response = await request(app)
         .delete('/api/posts/post-1/gallery')

@@ -18,8 +18,8 @@ describe('requestIdMiddleware', () => {
   let req: Partial<Request>;
   let res: Partial<Response>;
   let next: NextFunction;
-  let setHeaderMock: ReturnType<typeof vi.fn>;
-  let onMock: ReturnType<typeof vi.fn>;
+  let setHeaderMock: any;
+  let onMock: any;
   let emitFinish: (() => void) | null = null;
 
   beforeEach(() => {

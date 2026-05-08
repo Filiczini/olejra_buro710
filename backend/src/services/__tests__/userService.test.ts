@@ -45,13 +45,13 @@ const {
 vi.mock('../../db', () => ({
   db: {
     select: (...args: any[]) => {
-      mockSelect(...args);
+      (mockSelect as any)(...args);
       return {
         from: (...fArgs: unknown[]) => {
-          mockFrom(...fArgs);
+          (mockFrom as any)(...fArgs);
           return {
-            where: (...wArgs: unknown[]) => mockWhere(...wArgs),
-            orderBy: (...oArgs: unknown[]) => mockOrderBy(...oArgs),
+            where: (...wArgs: unknown[]) => (mockWhere as any)(...wArgs),
+            orderBy: (...oArgs: unknown[]) => (mockOrderBy as any)(...oArgs),
           };
         },
       };

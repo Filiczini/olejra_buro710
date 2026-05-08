@@ -2,19 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const {
   mockReturning,
-  mockUpdateWhere,
   mockUpdateSet,
   mockUpdateFn,
   mockInsertReturning,
-  mockInsertValues,
   mockInsertFn,
-  mockDeleteWhere,
   mockDeleteFn,
-  mockSelectOffset,
-  mockSelectLimit,
-  mockSelectOrderBy,
-  mockSelectWhere,
-  mockSelectFrom,
   mockSelect,
 } = vi.hoisted(() => {
   const mockReturning = vi.fn();
@@ -38,19 +30,11 @@ const {
 
   return {
     mockReturning,
-    mockUpdateWhere,
     mockUpdateSet,
     mockUpdateFn,
     mockInsertReturning,
-    mockInsertValues,
     mockInsertFn,
-    mockDeleteWhere,
     mockDeleteFn,
-    mockSelectOffset,
-    mockSelectLimit,
-    mockSelectOrderBy,
-    mockSelectWhere,
-    mockSelectFrom,
     mockSelect,
   };
 });
