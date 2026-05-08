@@ -7,18 +7,8 @@ export interface AuthenticatedUser {
   tokenVersion: number;
 }
 
-export interface AuthenticatedRequest extends Request {
-  user?: AuthenticatedUser;
-}
-
 declare module 'express' {
   interface Request {
     user?: AuthenticatedUser;
-  }
-}
-
-declare module 'express-serve-static-core' {
-  interface ParamsDictionary {
-    [key: string]: string;
   }
 }

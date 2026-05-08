@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { authMiddleware, adminMiddleware, optionalAuthMiddleware } from '../middleware/auth';
-import type { AuthenticatedRequest } from '../types/express.js';
 import { postService } from '../services/postService';
 import { storageService } from '../services/storageService';
 import { activityLogService } from '../services/activityLogService';
@@ -98,7 +97,7 @@ router.post(
   authMiddleware,
   adminMiddleware,
   uploadBlockMedia,
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req, res) => {
     const body: PostBody = req.body;
     const {
       title,
@@ -239,7 +238,7 @@ router.put(
   authMiddleware,
   adminMiddleware,
   uploadBlockMedia,
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req, res) => {
     const id = getParam(req.params.id);
     const body: PostBody = req.body;
     const {
@@ -394,7 +393,7 @@ router.delete(
   '/:id',
   authMiddleware,
   adminMiddleware,
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req, res) => {
     const id = getParam(req.params.id);
     const result = await postService.getById(id);
 
@@ -418,7 +417,7 @@ router.post(
   authMiddleware,
   adminMiddleware,
   uploadGalleryImages,
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req, res) => {
     const id = getParam(req.params.id);
     const files = req.files as Express.Multer.File[] | undefined;
 
@@ -456,7 +455,7 @@ router.delete(
   '/:id/gallery',
   authMiddleware,
   adminMiddleware,
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req, res) => {
     const id = getParam(req.params.id);
     const { image_url } = req.body as { image_url?: string };
 
