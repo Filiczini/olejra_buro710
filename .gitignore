@@ -43,6 +43,7 @@ cache/
 *.tmp
 .cache/
 docs
+!docs/TESTING_PLAN.md
 
 # Backup files
 *.bak
