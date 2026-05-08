@@ -17,7 +17,7 @@ const {
     where: (...wArgs: unknown[]) => mockWhere(...wArgs),
     orderBy: (...oArgs: unknown[]) => mockOrderBy(...oArgs),
   }));
-  const mockSelect = vi.fn(() => ({ from: (...fArgs: unknown[]) => mockFrom(...fArgs) }));
+  const mockSelect = vi.fn(() => ({ from: (...fArgs: unknown[]) => (mockFrom as any)(...fArgs) }));
 
   const mockInsertReturning = vi.fn();
   const mockInsertValues = vi.fn(() => ({ returning: mockInsertReturning }));
