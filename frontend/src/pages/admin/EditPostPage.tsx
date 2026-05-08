@@ -17,37 +17,16 @@ export default function EditPostPage() {
   const {
     id,
     isEditing,
-    loading,
-    saving,
     title,
     slug,
     slugLocked,
     status,
-    seoTitle,
-    seoDescription,
-    heroData,
-    initialBlocks,
-    galleryImages,
-    galleryNewFiles,
     featured,
-    errors,
-    isDirty,
-    draftBanner,
+    initialBlocks,
     pageBuilderKey,
-    toast,
-    dismissToast,
     markDirty,
     validateField,
-    restoreDraft,
-    dismissDraft,
-    getIsDirty,
     setStatus,
-    setSeoTitle,
-    setSeoDescription,
-    setOgImageFile,
-    setHeroData,
-    setGalleryImages,
-    setGalleryNewFiles,
     setFeatured,
     handleTitleChange,
     handleSlugChange,
@@ -55,21 +34,24 @@ export default function EditPostPage() {
     handleSlugLock,
     handleBlocksChange,
     handleBlockImageChange,
-    handleSubmit,
+    heroProps,
+    seoProps,
+    galleryProps,
+    formState,
   } = usePostForm();
 
-  const blocker = useBlocker(getIsDirty);
+  const blocker = useBlocker(formState.getIsDirty);
 
   useEffect(() => {
-    if (!isDirty) return;
+    if (!formState.isDirty) return;
     const handler = (e: BeforeUnloadEvent) => {
       e.preventDefault();
     };
     window.addEventListener('beforeunload', handler);
     return () => window.removeEventListener('beforeunload', handler);
-  }, [isDirty]);
+  }, [formState.isDirty]);
 
-  if (loading) {
+  if (formState.loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Icon icon="solar:spinner-linear" width={32} className="animate-spin text-zinc-400" />
@@ -85,11 +67,11 @@ export default function EditPostPage() {
         </h1>
       </div>
 
-      {draftBanner && (
+      {formState.draftBanner && (
         <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between gap-4">
           <p className="text-sm text-amber-800">
             <span className="font-medium">Знайдено незбережену версію</span> від{' '}
-            {new Date(draftBanner.savedAt).toLocaleTimeString('uk-UA', {
+            {new Date(formState.draftBanner.savedAt).toLocaleTimeString('uk-UA', {
               hour: '2-digit',
               minute: '2-digit',
             })}
@@ -98,14 +80,14 @@ export default function EditPostPage() {
           <div className="flex gap-2 shrink-0">
             <button
               type="button"
-              onClick={restoreDraft}
+              onClick={formState.restoreDraft}
               className="px-3 py-1.5 text-sm font-medium bg-amber-700 text-white rounded-lg hover:bg-amber-800 transition-colors cursor-pointer"
             >
               Відновити
             </button>
             <button
               type="button"
-              onClick={dismissDraft}
+              onClick={formState.dismissDraft}
               className="px-3 py-1.5 text-sm font-medium text-amber-700 hover:text-amber-900 transition-colors cursor-pointer"
             >
               Ігнорувати
@@ -114,10 +96,10 @@ export default function EditPostPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {errors.submit && (
+      <form onSubmit={formState.handleSubmit} className="space-y-6">
+        {formState.errors.submit && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-            {errors.submit}
+            {formState.errors.submit}
           </div>
         )}
 
@@ -130,7 +112,7 @@ export default function EditPostPage() {
             value={title}
             onChange={(e) => handleTitleChange(e.target.value)}
             onBlur={(e) => validateField('title', e.target.value)}
-            error={errors.title}
+            error={formState.errors.title}
             placeholder="Введіть назву сторінки"
           />
 
@@ -165,14 +147,16 @@ export default function EditPostPage() {
               id="post-slug"
               name="slug"
               className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent ${
-                errors.slug ? 'border-red-500' : 'border-zinc-200'
+                formState.errors.slug ? 'border-red-500' : 'border-zinc-200'
               }`}
               value={slug}
               onChange={(e) => handleSlugChange(e.target.value)}
               onBlur={(e) => validateField('slug', e.target.value)}
               placeholder="url-adresa-storinky"
             />
-            {errors.slug && <span className="text-sm text-red-500">{errors.slug}</span>}
+            {formState.errors.slug && (
+              <span className="text-sm text-red-500">{formState.errors.slug}</span>
+            )}
             {slug && (
               <p className="text-xs text-zinc-400">
                 /page/<span className="font-medium text-zinc-500">{slug}</span>
@@ -239,39 +223,14 @@ export default function EditPostPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           <div className="lg:col-span-3">
-            <PostHeroForm
-              data={heroData}
-              onChange={(data) => {
-                setHeroData(data);
-                markDirty();
-              }}
-              errors={errors}
-              onBlurField={validateField}
-            />
+            <PostHeroForm {...heroProps} />
           </div>
           <div className="lg:col-span-2">
-            <PostHeroPreview data={heroData} />
+            <PostHeroPreview data={heroProps.data} />
           </div>
         </div>
 
-        <SeoFields
-          seoTitle={seoTitle}
-          seoDescription={seoDescription}
-          onSeoTitleChange={(v) => {
-            setSeoTitle(v);
-            markDirty();
-          }}
-          onSeoDescriptionChange={(v) => {
-            setSeoDescription(v);
-            markDirty();
-          }}
-          onOgImageChange={(f) => {
-            setOgImageFile(f);
-            markDirty();
-          }}
-          onBlurField={validateField}
-          errors={{ seo_title: errors.seo_title, seo_description: errors.seo_description }}
-        />
+        <SeoFields {...seoProps} />
 
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-lg font-medium text-zinc-900 mb-4">Блоки контенту</h2>
@@ -283,22 +242,11 @@ export default function EditPostPage() {
           />
         </div>
 
-        <GalleryUploader
-          images={galleryImages}
-          onImagesChange={(imgs) => {
-            setGalleryImages(imgs);
-            markDirty();
-          }}
-          newFiles={galleryNewFiles}
-          onNewFilesChange={(files) => {
-            setGalleryNewFiles(files);
-            markDirty();
-          }}
-        />
+        <GalleryUploader {...galleryProps} />
 
-        {(errors.submit || Object.keys(errors).some((k) => k !== 'submit')) && (
+        {(formState.errors.submit || Object.keys(formState.errors).some((k) => k !== 'submit')) && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-            {errors.submit || 'Виправте помилки у формі перед збереженням'}
+            {formState.errors.submit || 'Виправте помилки у формі перед збереженням'}
           </div>
         )}
 
@@ -306,15 +254,22 @@ export default function EditPostPage() {
           <Button type="button" variant="secondary" onClick={() => navigate('/admin/posts')}>
             Скасувати
           </Button>
-          <Button type="submit" disabled={saving} className="flex items-center gap-2">
-            {saving && <Icon icon="solar:spinner-linear" width={16} className="animate-spin" />}
-            {saving ? 'Збереження...' : 'Зберегти'}
+          <Button type="submit" disabled={formState.saving} className="flex items-center gap-2">
+            {formState.saving && (
+              <Icon icon="solar:spinner-linear" width={16} className="animate-spin" />
+            )}
+            {formState.saving ? 'Збереження...' : 'Зберегти'}
           </Button>
         </div>
       </form>
 
-      {toast && (
-        <Toast key={toast.key} message={toast.message} type={toast.type} onDismiss={dismissToast} />
+      {formState.toast && (
+        <Toast
+          key={formState.toast.key}
+          message={formState.toast.message}
+          type={formState.toast.type}
+          onDismiss={formState.dismissToast}
+        />
       )}
 
       <Modal

@@ -27,6 +27,7 @@ vi.mock('../../lib/logger.js', () => ({
 // Import after mocking
 import contactRouter from '../contact';
 import { contactService } from '../../services/contactService';
+import { AppError } from '../../lib/errors';
 
 const mockedContactService = vi.mocked(contactService);
 
@@ -51,7 +52,11 @@ const createTestApp = (): Application => {
   app.use('/contact', contactRouter);
   app.use(
     (err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-      res.status(500).json({ error: err.message });
+      if (err instanceof AppError) {
+        res.status(err.statusCode).json({ error: err.message });
+        return;
+      }
+      res.status(500).json({ error: 'Internal server error' });
     }
   );
   return app;
@@ -166,7 +171,7 @@ describe('Contact Route', () => {
       const res = await request(app).post('/contact').send(VALID_CONTACT);
 
       expect(res.status).toBe(500);
-      expect(res.body.error).toBe('Помилка при відправці повідомлення');
+      expect(res.body.error).toBe('Internal server error');
     });
 
     it('includes validation details with field names', async () => {

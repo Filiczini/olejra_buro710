@@ -4,7 +4,8 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Search, ChevronDown, PlusCircle, Pencil, Eye, Trash2, CheckCircle, X } from 'lucide-react';
 import type { PostStatus, Post } from '@buro710/shared';
 import { postService } from '../../services/api';
-import Pagination from '../../components/admin/Pagination';
+import DataTable from '../../components/admin/DataTable';
+import type { ColumnDef } from '../../components/admin/DataTable';
 import Toast from '../../components/ui/Toast';
 import { useToast } from '../../hooks/useToast';
 import ConfirmModal from '../../components/ui/ConfirmModal';
@@ -42,30 +43,10 @@ export default function PostsPage() {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const allSelected = posts.length > 0 && posts.every((p) => selectedIds.has(p.id));
-  const someSelected = posts.some((p) => selectedIds.has(p.id));
-
   const postCountLabel = (n: number) => {
     if (n === 1) return '1 пост';
     if (n >= 2 && n <= 4) return `${n} пости`;
     return `${n} постів`;
-  };
-
-  const handleSelectAll = () => {
-    if (allSelected) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(posts.map((p) => p.id)));
-    }
-  };
-
-  const handleToggleSelect = (id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
   };
 
   const loadPosts = useCallback(
@@ -185,6 +166,110 @@ export default function PostsPage() {
     return new Date(dateString).toLocaleDateString('uk-UA');
   };
 
+  const postColumns: ColumnDef<Post>[] = [
+    {
+      key: 'title',
+      header: 'Назва',
+      cell: (post) =>
+        post.status === 'published' ? (
+          <a
+            href={`/page/${post.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors"
+          >
+            {post.title}
+          </a>
+        ) : (
+          <Link
+            to={`/admin/posts/edit/${post.id}`}
+            className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors"
+          >
+            {post.title}
+          </Link>
+        ),
+    },
+    {
+      key: 'slug',
+      header: 'Slug',
+      cell: (post) => (
+        <code className="text-sm font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+          /{post.slug}
+        </code>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Статус',
+      cell: (post) => getStatusBadge(post.status),
+    },
+    {
+      key: 'featured',
+      header: 'Обране',
+      cell: (post) =>
+        post.featured ? (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/20">
+            Так
+          </span>
+        ) : (
+          <span className="text-gray-400 text-sm">—</span>
+        ),
+    },
+    {
+      key: 'seo',
+      header: 'SEO',
+      cell: (post) =>
+        post.seo_title || post.seo_description ? (
+          <div className="flex items-center text-emerald-600 text-sm font-medium">
+            <CheckCircle className="h-4 w-4 mr-1.5 stroke-[1.5]" />
+            Налаштовано
+          </div>
+        ) : (
+          <span className="text-gray-400 text-sm">Не налаштовано</span>
+        ),
+    },
+    {
+      key: 'created',
+      header: 'Створено',
+      cell: (post) => (
+        <span className="text-base text-gray-500 tabular-nums">{formatDate(post.created_at)}</span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: <span className="text-right block">Дії</span>,
+      cell: (post) => (
+        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={() => navigate(`/admin/posts/edit/${post.id}`)}
+            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors cursor-pointer"
+            title="Редагувати"
+          >
+            <Pencil className="h-5 w-5 stroke-[1.5]" />
+          </button>
+          {post.status === 'published' && (
+            <a
+              href={`/page/${post.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+              title="Перегляд"
+            >
+              <Eye className="h-5 w-5 stroke-[1.5]" />
+            </a>
+          )}
+          <button
+            onClick={() => setDeleteTarget({ id: post.id, title: post.title })}
+            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
+            title="Видалити"
+          >
+            <Trash2 className="h-5 w-5 stroke-[1.5]" />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div>
       {toast && (
@@ -240,164 +325,23 @@ export default function PostsPage() {
           </div>
         </div>
 
-        {/* Table Card */}
-        <div className="bg-white border border-gray-200 rounded-xl shadow-[0px_2px_4px_rgba(0,0,0,0.02)] overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/50">
-                  <th className="py-4 pl-6 pr-2 w-10">
-                    <input
-                      type="checkbox"
-                      checked={allSelected}
-                      ref={(el) => {
-                        if (el) el.indeterminate = someSelected && !allSelected;
-                      }}
-                      onChange={handleSelectAll}
-                      className="w-4 h-4 rounded border-gray-300 text-zinc-900 cursor-pointer"
-                    />
-                  </th>
-                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">
-                    Назва
-                  </th>
-                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">
-                    Slug
-                  </th>
-                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">
-                    Статус
-                  </th>
-                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">
-                    Обране
-                  </th>
-                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">
-                    SEO
-                  </th>
-                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">
-                    Створено
-                  </th>
-                  <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide text-right">
-                    Дії
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {loading ? (
-                  <tr>
-                    <td colSpan={7} className="text-center py-8 text-gray-500">
-                      Завантаження...
-                    </td>
-                  </tr>
-                ) : posts.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="text-center py-8 text-gray-500">
-                      Постів не знайдено
-                    </td>
-                  </tr>
-                ) : (
-                  posts.map((post) => (
-                    <tr
-                      key={post.id}
-                      className={`group hover:bg-gray-50/80 transition-colors ${selectedIds.has(post.id) ? 'bg-zinc-50' : ''}`}
-                    >
-                      <td className="py-4 pl-6 pr-2">
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.has(post.id)}
-                          onChange={() => handleToggleSelect(post.id)}
-                          className="w-4 h-4 rounded border-gray-300 text-zinc-900 cursor-pointer"
-                        />
-                      </td>
-                      <td className="py-4 px-6">
-                        {post.status === 'published' ? (
-                          <a
-                            href={`/page/${post.slug}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors"
-                          >
-                            {post.title}
-                          </a>
-                        ) : (
-                          <Link
-                            to={`/admin/posts/edit/${post.id}`}
-                            className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors"
-                          >
-                            {post.title}
-                          </Link>
-                        )}
-                      </td>
-                      <td className="py-4 px-6">
-                        <code className="text-sm font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
-                          /{post.slug}
-                        </code>
-                      </td>
-                      <td className="py-4 px-6">{getStatusBadge(post.status)}</td>
-                      <td className="py-4 px-6">
-                        {post.featured ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/20">
-                            Так
-                          </span>
-                        ) : (
-                          <span className="text-gray-400 text-sm">—</span>
-                        )}
-                      </td>
-                      <td className="py-4 px-6">
-                        {post.seo_title || post.seo_description ? (
-                          <div className="flex items-center text-emerald-600 text-sm font-medium">
-                            <CheckCircle className="h-4 w-4 mr-1.5 stroke-[1.5]" />
-                            Налаштовано
-                          </div>
-                        ) : (
-                          <span className="text-gray-400 text-sm">Не налаштовано</span>
-                        )}
-                      </td>
-                      <td className="py-4 px-6 text-base text-gray-500 tabular-nums">
-                        {formatDate(post.created_at)}
-                      </td>
-                      <td className="py-4 px-6 text-right">
-                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => navigate(`/admin/posts/edit/${post.id}`)}
-                            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors cursor-pointer"
-                            title="Редагувати"
-                          >
-                            <Pencil className="h-5 w-5 stroke-[1.5]" />
-                          </button>
-                          {post.status === 'published' && (
-                            <a
-                              href={`/page/${post.slug}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
-                              title="Перегляд"
-                            >
-                              <Eye className="h-5 w-5 stroke-[1.5]" />
-                            </a>
-                          )}
-                          <button
-                            onClick={() => setDeleteTarget({ id: post.id, title: post.title })}
-                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
-                            title="Видалити"
-                          >
-                            <Trash2 className="h-5 w-5 stroke-[1.5]" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <Pagination
-            page={pagination.page}
-            totalPages={pagination.totalPages}
-            total={pagination.total}
-            limit={pagination.limit}
-            onPageChange={(page) => loadPosts(page)}
-          />
-        </div>
+        <DataTable
+          data={posts}
+          columns={postColumns}
+          rowKey={(post) => post.id}
+          rowSelectable
+          selectedIds={[...selectedIds]}
+          onSelectionChange={(ids) => setSelectedIds(new Set(ids))}
+          isLoading={loading}
+          emptyMessage="Постів не знайдено"
+          pagination={{
+            page: pagination.page,
+            totalPages: pagination.totalPages,
+            total: pagination.total,
+            limit: pagination.limit,
+            onPageChange: (page) => loadPosts(page),
+          }}
+        />
       </div>
       {selectedIds.size > 0 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 bg-zinc-900 text-white px-5 py-3 rounded-2xl shadow-2xl">

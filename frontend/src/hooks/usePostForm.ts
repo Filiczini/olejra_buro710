@@ -282,38 +282,16 @@ export function usePostForm() {
   return {
     id,
     isEditing,
-    loading,
-    saving,
-    initialBlocks,
-    galleryImages,
-    pageBuilderKey,
-    isDirty,
-    toast,
-    dismissToast,
-    getIsDirty,
-    draftBanner,
     title,
     slug,
     slugLocked,
     status,
-    seoTitle,
-    seoDescription,
-    heroData,
     featured,
-    ogImageFile,
-    galleryNewFiles,
-    errors,
+    initialBlocks,
+    pageBuilderKey,
     markDirty,
-    restoreDraft,
-    dismissDraft: draftDismiss,
     validateField,
     setStatus,
-    setSeoTitle,
-    setSeoDescription,
-    setOgImageFile,
-    setHeroData,
-    setGalleryImages,
-    setGalleryNewFiles,
     setFeatured,
     handleTitleChange,
     handleSlugChange,
@@ -321,6 +299,64 @@ export function usePostForm() {
     handleSlugLock,
     handleBlocksChange,
     handleBlockImageChange,
-    handleSubmit,
+
+    heroProps: {
+      data: heroData,
+      onChange: (data: typeof heroData) => {
+        setHeroData(data);
+        markDirty();
+      },
+      errors,
+      onBlurField: validateField,
+    },
+
+    seoProps: {
+      seoTitle,
+      seoDescription,
+      onSeoTitleChange: (v: string) => {
+        setSeoTitle(v);
+        markDirty();
+      },
+      onSeoDescriptionChange: (v: string) => {
+        setSeoDescription(v);
+        markDirty();
+      },
+      onOgImageChange: (f: File | null) => {
+        setOgImageFile(f);
+        markDirty();
+      },
+      onBlurField: validateField,
+      errors: {
+        seo_title: errors.seo_title,
+        seo_description: errors.seo_description,
+      },
+    },
+
+    galleryProps: {
+      images: galleryImages,
+      onImagesChange: (imgs: string[]) => {
+        setGalleryImages(imgs);
+        markDirty();
+      },
+      newFiles: galleryNewFiles,
+      onNewFilesChange: (files: File[]) => {
+        setGalleryNewFiles(files);
+        markDirty();
+      },
+    },
+
+    formState: {
+      loading,
+      saving,
+      errors,
+      isDirty,
+      toast,
+      dismissToast,
+      draftBanner,
+      getIsDirty,
+      restoreDraft,
+      dismissDraft: draftDismiss,
+      handleSubmit,
+    },
   };
 }

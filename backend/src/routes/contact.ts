@@ -4,7 +4,7 @@ import rateLimit from 'express-rate-limit';
 import { contactService } from '../services/contactService';
 import { contactSchema } from '@buro710/shared';
 import { validateBody } from '../middleware/validate.js';
-import { logger } from '../lib/logger.js';
+import { asyncHandler } from '../middleware/asyncHandler';
 
 const router = Router();
 
@@ -20,17 +20,12 @@ router.post(
   '/',
   contactLimiter,
   validateBody(contactSchema),
-  async (req: Request, res: Response) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { name, email, subject, message } = req.body;
 
-    try {
-      const result = await contactService.create({ name, email, subject, message });
-      res.json(result);
-    } catch (error) {
-      logger.error('Contact form error', error);
-      res.status(500).json({ error: 'Помилка при відправці повідомлення' });
-    }
-  }
+    const result = await contactService.create({ name, email, subject, message });
+    res.json(result);
+  })
 );
 
 export default router;

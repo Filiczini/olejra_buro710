@@ -11,7 +11,7 @@ import express from 'express';
 import request from 'supertest';
 import type { Application } from 'express';
 import type { Post, PaginatedResponse } from '@buro710/shared';
-import { ConflictError } from '../../lib/errors';
+import { AppError, ConflictError, NotFoundError } from '../../lib/errors';
 
 // ============================================================================
 // Mock Configuration
@@ -72,7 +72,7 @@ vi.mock('../../services/postService', () => ({
     getById: vi.fn(async (id: string) => {
       const post = store.posts.get(id);
       if (!post) {
-        throw new Error('Post not found');
+        throw new NotFoundError('Post not found');
       }
       return { post, blocks: [] };
     }),
@@ -121,7 +121,7 @@ vi.mock('../../services/postService', () => ({
     update: vi.fn(async (id: string, data: Partial<Post>) => {
       const existing = store.posts.get(id);
       if (!existing) {
-        throw new Error('Post not found');
+        throw new NotFoundError('Post not found');
       }
 
       // Check for duplicate slug if provided
@@ -148,7 +148,7 @@ vi.mock('../../services/postService', () => ({
 
     delete: vi.fn(async (id: string) => {
       if (!store.posts.has(id)) {
-        throw new Error('Post not found');
+        throw new NotFoundError('Post not found');
       }
       store.posts.delete(id);
     }),
@@ -197,7 +197,11 @@ const createTestApp = (): Application => {
   // Error handler
   app.use(
     (err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-      res.status(500).json({ error: err.message });
+      if (err instanceof AppError) {
+        res.status(err.statusCode).json({ error: err.message });
+        return;
+      }
+      res.status(500).json({ error: 'Internal server error' });
     }
   );
   return app;

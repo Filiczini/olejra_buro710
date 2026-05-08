@@ -29,11 +29,21 @@ vi.mock('../../lib/logger', () => ({
 
 import activityLogsRouter from '../activityLogs';
 import { activityLogService } from '../../services/activityLogService';
+import { AppError } from '../../lib/errors';
 
 const createTestApp = (): Application => {
   const app = express();
   app.use(express.json());
   app.use('/api/logs', activityLogsRouter);
+  app.use(
+    (err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+      if (err instanceof AppError) {
+        res.status(err.statusCode).json({ error: err.message });
+        return;
+      }
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  );
   return app;
 };
 
@@ -82,7 +92,7 @@ describe('Activity Logs Routes', () => {
       const response = await request(app).get('/api/logs');
 
       expect(response.status).toBe(500);
-      expect(response.body).toEqual({ error: 'Failed to fetch activity logs' });
+      expect(response.body).toEqual({ error: 'Internal server error' });
     });
   });
 
@@ -102,7 +112,7 @@ describe('Activity Logs Routes', () => {
       const response = await request(app).get('/api/logs/users');
 
       expect(response.status).toBe(500);
-      expect(response.body).toEqual({ error: 'Failed to fetch unique users' });
+      expect(response.body).toEqual({ error: 'Internal server error' });
     });
   });
 });

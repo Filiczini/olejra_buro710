@@ -7,6 +7,8 @@ import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import Toast from '../../components/ui/Toast';
 import { PlusCircle, Trash2, KeyRound } from 'lucide-react';
+import DataTable from '../../components/admin/DataTable';
+import type { ColumnDef } from '../../components/admin/DataTable';
 import ConfirmModal from '../../components/ui/ConfirmModal';
 import Modal from '../../components/ui/Modal';
 
@@ -119,6 +121,58 @@ export default function UsersPage() {
     return new Date(dateString).toLocaleDateString('uk-UA');
   };
 
+  const userColumns: ColumnDef<User>[] = [
+    {
+      key: 'email',
+      header: 'Email',
+      cell: (user) => <span className="text-base font-medium text-gray-900">{user.email}</span>,
+    },
+    {
+      key: 'role',
+      header: 'Роль',
+      cell: (user) => (
+        <span
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ring-1 ring-inset ${
+            user.role === 'admin'
+              ? 'bg-zinc-100 text-zinc-700 ring-zinc-600/20'
+              : 'bg-blue-50 text-blue-700 ring-blue-600/20'
+          }`}
+        >
+          {user.role === 'admin' ? 'Адміністратор' : 'Редактор'}
+        </span>
+      ),
+    },
+    {
+      key: 'created',
+      header: 'Створено',
+      cell: (user) => (
+        <span className="text-base text-gray-500 tabular-nums">{formatDate(user.created_at)}</span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: <span className="text-right block">Дії</span>,
+      cell: (user) => (
+        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={() => setPasswordTarget(user)}
+            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors cursor-pointer"
+            title="Змінити пароль"
+          >
+            <KeyRound className="h-5 w-5 stroke-[1.5]" />
+          </button>
+          <button
+            onClick={() => setDeleteTarget(user)}
+            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
+            title="Видалити"
+          >
+            <Trash2 className="h-5 w-5 stroke-[1.5]" />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="max-w-5xl mx-auto">
       {toast && (
@@ -189,82 +243,14 @@ export default function UsersPage() {
         </form>
       </div>
 
-      {/* Users Table */}
-      <div className="bg-white border border-gray-200/75 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/50">
-                <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">
-                  Email
-                </th>
-                <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">
-                  Роль
-                </th>
-                <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide">
-                  Створено
-                </th>
-                <th className="py-4 px-6 text-sm font-medium text-gray-500 uppercase tracking-wide text-right">
-                  Дії
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {loading ? (
-                <tr>
-                  <td colSpan={4} className="text-center py-8 text-gray-500">
-                    Завантаження...
-                  </td>
-                </tr>
-              ) : users.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="text-center py-8 text-gray-500">
-                    Користувачів не знайдено
-                  </td>
-                </tr>
-              ) : (
-                users.map((user) => (
-                  <tr key={user.id} className="group hover:bg-gray-50/80 transition-colors">
-                    <td className="py-4 px-6 text-base font-medium text-gray-900">{user.email}</td>
-                    <td className="py-4 px-6">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ring-1 ring-inset ${
-                          user.role === 'admin'
-                            ? 'bg-zinc-100 text-zinc-700 ring-zinc-600/20'
-                            : 'bg-blue-50 text-blue-700 ring-blue-600/20'
-                        }`}
-                      >
-                        {user.role === 'admin' ? 'Адміністратор' : 'Редактор'}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 text-base text-gray-500 tabular-nums">
-                      {formatDate(user.created_at)}
-                    </td>
-                    <td className="py-4 px-6 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => setPasswordTarget(user)}
-                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors cursor-pointer"
-                          title="Змінити пароль"
-                        >
-                          <KeyRound className="h-5 w-5 stroke-[1.5]" />
-                        </button>
-                        <button
-                          onClick={() => setDeleteTarget(user)}
-                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
-                          title="Видалити"
-                        >
-                          <Trash2 className="h-5 w-5 stroke-[1.5]" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <DataTable
+        data={users}
+        columns={userColumns}
+        rowKey={(user) => user.id}
+        isLoading={loading}
+        emptyMessage="Користувачів не знайдено"
+        className="border border-gray-200/75"
+      />
 
       <ConfirmModal
         isOpen={!!deleteTarget}

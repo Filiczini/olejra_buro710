@@ -54,9 +54,9 @@ describe('usePostForm', () => {
     expect(result.current.slug).toBe('');
     expect(result.current.slugLocked).toBe(false);
     expect(result.current.status).toBe('draft');
-    expect(result.current.loading).toBe(false);
-    expect(result.current.saving).toBe(false);
-    expect(result.current.errors).toEqual({});
+    expect(result.current.formState.loading).toBe(false);
+    expect(result.current.formState.saving).toBe(false);
+    expect(result.current.formState.errors).toEqual({});
     expect(result.current.featured).toBe(false);
   });
 
@@ -193,12 +193,12 @@ describe('usePostForm', () => {
     const { result } = renderHook(() => usePostForm());
 
     act(() => {
-      result.current.setSeoTitle('SEO Title');
-      result.current.setSeoDescription('SEO Description');
+      result.current.seoProps.onSeoTitleChange('SEO Title');
+      result.current.seoProps.onSeoDescriptionChange('SEO Description');
     });
 
-    expect(result.current.seoTitle).toBe('SEO Title');
-    expect(result.current.seoDescription).toBe('SEO Description');
+    expect(result.current.seoProps.seoTitle).toBe('SEO Title');
+    expect(result.current.seoProps.seoDescription).toBe('SEO Description');
   });
 
   it('handleSubmit validates and shows errors on invalid data', async () => {
@@ -216,10 +216,10 @@ describe('usePostForm', () => {
 
     await act(async () => {
       const fakeEvent = { preventDefault: vi.fn() } as unknown as React.FormEvent;
-      await result.current.handleSubmit(fakeEvent);
+      await result.current.formState.handleSubmit(fakeEvent);
     });
 
-    expect(result.current.errors).toEqual({
+    expect(result.current.formState.errors).toEqual({
       title: 'Title is required',
       slug: 'Slug is required',
     });
@@ -237,7 +237,7 @@ describe('usePostForm', () => {
 
     await act(async () => {
       const fakeEvent = { preventDefault: vi.fn() } as unknown as React.FormEvent;
-      await result.current.handleSubmit(fakeEvent);
+      await result.current.formState.handleSubmit(fakeEvent);
     });
 
     expect(postService.create).toHaveBeenCalledWith(expect.any(FormData));
@@ -268,7 +268,7 @@ describe('usePostForm', () => {
 
     await act(async () => {
       const fakeEvent = { preventDefault: vi.fn() } as unknown as React.FormEvent;
-      await result.current.handleSubmit(fakeEvent);
+      await result.current.formState.handleSubmit(fakeEvent);
     });
 
     expect(postService.update).toHaveBeenCalledWith('post-123', expect.any(FormData));
@@ -282,10 +282,10 @@ describe('usePostForm', () => {
 
     await act(async () => {
       const fakeEvent = { preventDefault: vi.fn() } as unknown as React.FormEvent;
-      await result.current.handleSubmit(fakeEvent);
+      await result.current.formState.handleSubmit(fakeEvent);
     });
 
-    expect(result.current.errors).toEqual({ submit: 'Помилка збереження посту' });
+    expect(result.current.formState.errors).toEqual({ submit: 'Помилка збереження посту' });
   });
 
   it('loads post data when editing', async () => {
@@ -322,9 +322,9 @@ describe('usePostForm', () => {
     expect(result.current.slug).toBe('loaded-post');
     expect(result.current.status).toBe('published');
     expect(result.current.featured).toBe(true);
-    expect(result.current.seoTitle).toBe('SEO');
-    expect(result.current.heroData.hero_title).toBe('Hero');
-    expect(result.current.loading).toBe(false);
+    expect(result.current.seoProps.seoTitle).toBe('SEO');
+    expect(result.current.heroProps.data.hero_title).toBe('Hero');
+    expect(result.current.formState.loading).toBe(false);
   });
 
   it('navigates away on load error', async () => {

@@ -5,14 +5,13 @@
  */
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { logger } from '../../lib/logger';
 import { activityLogService } from '../../services/activityLogService';
 import { apiKeyMiddleware } from '../../middleware/apiKey';
 import { uploadMiddleware } from '../../middleware/multer';
 import { postService } from '../../services/postService';
 import { storageService } from '../../services/storageService';
 import type { BlockType, BlockData, PostStatus } from '@buro710/shared';
-import { AppError } from '../../lib/errors';
+import { asyncHandler } from '../../middleware/asyncHandler';
 import {
   parseJsonField,
   processBlocks,
@@ -110,8 +109,9 @@ router.use(apiRateLimiter);
  * GET /api/v1/posts
  * List posts with pagination and optional status filter
  */
-router.get('/', async (req, res) => {
-  try {
+router.get(
+  '/',
+  asyncHandler(async (req, res) => {
     const { page, limit, status, search } = req.query;
 
     const parsedPage = page ? Math.max(1, parseInt(page as string, 10) || 1) : undefined;
@@ -127,33 +127,30 @@ router.get('/', async (req, res) => {
     });
 
     res.json(result);
-  } catch (error) {
-    logger.error('Error fetching posts:', error);
-    res.status(500).json({ error: 'Failed to fetch posts' });
-  }
-});
+  })
+);
 
 /**
  * GET /api/v1/posts/:id
  * Get a single post by ID with all blocks
  */
-router.get('/:id', async (req, res) => {
-  try {
+router.get(
+  '/:id',
+  asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     const result = await postService.getById(id);
     res.json(result);
-  } catch (error) {
-    logger.error('Error fetching post:', error);
-    res.status(404).json({ error: 'Post not found' });
-  }
-});
+  })
+);
 
 /**
  * POST /api/v1/posts
  * Create a new post (JSON or multipart/form-data)
  */
-router.post('/', uploadPostMedia, async (req, res) => {
-  try {
+router.post(
+  '/',
+  uploadPostMedia,
+  asyncHandler(async (req, res) => {
     const body = req.body as PostBody;
     const {
       title,
@@ -232,18 +229,17 @@ router.post('/', uploadPostMedia, async (req, res) => {
     });
 
     res.status(201).json(post);
-  } catch (error) {
-    logger.error('Error creating post:', error);
-    res.status(500).json({ error: 'Failed to create post' });
-  }
-});
+  })
+);
 
 /**
  * PUT /api/v1/posts/:id
  * Update an existing post (JSON or multipart/form-data)
  */
-router.put('/:id', uploadPostMedia, async (req, res) => {
-  try {
+router.put(
+  '/:id',
+  uploadPostMedia,
+  asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     const body = req.body as PostBody;
     const {
@@ -269,12 +265,7 @@ router.put('/:id', uploadPostMedia, async (req, res) => {
     }
 
     // Get existing post
-    let existing;
-    try {
-      existing = await postService.getById(id);
-    } catch {
-      return res.status(404).json({ error: 'Post not found' });
-    }
+    const existing = await postService.getById(id);
 
     // Parse JSON fields
     let parsedHeroTags: string[] | undefined;
@@ -361,29 +352,19 @@ router.put('/:id', uploadPostMedia, async (req, res) => {
     });
 
     res.json(post);
-  } catch (error) {
-    logger.error('Error updating post:', error);
-    if (error instanceof AppError) {
-      return res.status(error.statusCode).json({ error: error.message });
-    }
-    res.status(500).json({ error: 'Failed to update post' });
-  }
-});
+  })
+);
 
 /**
  * DELETE /api/v1/posts/:id
  * Delete a post by ID
  */
-router.delete('/:id', async (req, res) => {
-  try {
+router.delete(
+  '/:id',
+  asyncHandler(async (req, res) => {
     const id = req.params.id as string;
 
-    let post;
-    try {
-      ({ post } = await postService.getById(id));
-    } catch {
-      return res.status(404).json({ error: 'Post not found' });
-    }
+    const { post } = await postService.getById(id);
 
     await postService.delete(id);
 
@@ -396,10 +377,7 @@ router.delete('/:id', async (req, res) => {
     });
 
     res.json({ message: 'Post deleted successfully' });
-  } catch (error) {
-    logger.error('Error deleting post:', error);
-    res.status(500).json({ error: 'Failed to delete post' });
-  }
-});
+  })
+);
 
 export default router;

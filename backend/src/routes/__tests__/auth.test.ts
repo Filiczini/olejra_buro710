@@ -58,6 +58,7 @@ import authRouter from '../auth';
 import { userService } from '../../services/userService';
 import { refreshTokenService } from '../../services/refreshTokenService';
 import bcrypt from 'bcryptjs';
+import { AppError } from '../../lib/errors';
 
 const createTestApp = (): Application => {
   const app = express();
@@ -65,7 +66,11 @@ const createTestApp = (): Application => {
   app.use('/api/admin', authRouter);
   app.use(
     (err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-      res.status(500).json({ error: err.message });
+      if (err instanceof AppError) {
+        res.status(err.statusCode).json({ error: err.message });
+        return;
+      }
+      res.status(500).json({ error: 'Internal server error' });
     }
   );
   return app;

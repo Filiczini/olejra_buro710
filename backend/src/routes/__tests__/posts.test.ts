@@ -69,6 +69,15 @@ const createTestApp = (): Application => {
   const app = express();
   app.use(express.json());
   app.use('/api/posts', postsRouter);
+  app.use(
+    (err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+      if (err instanceof AppError) {
+        res.status(err.statusCode).json({ error: err.message });
+        return;
+      }
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  );
   return app;
 };
 

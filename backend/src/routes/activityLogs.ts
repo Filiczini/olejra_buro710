@@ -2,7 +2,7 @@ import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { authMiddleware, adminMiddleware } from '../middleware/auth';
 import { activityLogService } from '../services/activityLogService';
-import { logger } from '../lib/logger';
+import { asyncHandler } from '../middleware/asyncHandler';
 
 const router = Router();
 
@@ -17,8 +17,11 @@ const logsRateLimiter = rateLimit({
 
 router.use(logsRateLimiter);
 
-router.get('/', authMiddleware, adminMiddleware, async (req, res) => {
-  try {
+router.get(
+  '/',
+  authMiddleware,
+  adminMiddleware,
+  asyncHandler(async (req, res) => {
     const { page, limit, user_email, action } = req.query;
 
     const parsedPage = page ? Math.max(1, parseInt(page as string, 10) || 1) : undefined;
@@ -34,20 +37,17 @@ router.get('/', authMiddleware, adminMiddleware, async (req, res) => {
     });
 
     res.json(result);
-  } catch (error) {
-    logger.error('Error fetching activity logs:', error);
-    res.status(500).json({ error: 'Failed to fetch activity logs' });
-  }
-});
+  })
+);
 
-router.get('/users', authMiddleware, adminMiddleware, async (_req, res) => {
-  try {
+router.get(
+  '/users',
+  authMiddleware,
+  adminMiddleware,
+  asyncHandler(async (_req, res) => {
     const users = await activityLogService.getUniqueUsers();
     res.json(users);
-  } catch (error) {
-    logger.error('Error fetching unique users:', error);
-    res.status(500).json({ error: 'Failed to fetch unique users' });
-  }
-});
+  })
+);
 
 export default router;

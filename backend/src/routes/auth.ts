@@ -8,7 +8,7 @@ import { validateBody } from '../middleware/validate.js';
 import { generateToken } from '../config/jwt';
 import { userService } from '../services/userService';
 import { refreshTokenService } from '../services/refreshTokenService';
-import { logger } from '../lib/logger.js';
+import { asyncHandler } from '../middleware/asyncHandler';
 
 const router = Router();
 
@@ -24,67 +24,63 @@ router.post(
   '/login',
   loginLimiter,
   validateBody(loginSchema),
-  async (req: Request, res: Response) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
-    try {
-      const user = await userService.findByEmail(email);
+    const user = await userService.findByEmail(email);
 
-      if (!user) {
-        return res.status(401).json({ error: 'Invalid credentials' });
-      }
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
-      const isValid = await bcrypt.compare(password, user.password_hash);
+    const isValid = await bcrypt.compare(password, user.password_hash);
 
-      if (!isValid) {
-        return res.status(401).json({ error: 'Invalid credentials' });
-      }
+    if (!isValid) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
-      const tokenVersion = await userService.getTokenVersion(user.id);
-      const token = generateToken({
-        userId: user.id,
+    const tokenVersion = await userService.getTokenVersion(user.id);
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      tokenVersion,
+    });
+    const refreshToken = await refreshTokenService.create(user.id);
+
+    res.json({
+      token,
+      refreshToken,
+      user: {
+        id: user.id,
         email: user.email,
         role: user.role,
-        tokenVersion,
-      });
-      const refreshToken = await refreshTokenService.create(user.id);
-
-      res.json({
-        token,
-        refreshToken,
-        user: {
-          id: user.id,
-          email: user.email,
-          role: user.role,
-        },
-      });
-    } catch (error) {
-      logger.error('Login error', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  }
+      },
+    });
+  })
 );
 
-router.post('/logout', authMiddleware, async (req: Request, res: Response) => {
-  try {
+router.post(
+  '/logout',
+  authMiddleware,
+  asyncHandler(async (req: Request, res: Response) => {
     await Promise.all([
-      userService.incrementTokenVersion(req.user!.userId),
-      refreshTokenService.revokeAllForUser(req.user!.userId),
+      userService.incrementTokenVersion(req.user!.userId).catch(() => {}),
+      refreshTokenService.revokeAllForUser(req.user!.userId).catch(() => {}),
     ]);
-  } catch {
-    // best-effort: still clear client token even if DB update fails
-  }
-  res.json({ message: 'Logged out successfully' });
-});
+    res.json({ message: 'Logged out successfully' });
+  })
+);
 
-router.post('/refresh', async (req: Request, res: Response) => {
-  const { refreshToken, userId } = req.body;
+router.post(
+  '/refresh',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { refreshToken, userId } = req.body;
 
-  if (!refreshToken || !userId) {
-    return res.status(400).json({ error: 'Missing refreshToken or userId' });
-  }
+    if (!refreshToken || !userId) {
+      return res.status(400).json({ error: 'Missing refreshToken or userId' });
+    }
 
-  try {
     const isValid = await refreshTokenService.verify(userId, refreshToken);
     if (!isValid) {
       return res.status(401).json({ error: 'Invalid or expired refresh token' });
@@ -113,14 +109,13 @@ router.post('/refresh', async (req: Request, res: Response) => {
         role: user.role,
       },
     });
-  } catch (error) {
-    logger.error('Refresh error', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+  })
+);
 
-router.get('/me', authMiddleware, async (req: Request, res: Response) => {
-  try {
+router.get(
+  '/me',
+  authMiddleware,
+  asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user?.userId;
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -136,10 +131,7 @@ router.get('/me', authMiddleware, async (req: Request, res: Response) => {
       email: user.email,
       role: user.role,
     });
-  } catch (error) {
-    logger.error('Get user error', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+  })
+);
 
 export default router;

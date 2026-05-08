@@ -43,6 +43,7 @@ vi.mock('../../../services/activityLogService', () => ({
 // Import after mocking
 import postsRouter from '../posts';
 import { postService } from '../../../services/postService';
+import { AppError, NotFoundError } from '../../../lib/errors';
 
 // ============================================================================
 // Test Constants
@@ -89,7 +90,11 @@ const createTestApp = (): Application => {
   // Error handler
   app.use(
     (err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-      res.status(500).json({ error: err.message });
+      if (err instanceof AppError) {
+        res.status(err.statusCode).json({ error: err.message });
+        return;
+      }
+      res.status(500).json({ error: 'Internal server error' });
     }
   );
   return app;
@@ -276,7 +281,7 @@ describe('Posts API', () => {
 
       // Assert
       expect(response.status).toBe(500);
-      expect(response.body).toEqual({ error: 'Failed to fetch posts' });
+      expect(response.body).toEqual({ error: 'Internal server error' });
     });
   });
 
@@ -306,7 +311,7 @@ describe('Posts API', () => {
 
     it('returns 404 for non-existent post ID', async () => {
       // Arrange
-      vi.mocked(postService.getById).mockRejectedValue(new Error('Not found'));
+      vi.mocked(postService.getById).mockRejectedValue(new NotFoundError('Post not found'));
 
       // Act
       const response = await withApiKey(request(app).get('/api/v1/posts/non-existent-id'));
@@ -568,7 +573,7 @@ describe('Posts API', () => {
 
       // Assert
       expect(response.status).toBe(500);
-      expect(response.body).toEqual({ error: 'Failed to create post' });
+      expect(response.body).toEqual({ error: 'Internal server error' });
     });
   });
 
@@ -607,7 +612,7 @@ describe('Posts API', () => {
 
     it('returns 404 for non-existent post ID', async () => {
       // Arrange
-      vi.mocked(postService.getById).mockRejectedValue(new Error('Not found'));
+      vi.mocked(postService.getById).mockRejectedValue(new NotFoundError('Post not found'));
 
       // Act
       const response = await withApiKey(
@@ -748,7 +753,7 @@ describe('Posts API', () => {
 
       // Assert
       expect(response.status).toBe(500);
-      expect(response.body).toEqual({ error: 'Failed to update post' });
+      expect(response.body).toEqual({ error: 'Internal server error' });
     });
   });
 
@@ -776,7 +781,7 @@ describe('Posts API', () => {
 
     it('returns 404 for non-existent post ID', async () => {
       // Arrange
-      vi.mocked(postService.getById).mockRejectedValue(new Error('Not found'));
+      vi.mocked(postService.getById).mockRejectedValue(new NotFoundError('Post not found'));
 
       // Act
       const response = await withApiKey(request(app).delete('/api/v1/posts/non-existent-id'));
@@ -799,7 +804,7 @@ describe('Posts API', () => {
 
       // Assert
       expect(response.status).toBe(500);
-      expect(response.body).toEqual({ error: 'Failed to delete post' });
+      expect(response.body).toEqual({ error: 'Internal server error' });
     });
   });
 
