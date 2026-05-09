@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { userService } from '../services/api';
-import type { User } from '../services/api';
+import type { User } from '@buro710/shared';
 
 interface UseUsersResult {
   users: User[];

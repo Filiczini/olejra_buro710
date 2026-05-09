@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
-import type { User } from '../../services/api';
+import type { User } from '@buro710/shared';
 
 interface ChangePasswordModalProps {
   user: User | null;

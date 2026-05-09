@@ -3,7 +3,7 @@ import { logger } from '../../lib/logger';
 import { useToast } from '../../hooks/useToast';
 import { useUsers } from '../../hooks/useUsers';
 import { userService } from '../../services/api';
-import type { User } from '../../services/api';
+import type { User } from '@buro710/shared';
 import type { ApiError } from '../../types/api';
 import Toast from '../../components/ui/Toast';
 import { Trash2, KeyRound } from 'lucide-react';
