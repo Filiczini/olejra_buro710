@@ -27,7 +27,7 @@ export default function PostsPage() {
     setFilter,
     setPage,
     refresh,
-  } = useAdminListPage<Post, { status?: string; search?: string }>({
+  } = useAdminListPage<Post, { status?: PostStatus; search?: string }>({
     fetchData: (params) => postService.getAll(params),
     defaultLimit: 10,
   });

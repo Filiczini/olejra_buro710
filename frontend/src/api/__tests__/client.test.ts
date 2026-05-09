@@ -1,34 +1,49 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockAxiosInstance, mockedAxiosPost } = vi.hoisted(() => {
+const { mockAxiosInstance, mockedAxiosPost, requestUse, responseUse } = vi.hoisted(() => {
   const post = vi.fn();
   const callable = vi.fn();
+  const reqUse = vi.fn();
+  const respUse = vi.fn();
   const instance = Object.assign(callable, {
     interceptors: {
-      request: { use: vi.fn() },
-      response: { use: vi.fn() },
+      request: { use: reqUse },
+      response: { use: respUse },
     },
     post: vi.fn(),
   });
-  return { mockAxiosInstance: instance, mockedAxiosPost: post };
+  return {
+    mockAxiosInstance: instance,
+    mockedAxiosPost: post,
+    requestUse: reqUse,
+    responseUse: respUse,
+  };
 });
 
-vi.mock('axios', () => ({
-  default: {
-    create: vi.fn(() => mockAxiosInstance),
-    post: mockedAxiosPost,
-  },
-}));
+vi.mock('axios', () => {
+  const createFn = vi.fn(() => {
+    console.log('axios.create called, returning mockAxiosInstance');
+    return mockAxiosInstance;
+  });
+  return {
+    default: {
+      create: createFn,
+      post: mockedAxiosPost,
+    },
+  };
+});
 
 // Must import AFTER vi.mock hoists — side-effect registers interceptors
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import api from '../client';
 
+console.log('requestUse type:', typeof requestUse, 'mock:', requestUse.mock);
+
 // Extract interceptor handlers from the calls made during module import
-const requestOnFulfilled = mockAxiosInstance.interceptors.request.use.mock.calls[0][0] as (
+const requestOnFulfilled = requestUse.mock.calls[0][0] as (
   config: Record<string, unknown>
 ) => Record<string, unknown>;
-const responseOnRejected = mockAxiosInstance.interceptors.response.use.mock.calls[0][1] as (
+const responseOnRejected = responseUse.mock.calls[0][1] as (
   error: Record<string, unknown>
 ) => Promise<never>;
 

@@ -10,7 +10,7 @@ interface DraftBanner {
 }
 
 interface ToastState {
-  key: string;
+  key: number;
   message: string;
   type: 'success' | 'error';
 }

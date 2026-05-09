@@ -9,7 +9,7 @@ export interface PaginationState {
   totalPages: number;
 }
 
-export interface UseAdminListPageOptions<T, F extends Record<string, unknown>> {
+export interface UseAdminListPageOptions<T, F extends object> {
   fetchData: (params: { page: number; limit: number } & F) => Promise<PaginatedResponse<T>>;
   defaultPage?: number;
   defaultLimit?: number;
@@ -27,7 +27,7 @@ export interface UseAdminListPageResult<T, F> {
   refresh: () => void;
 }
 
-export function useAdminListPage<T, F extends Record<string, unknown>>({
+export function useAdminListPage<T, F extends object>({
   fetchData,
   defaultPage = 1,
   defaultLimit = 10,

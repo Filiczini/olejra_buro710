@@ -9,6 +9,20 @@ import BlockRenderer from '../components/blocks/BlockRenderer';
 import PostGalleryBlock from '../components/blocks/PostGalleryBlock';
 import type { Post, Block } from '@buro710/shared';
 
+const updateMetaTag = (name: string, content: string) => {
+  let meta = document.querySelector(`meta[name="${name}"], meta[property="${name}"]`);
+  if (!meta) {
+    meta = document.createElement('meta');
+    if (name.startsWith('og:')) {
+      meta.setAttribute('property', name);
+    } else {
+      meta.setAttribute('name', name);
+    }
+    document.head.appendChild(meta);
+  }
+  meta.setAttribute('content', content);
+};
+
 export default function PostPage() {
   const { slug } = useParams<{ slug: string }>();
   const [post, setPost] = useState<Post | null>(null);
@@ -46,26 +60,13 @@ export default function PostPage() {
 
   useEffect(() => {
     if (slug) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       loadPost(slug);
     }
     return () => {
       document.title = 'Buro 710';
     };
   }, [slug, loadPost]);
-
-  const updateMetaTag = (name: string, content: string) => {
-    let meta = document.querySelector(`meta[name="${name}"], meta[property="${name}"]`);
-    if (!meta) {
-      meta = document.createElement('meta');
-      if (name.startsWith('og:')) {
-        meta.setAttribute('property', name);
-      } else {
-        meta.setAttribute('name', name);
-      }
-      document.head.appendChild(meta);
-    }
-    meta.setAttribute('content', content);
-  };
 
   if (loading) {
     return (

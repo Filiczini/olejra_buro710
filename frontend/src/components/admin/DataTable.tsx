@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import Pagination from './Pagination';
 
 export interface ColumnDef<T> {

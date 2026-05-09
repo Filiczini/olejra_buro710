@@ -48,9 +48,15 @@ async function patch<T = unknown>(
   return response.data as T;
 }
 
+export interface LoginResponse {
+  token: string;
+  refreshToken: string;
+  user: { id: string; email: string; role: string };
+}
+
 export const authService = {
   login: async (email: string, password: string) => {
-    return post('/admin/login', { email, password });
+    return post<LoginResponse>('/admin/login', { email, password });
   },
   logout: async () => {
     await post('/admin/logout');
