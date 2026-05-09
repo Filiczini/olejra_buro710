@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { logger } from '../../lib/logger';
 import { useToast } from '../../hooks/useToast';
+import { useUsers } from '../../hooks/useUsers';
 import { userService } from '../../services/api';
 import type { User } from '../../services/api';
 import Input from '../../components/ui/Input';
@@ -14,8 +15,7 @@ import ConfirmModal from '../../components/ui/ConfirmModal';
 import Modal from '../../components/ui/Modal';
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(false);
+  const { users, loading, refresh } = useUsers();
   const [formLoading, setFormLoading] = useState(false);
   const { toast, showToast, dismissToast } = useToast();
 
@@ -29,24 +29,6 @@ export default function UsersPage() {
   const [newPassword, setNewPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [passwordLoading, setPasswordLoading] = useState(false);
-
-  const loadUsers = useCallback(async () => {
-    setLoading(true);
-    try {
-      const list = await userService.getAll();
-      setUsers(list);
-    } catch (error) {
-      logger.error('Error loading users', error);
-      showToast('Не вдалося завантажити користувачів', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }, [showToast]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadUsers();
-  }, [loadUsers]);
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
@@ -69,7 +51,7 @@ export default function UsersPage() {
       setPassword('');
       setRole('admin');
       setFormErrors({});
-      await loadUsers();
+      await refresh();
     } catch (error: unknown) {
       logger.error('Error creating user', error);
       const msg =
@@ -87,7 +69,7 @@ export default function UsersPage() {
       await userService.delete(deleteTarget.id);
       showToast('Користувача видалено', 'success');
       setDeleteTarget(null);
-      await loadUsers();
+      await refresh();
     } catch (error: unknown) {
       logger.error('Error deleting user', error);
       const msg =

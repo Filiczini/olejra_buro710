@@ -1,39 +1,14 @@
 import { Icon } from '@iconify-icon/react';
 import { Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { postService } from '../../services/api';
-import { logger } from '../../lib/logger';
-import type { Post } from '@buro710/shared';
+import { useEffect, useMemo, useState } from 'react';
+import { useFetchPosts } from '../../hooks/useFetchPosts';
 
 const SLIDE_INTERVAL_MS = 6000;
 
 export default function HeroSlider() {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const { posts: allPosts, loading, error } = useFetchPosts({ status: 'published', limit: 10 });
+  const posts = useMemo(() => allPosts.filter((p) => p.hero_image_url).slice(0, 5), [allPosts]);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    const fetchPosts = async () => {
-      try {
-        const response = await postService.getAll({ status: 'published', limit: 10 });
-        if (cancelled) return;
-        const featuredPosts = response.data.filter((p) => p.hero_image_url).slice(0, 5);
-        setPosts(featuredPosts);
-      } catch (err) {
-        if (cancelled) return;
-        logger.error('Failed to fetch posts', err);
-        setError(true);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    fetchPosts();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   useEffect(() => {
     if (posts.length <= 1) return;
