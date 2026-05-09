@@ -148,12 +148,15 @@ export default function EditPostPage() {
           </div>
         </div>
 
-        <div
-          className="flex items-center gap-3 cursor-pointer select-none"
+        <button
+          type="button"
+          role="switch"
+          aria-checked={featured}
           onClick={() => {
             setFeatured((v) => !v);
             markDirty();
           }}
+          className="flex items-center gap-3 cursor-pointer select-none bg-transparent border-0 p-0 text-left"
         >
           <div
             className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${featured ? 'bg-zinc-900' : 'bg-zinc-200'}`}
@@ -166,7 +169,7 @@ export default function EditPostPage() {
             Вибраний пост{' '}
             <span className="text-zinc-400 font-normal">(відображається на головній, макс. 6)</span>
           </span>
-        </div>
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
