@@ -4,6 +4,7 @@ import { useToast } from '../../hooks/useToast';
 import { useUsers } from '../../hooks/useUsers';
 import { userService } from '../../services/api';
 import type { User } from '../../services/api';
+import type { ApiError } from '../../types/api';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import Toast from '../../components/ui/Toast';
@@ -54,9 +55,7 @@ export default function UsersPage() {
       await refresh();
     } catch (error: unknown) {
       logger.error('Error creating user', error);
-      const msg =
-        (error as { response?: { data?: { error?: string } } })?.response?.data?.error ||
-        'Не вдалося створити користувача';
+      const msg = (error as ApiError)?.response?.data?.error || 'Не вдалося створити користувача';
       showToast(msg, 'error');
     } finally {
       setFormLoading(false);
@@ -72,9 +71,7 @@ export default function UsersPage() {
       await refresh();
     } catch (error: unknown) {
       logger.error('Error deleting user', error);
-      const msg =
-        (error as { response?: { data?: { error?: string } } })?.response?.data?.error ||
-        'Не вдалося видалити користувача';
+      const msg = (error as ApiError)?.response?.data?.error || 'Не вдалося видалити користувача';
       showToast(msg, 'error');
     }
   };

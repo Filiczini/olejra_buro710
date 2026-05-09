@@ -7,6 +7,7 @@ import type { ValidationValues } from './usePostValidation';
 import type { PostStatus } from '@buro710/shared';
 import type { EditBlock } from '../types/block';
 import type { PostHeroFormData } from '../components/admin/PostHeroForm';
+import type { ApiError } from '../types/api';
 
 interface BlockWithFile {
   id: string;
@@ -102,17 +103,7 @@ export function usePostSubmit() {
       } catch (error) {
         logger.error('Error saving post:', error);
         callbacks.showToast('Помилка збереження', 'error');
-        const data = (
-          error as {
-            response?: {
-              data?: {
-                error?: string;
-                field?: string;
-                details?: { field: string; message: string }[];
-              };
-            };
-          }
-        )?.response?.data;
+        const data = (error as ApiError)?.response?.data;
         if (data?.details?.length) {
           const fe: Record<string, string> = {};
           data.details.forEach(({ field, message }) => {
