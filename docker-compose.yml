@@ -32,6 +32,8 @@ services:
       timeout: 5s
       start_period: 10s
       retries: 3
+    expose:
+      - "80"
     depends_on:
       backend:
         condition: service_healthy
