@@ -39,11 +39,16 @@ export default function SingleImageUpload({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [compressMsg, setCompressMsg] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const latestImageRef = useRef<File | undefined>(undefined);
 
   useEffect(() => {
+    latestImageRef.current = image;
+
     const generatePreview = async () => {
       if (image) {
         const previewUrl = await createPreview(image);
+        // Ignore if image has changed since we started
+        if (latestImageRef.current !== image) return;
         setPreview({ file: image, previewUrl });
       } else if (initialImageUrl) {
         setPreview({ previewUrl: initialImageUrl });
