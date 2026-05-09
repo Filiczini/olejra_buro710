@@ -1,38 +1,42 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { logger } from '../../lib/logger';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Search, ChevronDown, PlusCircle, Pencil, Eye, Trash2, CheckCircle, X } from 'lucide-react';
+import { Pencil, Eye, Trash2, CheckCircle, ChevronDown, X } from 'lucide-react';
 import type { PostStatus, Post } from '@buro710/shared';
 import { postService } from '../../services/api';
 import DataTable from '../../components/admin/DataTable';
 import type { ColumnDef } from '../../components/admin/DataTable';
+import PostsToolbar from '../../components/admin/PostsToolbar';
 import Toast from '../../components/ui/Toast';
 import { useToast } from '../../hooks/useToast';
 import ConfirmModal from '../../components/ui/ConfirmModal';
+import { useAdminListPage } from '../../hooks/useAdminListPage';
 import { formatDate } from '../../lib/date';
-
-const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 10;
 
 export default function PostsPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast, showToast, dismissToast } = useToast();
+
+  const {
+    data: posts,
+    setData: setPosts,
+    loading,
+    pagination,
+    filters,
+    setFilter,
+    setPage,
+    refresh,
+  } = useAdminListPage<Post, { status?: string; search?: string }>({
+    fetchData: (params) => postService.getAll(params),
+    defaultLimit: 10,
+  });
+
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
   const [bulkLoading, setBulkLoading] = useState(false);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState({
-    page: DEFAULT_PAGE,
-    limit: DEFAULT_LIMIT,
-    total: 0,
-    totalPages: 0,
-  });
-  const [statusFilter, setStatusFilter] = useState<'draft' | 'published' | ''>('');
-  const [searchQuery, setSearchQuery] = useState('');
 
   const previousPostsRef = useRef<Post[]>([]);
   const previousPaginationRef = useRef(pagination);
@@ -50,46 +54,6 @@ export default function PostsPage() {
     return `${n} постів`;
   };
 
-  const loadPosts = useCallback(
-    async (page: number) => {
-      setLoading(true);
-      setSelectedIds(new Set());
-      try {
-        const result = await postService.getAll({
-          page,
-          limit: DEFAULT_LIMIT,
-          status: statusFilter || undefined,
-          search: searchQuery || undefined,
-        });
-        setPosts(result.data);
-        setPagination((prev) => ({
-          ...prev,
-          page,
-          total: result.pagination.total,
-          totalPages: result.pagination.totalPages,
-        }));
-      } catch (error) {
-        logger.error('Error loading posts', error);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [statusFilter, searchQuery]
-  );
-
-  useEffect(() => {
-    loadPosts(pagination.page);
-  }, [loadPosts]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (pagination.page !== 1) {
-        loadPosts(1);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
     const { id } = deleteTarget;
@@ -99,14 +63,12 @@ export default function PostsPage() {
     previousPaginationRef.current = pagination;
 
     setPosts((prev) => prev.filter((p) => p.id !== id));
-    setPagination((prev) => ({ ...prev, total: Math.max(0, prev.total - 1) }));
 
     try {
       await postService.delete(id);
     } catch (error) {
       logger.error('Error deleting post', error);
       setPosts(previousPostsRef.current);
-      setPagination(previousPaginationRef.current);
     }
   };
 
@@ -116,12 +78,11 @@ export default function PostsPage() {
     try {
       await Promise.all(ids.map((id) => postService.delete(id)));
       setPosts((prev) => prev.filter((p) => !selectedIds.has(p.id)));
-      setPagination((prev) => ({ ...prev, total: Math.max(0, prev.total - ids.length) }));
       setSelectedIds(new Set());
       setBulkDeleteConfirm(false);
     } catch (error) {
       logger.error('Error bulk deleting posts', error);
-      loadPosts(pagination.page);
+      refresh();
     } finally {
       setBulkLoading(false);
     }
@@ -142,7 +103,7 @@ export default function PostsPage() {
       setSelectedIds(new Set());
     } catch (error) {
       logger.error('Error bulk updating status', error);
-      loadPosts(pagination.page);
+      refresh();
     } finally {
       setBulkLoading(false);
     }
@@ -272,55 +233,21 @@ export default function PostsPage() {
       {toast && (
         <Toast key={toast.key} message={toast.message} type={toast.type} onDismiss={dismissToast} />
       )}
-      <div className="mx-auto max-w-7xl ">
-        {/* Toolbar */}
-        <div className="mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              {/* Search */}
-              <div className="relative group w-full sm:w-80">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-gray-400 group-focus-within:text-gray-600 stroke-[1.5]" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Пошук постів..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 transition-all bg-white"
-                />
-              </div>
-
-              {/* Filter Dropdown */}
-              <div className="relative">
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as 'draft' | 'published' | '')}
-                  className="appearance-none bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 cursor-pointer hover:border-gray-300 transition-colors"
-                >
-                  <option value="">Всі статуси</option>
-                  <option value="published">Опубліковано</option>
-                  <option value="draft">Чернетка</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                  <ChevronDown className="h-4 w-4 stroke-[1.5]" />
-                </div>
-              </div>
-
-              <span className="text-sm text-gray-500 ml-2 font-medium">
-                Всього: {pagination.total}
-              </span>
-            </div>
-
-            <button
-              onClick={() => navigate('/admin/posts/create')}
-              className="flex items-center justify-center px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-base font-medium rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 cursor-pointer"
-            >
-              <PlusCircle className="h-5 w-5 mr-2 stroke-[1.5]" />
-              Додати пост
-            </button>
-          </div>
-        </div>
+      <div className="mx-auto max-w-7xl">
+        <PostsToolbar
+          searchQuery={filters.search || ''}
+          onSearchChange={(value) => {
+            setSelectedIds(new Set());
+            setFilter('search', value || undefined);
+          }}
+          statusFilter={(filters.status as 'draft' | 'published' | '') || ''}
+          onStatusChange={(value) => {
+            setSelectedIds(new Set());
+            setFilter('status', value || undefined);
+          }}
+          total={pagination.total}
+          onAddClick={() => navigate('/admin/posts/create')}
+        />
 
         <DataTable
           data={posts}
@@ -336,7 +263,10 @@ export default function PostsPage() {
             totalPages: pagination.totalPages,
             total: pagination.total,
             limit: pagination.limit,
-            onPageChange: (page) => loadPosts(page),
+            onPageChange: (page) => {
+              setSelectedIds(new Set());
+              setPage(page);
+            },
           }}
         />
       </div>
