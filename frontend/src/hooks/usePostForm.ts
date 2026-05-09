@@ -1,23 +1,19 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { logger } from '../lib/logger';
-import { postService } from '../services/api';
-import type { Block, BlockType, BlockData } from '@buro710/shared';
-import type { EditBlock } from '../types/block';
+import { useParams } from 'react-router-dom';
 import { useToast } from './useToast';
 import { usePostDraft } from './usePostDraft';
 import { usePostFiles } from './usePostFiles';
 import { usePostFormState } from './usePostFormState';
 import { usePostValidation } from './usePostValidation';
-import { buildPostFormData } from '../lib/buildPostFormData';
+import { usePostLoad } from './usePostLoad';
+import { usePostSubmit } from './usePostSubmit';
+import type { Block, BlockType, BlockData } from '@buro710/shared';
+import type { EditBlock } from '../types/block';
 
 export function usePostForm() {
-  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEditing = Boolean(id);
 
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [initialBlocks, setInitialBlocks] = useState<Block[]>([]);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [pageBuilderKey, setPageBuilderKey] = useState(0);
@@ -72,18 +68,19 @@ export function usePostForm() {
   const [isDirty, setIsDirty] = useState(false);
   const blocksDataRef = useRef<EditBlock[]>([]);
 
-  const markDirty = () => {
+  const markDirty = useCallback(() => {
     isDirtyRef.current = true;
     setIsDirty(true);
-  };
-  const clearDirty = () => {
+  }, []);
+  const clearDirty = useCallback(() => {
     isDirtyRef.current = false;
     setIsDirty(false);
-  };
+  }, []);
   const getIsDirty = useCallback(() => isDirtyRef.current, []);
 
   // Always-fresh snapshot — updated each render so autosave never captures stale values
   const snapshotRef = useRef<() => Parameters<typeof draftSave>[0]>(null!);
+  // eslint-disable-next-line react-hooks/refs
   snapshotRef.current = () => ({
     title,
     slug,
@@ -137,53 +134,23 @@ export function usePostForm() {
     setPageBuilderKey((k) => k + 1);
     draftDismiss();
     markDirty();
-  }, [applyFields, draftDataRef, draftDismiss]);
+  }, [applyFields, draftDataRef, draftDismiss, markDirty]);
 
-  const loadPost = useCallback(
-    async (postId: string) => {
-      setLoading(true);
-      try {
-        const { post, blocks: lb } = await postService.getById(postId);
-        applyFields({
-          title: post.title,
-          slug: post.slug,
-          slugLocked: true,
-          status: post.status,
-          seoTitle: post.seo_title || '',
-          seoDescription: post.seo_description || '',
-          featured: post.featured || false,
-          heroData: {
-            hero_image_url: post.hero_image_url || '',
-            hero_title: post.hero_title || '',
-            hero_subtitle: post.hero_subtitle || '',
-            hero_tags: post.hero_tags || [],
-            hero_location: post.hero_location || '',
-            hero_year: post.hero_year || '',
-            heroImage: undefined,
-          },
-        });
-        setInitialBlocks(lb);
-        setGalleryImages(post.gallery_images || []);
-        blocksDataRef.current = lb.map((b, i) => ({
-          id: b.id,
-          type: b.type,
-          data: b.data,
-          sort_order: i,
-        }));
-        clearDirty();
-      } catch (error) {
-        logger.error('Error loading post', error);
-        navigate('/admin/posts');
-      } finally {
-        setLoading(false);
-      }
-    },
-    [navigate, applyFields]
-  );
+  const { loading, load } = usePostLoad();
 
   useEffect(() => {
-    if (id) loadPost(id);
-  }, [id, loadPost]);
+    if (id) {
+      load(id, {
+        applyFields,
+        setInitialBlocks,
+        setGalleryImages,
+        setBlocksData: (blocks) => {
+          blocksDataRef.current = blocks;
+        },
+        clearDirty,
+      });
+    }
+  }, [id, load, applyFields, clearDirty]);
 
   const handleTitleChange = (value: string) => {
     updateTitle(value);
@@ -212,16 +179,15 @@ export function usePostForm() {
       fileBlockImageChange(blockId, file, field);
       markDirty();
     },
-    [fileBlockImageChange]
+    [fileBlockImageChange, markDirty]
   );
+
+  const { saving, submit } = usePostSubmit();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate({ title, slug, status, seoTitle, seoDescription, heroData })) return;
-
-    setSaving(true);
-    try {
-      const formData = buildPostFormData({
+    await submit(
+      {
         title,
         slug,
         status,
@@ -234,49 +200,18 @@ export function usePostForm() {
         blockFiles,
         galleryImages,
         galleryNewFiles,
-      });
-      if (isEditing && id) {
-        await postService.update(id, formData);
-      } else {
-        await postService.create(formData);
+        isEditing,
+        id,
+      },
+      {
+        validate,
+        setErrors,
+        scrollToFirstError,
+        showToast,
+        clearDirty,
+        draftDismiss,
       }
-      clearDirty();
-      draftDismiss();
-      navigate('/admin/posts', { state: { saved: true } });
-    } catch (error) {
-      logger.error('Error saving post:', error);
-      showToast('Помилка збереження', 'error');
-      const data = (
-        error as {
-          response?: {
-            data?: {
-              error?: string;
-              field?: string;
-              details?: { field: string; message: string }[];
-            };
-          };
-        }
-      )?.response?.data;
-      if (data?.details?.length) {
-        const fe: Record<string, string> = {};
-        data.details.forEach(({ field, message }) => {
-          if (field && !fe[field]) fe[field] = message;
-        });
-        setErrors(fe);
-      } else if (data?.field && data?.error) {
-        setErrors({
-          [data.field]:
-            data.field === 'slug' && data.error === 'Slug already exists'
-              ? 'Такий URL вже існує'
-              : data.error,
-        });
-      } else {
-        setErrors({ submit: 'Помилка збереження посту' });
-      }
-      scrollToFirstError();
-    } finally {
-      setSaving(false);
-    }
+    );
   };
 
   return {
