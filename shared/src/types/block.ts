@@ -60,8 +60,23 @@ export interface CreateBlockData {
 
 export interface UpdateBlockData {
   type?: BlockType;
-  data?: BlockData;
+  data?: Record<string, unknown>;
   sort_order?: number;
+}
+
+/** Raw block input used before runtime validation (data is Record<string, unknown>) */
+export interface CreateBlockInput {
+  type: BlockType;
+  data: Record<string, unknown>;
+  sort_order?: number;
+}
+
+/** Raw block input for bulk create/update (may include id for existing blocks) */
+export interface UpsertBlockInput {
+  id?: string;
+  type: BlockType;
+  data: Record<string, unknown>;
+  sort_order: number;
 }
 
 export const BLOCK_ICONS: { value: string; label: string }[] = [

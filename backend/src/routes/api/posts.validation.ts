@@ -2,7 +2,7 @@
  * Validation utilities for Posts API (shared between internal and external routes)
  */
 
-import type { PostStatus, BlockType, BlockData } from '@buro710/shared';
+import type { PostStatus, BlockType, UpsertBlockInput } from '@buro710/shared';
 import { postUpdateSchema } from '@buro710/shared';
 
 export interface PostBody {
@@ -79,12 +79,7 @@ export interface RawBlock {
   sort_order?: number;
 }
 
-export interface ProcessedBlock {
-  id?: string;
-  type: BlockType;
-  data: BlockData;
-  sort_order: number;
-}
+export type ProcessedBlock = UpsertBlockInput;
 
 export const parseBlocksJson = (blocksJson: string | undefined): RawBlock[] => {
   if (!blocksJson) return [];
@@ -101,7 +96,7 @@ export const cleanBlockData = (block: RawBlock, index: number): ProcessedBlock =
   return {
     id: block.id,
     type: block.type as BlockType,
-    data: data as unknown as BlockData,
+    data,
     sort_order: block.sort_order ?? index,
   };
 };
@@ -149,7 +144,7 @@ export const extractBlockImageUploads = (
     return {
       id: block.id,
       type: block.type as BlockType,
-      data: data as unknown as BlockData,
+      data,
       sort_order: block.sort_order ?? index,
     };
   });

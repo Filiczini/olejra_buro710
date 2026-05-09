@@ -12,6 +12,8 @@ import type {
   PostPaginationParams,
   PostHero,
   Block,
+  CreateBlockInput,
+  UpsertBlockInput,
 } from '@buro710/shared';
 
 interface CreatePostParams extends PostHero {
@@ -23,11 +25,7 @@ interface CreatePostParams extends PostHero {
   seo_description?: string;
   og_image_url?: string;
   gallery_images?: string[];
-  blocks?: {
-    type: Block['type'];
-    data: Block['data'];
-    sort_order?: number;
-  }[];
+  blocks?: CreateBlockInput[];
 }
 
 interface UpdatePostParams extends Partial<PostHero> {
@@ -39,12 +37,7 @@ interface UpdatePostParams extends Partial<PostHero> {
   seo_description?: string;
   og_image_url?: string;
   gallery_images?: string[];
-  blocks?: {
-    id?: string;
-    type: Block['type'];
-    data: Block['data'];
-    sort_order: number;
-  }[];
+  blocks?: UpsertBlockInput[];
 }
 
 function toPost(row: typeof posts.$inferSelect): Post {

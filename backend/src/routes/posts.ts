@@ -6,7 +6,7 @@ import { storageService } from '../services/storageService';
 import { activityLogService } from '../services/activityLogService';
 import { uploadBlockMedia, uploadGalleryImages } from '../middleware/multer';
 import { blockService } from '../services/blockService';
-import type { BlockType, BlockData } from '@buro710/shared';
+import type { BlockData } from '@buro710/shared';
 import { asyncHandler, getParam } from '../middleware/asyncHandler';
 import {
   validatePostInput,
@@ -172,11 +172,7 @@ router.post(
       hero_location,
       hero_year,
       gallery_images: finalGalleryImages,
-      blocks: processedBlocks as unknown as {
-        type: BlockType;
-        data: BlockData;
-        sort_order: number;
-      }[],
+      blocks: processedBlocks,
     });
 
     if (blockUploads.length > 0) {
@@ -363,12 +359,7 @@ router.put(
       hero_location,
       hero_year,
       gallery_images: finalGalleryImages,
-      blocks: parsedBlocks as unknown as {
-        id?: string;
-        type: BlockType;
-        data: BlockData;
-        sort_order: number;
-      }[],
+      blocks: parsedBlocks,
     });
 
     await activityLogService.log({

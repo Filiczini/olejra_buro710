@@ -2,15 +2,17 @@ import { eq, asc } from 'drizzle-orm';
 import { db } from '../db';
 import { blocks } from '../db/schema';
 import { blockDataSchema } from '@buro710/shared';
-import type { Block, BlockType, BlockData, UpdateBlockData } from '@buro710/shared';
+import type {
+  Block,
+  BlockType,
+  UpdateBlockData,
+  CreateBlockInput,
+  UpsertBlockInput,
+} from '@buro710/shared';
 
 interface CreateBlocksParams {
   postId: string;
-  blocks: {
-    type: BlockType;
-    data: BlockData;
-    sort_order?: number;
-  }[];
+  blocks: CreateBlockInput[];
 }
 
 interface ReorderBlocksParams {
@@ -84,17 +86,19 @@ export const blockService = {
     return blockService.getByPostId(params.postId);
   },
 
-  syncBlocks: async (
-    postId: string,
-    incomingBlocks: { id?: string; type: BlockType; data: BlockData; sort_order: number }[]
-  ): Promise<Block[]> => {
+  syncBlocks: async (postId: string, incomingBlocks: UpsertBlockInput[]): Promise<Block[]> => {
     const existingBlocks = await blockService.getByPostId(postId);
     const existingIds = new Set(existingBlocks.map((b) => b.id));
     const incomingIds = new Set(incomingBlocks.filter((b) => b.id).map((b) => b.id));
 
     const toDelete = existingBlocks.filter((b) => !incomingIds.has(b.id));
-    const toCreate: { type: BlockType; data: BlockData; sort_order: number }[] = [];
-    const toUpdate: { id: string; type: BlockType; data: BlockData; sort_order: number }[] = [];
+    const toCreate: { type: BlockType; data: Record<string, unknown>; sort_order: number }[] = [];
+    const toUpdate: {
+      id: string;
+      type: BlockType;
+      data: Record<string, unknown>;
+      sort_order: number;
+    }[] = [];
 
     for (const block of incomingBlocks) {
       if (block.id && existingIds.has(block.id)) {

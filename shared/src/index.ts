@@ -48,6 +48,8 @@ export type {
   Block,
   CreateBlockData,
   UpdateBlockData,
+  CreateBlockInput,
+  UpsertBlockInput,
 } from "./types/block.js";
 export { BLOCK_ICONS } from "./types/block.js";
 
