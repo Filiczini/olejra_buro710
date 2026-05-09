@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useLayoutEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { logger } from '../lib/logger';
 import type { PaginatedResponse } from '@buro710/shared';
 
@@ -34,8 +35,8 @@ export function useAdminListPage<T, F extends object>({
   initialFilters = {} as F,
 }: UseAdminListPageOptions<T, F>): UseAdminListPageResult<T, F> {
   const [data, setData] = useState<T[]>([]);
-  const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<F>(initialFilters);
+  const [debouncedFilters, setDebouncedFilters] = useState<F>(initialFilters);
   const [targetPage, setTargetPage] = useState(defaultPage);
   const [pagination, setPagination] = useState<PaginationState>({
     page: defaultPage,
@@ -43,63 +44,89 @@ export function useAdminListPage<T, F extends object>({
     total: 0,
     totalPages: 0,
   });
-  const [tick, setTick] = useState(0);
 
-  // Keep fetchData reference stable so callers don't need useCallback
   const fetchDataRef = useRef(fetchData);
   useLayoutEffect(() => {
     fetchDataRef.current = fetchData;
   });
 
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Reset to first page when debounced filters change
   useEffect(() => {
-    let cancelled = false;
-    // Data-fetching effect: setLoading synchronously to show loading state
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLoading(true);
-    fetchDataRef
-      .current({ page: targetPage, limit: defaultLimit, ...filters })
-      .then((result) => {
-        if (cancelled) return;
-        setData(result.data);
+    queueMicrotask(() => {
+      setTargetPage(defaultPage);
+    });
+  }, [debouncedFilters, defaultPage]);
+
+  const {
+    data: queryResult,
+    isFetching,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['adminList', { page: targetPage, limit: defaultLimit, ...debouncedFilters }],
+    queryFn: () =>
+      fetchDataRef.current({ page: targetPage, limit: defaultLimit, ...debouncedFilters }),
+    structuralSharing: false,
+  });
+
+  useEffect(() => {
+    if (queryResult) {
+      queueMicrotask(() => {
+        setData(queryResult.data);
         setPagination((prev) => ({
           ...prev,
           page: targetPage,
-          total: result.pagination.total,
-          totalPages: result.pagination.totalPages,
+          total: queryResult.pagination.total,
+          totalPages: queryResult.pagination.totalPages,
         }));
-      })
-      .catch((error) => {
-        if (cancelled) return;
-        logger.error('Error loading data', error);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
       });
-    return () => {
-      cancelled = true;
-    };
-  }, [targetPage, filters, defaultLimit, tick]);
+    }
+  }, [queryResult, targetPage]);
 
-  const setFilter = useCallback(
-    <K extends keyof F>(key: K, value: F[K] | undefined) => {
-      setFilters((prev) => ({ ...prev, [key]: value }));
-      setTargetPage(defaultPage);
-    },
-    [defaultPage]
-  );
+  useEffect(() => {
+    if (isError && error) {
+      logger.error('Error loading data', error);
+    }
+  }, [isError, error]);
+
+  const setFilter = useCallback(<K extends keyof F>(key: K, value: F[K] | undefined) => {
+    setFilters((prev) => {
+      const next = { ...prev, [key]: value } as F;
+      if ((key as string) === 'search') {
+        if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = setTimeout(() => {
+          setDebouncedFilters(next);
+        }, 300);
+      } else {
+        if (debounceTimerRef.current) {
+          clearTimeout(debounceTimerRef.current);
+          debounceTimerRef.current = null;
+        }
+        setDebouncedFilters(next);
+      }
+      return next;
+    });
+  }, []);
 
   const setPage = useCallback((page: number) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
     setTargetPage(page);
   }, []);
 
   const refresh = useCallback(() => {
-    setTick((v) => v + 1);
-  }, []);
+    refetch();
+  }, [refetch]);
 
   return {
     data,
     setData,
-    loading,
+    loading: isFetching,
     pagination,
     filters,
     setFilter,
