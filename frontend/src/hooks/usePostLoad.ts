@@ -12,6 +12,7 @@ export interface LoadCallbacks {
   setGalleryImages: (images: string[]) => void;
   setBlocksData: (blocks: EditBlock[]) => void;
   clearDirty: () => void;
+  onLoaded?: () => void;
 }
 
 export function usePostLoad() {
@@ -52,6 +53,7 @@ export function usePostLoad() {
           }))
         );
         callbacks.clearDirty();
+        callbacks.onLoaded?.();
       } catch (error) {
         logger.error('Error loading post', error);
         navigate('/admin/posts');

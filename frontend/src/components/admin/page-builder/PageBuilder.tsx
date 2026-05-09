@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import type {
   Block,
   BlockType,
@@ -8,11 +8,12 @@ import type {
   TextImageData,
   ThreeImagesData,
 } from '@buro710/shared';
+import type { EditBlock } from '../../../types/block';
 import BlocksList from './BlocksList';
 import AddBlockMenu from './AddBlockMenu';
 
 interface PageBuilderProps {
-  initialBlocks: Block[];
+  initialBlocks: EditBlock[];
   onChange: (
     blocks: { id?: string; type: BlockType; data: BlockData; sort_order: number }[]
   ) => void;
@@ -23,8 +24,19 @@ function generateTempId(): string {
   return `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
+function normalizeBlocks(editBlocks: EditBlock[]): Block[] {
+  return editBlocks.map((b) => ({
+    ...b,
+    id: b.id ?? b._tempId ?? generateTempId(),
+    post_id: b.post_id ?? '',
+    created_at: b.created_at ?? new Date().toISOString(),
+    sort_order: b.sort_order ?? 0,
+  }));
+}
+
 export default function PageBuilder({ initialBlocks, onChange, onImageChange }: PageBuilderProps) {
-  const [blocks, setBlocks] = useState<Block[]>(initialBlocks);
+  const normalized = useMemo(() => normalizeBlocks(initialBlocks), [initialBlocks]);
+  const [blocks, setBlocks] = useState<Block[]>(normalized);
 
   const notifyChange = useCallback(
     (updatedBlocks: Block[]) => {

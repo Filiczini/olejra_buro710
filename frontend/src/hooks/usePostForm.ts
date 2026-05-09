@@ -148,6 +148,7 @@ export function usePostForm() {
           blocksDataRef.current = blocks;
         },
         clearDirty,
+        onLoaded: () => setPageBuilderKey((k) => k + 1),
       });
     }
   }, [id, load, applyFields, clearDirty]);
