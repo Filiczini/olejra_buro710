@@ -6,7 +6,7 @@ import type { User } from '@buro710/shared';
 
 interface ChangePasswordModalProps {
   user: User | null;
-  onUpdate: (userId: number, newPassword: string) => Promise<void>;
+  onUpdate: (userId: string, newPassword: string) => Promise<void>;
   onClose: () => void;
   loading: boolean;
 }

@@ -9,6 +9,7 @@ import type {
   ActivityLogsParams,
   ContactFormData,
   ContactSubmitResponse,
+  User,
 } from '@buro710/shared';
 
 async function get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T> {

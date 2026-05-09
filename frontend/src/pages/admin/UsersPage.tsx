@@ -56,7 +56,7 @@ export default function UsersPage() {
     }
   };
 
-  const handleUpdatePassword = async (userId: number, newPassword: string) => {
+  const handleUpdatePassword = async (userId: string, newPassword: string) => {
     setPasswordLoading(true);
     try {
       await userService.updatePassword(userId, newPassword);

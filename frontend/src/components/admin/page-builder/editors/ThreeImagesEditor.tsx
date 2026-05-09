@@ -46,10 +46,11 @@ export default function ThreeImagesEditor({
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      if (typeof reader.result === 'string') {
+      const result = reader.result;
+      if (typeof result === 'string') {
         setPreviews((prev) => {
           const n = [...prev];
-          n[index] = reader.result;
+          n[index] = result;
           return n;
         });
         setHasNewImage((prev) => {
