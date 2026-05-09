@@ -41,7 +41,7 @@ export default function PostGalleryBlock({ images, title }: PostGalleryBlockProp
     checkScrollButtons();
     window.addEventListener('resize', checkScrollButtons);
     return () => window.removeEventListener('resize', checkScrollButtons);
-  }, [images]);
+  }, [images, checkScrollButtons]);
 
   const scroll = (direction: 'left' | 'right') => {
     const container = scrollContainerRef.current;
