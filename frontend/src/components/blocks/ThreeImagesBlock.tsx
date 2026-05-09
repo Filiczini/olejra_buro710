@@ -5,14 +5,9 @@ interface ThreeImagesBlockProps {
 }
 
 export default function ThreeImagesBlock({ data }: ThreeImagesBlockProps) {
-  const images =
-    data.images ??
-    [1, 2, 3].map((i) => ({
-      url: (data as unknown as Record<string, string>)[`image_url_${i}`] ?? '',
-      alt: (data as unknown as Record<string, string>)[`alt_${i}`] ?? '',
-    }));
+  const images = data.images ?? [];
 
-  if (!images || images.every((img) => !img.url)) return null;
+  if (images.length === 0 || images.every((img) => !img.url)) return null;
 
   return (
     <section className="py-12 px-6">
