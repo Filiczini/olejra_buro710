@@ -113,7 +113,7 @@ export function usePostForm() {
     };
     window.addEventListener('beforeunload', h);
     return () => window.removeEventListener('beforeunload', h);
-  }, [draftSave]);
+  }, [draftSave, isDirtyRef]);
 
   const restoreDraft = useCallback(() => {
     const data = draftDataRef.current;
