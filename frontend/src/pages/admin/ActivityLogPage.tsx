@@ -1,65 +1,44 @@
 import { useState, useEffect, useCallback } from 'react';
 import { logger } from '../../lib/logger';
-import { formatDate } from '../../lib/date';
 import { ChevronDown } from 'lucide-react';
 import DataTable from '../../components/admin/DataTable';
 import type { ColumnDef } from '../../components/admin/DataTable';
 import { activityLogService } from '../../services/api';
 import type { ActivityLog, ActivityLogsParams } from '@buro710/shared';
-
-const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 20;
+import { useAdminListPage } from '../../hooks/useAdminListPage';
+import { formatDate } from '../../lib/date';
 
 export default function ActivityLogPage() {
-  const [logs, setLogs] = useState<ActivityLog[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState({
-    page: DEFAULT_PAGE,
-    limit: DEFAULT_LIMIT,
-    total: 0,
-    totalPages: 0,
+  const {
+    data: logs,
+    loading,
+    pagination,
+    filters,
+    setFilter,
+    setPage,
+  } = useAdminListPage<ActivityLog, ActivityLogsParams>({
+    fetchData: (params) => activityLogService.getAll(params),
+    defaultLimit: 20,
   });
-  const [filters, setFilters] = useState<ActivityLogsParams>({});
+
   const [uniqueUsers, setUniqueUsers] = useState<string[]>([]);
 
-  const loadLogs = useCallback(async () => {
-    setLoading(true);
-    try {
-      const result = await activityLogService.getAll({
-        page: pagination.page,
-        limit: pagination.limit,
-        ...filters,
+  useEffect(() => {
+    activityLogService
+      .getUniqueUsers()
+      .then(setUniqueUsers)
+      .catch((error) => {
+        logger.error('Error loading users', error);
       });
-      setLogs(result.data);
-      setPagination(result.pagination);
-    } catch (error) {
-      logger.error('Error loading logs', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [pagination.page, pagination.limit, filters]);
-
-  const loadUniqueUsers = useCallback(async () => {
-    try {
-      const users = await activityLogService.getUniqueUsers();
-      setUniqueUsers(users);
-    } catch (error) {
-      logger.error('Error loading users', error);
-    }
   }, []);
 
-  useEffect(() => {
-    loadLogs();
-  }, [loadLogs]);
-
-  useEffect(() => {
-    loadUniqueUsers();
-  }, [loadUniqueUsers]);
-
-  const handleFilterChange = (key: keyof ActivityLogsParams, value: string | undefined) => {
-    setFilters({ ...filters, [key]: value === '' ? undefined : value });
-    setPagination({ ...pagination, page: 1 });
-  };
+  const handleFilterChange = useCallback(
+    (key: keyof ActivityLogsParams, value: string | undefined) => {
+      setFilter(key, value === '' ? undefined : (value as never));
+      setPage(1);
+    },
+    [setFilter, setPage]
+  );
 
   const getEntityTypeBadge = (type: string) => {
     switch (type) {
@@ -218,7 +197,7 @@ export default function ActivityLogPage() {
         totalPages: pagination.totalPages,
         total: pagination.total,
         limit: pagination.limit,
-        onPageChange: (page) => setPagination({ ...pagination, page }),
+        onPageChange: setPage,
       }}
       header={
         <div className="p-8 pb-4">
@@ -278,7 +257,11 @@ export default function ActivityLogPage() {
 
             <div className="md:col-span-3 md:col-start-10 flex justify-end">
               <button
-                onClick={() => setFilters({ user_email: undefined, action: undefined })}
+                onClick={() => {
+                  setFilter('user_email', undefined);
+                  setFilter('action', undefined);
+                  setPage(1);
+                }}
                 className="w-full md:w-auto px-6 py-2.5 border border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-full text-sm font-medium transition-all focus:ring-2 focus:ring-offset-1 focus:ring-gray-100 cursor-pointer"
               >
                 Очистити фільтри
