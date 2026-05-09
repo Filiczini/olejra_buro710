@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { Icon } from '@iconify-icon/react';
 import { compressImage } from '../../lib/compressImage';
+import GalleryPreview from './GalleryPreview';
+import GalleryDropzone from './GalleryDropzone';
 
 interface GalleryUploaderProps {
   images: string[];
@@ -10,7 +11,7 @@ interface GalleryUploaderProps {
   label?: string;
 }
 
-interface ImageItem {
+export interface ImageItem {
   id: string;
   url: string;
   isNew: boolean;
@@ -191,104 +192,24 @@ export default function GalleryUploader({
       </h2>
 
       <div className="flex flex-col gap-6">
-        {imageItems.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {imageItems.map((item, index) => (
-              <div
-                key={item.id}
-                draggable
-                onDragStart={() => handleDragStart(index)}
-                onDragOver={(e) => handleDragOverItem(e, index)}
-                onDragEnd={handleDragEnd}
-                className={`relative aspect-[4/5] bg-zinc-100 rounded-lg overflow-hidden group cursor-move ${
-                  draggedIndex === index ? 'opacity-50' : ''
-                }`}
-              >
-                <img
-                  src={item.url}
-                  alt={`Gallery ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
-                {item.isNew && (
-                  <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded">
-                    Нове
-                  </div>
-                )}
-                <button
-                  type="button"
-                  onClick={() => handleRemoveImage(item)}
-                  className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 cursor-pointer"
-                  title="Видалити"
-                >
-                  <Icon icon="solar:close-circle-linear" width={16} />
-                </button>
-                <div className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-0.5 rounded flex items-center gap-1">
-                  <Icon icon="solar:hand-shake-linear" width={12} />
-                  Перетягніть
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <GalleryPreview
+          items={imageItems}
+          draggedIndex={draggedIndex}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOverItem}
+          onDragEnd={handleDragEnd}
+          onRemove={handleRemoveImage}
+        />
 
-        <div
+        <GalleryDropzone
+          isDragging={isDragging}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-            isDragging ? 'border-zinc-900 bg-zinc-50' : 'border-zinc-300 hover:border-zinc-400'
-          }`}
-        >
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/jpg"
-            multiple
-            onChange={handleFileChange}
-            className="hidden"
-            id="gallery-upload"
-          />
-          <label
-            htmlFor="gallery-upload"
-            className="cursor-pointer flex flex-col items-center gap-3"
-          >
-            <Icon icon="solar:gallery-add-linear" width={48} className="text-zinc-400" />
-            <div className="flex flex-col gap-1">
-              <p className="text-sm text-zinc-600">
-                Перетягніть зображення або{' '}
-                <span className="text-zinc-900 font-medium">виберіть файли</span>
-              </p>
-              <p className="text-xs text-zinc-400">
-                Формати: <span className="font-medium">JPEG, PNG</span> · Максимальний розмір:{' '}
-                <span className="font-medium">10MB</span> на файл
-              </p>
-            </div>
-          </label>
-        </div>
-
-        {rejectedFiles.length > 0 && (
-          <div className="flex flex-col gap-1">
-            {rejectedFiles.map((msg) => (
-              <p key={msg} className="text-xs text-red-500">
-                {msg}
-              </p>
-            ))}
-          </div>
-        )}
-
-        {compressMsg && (
-          <div className="flex items-center gap-1.5 text-xs text-zinc-500">
-            {compressMsg.includes('→') ? (
-              <Icon
-                icon="solar:check-circle-linear"
-                width={14}
-                className="text-green-500 flex-shrink-0"
-              />
-            ) : (
-              <Icon icon="solar:spinner-linear" width={14} className="animate-spin flex-shrink-0" />
-            )}
-            <span>{compressMsg}</span>
-          </div>
-        )}
+          onFileChange={handleFileChange}
+          rejectedFiles={rejectedFiles}
+          compressMsg={compressMsg}
+        />
 
         <p className="text-xs text-zinc-500 text-center">
           Перетягніть зображення для зміни порядку. Галерея відображається внизу сторінки.
