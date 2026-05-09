@@ -92,6 +92,7 @@ export default function DataTable<T>({
                     }}
                     onChange={handleSelectAll}
                     className="w-4 h-4 rounded border-gray-300 text-zinc-900 cursor-pointer"
+                    aria-label="Вибрати всі рядки"
                   />
                 </th>
               )}
@@ -135,6 +136,7 @@ export default function DataTable<T>({
                           checked={isSelected}
                           onChange={() => handleToggleSelect(id)}
                           className="w-4 h-4 rounded border-gray-300 text-zinc-900 cursor-pointer"
+                          aria-label="Вибрати рядок"
                         />
                       </td>
                     )}

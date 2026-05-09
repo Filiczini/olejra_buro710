@@ -129,6 +129,7 @@ export default function BlockItem({
             {...attributes}
             {...listeners}
             className="cursor-pointer cursor-grab active:cursor-grabbing text-zinc-400 hover:text-zinc-600 transition-colors"
+            aria-label="Перетягнути блок"
           >
             <Icon icon="solar:hamburger-menu-linear" width={20} />
           </button>
@@ -142,6 +143,7 @@ export default function BlockItem({
           type="button"
           onClick={handleDelete}
           className="p-1 text-zinc-400 hover:text-red-500 transition-colors cursor-pointer"
+          aria-label="Видалити блок"
         >
           <Icon icon="solar:trash-bin-trash-linear" width={20} />
         </button>

@@ -135,6 +135,7 @@ export default function UsersPage() {
             onClick={() => setPasswordTarget(user)}
             className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors cursor-pointer"
             title="Змінити пароль"
+            aria-label="Змінити пароль"
           >
             <KeyRound className="h-5 w-5 stroke-[1.5]" />
           </button>
@@ -142,6 +143,7 @@ export default function UsersPage() {
             onClick={() => setDeleteTarget(user)}
             className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
             title="Видалити"
+            aria-label="Видалити користувача"
           >
             <Trash2 className="h-5 w-5 stroke-[1.5]" />
           </button>
@@ -185,9 +187,12 @@ export default function UsersPage() {
             />
           </div>
           <div className="md:col-span-3">
-            <label className="block text-sm font-medium text-zinc-700 mb-2">Роль</label>
+            <label htmlFor="user-role" className="block text-sm font-medium text-zinc-700 mb-2">
+              Роль
+            </label>
             <div className="relative">
               <select
+                id="user-role"
                 value={role}
                 onChange={(e) => setRole(e.target.value as 'admin' | 'editor')}
                 className="appearance-none w-full bg-white border border-zinc-200 text-zinc-900 py-3 pl-4 pr-10 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent cursor-pointer"
