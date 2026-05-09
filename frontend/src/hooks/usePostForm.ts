@@ -7,14 +7,14 @@ import { usePostFormState } from './usePostFormState';
 import { usePostValidation } from './usePostValidation';
 import { usePostLoad } from './usePostLoad';
 import { usePostSubmit } from './usePostSubmit';
-import type { Block, BlockType, BlockData } from '@buro710/shared';
+import type { BlockType, BlockData } from '@buro710/shared';
 import type { EditBlock } from '../types/block';
 
 export function usePostForm() {
   const { id } = useParams<{ id: string }>();
   const isEditing = Boolean(id);
 
-  const [initialBlocks, setInitialBlocks] = useState<Block[]>([]);
+  const [initialBlocks, setInitialBlocks] = useState<EditBlock[]>([]);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [pageBuilderKey, setPageBuilderKey] = useState(0);
 
@@ -128,7 +128,7 @@ export function usePostForm() {
       featured: data.featured,
       heroData: { ...data.heroData, heroImage: undefined },
     });
-    setInitialBlocks(data.blocks as unknown as Block[]);
+    setInitialBlocks(data.blocks);
     blocksDataRef.current = data.blocks;
     setGalleryImages(data.galleryImages);
     setPageBuilderKey((k) => k + 1);

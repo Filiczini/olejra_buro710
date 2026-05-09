@@ -2,13 +2,13 @@ import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logger } from '../lib/logger';
 import { postService } from '../services/api';
-import type { Block, PostStatus } from '@buro710/shared';
+import type { PostStatus } from '@buro710/shared';
 import type { EditBlock } from '../types/block';
 import type { PostFormFields } from './usePostFormState';
 
 export interface LoadCallbacks {
   applyFields: (fields: Partial<PostFormFields>) => void;
-  setInitialBlocks: (blocks: Block[]) => void;
+  setInitialBlocks: (blocks: EditBlock[]) => void;
   setGalleryImages: (images: string[]) => void;
   setBlocksData: (blocks: EditBlock[]) => void;
   clearDirty: () => void;
