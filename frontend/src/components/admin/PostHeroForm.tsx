@@ -1,11 +1,7 @@
 import Input from '../ui/Input';
 import SingleImageUpload from './SingleImageUpload';
 import TagInput from './TagInput';
-import type { PostHero } from '@buro710/shared';
-
-export interface PostHeroFormData extends PostHero {
-  heroImage?: File;
-}
+import type { PostHeroFormData } from '../../types/post';
 
 interface PostHeroFormProps {
   data: PostHeroFormData;

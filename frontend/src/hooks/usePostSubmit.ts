@@ -6,7 +6,7 @@ import { buildPostFormData } from '../lib/buildPostFormData';
 import type { ValidationValues } from './usePostValidation';
 import type { PostStatus } from '@buro710/shared';
 import type { EditBlock } from '../types/block';
-import type { PostHeroFormData } from '../components/admin/PostHeroForm';
+import type { PostHeroFormData } from '../types/post';
 import type { ApiError } from '../types/api';
 
 interface BlockWithFile {

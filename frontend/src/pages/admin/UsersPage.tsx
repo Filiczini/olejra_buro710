@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { logger } from '../../lib/logger';
 import { useToast } from '../../hooks/useToast';
 import { useUsers } from '../../hooks/useUsers';
@@ -98,59 +98,64 @@ export default function UsersPage() {
     }
   };
 
-  const userColumns: ColumnDef<User>[] = [
-    {
-      key: 'email',
-      header: 'Email',
-      cell: (user) => <span className="text-base font-medium text-gray-900">{user.email}</span>,
-    },
-    {
-      key: 'role',
-      header: 'Роль',
-      cell: (user) => (
-        <span
-          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ring-1 ring-inset ${
-            user.role === 'admin'
-              ? 'bg-zinc-100 text-zinc-700 ring-zinc-600/20'
-              : 'bg-blue-50 text-blue-700 ring-blue-600/20'
-          }`}
-        >
-          {user.role === 'admin' ? 'Адміністратор' : 'Редактор'}
-        </span>
-      ),
-    },
-    {
-      key: 'created',
-      header: 'Створено',
-      cell: (user) => (
-        <span className="text-base text-gray-500 tabular-nums">{formatDate(user.created_at)}</span>
-      ),
-    },
-    {
-      key: 'actions',
-      header: <span className="text-right block">Дії</span>,
-      cell: (user) => (
-        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            onClick={() => setPasswordTarget(user)}
-            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors cursor-pointer"
-            title="Змінити пароль"
-            aria-label="Змінити пароль"
+  const userColumns = useMemo<ColumnDef<User>[]>(
+    () => [
+      {
+        key: 'email',
+        header: 'Email',
+        cell: (user) => <span className="text-base font-medium text-gray-900">{user.email}</span>,
+      },
+      {
+        key: 'role',
+        header: 'Роль',
+        cell: (user) => (
+          <span
+            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ring-1 ring-inset ${
+              user.role === 'admin'
+                ? 'bg-zinc-100 text-zinc-700 ring-zinc-600/20'
+                : 'bg-blue-50 text-blue-700 ring-blue-600/20'
+            }`}
           >
-            <KeyRound className="h-5 w-5 stroke-[1.5]" />
-          </button>
-          <button
-            onClick={() => setDeleteTarget(user)}
-            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
-            title="Видалити"
-            aria-label="Видалити користувача"
-          >
-            <Trash2 className="h-5 w-5 stroke-[1.5]" />
-          </button>
-        </div>
-      ),
-    },
-  ];
+            {user.role === 'admin' ? 'Адміністратор' : 'Редактор'}
+          </span>
+        ),
+      },
+      {
+        key: 'created',
+        header: 'Створено',
+        cell: (user) => (
+          <span className="text-base text-gray-500 tabular-nums">
+            {formatDate(user.created_at)}
+          </span>
+        ),
+      },
+      {
+        key: 'actions',
+        header: <span className="text-right block">Дії</span>,
+        cell: (user) => (
+          <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={() => setPasswordTarget(user)}
+              className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors cursor-pointer"
+              title="Змінити пароль"
+              aria-label="Змінити пароль"
+            >
+              <KeyRound className="h-5 w-5 stroke-[1.5]" />
+            </button>
+            <button
+              onClick={() => setDeleteTarget(user)}
+              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
+              title="Видалити"
+              aria-label="Видалити користувача"
+            >
+              <Trash2 className="h-5 w-5 stroke-[1.5]" />
+            </button>
+          </div>
+        ),
+      },
+    ],
+    []
+  );
 
   return (
     <div className="max-w-5xl mx-auto">

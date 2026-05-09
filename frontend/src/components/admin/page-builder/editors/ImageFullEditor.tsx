@@ -32,9 +32,11 @@ export default function ImageFullEditor({
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setPreviewUrl(reader.result as string);
-      setHasNewImage(true);
-      setTimeout(() => setCompressMsg(null), 3000);
+      if (typeof reader.result === 'string') {
+        setPreviewUrl(reader.result);
+        setHasNewImage(true);
+        setTimeout(() => setCompressMsg(null), 3000);
+      }
     };
     reader.onerror = () => {
       setPreviewUrl(null);

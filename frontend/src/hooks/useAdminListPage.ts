@@ -22,7 +22,7 @@ export interface UseAdminListPageResult<T, F> {
   loading: boolean;
   pagination: PaginationState;
   filters: F;
-  setFilter: <K extends keyof F>(key: K, value: F[K]) => void;
+  setFilter: <K extends keyof F>(key: K, value: F[K] | undefined) => void;
   setPage: (page: number) => void;
   refresh: () => void;
 }
@@ -81,7 +81,7 @@ export function useAdminListPage<T, F extends object>({
   }, [targetPage, filters, defaultLimit, tick]);
 
   const setFilter = useCallback(
-    <K extends keyof F>(key: K, value: F[K]) => {
+    <K extends keyof F>(key: K, value: F[K] | undefined) => {
       setFilters((prev) => ({ ...prev, [key]: value }));
       setTargetPage(defaultPage);
     },

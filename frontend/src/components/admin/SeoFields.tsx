@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Icon } from '@iconify-icon/react';
 
 interface SeoFieldsProps {
@@ -33,7 +33,9 @@ export default function SeoFields({
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewUrl(reader.result as string);
+        if (typeof reader.result === 'string') {
+          setPreviewUrl(reader.result);
+        }
       };
       reader.onerror = () => setPreviewUrl(null);
       reader.readAsDataURL(file);
@@ -48,10 +50,16 @@ export default function SeoFields({
 
   const titleLength = seoTitle.length;
   const descLength = seoDescription.length;
-  const titleColor =
-    titleLength > 60 ? 'text-red-500' : titleLength > 50 ? 'text-yellow-600' : 'text-zinc-500';
-  const descColor =
-    descLength > 160 ? 'text-red-500' : descLength > 140 ? 'text-yellow-600' : 'text-zinc-500';
+  const titleColor = useMemo(
+    () =>
+      titleLength > 60 ? 'text-red-500' : titleLength > 50 ? 'text-yellow-600' : 'text-zinc-500',
+    [titleLength]
+  );
+  const descColor = useMemo(
+    () =>
+      descLength > 160 ? 'text-red-500' : descLength > 140 ? 'text-yellow-600' : 'text-zinc-500',
+    [descLength]
+  );
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden">

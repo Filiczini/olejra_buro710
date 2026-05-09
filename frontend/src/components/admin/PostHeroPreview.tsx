@@ -1,5 +1,5 @@
 import { Icon } from '@iconify-icon/react';
-import type { PostHeroFormData } from './PostHeroForm';
+import type { PostHeroFormData } from '../../types/post';
 
 interface PostHeroPreviewProps {
   data: PostHeroFormData;

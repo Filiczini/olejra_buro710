@@ -46,17 +46,19 @@ export default function ThreeImagesEditor({
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setPreviews((prev) => {
-        const n = [...prev];
-        n[index] = reader.result as string;
-        return n;
-      });
-      setHasNewImage((prev) => {
-        const n = [...prev];
-        n[index] = true;
-        return n;
-      });
-      setTimeout(() => setMsg(index, null), 3000);
+      if (typeof reader.result === 'string') {
+        setPreviews((prev) => {
+          const n = [...prev];
+          n[index] = reader.result;
+          return n;
+        });
+        setHasNewImage((prev) => {
+          const n = [...prev];
+          n[index] = true;
+          return n;
+        });
+        setTimeout(() => setMsg(index, null), 3000);
+      }
     };
     reader.onerror = () => {
       setPreviews((prev) => {

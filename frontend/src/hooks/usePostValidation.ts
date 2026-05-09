@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { postCreateSchema } from '@buro710/shared';
 import type { ZodIssue, ZodTypeAny } from 'zod';
 import type { PostStatus } from '@buro710/shared';
-import type { PostHeroFormData } from '../components/admin/PostHeroForm';
+import type { PostHeroFormData } from '../types/post';
 
 export interface ValidationValues {
   title: string;

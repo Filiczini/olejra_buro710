@@ -128,8 +128,7 @@ export default function AboutPage() {
               {values.map((value) => (
                 <div
                   key={value.id}
-                  className="space-y-4 animate-reveal-up"
-                  style={{ animationDelay: `${value.id * 100}ms` }}
+                  className={`space-y-4 animate-reveal-up [animation-delay:${value.id * 100}ms]`}
                 >
                   <Icon icon={value.icon} width={32} className="text-zinc-500" />
                   <h4 className="text-xl font-medium">{value.title}</h4>
