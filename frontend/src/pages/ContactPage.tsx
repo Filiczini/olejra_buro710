@@ -1,10 +1,8 @@
 import { Icon } from '@iconify-icon/react';
-import { useState } from 'react';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
-import Button from '../components/ui/Button';
-import Input from '../components/ui/Input';
-import { contactService } from '../services/api';
+import ContactForm from '../components/contact/ContactForm';
+import { useContactForm } from '../hooks/useContactForm';
 
 const CONTACT_INFO = [
   {
@@ -52,39 +50,7 @@ const SOCIAL_LINKS = [
 ];
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: '',
-  });
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      const result = await contactService.submit(formData);
-      if (result.success) {
-        setSuccess(true);
-        setFormData({ name: '', email: '', subject: '', message: '' });
-      } else {
-        setError(result.message || 'Помилка при відправці');
-      }
-    } catch {
-      setError('Помилка при відправці повідомлення. Спробуйте пізніше.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+  const { formData, loading, success, error, handleChange, handleSubmit, reset } = useContactForm();
 
   return (
     <div className="min-h-screen bg-zinc-50">
@@ -185,85 +151,15 @@ export default function ContactPage() {
               <p className="text-zinc-500 text-lg max-w-2xl mx-auto">Розкажіть про свій проект.</p>
             </div>
 
-            {success ? (
-              <div className="text-center py-12">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-6">
-                  <Icon icon="solar:check-circle-linear" width={32} className="text-green-600" />
-                </div>
-                <h3 className="text-2xl font-medium mb-2">Повідомлення надіслано!</h3>
-                <p className="text-zinc-500 mb-6">Ми зв'яжемося з вами найближчим часом.</p>
-                <Button variant="secondary" onClick={() => setSuccess(false)}>
-                  Надіслати ще одне повідомлення
-                </Button>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-8">
-                {error && (
-                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-                    {error}
-                  </div>
-                )}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Input
-                    label="Ім'я"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="Ваше ім'я"
-                    required
-                    disabled={loading}
-                  />
-                  <Input
-                    label="Email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="Введіть ваш email"
-                    required
-                    disabled={loading}
-                  />
-                </div>
-                <Input
-                  label="Тема"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleChange}
-                  placeholder="Тема вашого повідомлення"
-                  required
-                  disabled={loading}
-                />
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="contact-message" className="text-sm font-medium text-zinc-700">
-                    Повідомлення
-                  </label>
-                  <textarea
-                    id="contact-message"
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    placeholder="Ваше повідомлення..."
-                    rows={6}
-                    className="w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent resize-none disabled:bg-zinc-100 disabled:cursor-not-allowed"
-                    required
-                    disabled={loading}
-                    minLength={10}
-                  />
-                </div>
-                <div className="text-center">
-                  <Button type="submit" variant="primary" className="px-12 py-4" disabled={loading}>
-                    {loading ? (
-                      <span className="flex items-center gap-2">
-                        <Icon icon="solar:spinner-linear" width={18} className="animate-spin" />
-                        Відправка...
-                      </span>
-                    ) : (
-                      'Надіслати повідомлення'
-                    )}
-                  </Button>
-                </div>
-              </form>
-            )}
+            <ContactForm
+              formData={formData}
+              loading={loading}
+              error={error}
+              success={success}
+              onChange={handleChange}
+              onSubmit={handleSubmit}
+              onReset={reset}
+            />
           </div>
         </section>
 
