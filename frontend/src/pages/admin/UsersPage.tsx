@@ -5,53 +5,33 @@ import { useUsers } from '../../hooks/useUsers';
 import { userService } from '../../services/api';
 import type { User } from '../../services/api';
 import type { ApiError } from '../../types/api';
-import Input from '../../components/ui/Input';
-import Button from '../../components/ui/Button';
 import Toast from '../../components/ui/Toast';
-import { PlusCircle, Trash2, KeyRound } from 'lucide-react';
+import { Trash2, KeyRound } from 'lucide-react';
 import { formatDate } from '../../lib/date';
 import DataTable from '../../components/admin/DataTable';
 import type { ColumnDef } from '../../components/admin/DataTable';
 import ConfirmModal from '../../components/ui/ConfirmModal';
-import Modal from '../../components/ui/Modal';
+import CreateUserForm from '../../components/admin/CreateUserForm';
+import ChangePasswordModal from '../../components/admin/ChangePasswordModal';
 
 export default function UsersPage() {
   const { users, loading, refresh } = useUsers();
   const [formLoading, setFormLoading] = useState(false);
   const { toast, showToast, dismissToast } = useToast();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'admin' | 'editor'>('admin');
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
   const [passwordTarget, setPasswordTarget] = useState<User | null>(null);
-  const [newPassword, setNewPassword] = useState('');
-  const [passwordError, setPasswordError] = useState('');
   const [passwordLoading, setPasswordLoading] = useState(false);
 
-  const validateForm = () => {
-    const errors: Record<string, string> = {};
-    if (!email.trim()) errors.email = "Email обов'язковий";
-    else if (!/^\S+@\S+\.\S+$/.test(email)) errors.email = 'Невірний формат email';
-    if (!password || password.length < 6) errors.password = 'Пароль має бути не менше 6 символів';
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
+  const handleCreate = async (data: {
+    email: string;
+    password: string;
+    role: 'admin' | 'editor';
+  }) => {
     setFormLoading(true);
     try {
-      await userService.create({ email, password, role });
+      await userService.create(data);
       showToast('Користувача створено', 'success');
-      setEmail('');
-      setPassword('');
-      setRole('admin');
-      setFormErrors({});
       await refresh();
     } catch (error: unknown) {
       logger.error('Error creating user', error);
@@ -76,20 +56,12 @@ export default function UsersPage() {
     }
   };
 
-  const handleUpdatePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!passwordTarget) return;
-    if (!newPassword || newPassword.length < 6) {
-      setPasswordError('Пароль має бути не менше 6 символів');
-      return;
-    }
+  const handleUpdatePassword = async (userId: number, newPassword: string) => {
     setPasswordLoading(true);
     try {
-      await userService.updatePassword(passwordTarget.id, newPassword);
+      await userService.updatePassword(userId, newPassword);
       showToast('Пароль оновлено', 'success');
       setPasswordTarget(null);
-      setNewPassword('');
-      setPasswordError('');
     } catch (error: unknown) {
       logger.error('Error updating password', error);
       showToast('Не вдалося оновити пароль', 'error');
@@ -165,70 +137,7 @@ export default function UsersPage() {
 
       <h2 className="text-3xl font-semibold tracking-tight text-gray-900 mb-8">Користувачі</h2>
 
-      {/* Create Form */}
-      <div className="bg-white border border-gray-200/75 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-6 mb-8">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Додати користувача</h3>
-        <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-          <div className="md:col-span-4">
-            <Input
-              label="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              error={formErrors.email}
-              placeholder="user@example.com"
-              required
-            />
-          </div>
-          <div className="md:col-span-3">
-            <Input
-              label="Пароль"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              error={formErrors.password}
-              placeholder="Мінімум 6 символів"
-              required
-            />
-          </div>
-          <div className="md:col-span-3">
-            <label htmlFor="user-role" className="block text-sm font-medium text-zinc-700 mb-2">
-              Роль
-            </label>
-            <div className="relative">
-              <select
-                id="user-role"
-                value={role}
-                onChange={(e) => setRole(e.target.value as 'admin' | 'editor')}
-                className="appearance-none w-full bg-white border border-zinc-200 text-zinc-900 py-3 pl-4 pr-10 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent cursor-pointer"
-              >
-                <option value="admin">Адміністратор</option>
-                <option value="editor">Редактор</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-400">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-          <div className="md:col-span-2">
-            <button
-              type="submit"
-              disabled={formLoading}
-              className="w-full flex items-center justify-center px-4 py-3 bg-zinc-900 hover:bg-zinc-800 text-white text-base font-medium rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-zinc-900 disabled:opacity-50 cursor-pointer"
-            >
-              <PlusCircle className="h-5 w-5 mr-2 stroke-[1.5]" />
-              {formLoading ? 'Створення...' : 'Додати'}
-            </button>
-          </div>
-        </form>
-      </div>
+      <CreateUserForm onCreate={handleCreate} formLoading={formLoading} />
 
       <DataTable
         data={users}
@@ -255,54 +164,12 @@ export default function UsersPage() {
         variant="danger"
       />
 
-      <Modal
-        isOpen={!!passwordTarget}
-        onClose={() => {
-          setPasswordTarget(null);
-          setNewPassword('');
-          setPasswordError('');
-        }}
-        title="Зміна пароля"
-      >
-        <p className="text-sm text-zinc-500 mb-4">
-          Новий пароль для{' '}
-          <span className="font-medium text-zinc-900">{passwordTarget?.email}</span>
-        </p>
-        <form onSubmit={handleUpdatePassword} className="space-y-4">
-          <Input
-            label="Новий пароль"
-            type="password"
-            value={newPassword}
-            onChange={(e) => {
-              setNewPassword(e.target.value);
-              setPasswordError('');
-            }}
-            error={passwordError}
-            placeholder="Мінімум 6 символів"
-            required
-          />
-          <div className="flex gap-3 justify-end">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => {
-                setPasswordTarget(null);
-                setNewPassword('');
-                setPasswordError('');
-              }}
-            >
-              Скасувати
-            </Button>
-            <button
-              type="submit"
-              disabled={passwordLoading}
-              className="px-5 py-2.5 rounded-full font-medium transition-all cursor-pointer bg-zinc-900 text-white hover:bg-zinc-800 disabled:opacity-50"
-            >
-              {passwordLoading ? 'Збереження...' : 'Зберегти'}
-            </button>
-          </div>
-        </form>
-      </Modal>
+      <ChangePasswordModal
+        user={passwordTarget}
+        onUpdate={handleUpdatePassword}
+        onClose={() => setPasswordTarget(null)}
+        loading={passwordLoading}
+      />
     </div>
   );
 }

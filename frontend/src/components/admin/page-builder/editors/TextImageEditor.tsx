@@ -3,6 +3,7 @@ import { Icon } from '@iconify-icon/react';
 import type { BlockData, TextImageData } from '@buro710/shared';
 import { BLOCK_ICONS } from '@buro710/shared';
 import { compressImage } from '../../../../lib/compressImage';
+import FeatureTagsInput from '../../../admin/FeatureTagsInput';
 
 interface TextImageEditorProps {
   blockId: string;
@@ -22,7 +23,6 @@ export default function TextImageEditor({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [hasNewImage, setHasNewImage] = useState(false);
   const [compressMsg, setCompressMsg] = useState<string | null>(null);
-  const [newFeature, setNewFeature] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const displayUrl = hasNewImage ? previewUrl : data.image_url;
@@ -62,40 +62,6 @@ export default function TextImageEditor({
 
   const updateField = (field: keyof TextImageData, value: string | string[]) => {
     onChange({ ...data, [field]: value });
-  };
-
-  const addFeature = (value: string) => {
-    const trimmed = value.trim();
-    if (trimmed) {
-      const features = data.features || [];
-      updateField('features', [...features, trimmed]);
-    }
-  };
-
-  const removeFeature = (index: number) => {
-    const features = data.features || [];
-    updateField(
-      'features',
-      features.filter((_, i) => i !== index)
-    );
-  };
-
-  const handleFeatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value.includes(',')) {
-      const parts = value.split(',');
-      addFeature(parts[0]);
-      setNewFeature(parts.slice(1).join(','));
-    } else {
-      setNewFeature(value);
-    }
-  };
-
-  const handleFeatureBlur = () => {
-    if (newFeature.trim()) {
-      addFeature(newFeature);
-      setNewFeature('');
-    }
   };
 
   const gridCols = 'md:grid-cols-[1fr_1fr]';
@@ -172,64 +138,11 @@ export default function TextImageEditor({
           />
         </div>
 
-        <div>
-          <label
-            htmlFor={f('new-feature')}
-            className="block text-xs font-medium text-zinc-600 mb-1"
-          >
-            Особливості (features)
-          </label>
-          <div className="flex gap-2 mb-2">
-            <input
-              id={f('new-feature')}
-              name={f('new-feature')}
-              type="text"
-              value={newFeature}
-              onChange={handleFeatureChange}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  if (newFeature.trim()) {
-                    addFeature(newFeature);
-                    setNewFeature('');
-                  }
-                }
-              }}
-              onBlur={handleFeatureBlur}
-              placeholder="Додати особливість"
-              className="flex-1 px-2 py-1.5 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
-            />
-            <button
-              type="button"
-              onClick={() => {
-                if (newFeature.trim()) {
-                  addFeature(newFeature);
-                  setNewFeature('');
-                }
-              }}
-              className="px-3 py-1.5 bg-zinc-100 text-zinc-700 rounded-lg hover:bg-zinc-200 text-sm cursor-pointer"
-            >
-              +
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-1">
-            {(data.features || []).map((feature, index) => (
-              <span
-                key={`${index}-${feature}`}
-                className="inline-flex items-center gap-1 px-2 py-1 bg-zinc-100 text-zinc-700 rounded text-xs"
-              >
-                {feature}
-                <button
-                  type="button"
-                  onClick={() => removeFeature(index)}
-                  className="text-zinc-400 hover:text-red-500 cursor-pointer"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-        </div>
+        <FeatureTagsInput
+          id={f('new-feature')}
+          features={data.features}
+          onChange={(features) => updateField('features', features)}
+        />
       </div>
 
       <div className={order.image}>
