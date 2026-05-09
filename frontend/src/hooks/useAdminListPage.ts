@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
 import { logger } from '../lib/logger';
 import type { PaginatedResponse } from '@buro710/shared';
 
@@ -45,12 +45,19 @@ export function useAdminListPage<T, F extends object>({
   });
   const [tick, setTick] = useState(0);
 
+  // Keep fetchData reference stable so callers don't need useCallback
+  const fetchDataRef = useRef(fetchData);
+  useLayoutEffect(() => {
+    fetchDataRef.current = fetchData;
+  });
+
   useEffect(() => {
     let cancelled = false;
     // Data-fetching effect: setLoading synchronously to show loading state
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
-    fetchData({ page: targetPage, limit: defaultLimit, ...filters })
+    fetchDataRef
+      .current({ page: targetPage, limit: defaultLimit, ...filters })
       .then((result) => {
         if (cancelled) return;
         setData(result.data);
@@ -71,7 +78,7 @@ export function useAdminListPage<T, F extends object>({
     return () => {
       cancelled = true;
     };
-  }, [targetPage, filters, fetchData, defaultLimit, tick]);
+  }, [targetPage, filters, defaultLimit, tick]);
 
   const setFilter = useCallback(
     <K extends keyof F>(key: K, value: F[K]) => {
