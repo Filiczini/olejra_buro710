@@ -17,10 +17,14 @@ export function useAuth() {
       try {
         await api.get('/admin/me');
         setIsAuthenticated(true);
-      } catch {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
+      } catch (error: unknown) {
+        const status = (error as { response?: { status?: number } })?.response?.status;
+        // Don't clear tokens on 401 — the API interceptor handles refresh/redirect
+        if (status !== 401) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+        }
         setIsAuthenticated(false);
       } finally {
         setIsLoading(false);

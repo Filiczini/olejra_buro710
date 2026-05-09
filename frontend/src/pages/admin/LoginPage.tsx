@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
+import api from '../../api/client';
 import { authService } from '../../services/api';
 import type { LoginCredentials } from '@buro710/shared';
 
@@ -16,9 +17,17 @@ export default function LoginPage() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token) {
-      navigate('/admin/posts', { replace: true });
-    }
+    if (!token) return;
+
+    // Verify token is still valid before redirecting
+    api
+      .get('/admin/me')
+      .then(() => navigate('/admin/posts', { replace: true }))
+      .catch(() => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+      });
   }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
