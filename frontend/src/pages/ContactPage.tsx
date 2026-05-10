@@ -1,51 +1,7 @@
 import { Icon } from '@iconify-icon/react';
 import ContactForm from '../components/contact/ContactForm';
 import { useContactForm } from '../hooks/useContactForm';
-
-const CONTACT_INFO = [
-  {
-    icon: 'solar:letter-linear',
-    label: 'Email',
-    value: 'hello@buro710.com',
-    link: 'mailto:hello@buro710.com',
-  },
-  {
-    icon: 'solar:phone-linear',
-    label: 'Телефон',
-    value: '+380 44 123 4567',
-    link: 'tel:+380441234567',
-  },
-  {
-    icon: 'solar:map-point-linear',
-    label: 'Адреса',
-    value: 'Чернівці, вул. Рівненська, 5А',
-    link: null,
-  },
-  {
-    icon: 'solar:clock-linear',
-    label: 'Робочий час',
-    value: 'Пн-Пт: 9:00 - 18:00',
-    link: null,
-  },
-];
-
-const SOCIAL_LINKS = [
-  {
-    icon: 'solar:instagram-linear',
-    name: 'Instagram',
-    link: 'https://instagram.com/buro710',
-  },
-  {
-    icon: 'solar:linkedin-linear',
-    name: 'LinkedIn',
-    link: 'https://linkedin.com/company/buro710',
-  },
-  {
-    icon: 'solar:behance-linear',
-    name: 'Behance',
-    link: 'https://behance.net/buro710',
-  },
-];
+import { contactInfo, socialLinks } from '../constants/contact';
 
 export default function ContactPage() {
   const { formData, loading, success, error, handleChange, handleSubmit, reset } = useContactForm();
@@ -94,7 +50,7 @@ export default function ContactPage() {
                 Зв'яжіться з нами зручним для вас способом.
               </p>
               <div className="space-y-6">
-                {CONTACT_INFO.map((info) => (
+                {contactInfo.map((info) => (
                   <div key={info.label} className="flex items-start gap-4">
                     <div className="flex-shrink-0">
                       <Icon icon={info.icon} width={24} className="text-zinc-900" />
@@ -120,7 +76,7 @@ export default function ContactPage() {
               <h3 className="text-2xl font-medium tracking-tight mb-6">Соціальні мережі</h3>
               <p className="text-zinc-500 text-lg mb-8">Дізнавайтеся про наші новини.</p>
               <div className="space-y-4">
-                {SOCIAL_LINKS.map((social) => (
+                {socialLinks.map((social) => (
                   <a
                     key={social.name}
                     href={social.link}
