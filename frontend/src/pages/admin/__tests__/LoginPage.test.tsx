@@ -8,6 +8,7 @@ const { mockLogin } = vi.hoisted(() => ({
 }));
 
 const mockNavigate = vi.fn();
+const mockApiGet = vi.fn();
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
@@ -23,21 +24,33 @@ vi.mock('../../../services/api', () => ({
   },
 }));
 
+vi.mock('../../../api/client', () => ({
+  default: {
+    get: (...args: unknown[]) => mockApiGet(...args),
+  },
+}));
+
 describe('LoginPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
     mockNavigate.mockClear();
+    mockApiGet.mockReset();
   });
 
-  it('redirects when token already exists', () => {
+  it('redirects when token already exists', async () => {
     localStorage.setItem('token', 'existing');
+    mockApiGet.mockResolvedValue({ data: { id: '1', email: 'a@b.c', role: 'admin' } });
+
     render(
       <MemoryRouter>
         <LoginPage />
       </MemoryRouter>
     );
-    expect(mockNavigate).toHaveBeenCalledWith('/admin/posts', { replace: true });
+
+    await waitFor(() =>
+      expect(mockNavigate).toHaveBeenCalledWith('/admin/posts', { replace: true })
+    );
   });
 
   it('renders login form', () => {
