@@ -2,75 +2,75 @@ import { Icon } from '@iconify-icon/react';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 
+const values = [
+  {
+    id: 1,
+    icon: 'solar:soundwave-square-linear',
+    title: 'Звук',
+    description: 'Враховуємо акустичні сценарії.',
+  },
+  {
+    id: 2,
+    icon: 'solar:ruler-pen-linear',
+    title: 'Пропорції',
+    description: 'Працюємо з золотим перетином.',
+  },
+  {
+    id: 3,
+    icon: 'solar:layers-minimalistic-linear',
+    title: 'Шари',
+    description: 'Створюємо глибину через багатошаровість.',
+  },
+  {
+    id: 4,
+    icon: 'solar:sun-2-linear',
+    title: 'Світло',
+    description: 'Проектуємо світлотіньові сценарії.',
+  },
+];
+
+const steps = [
+  {
+    id: '01',
+    name: 'Концепція',
+    description: 'Вивчення контексту.',
+  },
+  {
+    id: '02',
+    name: 'Дизайн',
+    description: 'Створення детальних проектів.',
+  },
+  {
+    id: '03',
+    name: 'Реалізація',
+    description: 'Координація будівельних процесів.',
+  },
+  {
+    id: '04',
+    name: 'Здача',
+    description: 'Фіналізація проекту.',
+  },
+];
+
+const team = [
+  {
+    name: 'Олена Коваленко',
+    role: 'Головний архітектор',
+    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&fit=crop',
+  },
+  {
+    name: 'Андрій Петренко',
+    role: "Інтер'єрний дизайнер",
+    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=800&fit=crop',
+  },
+  {
+    name: 'Марія Сидоренко',
+    role: 'Архітектор',
+    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&fit=crop',
+  },
+];
+
 export default function AboutPage() {
-  const values = [
-    {
-      id: 1,
-      icon: 'solar:soundwave-square-linear',
-      title: 'Звук',
-      description: 'Враховуємо акустичні сценарії.',
-    },
-    {
-      id: 2,
-      icon: 'solar:ruler-pen-linear',
-      title: 'Пропорції',
-      description: 'Працюємо з золотим перетином.',
-    },
-    {
-      id: 3,
-      icon: 'solar:layers-minimalistic-linear',
-      title: 'Шари',
-      description: 'Створюємо глибину через багатошаровість.',
-    },
-    {
-      id: 4,
-      icon: 'solar:sun-2-linear',
-      title: 'Світло',
-      description: 'Проектуємо світлотіньові сценарії.',
-    },
-  ];
-
-  const steps = [
-    {
-      id: '01',
-      name: 'Концепція',
-      description: 'Вивчення контексту.',
-    },
-    {
-      id: '02',
-      name: 'Дизайн',
-      description: 'Створення детальних проектів.',
-    },
-    {
-      id: '03',
-      name: 'Реалізація',
-      description: 'Координація будівельних процесів.',
-    },
-    {
-      id: '04',
-      name: 'Здача',
-      description: 'Фіналізація проекту.',
-    },
-  ];
-
-  const team = [
-    {
-      name: 'Олена Коваленко',
-      role: 'Головний архітектор',
-      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&fit=crop',
-    },
-    {
-      name: 'Андрій Петренко',
-      role: "Інтер'єрний дизайнер",
-      image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=800&fit=crop',
-    },
-    {
-      name: 'Марія Сидоренко',
-      role: 'Архітектор',
-      image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&fit=crop',
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-zinc-50">
       <Header />
