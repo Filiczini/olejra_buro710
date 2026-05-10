@@ -1,12 +1,6 @@
 import { useState, useCallback } from 'react';
 import { contactService } from '../services/api';
-
-export interface ContactFormData {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-}
+import type { ContactFormData } from '@buro710/shared';
 
 export function useContactForm() {
   const [formData, setFormData] = useState<ContactFormData>({

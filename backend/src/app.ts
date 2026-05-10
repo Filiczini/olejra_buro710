@@ -15,6 +15,7 @@ import authRoutes from './routes/auth';
 import usersRoutes from './routes/users';
 import activityLogsRoutes from './routes/activityLogs';
 import postsRoutes from './routes/posts';
+import galleryRoutes from './routes/gallery';
 import contactRoutes from './routes/contact';
 import apiPostsRoutes from './routes/api/posts';
 import { db } from './db';
@@ -71,6 +72,7 @@ app.use('/api/admin', authRoutes);
 app.use('/api/admin', usersRoutes);
 app.use('/api/logs', activityLogsRoutes);
 app.use('/api/posts', postsRoutes);
+app.use('/api/posts', galleryRoutes);
 app.use('/api/contact', contactRoutes);
 
 // External API v1

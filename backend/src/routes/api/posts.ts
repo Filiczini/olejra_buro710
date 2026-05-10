@@ -9,7 +9,7 @@ import { activityLogService } from '../../services/activityLogService';
 import { apiKeyMiddleware } from '../../middleware/apiKey';
 import { uploadMiddleware } from '../../middleware/multer';
 import { postService } from '../../services/postService';
-import { storageService } from '../../services/storageService';
+import { postFileService } from '../../services/postFileService';
 import type { PostStatus } from '@buro710/shared';
 import { asyncHandler, getParam } from '../../middleware/asyncHandler';
 import {
@@ -27,67 +27,6 @@ const uploadPostMedia = uploadMiddleware.fields([
   { name: 'og_image', maxCount: 1 },
   { name: 'gallery_images', maxCount: 20 },
 ]);
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-export interface ProcessedFiles {
-  heroImageUrl?: string;
-  ogImageUrl?: string;
-  galleryUrls: string[];
-}
-
-export interface UrlOptions {
-  hero_image_url?: string;
-  og_image_url?: string;
-}
-
-export const processUploadedFiles = async (
-  files: { [fieldname: string]: Express.Multer.File[] } | undefined,
-  existingGallery: string[] = [],
-  urls: UrlOptions = {}
-): Promise<ProcessedFiles> => {
-  const result: ProcessedFiles = { galleryUrls: existingGallery };
-
-  if (!files) {
-    // If no files, use URLs if provided
-    if (urls.hero_image_url) {
-      result.heroImageUrl = urls.hero_image_url;
-    }
-    if (urls.og_image_url) {
-      result.ogImageUrl = urls.og_image_url;
-    }
-    return result;
-  }
-
-  // Hero image: file takes priority over URL
-  if (files['hero_image']?.[0]) {
-    result.heroImageUrl = await storageService.uploadImage(files['hero_image'][0], 'posts');
-  } else if (urls.hero_image_url) {
-    result.heroImageUrl = urls.hero_image_url;
-  }
-
-  // OG image: file takes priority over URL
-  if (files['og_image']?.[0]) {
-    result.ogImageUrl = await storageService.uploadImage(files['og_image'][0], 'posts');
-  } else if (urls.og_image_url) {
-    result.ogImageUrl = urls.og_image_url;
-  }
-
-  // Gallery (existing logic)
-  const galleryFiles = files['gallery_images'] || [];
-  const newGalleryUrls: string[] = [];
-
-  for (const file of galleryFiles) {
-    const url = await storageService.uploadImage(file, 'posts');
-    newGalleryUrls.push(url);
-  }
-
-  result.galleryUrls = [...existingGallery, ...newGalleryUrls];
-
-  return result;
-};
 
 // ============================================================================
 // Routes - All protected by API Key
@@ -193,10 +132,21 @@ router.post(
 
     // Process uploaded files
     const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
-    const processedFiles = await processUploadedFiles(files, existingGallery, {
-      hero_image_url,
-      og_image_url,
+    const heroImageUrl = await postFileService.processImage({
+      file: files?.['hero_image']?.[0],
+      urlFromBody: hero_image_url,
+      folder: 'posts',
     });
+    const ogImageUrl = await postFileService.processImage({
+      file: files?.['og_image']?.[0],
+      urlFromBody: og_image_url,
+      folder: 'posts',
+    });
+    const newGalleryUrls = await postFileService.uploadGalleryImages(
+      files?.['gallery_images'] || [],
+      'posts'
+    );
+    const finalGalleryImages = [...existingGallery, ...newGalleryUrls];
 
     // Create post
     const post = await postService.create({
@@ -205,14 +155,14 @@ router.post(
       status,
       seo_title,
       seo_description,
-      hero_image_url: processedFiles.heroImageUrl,
-      og_image_url: processedFiles.ogImageUrl,
+      hero_image_url: heroImageUrl,
+      og_image_url: ogImageUrl,
       hero_title,
       hero_subtitle,
       hero_tags: parsedHeroTags,
       hero_location,
       hero_year,
-      gallery_images: processedFiles.galleryUrls,
+      gallery_images: finalGalleryImages,
       blocks: parsedBlocks,
     });
 
@@ -286,33 +236,24 @@ router.put(
     // Process uploaded files
     const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
 
-    // Hero image: file takes priority over URL
-    let heroImageUrl = existing.post.hero_image_url;
-    if (files?.['hero_image']?.[0]) {
-      if (heroImageUrl) {
-        await storageService.deleteImage(heroImageUrl);
-      }
-      heroImageUrl = await storageService.uploadImage(files['hero_image'][0], 'posts');
-    } else if (heroImageUrlFromBody !== undefined) {
-      heroImageUrl = heroImageUrlFromBody || undefined;
-    }
+    const heroImageUrl = await postFileService.processImage({
+      file: files?.['hero_image']?.[0],
+      existingUrl: existing.post.hero_image_url,
+      urlFromBody: heroImageUrlFromBody,
+      folder: 'posts',
+    });
 
-    // OG image: file takes priority over URL
-    let ogImageUrl = existing.post.og_image_url;
-    if (files?.['og_image']?.[0]) {
-      if (ogImageUrl) {
-        await storageService.deleteImage(ogImageUrl);
-      }
-      ogImageUrl = await storageService.uploadImage(files['og_image'][0], 'posts');
-    } else if (ogImageUrlFromBody !== undefined) {
-      ogImageUrl = ogImageUrlFromBody || undefined;
-    }
+    const ogImageUrl = await postFileService.processImage({
+      file: files?.['og_image']?.[0],
+      existingUrl: existing.post.og_image_url,
+      urlFromBody: ogImageUrlFromBody,
+      folder: 'posts',
+    });
 
-    const galleryFiles = files?.['gallery_images'] || [];
-    const newGalleryUrls: string[] = [];
-    for (const file of galleryFiles) {
-      newGalleryUrls.push(await storageService.uploadImage(file, 'posts'));
-    }
+    const newGalleryUrls = await postFileService.uploadGalleryImages(
+      files?.['gallery_images'] || [],
+      'posts'
+    );
 
     const finalGalleryImages = [...existingGallery, ...newGalleryUrls];
 

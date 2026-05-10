@@ -4,8 +4,9 @@ import { authMiddleware, adminMiddleware, optionalAuthMiddleware } from '../midd
 import { postService } from '../services/postService';
 import { storageService } from '../services/storageService';
 import { activityLogService } from '../services/activityLogService';
-import { uploadBlockMedia, uploadGalleryImages } from '../middleware/multer';
+import { uploadBlockMedia } from '../middleware/multer';
 import { blockService } from '../services/blockService';
+import { postFileService } from '../services/postFileService';
 import type { BlockData } from '@buro710/shared';
 import { asyncHandler, getParam } from '../middleware/asyncHandler';
 import {
@@ -126,15 +127,13 @@ router.post(
 
     const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
 
-    let heroImageUrl: string | undefined;
-    if (files?.['heroImage']?.[0]) {
-      heroImageUrl = await storageService.uploadImage(files['heroImage'][0], 'blocks');
-    }
+    const heroImageUrl = files?.['heroImage']?.[0]
+      ? await storageService.uploadImage(files['heroImage'][0], 'blocks')
+      : undefined;
 
-    let ogImageUrl: string | undefined;
-    if (files?.['ogImage']?.[0]) {
-      ogImageUrl = await storageService.uploadImage(files['ogImage'][0], 'blocks');
-    }
+    const ogImageUrl = files?.['ogImage']?.[0]
+      ? await storageService.uploadImage(files['ogImage'][0], 'blocks')
+      : undefined;
 
     const rawBlocks = parseBlocksJson(blocks);
     const blockImageFiles = files?.['blockImages'] || [];
@@ -143,18 +142,11 @@ router.post(
       blockImageFiles
     );
 
-    const galleryImageFiles = files?.['galleryImages'] || [];
-    const existingGalleryUrls: string[] = [];
-    if (gallery_images) {
-      const parsed = JSON.parse(gallery_images);
-      if (Array.isArray(parsed)) {
-        existingGalleryUrls.push(...parsed.filter((url): url is string => typeof url === 'string'));
-      }
-    }
-    const newGalleryUrls = await Promise.all(
-      galleryImageFiles.map((file) => storageService.uploadImage(file, 'blocks'))
+    const existingGalleryUrls = postFileService.parseGalleryImages(gallery_images);
+    const newGalleryUrls = await postFileService.uploadGalleryImages(
+      files?.['galleryImages'] || [],
+      'blocks'
     );
-
     const finalGalleryImages = [...existingGalleryUrls, ...newGalleryUrls];
 
     const post = await postService.create({
@@ -176,32 +168,29 @@ router.post(
     });
 
     if (blockUploads.length > 0) {
-      // Prefetch all blocks once to avoid N+1 queries
+      const uploadMap = await postFileService.processBlockImageUploads(blockUploads, 'blocks');
       const allBlocks = await blockService.getByPostId(post.id);
-
       const blocksByOrder = new Map(allBlocks.map((b) => [b.sort_order, b]));
 
-      await Promise.all(
-        blockUploads.map(async (upload) => {
-          const imageUrl = await storageService.uploadImage(upload.file, 'blocks');
-          const blockRecord = blocksByOrder.get(upload.sort_order);
+      for (const [sortOrderStr, uploads] of Object.entries(uploadMap)) {
+        const sortOrder = Number(sortOrderStr);
+        const blockRecord = blocksByOrder.get(sortOrder);
+        if (!blockRecord) continue;
 
-          if (blockRecord) {
-            const currentData = blockRecord.data as Record<string, unknown>;
-            if (upload.imageSlot !== undefined) {
-              const images = [...((currentData.images as { url: string; alt: string }[]) || [])];
-              images[upload.imageSlot] = { ...images[upload.imageSlot], url: imageUrl };
-              await blockService.update(blockRecord.id, {
-                data: { ...currentData, images } as BlockData,
-              });
-            } else {
-              await blockService.update(blockRecord.id, {
-                data: { ...currentData, image_url: imageUrl } as BlockData,
-              });
-            }
+        const currentData = { ...(blockRecord.data as Record<string, unknown>) };
+        for (const upload of uploads) {
+          if (upload.slot !== undefined) {
+            const images = [...((currentData.images as { url: string; alt: string }[]) || [])];
+            images[upload.slot] = { ...images[upload.slot], url: upload.url };
+            currentData.images = images;
+          } else {
+            currentData.image_url = upload.url;
           }
-        })
-      );
+        }
+        await blockService.update(blockRecord.id, {
+          data: currentData as BlockData,
+        });
+      }
     }
 
     const heroFields: string[] = [];
@@ -261,21 +250,17 @@ router.put(
     const existing = await postService.getById(id);
     const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
 
-    let heroImageUrl = existing.post.hero_image_url;
-    if (files?.['heroImage']?.[0]) {
-      if (heroImageUrl) {
-        await storageService.deleteImage(heroImageUrl);
-      }
-      heroImageUrl = await storageService.uploadImage(files['heroImage'][0], 'blocks');
-    }
+    const heroImageUrl = await postFileService.processImage({
+      file: files?.['heroImage']?.[0],
+      existingUrl: existing.post.hero_image_url,
+      folder: 'blocks',
+    });
 
-    let ogImageUrl = existing.post.og_image_url;
-    if (files?.['ogImage']?.[0]) {
-      if (ogImageUrl) {
-        await storageService.deleteImage(ogImageUrl);
-      }
-      ogImageUrl = await storageService.uploadImage(files['ogImage'][0], 'blocks');
-    }
+    const ogImageUrl = await postFileService.processImage({
+      file: files?.['ogImage']?.[0],
+      existingUrl: existing.post.og_image_url,
+      folder: 'blocks',
+    });
 
     const rawBlocks = blocks ? parseBlocksJson(blocks) : undefined;
     const blockImageFiles = files?.['blockImages'] || [];
@@ -286,47 +271,21 @@ router.put(
     let parsedBlocks = extracted.blocks;
     const blockUploadsForUpdate = extracted.uploads;
 
-    // Upload block images in parallel and apply URLs to block data
-    const blockUploadResults = await Promise.all(
-      blockUploadsForUpdate.map(async (upload) => ({
-        sort_order: upload.sort_order,
-        url: await storageService.uploadImage(upload.file, 'blocks'),
-        slot: upload.imageSlot,
-      }))
+    const uploadMap = await postFileService.processBlockImageUploads(
+      blockUploadsForUpdate,
+      'blocks'
     );
-    const blockImageUploads: Record<number, { url: string; slot?: number }[]> = {};
-    for (const result of blockUploadResults) {
-      if (!blockImageUploads[result.sort_order]) blockImageUploads[result.sort_order] = [];
-      blockImageUploads[result.sort_order].push({ url: result.url, slot: result.slot });
-    }
-
     if (parsedBlocks) {
-      parsedBlocks = parsedBlocks.map((block) => {
-        const uploads = blockImageUploads[block.sort_order];
-        if (!uploads) return block;
-
-        const data = { ...(block.data as Record<string, unknown>) };
-        for (const upload of uploads) {
-          if (upload.slot !== undefined) {
-            const images = [...((data.images as { url: string; alt: string }[]) || [])];
-            images[upload.slot] = { ...images[upload.slot], url: upload.url };
-            data.images = images;
-          } else {
-            data.image_url = upload.url;
-          }
-        }
-        return { ...block, data: data as BlockData };
-      });
+      parsedBlocks = postFileService.applyBlockImageUrls(parsedBlocks, uploadMap);
     }
 
-    const galleryImageFiles = files?.['galleryImages'] || [];
     const existingGalleryUrls = gallery_images
-      ? JSON.parse(gallery_images)
+      ? postFileService.parseGalleryImages(gallery_images)
       : existing.post.gallery_images || [];
-    const newGalleryUrls = await Promise.all(
-      galleryImageFiles.map((file) => storageService.uploadImage(file, 'blocks'))
+    const newGalleryUrls = await postFileService.uploadGalleryImages(
+      files?.['galleryImages'] || [],
+      'blocks'
     );
-
     const finalGalleryImages = [...existingGalleryUrls, ...newGalleryUrls];
 
     const changedFields: string[] = [];
@@ -400,89 +359,6 @@ router.delete(
     await postService.delete(id);
 
     res.json({ message: 'Post deleted successfully' });
-  })
-);
-
-router.post(
-  '/:id/gallery',
-  authMiddleware,
-  adminMiddleware,
-  uploadGalleryImages,
-  asyncHandler(async (req, res) => {
-    const id = getParam(req.params.id);
-    const files = req.files as Express.Multer.File[] | undefined;
-
-    if (!files || files.length === 0) {
-      return res.status(400).json({ error: 'No files uploaded' });
-    }
-
-    const existing = await postService.getById(id);
-    const currentGallery = existing.post.gallery_images || [];
-
-    const uploadPromises = files.map((file) => storageService.uploadImage(file, 'blocks'));
-    const newUrls = await Promise.all(uploadPromises);
-
-    const updatedGallery = [...currentGallery, ...newUrls];
-
-    await postService.update(id, { gallery_images: updatedGallery });
-
-    await activityLogService.log({
-      user_email: req.user?.email || 'unknown',
-      action: 'update',
-      entity_type: 'post',
-      entity_id: id,
-      entity_title: existing.post.title,
-      changes: {
-        gallery_updated: true,
-        gallery_count: updatedGallery.length,
-      },
-    });
-
-    res.json({ gallery_images: updatedGallery, new_images: newUrls });
-  })
-);
-
-router.delete(
-  '/:id/gallery',
-  authMiddleware,
-  adminMiddleware,
-  asyncHandler(async (req, res) => {
-    const id = getParam(req.params.id);
-    const { image_url } = req.body as { image_url?: string };
-
-    if (!image_url || typeof image_url !== 'string') {
-      return res.status(400).json({ error: 'Image URL is required' });
-    }
-
-    try {
-      new URL(image_url);
-    } catch {
-      return res.status(400).json({ error: 'Invalid image URL format' });
-    }
-
-    const existing = await postService.getById(id);
-    const currentGallery = existing.post.gallery_images || [];
-
-    const updatedGallery = currentGallery.filter((url) => url !== image_url);
-
-    if (updatedGallery.length !== currentGallery.length) {
-      await storageService.deleteImage(image_url);
-      await postService.update(id, { gallery_images: updatedGallery });
-
-      await activityLogService.log({
-        user_email: req.user?.email || 'unknown',
-        action: 'update',
-        entity_type: 'post',
-        entity_id: id,
-        entity_title: existing.post.title,
-        changes: {
-          gallery_updated: true,
-          gallery_count: updatedGallery.length,
-        },
-      });
-    }
-
-    res.json({ gallery_images: updatedGallery });
   })
 );
 

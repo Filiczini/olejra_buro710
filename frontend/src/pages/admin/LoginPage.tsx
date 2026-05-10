@@ -1,52 +1,9 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
-import api from '../../api/client';
-import { authService } from '../../services/api';
-import type { LoginCredentials } from '@buro710/shared';
+import { useLoginForm } from '../../hooks/useLoginForm';
 
 export default function LoginPage() {
-  const navigate = useNavigate();
-  const [credentials, setCredentials] = useState<LoginCredentials>({
-    email: '',
-    password: '',
-  });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    // Verify token is still valid before redirecting
-    api
-      .get('/admin/me')
-      .then(() => navigate('/admin/posts', { replace: true }))
-      .catch(() => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-      });
-  }, [navigate]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      const response = await authService.login(credentials.email, credentials.password);
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('refreshToken', response.refreshToken);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      navigate('/admin/posts');
-    } catch {
-      setError('Невірний email або пароль');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { credentials, error, loading, handleChange, handleSubmit } = useLoginForm();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-50">
@@ -60,7 +17,7 @@ export default function LoginPage() {
             placeholder="Введіть ваш email"
             value={credentials.email}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setCredentials({ ...credentials, email: e.target.value })
+              handleChange('email', e.target.value)
             }
             required
           />
@@ -71,7 +28,7 @@ export default function LoginPage() {
             placeholder="Введіть ваш пароль"
             value={credentials.password}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setCredentials({ ...credentials, password: e.target.value })
+              handleChange('password', e.target.value)
             }
             required
           />

@@ -61,7 +61,6 @@ vi.mock('../../lib/logger', () => ({
 
 import postsRouter from '../posts';
 import { postService } from '../../services/postService';
-import { storageService } from '../../services/storageService';
 import { activityLogService } from '../../services/activityLogService';
 import { AppError } from '../../lib/errors';
 
@@ -310,53 +309,6 @@ describe('Internal Posts Routes', () => {
       const response = await request(app).delete('/api/posts/post-1');
 
       expect(response.status).toBe(500);
-    });
-  });
-
-  describe('POST /api/posts/:id/gallery', () => {
-    it('returns 400 when no files', async () => {
-      vi.mocked(postService.getById).mockResolvedValue({ post: mockPost, blocks: [] } as any);
-
-      const response = await request(app).post('/api/posts/post-1/gallery');
-
-      expect(response.status).toBe(400);
-    });
-  });
-
-  describe('DELETE /api/posts/:id/gallery', () => {
-    it('returns 400 when image_url is missing', async () => {
-      vi.mocked(postService.getById).mockResolvedValue({ post: mockPost, blocks: [] } as any);
-
-      const response = await request(app).delete('/api/posts/post-1/gallery').send({});
-
-      expect(response.status).toBe(400);
-    });
-
-    it('returns 400 when image_url is invalid', async () => {
-      vi.mocked(postService.getById).mockResolvedValue({ post: mockPost, blocks: [] } as any);
-
-      const response = await request(app)
-        .delete('/api/posts/post-1/gallery')
-        .send({ image_url: 'not-a-url' });
-
-      expect(response.status).toBe(400);
-    });
-
-    it('removes image from gallery', async () => {
-      const postWithGallery = { ...mockPost, gallery_images: ['http://example.com/img.jpg'] };
-      vi.mocked(postService.getById).mockResolvedValue({
-        post: postWithGallery,
-        blocks: [],
-      } as any);
-      vi.mocked(postService.update).mockResolvedValue(postWithGallery as any);
-      vi.mocked(storageService.deleteImage).mockResolvedValue({ success: true } as any);
-
-      const response = await request(app)
-        .delete('/api/posts/post-1/gallery')
-        .send({ image_url: 'http://example.com/img.jpg' });
-
-      expect(response.status).toBe(200);
-      expect(storageService.deleteImage).toHaveBeenCalledWith('http://example.com/img.jpg');
     });
   });
 });

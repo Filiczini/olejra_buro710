@@ -1,9 +1,5 @@
 import { useState, useCallback } from 'react';
-
-export interface BlockWithFile {
-  id: string;
-  file: File | null;
-}
+import type { BlockWithFile } from '../types/block';
 
 export function usePostFiles() {
   const [ogImageFile, setOgImageFile] = useState<File | null>(null);

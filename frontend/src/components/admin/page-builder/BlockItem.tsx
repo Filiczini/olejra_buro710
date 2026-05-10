@@ -1,15 +1,8 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Icon } from '@iconify-icon/react';
-import type {
-  Block,
-  BlockType,
-  BlockData,
-  TextFullData,
-  ImageFullData,
-  TextImageData,
-  ThreeImagesData,
-} from '@buro710/shared';
+import type { Block, BlockType, BlockData } from '@buro710/shared';
+import { isTextFull, isImageFull, isTextImage, isThreeImages } from '../../../lib/blockTypeGuards';
 import TextFullEditor from './editors/TextFullEditor';
 import ImageFullEditor from './editors/ImageFullEditor';
 import TextImageEditor from './editors/TextImageEditor';
@@ -62,56 +55,47 @@ export default function BlockItem({
   };
 
   const renderEditor = () => {
-    switch (block.type) {
-      case 'text_full':
-        return (
-          <TextFullEditor
-            blockId={block.id}
-            data={block.data as TextFullData}
-            onChange={(data) => onUpdate(block.id, data)}
-          />
-        );
-      case 'image_full':
-        return (
-          <ImageFullEditor
-            blockId={block.id}
-            data={block.data as ImageFullData}
-            onChange={(data) => onUpdate(block.id, data)}
-            onImageChange={(file) => onImageChange(block.id, file)}
-          />
-        );
-      case 'text_image':
-        return (
-          <TextImageEditor
-            blockId={block.id}
-            data={block.data as TextImageData}
-            onChange={(data) => onUpdate(block.id, data)}
-            onImageChange={(file) => onImageChange(block.id, file)}
-            mirrored={false}
-          />
-        );
-      case 'image_text':
-        return (
-          <TextImageEditor
-            blockId={block.id}
-            data={block.data as TextImageData}
-            onChange={(data) => onUpdate(block.id, data)}
-            onImageChange={(file) => onImageChange(block.id, file)}
-            mirrored
-          />
-        );
-      case 'three_images':
-        return (
-          <ThreeImagesEditor
-            blockId={block.id}
-            data={block.data as ThreeImagesData}
-            onChange={(data) => onUpdate(block.id, data)}
-            onImageChange={(file, field) => onImageChange(block.id, file, field)}
-          />
-        );
-      default:
-        return null;
+    if (isTextFull(block)) {
+      return (
+        <TextFullEditor
+          blockId={block.id}
+          data={block.data}
+          onChange={(data) => onUpdate(block.id, data)}
+        />
+      );
     }
+    if (isImageFull(block)) {
+      return (
+        <ImageFullEditor
+          blockId={block.id}
+          data={block.data}
+          onChange={(data) => onUpdate(block.id, data)}
+          onImageChange={(file) => onImageChange(block.id, file)}
+        />
+      );
+    }
+    if (isTextImage(block)) {
+      return (
+        <TextImageEditor
+          blockId={block.id}
+          data={block.data}
+          onChange={(data) => onUpdate(block.id, data)}
+          onImageChange={(file) => onImageChange(block.id, file)}
+          mirrored={block.type === 'image_text'}
+        />
+      );
+    }
+    if (isThreeImages(block)) {
+      return (
+        <ThreeImagesEditor
+          blockId={block.id}
+          data={block.data}
+          onChange={(data) => onUpdate(block.id, data)}
+          onImageChange={(file, field) => onImageChange(block.id, file, field)}
+        />
+      );
+    }
+    return null;
   };
 
   return (

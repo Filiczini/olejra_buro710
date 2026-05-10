@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
-import { logger } from '../../lib/logger';
+import { useCallback } from 'react';
 import { ChevronDown } from 'lucide-react';
 import DataTable from '../../components/admin/DataTable';
 import { activityLogService } from '../../services/api';
 import type { ActivityLog, ActivityLogsParams } from '@buro710/shared';
 import { useAdminListPage } from '../../hooks/useAdminListPage';
+import { useUniqueUsers } from '../../hooks/useUniqueUsers';
 import { useActivityLogColumns } from '../../components/admin/ActivityLogTableColumns';
 
 export default function ActivityLogPage() {
@@ -20,16 +20,7 @@ export default function ActivityLogPage() {
     defaultLimit: 20,
   });
 
-  const [uniqueUsers, setUniqueUsers] = useState<string[]>([]);
-
-  useEffect(() => {
-    activityLogService
-      .getUniqueUsers()
-      .then(setUniqueUsers)
-      .catch((error) => {
-        logger.error('Error loading users', error);
-      });
-  }, []);
+  const uniqueUsers = useUniqueUsers();
 
   const handleFilterChange = useCallback(
     (key: keyof ActivityLogsParams, value: string | undefined) => {

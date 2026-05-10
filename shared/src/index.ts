@@ -53,7 +53,9 @@ export type {
 } from "./types/block.js";
 export { BLOCK_ICONS } from "./types/block.js";
 
-export type { LoginCredentials } from "./types/auth.js";
+export type { LoginCredentials, LoginResponse } from "./types/auth.js";
+
+export type { ApiError } from "./types/api.js";
 
 export type {
   ContactFormData,

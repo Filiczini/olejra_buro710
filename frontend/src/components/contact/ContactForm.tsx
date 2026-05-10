@@ -1,7 +1,7 @@
 import { Icon } from '@iconify-icon/react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
-import type { ContactFormData } from '../../hooks/useContactForm';
+import type { ContactFormData } from '@buro710/shared';
 
 interface ContactFormProps {
   formData: ContactFormData;

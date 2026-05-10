@@ -4,15 +4,9 @@ import { logger } from '../lib/logger';
 import { postService } from '../services/api';
 import { buildPostFormData } from '../lib/buildPostFormData';
 import type { ValidationValues } from './usePostValidation';
-import type { PostStatus } from '@buro710/shared';
-import type { EditBlock } from '../types/block';
+import type { PostStatus, ApiError } from '@buro710/shared';
+import type { EditBlock, BlockWithFile } from '../types/block';
 import type { PostHeroFormData } from '../types/post';
-import type { ApiError } from '../types/api';
-
-interface BlockWithFile {
-  id: string;
-  file: File | null;
-}
 
 export interface SubmitValues {
   title: string;

@@ -10,6 +10,7 @@ import type {
   ContactFormData,
   ContactSubmitResponse,
   User,
+  LoginResponse,
 } from '@buro710/shared';
 
 async function get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T> {
@@ -47,12 +48,6 @@ async function patch<T = unknown>(
 ): Promise<T> {
   const response = await api.patch(url, data, config);
   return response.data as T;
-}
-
-export interface LoginResponse {
-  token: string;
-  refreshToken: string;
-  user: { id: string; email: string; role: string };
 }
 
 export const authService = {

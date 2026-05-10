@@ -1,49 +1,33 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../api/client';
 
 export function useAuth() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const checkAuth = async () => {
+  const { data: user, isLoading } = useQuery({
+    queryKey: ['auth', 'me'],
+    queryFn: async () => {
       const token = localStorage.getItem('token');
-      if (!token) {
-        setIsAuthenticated(false);
-        setIsLoading(false);
-        return;
-      }
-
+      if (!token) return null;
       try {
-        await api.get('/admin/me');
-        setIsAuthenticated(true);
+        const response = await api.get('/admin/me');
+        return response.data as { id: string; email: string; role: string };
       } catch (error: unknown) {
         const status = (error as { response?: { status?: number } })?.response?.status;
-        // Don't clear tokens on 401 — the API interceptor handles refresh/redirect
         if (status !== 401) {
           localStorage.removeItem('token');
           localStorage.removeItem('refreshToken');
           localStorage.removeItem('user');
         }
-        setIsAuthenticated(false);
-      } finally {
-        setIsLoading(false);
+        return null;
       }
-    };
+    },
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 
-    checkAuth();
-
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'token') {
-        setIsAuthenticated(!!e.newValue);
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
-  const handleLogout = useCallback(async () => {
+  const handleLogout = async () => {
     try {
       await api.post('/admin/logout');
     } catch {
@@ -52,8 +36,8 @@ export function useAuth() {
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
-    setIsAuthenticated(false);
-  }, []);
+    queryClient.setQueryData(['auth', 'me'], null);
+  };
 
-  return { isAuthenticated, isLoading, handleLogout };
+  return { isAuthenticated: !!user, isLoading, handleLogout };
 }

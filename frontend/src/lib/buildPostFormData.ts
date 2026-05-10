@@ -1,11 +1,6 @@
-import type { EditBlock } from '../types/block';
+import type { EditBlock, BlockWithFile } from '../types/block';
 import type { PostHeroFormData } from '../types/post';
 import type { PostStatus } from '@buro710/shared';
-
-interface BlockWithFile {
-  id: string;
-  file: File | null;
-}
 
 interface BuildParams {
   title: string;

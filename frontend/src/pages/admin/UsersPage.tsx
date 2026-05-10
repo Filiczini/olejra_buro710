@@ -1,132 +1,60 @@
-import { useState, useMemo } from 'react';
-import { logger } from '../../lib/logger';
 import { useToast } from '../../hooks/useToast';
 import { useUsers } from '../../hooks/useUsers';
-import { userService } from '../../services/api';
+import { useUserActions } from '../../hooks/useUserActions';
+import { useUserColumns } from '../../hooks/useUserColumns';
 import type { User } from '@buro710/shared';
-import type { ApiError } from '../../types/api';
 import Toast from '../../components/ui/Toast';
-import { Trash2, KeyRound } from 'lucide-react';
-import { formatDate } from '../../lib/date';
 import DataTable from '../../components/admin/DataTable';
-import type { ColumnDef } from '../../components/admin/DataTable';
 import ConfirmModal from '../../components/ui/ConfirmModal';
 import CreateUserForm from '../../components/admin/CreateUserForm';
 import ChangePasswordModal from '../../components/admin/ChangePasswordModal';
 
 export default function UsersPage() {
   const { users, loading, refresh } = useUsers();
-  const [formLoading, setFormLoading] = useState(false);
   const { toast, showToast, dismissToast } = useToast();
 
-  const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
-  const [passwordTarget, setPasswordTarget] = useState<User | null>(null);
-  const [passwordLoading, setPasswordLoading] = useState(false);
+  const {
+    formLoading,
+    passwordLoading,
+    deleteTarget,
+    passwordTarget,
+    setDeleteTarget,
+    setPasswordTarget,
+    handleCreate,
+    handleDelete,
+    handleUpdatePassword,
+  } = useUserActions(refresh);
 
-  const handleCreate = async (data: {
-    email: string;
-    password: string;
-    role: 'admin' | 'editor';
-  }) => {
-    setFormLoading(true);
-    try {
-      await userService.create(data);
+  const onCreate = async (data: { email: string; password: string; role: 'admin' | 'editor' }) => {
+    const error = await handleCreate(data);
+    if (error) {
+      showToast(error, 'error');
+    } else {
       showToast('Користувача створено', 'success');
-      await refresh();
-    } catch (error: unknown) {
-      logger.error('Error creating user', error);
-      const msg = (error as ApiError)?.response?.data?.error || 'Не вдалося створити користувача';
-      showToast(msg, 'error');
-    } finally {
-      setFormLoading(false);
     }
   };
 
-  const handleDelete = async () => {
-    if (!deleteTarget) return;
-    try {
-      await userService.delete(deleteTarget.id);
+  const onDelete = async () => {
+    const error = await handleDelete();
+    if (error) {
+      showToast(error, 'error');
+    } else {
       showToast('Користувача видалено', 'success');
-      setDeleteTarget(null);
-      await refresh();
-    } catch (error: unknown) {
-      logger.error('Error deleting user', error);
-      const msg = (error as ApiError)?.response?.data?.error || 'Не вдалося видалити користувача';
-      showToast(msg, 'error');
     }
   };
 
-  const handleUpdatePassword = async (userId: string, newPassword: string) => {
-    setPasswordLoading(true);
+  const onUpdatePassword = async (userId: string, newPassword: string) => {
     try {
-      await userService.updatePassword(userId, newPassword);
+      await handleUpdatePassword(userId, newPassword);
       showToast('Пароль оновлено', 'success');
-      setPasswordTarget(null);
-    } catch (error: unknown) {
-      logger.error('Error updating password', error);
+    } catch {
       showToast('Не вдалося оновити пароль', 'error');
-    } finally {
-      setPasswordLoading(false);
     }
   };
 
-  const userColumns = useMemo<ColumnDef<User>[]>(
-    () => [
-      {
-        key: 'email',
-        header: 'Email',
-        cell: (user) => <span className="text-base font-medium text-gray-900">{user.email}</span>,
-      },
-      {
-        key: 'role',
-        header: 'Роль',
-        cell: (user) => (
-          <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ring-1 ring-inset ${
-              user.role === 'admin'
-                ? 'bg-zinc-100 text-zinc-700 ring-zinc-600/20'
-                : 'bg-blue-50 text-blue-700 ring-blue-600/20'
-            }`}
-          >
-            {user.role === 'admin' ? 'Адміністратор' : 'Редактор'}
-          </span>
-        ),
-      },
-      {
-        key: 'created',
-        header: 'Створено',
-        cell: (user) => (
-          <span className="text-base text-gray-500 tabular-nums">
-            {formatDate(user.created_at)}
-          </span>
-        ),
-      },
-      {
-        key: 'actions',
-        header: <span className="text-right block">Дії</span>,
-        cell: (user) => (
-          <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={() => setPasswordTarget(user)}
-              className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors cursor-pointer"
-              title="Змінити пароль"
-              aria-label="Змінити пароль"
-            >
-              <KeyRound className="h-5 w-5 stroke-[1.5]" />
-            </button>
-            <button
-              onClick={() => setDeleteTarget(user)}
-              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
-              title="Видалити"
-              aria-label="Видалити користувача"
-            >
-              <Trash2 className="h-5 w-5 stroke-[1.5]" />
-            </button>
-          </div>
-        ),
-      },
-    ],
-    []
+  const userColumns = useUserColumns(
+    (user: User) => setPasswordTarget(user),
+    (user: User) => setDeleteTarget(user)
   );
 
   return (
@@ -137,7 +65,7 @@ export default function UsersPage() {
 
       <h2 className="text-3xl font-semibold tracking-tight text-gray-900 mb-8">Користувачі</h2>
 
-      <CreateUserForm onCreate={handleCreate} formLoading={formLoading} />
+      <CreateUserForm onCreate={onCreate} formLoading={formLoading} />
 
       <DataTable
         data={users}
@@ -151,7 +79,7 @@ export default function UsersPage() {
       <ConfirmModal
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
-        onConfirm={handleDelete}
+        onConfirm={onDelete}
         title="Підтвердження видалення"
         message={
           <>
@@ -166,7 +94,7 @@ export default function UsersPage() {
 
       <ChangePasswordModal
         user={passwordTarget}
-        onUpdate={handleUpdatePassword}
+        onUpdate={onUpdatePassword}
         onClose={() => setPasswordTarget(null)}
         loading={passwordLoading}
       />
