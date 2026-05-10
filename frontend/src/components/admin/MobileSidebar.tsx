@@ -1,4 +1,5 @@
-import { FileText, History, Users, Settings, ExternalLink, X } from 'lucide-react';
+import { X } from 'lucide-react';
+import { adminNavItems, adminBottomNavItems } from '../../constants/navigation';
 import SidebarMenuItem from './SidebarMenuItem';
 
 interface MobileSidebarProps {
@@ -40,15 +41,28 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          <SidebarMenuItem icon={FileText} label="Пости" path="/admin/posts" />
-          <SidebarMenuItem icon={History} label="Журнал дій" path="/admin/logs" />
-          <SidebarMenuItem icon={Users} label="Користувачі" path="/admin/users" />
-          <SidebarMenuItem icon={Settings} label="Налаштування" path="/admin/settings" />
+          {adminNavItems.map((item) => (
+            <SidebarMenuItem
+              key={item.path}
+              icon={item.icon}
+              label={item.label}
+              path={item.path}
+              isExternal={item.isExternal}
+            />
+          ))}
         </nav>
 
         {/* Bottom Section */}
         <div className="p-4 border-t border-zinc-900 space-y-2">
-          <SidebarMenuItem icon={ExternalLink} label="Перегляд сайту" path="/" isExternal />
+          {adminBottomNavItems.map((item) => (
+            <SidebarMenuItem
+              key={item.path}
+              icon={item.icon}
+              label={item.label}
+              path={item.path}
+              isExternal={item.isExternal}
+            />
+          ))}
         </div>
       </aside>
     </>

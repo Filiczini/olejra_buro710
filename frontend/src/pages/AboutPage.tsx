@@ -1,6 +1,4 @@
 import { Icon } from '@iconify-icon/react';
-import Header from '../components/layout/Header';
-import Footer from '../components/layout/Footer';
 
 const values = [
   {
@@ -73,7 +71,6 @@ const team = [
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-zinc-50">
-      <Header />
       <div className="pt-20">
         {/* Hero Section */}
         <section className="max-w-[1800px] mx-auto px-6 py-24 md:py-32">
@@ -214,7 +211,6 @@ export default function AboutPage() {
           </div>
         </section>
       </div>
-      <Footer />
     </div>
   );
 }

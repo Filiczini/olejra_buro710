@@ -4,6 +4,7 @@ import { Icon } from '@iconify-icon/react';
 import { postService } from '../services/api';
 import { logger } from '../lib/logger';
 import Header from '../components/layout/Header';
+import Footer from '../components/layout/Footer';
 import PostHeroBlock from '../components/blocks/PostHeroBlock';
 import BlockRenderer from '../components/blocks/BlockRenderer';
 import PostGalleryBlock from '../components/blocks/PostGalleryBlock';
@@ -112,6 +113,7 @@ export default function PostPage() {
             </div>
           )}
       </main>
+      <Footer />
     </div>
   );
 }

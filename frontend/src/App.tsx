@@ -9,6 +9,7 @@ import ProjectsPage from './pages/ProjectsPage';
 import LoginPage from './pages/admin/LoginPage';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 import AdminLayout from './layouts/AdminLayout';
+import PublicLayout from './layouts/PublicLayout';
 import NotFoundPage from './pages/NotFoundPage';
 
 const PostsPage = lazy(() => import('./pages/admin/PostsPage'));
@@ -32,17 +33,25 @@ function AdminWrapper() {
 }
 
 const router = createBrowserRouter([
-  { path: '/', element: <HomePage /> },
-  { path: '/projects', element: <ProjectsPage /> },
-  { path: '/about', element: <AboutPage /> },
-  { path: '/contact', element: <ContactPage /> },
   { path: '/page/:slug', element: <PublicPostPage /> },
+  {
+    path: '/',
+    element: <PublicLayout />,
+    children: [
+      { path: '', element: <HomePage />, handle: { transparentHeader: true } },
+      { path: 'projects', element: <ProjectsPage /> },
+      { path: 'about', element: <AboutPage /> },
+      { path: 'contact', element: <ContactPage /> },
+      { path: '*', element: <NotFoundPage /> },
+    ],
+  },
   { path: '/admin/login', element: <LoginPage /> },
   {
+    path: '/admin',
     element: <AdminWrapper />,
     children: [
       {
-        path: '/admin/posts',
+        path: 'posts',
         element: (
           <Suspense fallback={loadingFallback}>
             <PostsPage />
@@ -50,7 +59,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: '/admin/posts/create',
+        path: 'posts/create',
         element: (
           <Suspense fallback={loadingFallback}>
             <EditPostPage />
@@ -58,7 +67,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: '/admin/posts/edit/:id',
+        path: 'posts/edit/:id',
         element: (
           <Suspense fallback={loadingFallback}>
             <EditPostPage />
@@ -66,7 +75,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: '/admin/logs',
+        path: 'logs',
         element: (
           <Suspense fallback={loadingFallback}>
             <ActivityLogPage />
@@ -74,7 +83,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: '/admin/users',
+        path: 'users',
         element: (
           <Suspense fallback={loadingFallback}>
             <UsersPage />
@@ -82,16 +91,16 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: '/admin/settings',
+        path: 'settings',
         element: (
           <Suspense fallback={loadingFallback}>
             <SettingsPage />
           </Suspense>
         ),
       },
+      { path: '*', element: <NotFoundPage /> },
     ],
   },
-  { path: '*', element: <NotFoundPage /> },
 ]);
 
 function App() {

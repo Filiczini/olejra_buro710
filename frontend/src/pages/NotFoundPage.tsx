@@ -1,12 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
-import Header from '../components/layout/Header';
-import Footer from '../components/layout/Footer';
 
 export default function NotFoundPage() {
   return (
     <div className="min-h-screen bg-zinc-50">
-      <Header />
       <div className="pt-20">
         <section className="max-w-[1800px] mx-auto px-6 py-24 md:py-48 min-h-[calc(85vh)]">
           <div className="max-w-xl">
@@ -29,7 +26,6 @@ export default function NotFoundPage() {
           </div>
         </section>
       </div>
-      <Footer />
     </div>
   );
 }

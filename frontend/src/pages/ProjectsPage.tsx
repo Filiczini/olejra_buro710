@@ -1,5 +1,3 @@
-import Header from '../components/layout/Header';
-import Footer from '../components/layout/Footer';
 import ProjectCard from '../components/projects/ProjectCard';
 import { useFetchPosts } from '../hooks/useFetchPosts';
 
@@ -8,7 +6,6 @@ export default function ProjectsPage() {
 
   return (
     <div className="min-h-screen bg-white text-zinc-900 antialiased">
-      <Header />
       <main className="pt-32 pb-24">
         <section className="max-w-[1600px] mx-auto px-6">
           <div className="flex justify-between items-end mb-16 border-b border-zinc-200 pb-6">
@@ -59,7 +56,6 @@ export default function ProjectsPage() {
           )}
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

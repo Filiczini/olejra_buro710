@@ -2,6 +2,7 @@ import { Icon } from '@iconify-icon/react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { publicNavItems } from '../../constants/navigation';
 
 interface HeaderProps {
   transparent?: boolean;
@@ -97,24 +98,15 @@ export default function Header({ transparent = false }: HeaderProps) {
             />
           </button>
           <nav className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 gap-10">
-            <a
-              href="/projects"
-              className={`nav-link text-xs font-medium uppercase tracking-wide transition-all duration-300 ${isTransparent ? 'text-white/80 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'} hover:scale-105`}
-            >
-              Проєкти
-            </a>
-            <a
-              href="/about"
-              className={`nav-link text-xs font-medium uppercase tracking-wide transition-all duration-300 ${isTransparent ? 'text-white/80 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'} hover:scale-105`}
-            >
-              Про бюро
-            </a>
-            <a
-              href="/contact"
-              className={`nav-link text-xs font-medium uppercase tracking-wide transition-all duration-300 ${isTransparent ? 'text-white/80 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'} hover:scale-105`}
-            >
-              Контакти
-            </a>
+            {publicNavItems.map((item) => (
+              <a
+                key={item.path}
+                href={item.path}
+                className={`nav-link text-xs font-medium uppercase tracking-wide transition-all duration-300 ${isTransparent ? 'text-white/80 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'} hover:scale-105`}
+              >
+                {item.label}
+              </a>
+            ))}
           </nav>
           {isAuthenticated && (
             <div className="flex items-center gap-6 md:gap-8">
@@ -177,27 +169,16 @@ export default function Header({ transparent = false }: HeaderProps) {
               </button>
             </div>
             <nav className="flex-1 flex flex-col items-center justify-center gap-8">
-              <a
-                href="/projects"
-                onClick={handleClose}
-                className="text-2xl font-medium text-zinc-900 hover:text-zinc-600"
-              >
-                Проєкти
-              </a>
-              <a
-                href="/about"
-                onClick={handleClose}
-                className="text-2xl font-medium text-zinc-900 hover:text-zinc-600"
-              >
-                Про бюро
-              </a>
-              <a
-                href="/contact"
-                onClick={handleClose}
-                className="text-2xl font-medium text-zinc-900 hover:text-zinc-600"
-              >
-                Контакти
-              </a>
+              {publicNavItems.map((item) => (
+                <a
+                  key={item.path}
+                  href={item.path}
+                  onClick={handleClose}
+                  className="text-2xl font-medium text-zinc-900 hover:text-zinc-600"
+                >
+                  {item.label}
+                </a>
+              ))}
               {isAuthenticated && (
                 <>
                   <a

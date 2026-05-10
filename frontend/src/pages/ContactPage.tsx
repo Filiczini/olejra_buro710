@@ -1,6 +1,4 @@
 import { Icon } from '@iconify-icon/react';
-import Header from '../components/layout/Header';
-import Footer from '../components/layout/Footer';
 import ContactForm from '../components/contact/ContactForm';
 import { useContactForm } from '../hooks/useContactForm';
 
@@ -54,7 +52,6 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-zinc-50">
-      <Header />
       <div className="pt-20">
         <section className="max-w-[1800px] mx-auto px-6 py-24 md:py-32">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
@@ -192,7 +189,6 @@ export default function ContactPage() {
           </div>
         </section>
       </div>
-      <Footer />
     </div>
   );
 }

@@ -1,5 +1,3 @@
-import Header from '../components/layout/Header';
-import Footer from '../components/layout/Footer';
 import HeroSlider from '../components/sections/HeroSlider';
 import AboutSection from '../components/sections/AboutSection';
 import PhilosophySection from '../components/sections/PhilosophySection';
@@ -11,7 +9,6 @@ import ProjectsGallerySection from '../components/sections/ProjectsGallerySectio
 export default function HomePage() {
   return (
     <div className="bg-zinc-50 text-zinc-900 antialiased selection:bg-zinc-900 selection:text-white">
-      <Header transparent={true} />
       <main>
         <HeroSlider />
         <AboutSection />
@@ -21,7 +18,6 @@ export default function HomePage() {
         <CinematicDivider />
         <ContactCTA />
       </main>
-      <Footer />
     </div>
   );
 }
