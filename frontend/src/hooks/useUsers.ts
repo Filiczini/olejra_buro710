@@ -6,7 +6,7 @@ interface UseUsersResult {
   users: User[];
   loading: boolean;
   error: boolean;
-  refresh: () => void;
+  refresh: () => Promise<unknown>;
 }
 
 export function useUsers(): UseUsersResult {
