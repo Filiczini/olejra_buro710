@@ -57,7 +57,9 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - DATABASE_URL=${DATABASE_URL}
+      # Host pinned to container_name (not bare "postgres") to avoid DNS alias
+      # collision with other stacks on the shared dokploy-network.
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@bureau710_postgres:5432/${POSTGRES_DB}
       - UPLOADS_DIR=/app/uploads
       - JWT_SECRET=${JWT_SECRET}
       - FRONTEND_URL=${FRONTEND_URL}
@@ -87,7 +89,8 @@ services:
       - backups:/backups
       - uploads:/uploads:ro
     environment:
-      - DATABASE_URL=${DATABASE_URL}
+      # Host pinned to container_name to avoid dokploy-network alias collision.
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@bureau710_postgres:5432/${POSTGRES_DB}
     restart: unless-stopped
     deploy:
       resources:
