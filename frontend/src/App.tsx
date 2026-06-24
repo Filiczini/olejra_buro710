@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, type ComponentType } from 'react';
 import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import ErrorBoundary from './components/providers/ErrorBoundary';
 import HomePage from './pages/HomePage';
@@ -12,11 +12,33 @@ import AdminLayout from './layouts/AdminLayout';
 import PublicLayout from './layouts/PublicLayout';
 import NotFoundPage from './pages/NotFoundPage';
 
-const PostsPage = lazy(() => import('./pages/admin/PostsPage'));
-const EditPostPage = lazy(() => import('./pages/admin/EditPostPage'));
-const ActivityLogPage = lazy(() => import('./pages/admin/ActivityLogPage'));
-const UsersPage = lazy(() => import('./pages/admin/UsersPage'));
-const SettingsPage = lazy(() => import('./pages/admin/SettingsPage'));
+// Reload once if a lazy chunk fails to load — happens when a stale tab
+// requests an asset hash that no longer exists after a deploy.
+const CHUNK_RELOAD_KEY = 'chunkReloaded';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function lazyWithReload<T extends ComponentType<any>>(factory: () => Promise<{ default: T }>) {
+  return lazy(() =>
+    factory()
+      .then((module) => {
+        sessionStorage.removeItem(CHUNK_RELOAD_KEY);
+        return module;
+      })
+      .catch((error) => {
+        if (!sessionStorage.getItem(CHUNK_RELOAD_KEY)) {
+          sessionStorage.setItem(CHUNK_RELOAD_KEY, '1');
+          window.location.reload();
+          return new Promise<{ default: T }>(() => {}); // hold render while reloading
+        }
+        throw error;
+      })
+  );
+}
+
+const PostsPage = lazyWithReload(() => import('./pages/admin/PostsPage'));
+const EditPostPage = lazyWithReload(() => import('./pages/admin/EditPostPage'));
+const ActivityLogPage = lazyWithReload(() => import('./pages/admin/ActivityLogPage'));
+const UsersPage = lazyWithReload(() => import('./pages/admin/UsersPage'));
+const SettingsPage = lazyWithReload(() => import('./pages/admin/SettingsPage'));
 
 const loadingFallback = (
   <div className="flex items-center justify-center py-32 text-gray-400">Завантаження...</div>
