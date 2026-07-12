@@ -25,6 +25,7 @@ vi.mock('../../services/refreshTokenService', () => ({
   refreshTokenService: {
     create: vi.fn(),
     verify: vi.fn(),
+    findUserByToken: vi.fn(),
     rotate: vi.fn(),
     revokeAllForUser: vi.fn(),
   },
@@ -54,6 +55,7 @@ vi.mock('../../middleware/auth', () => ({
 }));
 
 // Import after mocking
+import cookieParser from 'cookie-parser';
 import authRouter from '../auth';
 import { userService } from '../../services/userService';
 import { refreshTokenService } from '../../services/refreshTokenService';
@@ -63,6 +65,7 @@ import { AppError } from '../../lib/errors';
 const createTestApp = (): Application => {
   const app = express();
   app.use(express.json());
+  app.use(cookieParser());
   app.use('/api/admin', authRouter);
   app.use(
     (err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
@@ -98,7 +101,7 @@ describe('Auth Routes', () => {
   });
 
   describe('POST /api/admin/login', () => {
-    it('returns token, refreshToken and user on valid credentials', async () => {
+    it('sets auth cookies and returns user on valid credentials', async () => {
       vi.mocked(userService.findByEmail).mockResolvedValue(MOCK_USER);
       vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
       vi.mocked(userService.getTokenVersion).mockResolvedValue(0);
@@ -110,14 +113,17 @@ describe('Auth Routes', () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({
-        token: 'mock-jwt-token',
-        refreshToken: 'mock-refresh-token',
         user: {
           id: MOCK_USER.id,
           email: MOCK_USER.email,
           role: MOCK_USER.role,
         },
       });
+
+      const cookies = response.headers['set-cookie'] as unknown as string[];
+      expect(cookies.some((c) => c.startsWith('access_token=mock-jwt-token'))).toBe(true);
+      expect(cookies.some((c) => c.startsWith('refresh_token=mock-refresh-token'))).toBe(true);
+      expect(cookies.every((c) => c.includes('HttpOnly'))).toBe(true);
     });
 
     it('returns 401 on invalid email', async () => {
@@ -145,7 +151,7 @@ describe('Auth Routes', () => {
   });
 
   describe('POST /api/admin/refresh', () => {
-    it('returns new tokens on valid refresh', async () => {
+    it('rotates tokens on valid body-based refresh (legacy clients)', async () => {
       vi.mocked(refreshTokenService.verify).mockResolvedValue(true);
       vi.mocked(userService.findById).mockResolvedValue(MOCK_USER);
       vi.mocked(userService.getTokenVersion).mockResolvedValue(0);
@@ -157,8 +163,6 @@ describe('Auth Routes', () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({
-        token: 'mock-jwt-token',
-        refreshToken: 'new-refresh-token',
         user: {
           id: MOCK_USER.id,
           email: MOCK_USER.email,
@@ -166,6 +170,38 @@ describe('Auth Routes', () => {
         },
       });
       expect(refreshTokenService.rotate).toHaveBeenCalledWith('user-123', 'valid-refresh-token');
+
+      const cookies = response.headers['set-cookie'] as unknown as string[];
+      expect(cookies.some((c) => c.startsWith('refresh_token=new-refresh-token'))).toBe(true);
+    });
+
+    it('rotates tokens on valid cookie-based refresh', async () => {
+      vi.mocked(refreshTokenService.findUserByToken).mockResolvedValue('user-123');
+      vi.mocked(userService.findById).mockResolvedValue(MOCK_USER);
+      vi.mocked(userService.getTokenVersion).mockResolvedValue(0);
+      vi.mocked(refreshTokenService.rotate).mockResolvedValue('new-refresh-token');
+
+      const response = await request(app)
+        .post('/api/admin/refresh')
+        .set('Cookie', 'refresh_token=cookie-refresh-token')
+        .send({});
+
+      expect(response.status).toBe(200);
+      expect(response.body.user.id).toBe(MOCK_USER.id);
+      expect(refreshTokenService.findUserByToken).toHaveBeenCalledWith('cookie-refresh-token');
+      expect(refreshTokenService.rotate).toHaveBeenCalledWith('user-123', 'cookie-refresh-token');
+    });
+
+    it('returns 401 when cookie refresh token is unknown', async () => {
+      vi.mocked(refreshTokenService.findUserByToken).mockResolvedValue(null);
+
+      const response = await request(app)
+        .post('/api/admin/refresh')
+        .set('Cookie', 'refresh_token=stale-token')
+        .send({});
+
+      expect(response.status).toBe(401);
+      expect(response.body).toEqual({ error: 'Invalid or expired refresh token' });
     });
 
     it('returns 400 when refreshToken is missing', async () => {

@@ -54,8 +54,7 @@ describe('useAuth', () => {
     expect(mockGet).toHaveBeenCalledWith('/admin/me');
   });
 
-  it('returns isAuthenticated false when token exists but API rejects', async () => {
-    localStorage.setItem('token', 'expired-token');
+  it('returns isAuthenticated false when the session probe rejects', async () => {
     mockGet.mockRejectedValue(new Error('Unauthorized'));
 
     const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
@@ -65,11 +64,9 @@ describe('useAuth', () => {
     });
 
     expect(result.current.isAuthenticated).toBe(false);
-    expect(localStorage.getItem('token')).toBeNull();
   });
 
-  it('handleLogout calls API and removes token', async () => {
-    localStorage.setItem('token', 'valid-jwt-token');
+  it('handleLogout calls API and clears auth state', async () => {
     mockGet.mockResolvedValue({ data: { id: '1', email: 'admin@test.com', role: 'admin' } });
 
     const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
@@ -85,7 +82,6 @@ describe('useAuth', () => {
     await waitFor(() => {
       expect(result.current.isAuthenticated).toBe(false);
     });
-    expect(localStorage.getItem('token')).toBeNull();
     expect(mockPost).toHaveBeenCalledWith('/admin/logout');
   });
 });

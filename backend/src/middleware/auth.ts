@@ -1,6 +1,19 @@
 import type { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../config/jwt';
 import { userService } from '../services/userService';
+import { ACCESS_TOKEN_COOKIE } from '../lib/authCookies';
+
+/** httpOnly cookie first (browser flow), Bearer header as fallback (API clients, tests). */
+function extractToken(req: Request): string | undefined {
+  const cookieToken: string | undefined = req.cookies?.[ACCESS_TOKEN_COOKIE];
+  if (cookieToken) return cookieToken;
+
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.split(' ')[1];
+  }
+  return undefined;
+}
 
 export const adminMiddleware = (req: Request, res: Response, next: NextFunction) => {
   if (req.user?.role !== 'admin') {
@@ -10,10 +23,9 @@ export const adminMiddleware = (req: Request, res: Response, next: NextFunction)
 };
 
 export const optionalAuthMiddleware = (req: Request, _res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
+  const token = extractToken(req);
 
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.split(' ')[1];
+  if (token) {
     try {
       req.user = verifyToken(token);
     } catch {
@@ -24,13 +36,11 @@ export const optionalAuthMiddleware = (req: Request, _res: Response, next: NextF
 };
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
+  const token = extractToken(req);
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (!token) {
     return res.status(401).json({ error: 'No token provided' });
   }
-
-  const token = authHeader.split(' ')[1];
 
   try {
     const decoded = verifyToken(token);

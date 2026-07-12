@@ -13,11 +13,8 @@ export default function TopBar({ onMobileMenuClick }: TopBarProps) {
     try {
       await authService.logout();
     } catch {
-      // Continue with local cleanup even if API call fails
+      // Cookies are cleared server-side; ignore network errors
     }
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
     navigate('/');
   };
 

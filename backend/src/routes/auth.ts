@@ -9,6 +9,7 @@ import { generateToken } from '../config/jwt';
 import { userService } from '../services/userService';
 import { refreshTokenService } from '../services/refreshTokenService';
 import { asyncHandler } from '../middleware/asyncHandler';
+import { setAuthCookies, clearAuthCookies, REFRESH_TOKEN_COOKIE } from '../lib/authCookies';
 
 const router = Router();
 
@@ -58,9 +59,8 @@ router.post(
     });
     const refreshToken = await refreshTokenService.create(user.id);
 
+    setAuthCookies(res, token, refreshToken);
     res.json({
-      token,
-      refreshToken,
       user: {
         id: user.id,
         email: user.email,
@@ -78,6 +78,7 @@ router.post(
       userService.incrementTokenVersion(req.user!.userId).catch(() => {}),
       refreshTokenService.revokeAllForUser(req.user!.userId).catch(() => {}),
     ]);
+    clearAuthCookies(res);
     res.json({ message: 'Logged out successfully' });
   })
 );
@@ -86,19 +87,38 @@ router.post(
   '/refresh',
   refreshLimiter,
   asyncHandler(async (req: Request, res: Response) => {
-    const { refreshToken, userId } = req.body;
+    // Cookie-based flow (current frontend); body-based flow kept for
+    // API clients that still send { refreshToken, userId }.
+    const cookieToken: string | undefined = req.cookies?.[REFRESH_TOKEN_COOKIE];
+    const bodyToken: string | undefined = req.body?.refreshToken;
+    const bodyUserId: string | undefined = req.body?.userId;
 
-    if (!refreshToken || !userId) {
-      return res.status(400).json({ error: 'Missing refreshToken or userId' });
-    }
+    let refreshToken: string;
+    let userId: string;
 
-    const isValid = await refreshTokenService.verify(userId, refreshToken);
-    if (!isValid) {
-      return res.status(401).json({ error: 'Invalid or expired refresh token' });
+    if (cookieToken) {
+      const foundUserId = await refreshTokenService.findUserByToken(cookieToken);
+      if (!foundUserId) {
+        clearAuthCookies(res);
+        return res.status(401).json({ error: 'Invalid or expired refresh token' });
+      }
+      refreshToken = cookieToken;
+      userId = foundUserId;
+    } else {
+      if (!bodyToken || !bodyUserId) {
+        return res.status(400).json({ error: 'Missing refreshToken or userId' });
+      }
+      const isValid = await refreshTokenService.verify(bodyUserId, bodyToken);
+      if (!isValid) {
+        return res.status(401).json({ error: 'Invalid or expired refresh token' });
+      }
+      refreshToken = bodyToken;
+      userId = bodyUserId;
     }
 
     const user = await userService.findById(userId);
     if (!user) {
+      clearAuthCookies(res);
       return res.status(401).json({ error: 'User not found' });
     }
 
@@ -111,9 +131,8 @@ router.post(
     });
     const newRefreshToken = await refreshTokenService.rotate(user.id, refreshToken);
 
+    setAuthCookies(res, newAccessToken, newRefreshToken);
     res.json({
-      token: newAccessToken,
-      refreshToken: newRefreshToken,
       user: {
         id: user.id,
         email: user.email,

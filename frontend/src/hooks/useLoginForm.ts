@@ -22,16 +22,12 @@ export function useLoginForm(): UseLoginFormReturn {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
+    // Cookie-based session: probe /admin/me and redirect if already logged in
     api
       .get('/admin/me')
       .then(() => navigate('/admin/posts', { replace: true }))
       .catch(() => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
+        // Not authenticated — stay on the login page
       });
   }, [navigate]);
 
@@ -46,10 +42,7 @@ export function useLoginForm(): UseLoginFormReturn {
       setLoading(true);
 
       try {
-        const response = await authService.login(credentials.email, credentials.password);
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('refreshToken', response.refreshToken);
-        localStorage.setItem('user', JSON.stringify(response.user));
+        await authService.login(credentials.email, credentials.password);
         navigate('/admin/posts');
       } catch {
         setError('Невірний email або пароль');

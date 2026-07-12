@@ -3,8 +3,7 @@ export interface LoginCredentials {
   password: string;
 }
 
+// Tokens are delivered as httpOnly cookies; the body carries only the user.
 export interface LoginResponse {
-  token: string;
-  refreshToken: string;
   user: { id: string; email: string; role: string };
 }

@@ -1,56 +1,30 @@
 import axios from 'axios';
 
+// Auth is cookie-based (httpOnly access_token + refresh_token set by the backend).
+// withCredentials makes axios send them on every request.
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
   timeout: 10000,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
 let isRefreshing = false;
-let refreshSubscribers: Array<(token: string) => void> = [];
+let refreshSubscribers: Array<() => void> = [];
 
-function onRefreshed(token: string) {
-  refreshSubscribers.forEach((cb) => cb(token));
+function onRefreshed() {
+  refreshSubscribers.forEach((cb) => cb());
   refreshSubscribers = [];
 }
 
-function subscribeTokenRefresh(cb: (token: string) => void) {
+function subscribeTokenRefresh(cb: () => void) {
   refreshSubscribers.push(cb);
-}
-
-function getToken(): string | null {
-  return localStorage.getItem('token');
-}
-
-function getRefreshToken(): string | null {
-  return localStorage.getItem('refreshToken');
-}
-
-function getUserId(): string | null {
-  const userStr = localStorage.getItem('user');
-  if (!userStr) return null;
-  try {
-    const user = JSON.parse(userStr);
-    return user.id ?? null;
-  } catch {
-    return null;
-  }
-}
-
-function clearAuth() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('refreshToken');
-  localStorage.removeItem('user');
 }
 
 api.interceptors.request.use(
   (config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
     // Дозволити Axios автоматично встановлювати Content-Type для FormData
     if (config.data instanceof FormData) {
       delete config.headers['Content-Type'];
@@ -67,29 +41,21 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Only handle 401 on protected endpoints, skip login/refresh themselves
+    // Only handle 401 on protected endpoints, skip login/refresh/me themselves.
+    // /admin/me is the auth probe — a 401 there just means "not logged in".
     if (
       error.response?.status === 401 &&
       originalRequest &&
       !originalRequest._retry &&
       !originalRequest.url?.includes('/admin/login') &&
-      !originalRequest.url?.includes('/admin/refresh')
+      !originalRequest.url?.includes('/admin/refresh') &&
+      !originalRequest.url?.includes('/admin/me')
     ) {
       originalRequest._retry = true;
 
-      const refreshToken = getRefreshToken();
-      const userId = getUserId();
-
-      if (!refreshToken || !userId) {
-        clearAuth();
-        window.location.href = '/admin/login';
-        return Promise.reject(error);
-      }
-
       if (isRefreshing) {
         return new Promise((resolve) => {
-          subscribeTokenRefresh((token: string) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
+          subscribeTokenRefresh(() => {
             resolve(api(originalRequest));
           });
         });
@@ -98,23 +64,19 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const response = await axios.post(
+        // Refresh token travels as an httpOnly cookie; no body needed.
+        await axios.post(
           `${import.meta.env.VITE_API_URL || '/api'}/admin/refresh`,
-          { refreshToken, userId },
-          { headers: { 'Content-Type': 'application/json' } }
+          {},
+          { withCredentials: true }
         );
 
-        const { token, refreshToken: newRefreshToken, user } = response.data;
-        localStorage.setItem('token', token);
-        localStorage.setItem('refreshToken', newRefreshToken);
-        localStorage.setItem('user', JSON.stringify(user));
-
-        onRefreshed(token);
-        originalRequest.headers.Authorization = `Bearer ${token}`;
+        onRefreshed();
         return api(originalRequest);
       } catch {
-        clearAuth();
-        window.location.href = '/admin/login';
+        if (window.location.pathname.startsWith('/admin')) {
+          window.location.href = '/admin/login';
+        }
         return Promise.reject(error);
       } finally {
         isRefreshing = false;

@@ -7,18 +7,10 @@ export function useAuth() {
   const { data: user, isLoading } = useQuery({
     queryKey: ['auth', 'me'],
     queryFn: async () => {
-      const token = localStorage.getItem('token');
-      if (!token) return null;
       try {
         const response = await api.get('/admin/me');
         return response.data as { id: string; email: string; role: string };
-      } catch (error: unknown) {
-        const status = (error as { response?: { status?: number } })?.response?.status;
-        if (status !== 401) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('user');
-        }
+      } catch {
         return null;
       }
     },
@@ -31,11 +23,8 @@ export function useAuth() {
     try {
       await api.post('/admin/logout');
     } catch {
-      // Continue with local cleanup
+      // Cookies are cleared server-side; ignore network errors
     }
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
     queryClient.setQueryData(['auth', 'me'], null);
   };
 

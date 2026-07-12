@@ -33,13 +33,13 @@ vi.mock('../../../api/client', () => ({
 describe('LoginPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.clear();
     mockNavigate.mockClear();
     mockApiGet.mockReset();
+    // Default: no active session — the /admin/me probe rejects
+    mockApiGet.mockRejectedValue(new Error('unauthenticated'));
   });
 
-  it('redirects when token already exists', async () => {
-    localStorage.setItem('token', 'existing');
+  it('redirects when session cookie is still valid', async () => {
     mockApiGet.mockResolvedValue({ data: { id: '1', email: 'a@b.c', role: 'admin' } });
 
     render(
@@ -66,8 +66,6 @@ describe('LoginPage', () => {
 
   it('submits credentials and redirects on success', async () => {
     mockLogin.mockResolvedValueOnce({
-      token: 't1',
-      refreshToken: 'rt1',
       user: { id: 'u1', email: 'a@b.c' },
     });
 
@@ -86,8 +84,6 @@ describe('LoginPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /увійти/i }));
 
     await waitFor(() => expect(mockLogin).toHaveBeenCalledWith('a@b.c', 'secret'));
-    expect(localStorage.getItem('token')).toBe('t1');
-    expect(localStorage.getItem('refreshToken')).toBe('rt1');
     expect(mockNavigate).toHaveBeenCalledWith('/admin/posts');
   });
 
@@ -117,7 +113,7 @@ describe('LoginPage', () => {
     mockLogin.mockImplementationOnce(
       () =>
         new Promise((resolve) => {
-          resolveLogin = () => resolve({ token: 't', refreshToken: 'rt', user: {} });
+          resolveLogin = () => resolve({ user: {} });
         })
     );
 
