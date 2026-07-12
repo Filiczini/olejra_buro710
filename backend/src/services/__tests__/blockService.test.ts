@@ -35,14 +35,16 @@ const {
   };
 });
 
-vi.mock('../../db', () => ({
-  db: {
+vi.mock('../../db', () => {
+  const dbMock = {
     select: mockSelect,
     insert: mockInsertFn,
     update: mockUpdateFn,
     delete: mockDeleteFn,
-  },
-}));
+    transaction: vi.fn(async (cb: (tx: unknown) => unknown) => cb(dbMock)),
+  };
+  return { db: dbMock };
+});
 
 vi.mock('../../db/schema', () => ({
   blocks: {
@@ -250,20 +252,27 @@ describe('blockService', () => {
       const result = await blockService.syncBlocks('p1', incomingBlocks);
 
       // b2 should be deleted (exists but not in incoming)
-      expect(deleteSpy).toHaveBeenCalledWith('b2');
+      expect(deleteSpy).toHaveBeenCalledWith('b2', expect.anything());
 
       // New block should be created (no id)
-      expect(createSpy).toHaveBeenCalledWith({
-        postId: 'p1',
-        blocks: [{ type: 'text_full', data: { content: 'New' }, sort_order: 2 }],
-      });
+      expect(createSpy).toHaveBeenCalledWith(
+        {
+          postId: 'p1',
+          blocks: [{ type: 'text_full', data: { content: 'New' }, sort_order: 2 }],
+        },
+        expect.anything()
+      );
 
       // b1 should be updated (has id and exists)
-      expect(updateSpy).toHaveBeenCalledWith('b1', {
-        type: 'text_full',
-        data: { content: 'Updated' },
-        sort_order: 0,
-      });
+      expect(updateSpy).toHaveBeenCalledWith(
+        'b1',
+        {
+          type: 'text_full',
+          data: { content: 'Updated' },
+          sort_order: 0,
+        },
+        expect.anything()
+      );
 
       expect(result).toHaveLength(2);
 

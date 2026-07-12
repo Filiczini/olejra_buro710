@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import multer from 'multer';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
 import fs from 'fs/promises';
@@ -173,13 +174,16 @@ app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
     return;
   }
 
-  // Multer file size error
-  if (err.message?.includes('File too large')) {
-    res.status(413).json({ error: 'File too large. Maximum size is 10MB.' });
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      res.status(413).json({ error: 'File too large. Maximum size is 10MB.' });
+      return;
+    }
+    res.status(400).json({ error: `Upload error: ${err.message}` });
     return;
   }
 
-  // Multer file type error
+  // Multer fileFilter rejection (plain Error from our filter)
   if (err.message?.includes('Only JPEG and PNG')) {
     res.status(400).json({ error: err.message });
     return;

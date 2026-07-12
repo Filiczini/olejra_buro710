@@ -12,6 +12,7 @@ import { asyncHandler, getParam } from '../middleware/asyncHandler';
 import {
   validatePostInput,
   parseBlocksJson,
+  parseJsonField,
   extractBlockImageUploads,
   type PostBody,
 } from './api/posts.validation';
@@ -160,7 +161,7 @@ router.post(
       hero_image_url: heroImageUrl,
       hero_title,
       hero_subtitle,
-      hero_tags: hero_tags ? JSON.parse(hero_tags) : [],
+      hero_tags: parseJsonField<string[]>(hero_tags, 'hero_tags') ?? [],
       hero_location,
       hero_year,
       gallery_images: finalGalleryImages,
@@ -297,7 +298,8 @@ router.put(
     if (heroImageUrl !== existing.post.hero_image_url) heroFields.push('hero_image');
     if (hero_title !== existing.post.hero_title) heroFields.push('hero_title');
     if (hero_subtitle !== existing.post.hero_subtitle) heroFields.push('hero_subtitle');
-    const newHeroTags = hero_tags ? JSON.parse(hero_tags) : [];
+    const parsedHeroTags = parseJsonField<string[]>(hero_tags, 'hero_tags');
+    const newHeroTags = parsedHeroTags ?? [];
     const oldHeroTags = existing.post.hero_tags || [];
     if (JSON.stringify(newHeroTags) !== JSON.stringify(oldHeroTags)) heroFields.push('hero_tags');
     if (hero_location !== existing.post.hero_location) heroFields.push('hero_location');
@@ -314,7 +316,7 @@ router.put(
       hero_image_url: heroImageUrl,
       hero_title,
       hero_subtitle,
-      hero_tags: hero_tags ? JSON.parse(hero_tags) : undefined,
+      hero_tags: parsedHeroTags ?? undefined,
       hero_location,
       hero_year,
       gallery_images: finalGalleryImages,

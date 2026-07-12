@@ -40,6 +40,18 @@ interface UpdatePostParams extends Partial<PostHero> {
   blocks?: UpsertBlockInput[];
 }
 
+// Postgres unique_violation (23505) on the active-slug unique index.
+// Drizzle may wrap the pg error, so check the cause chain too.
+function isSlugUniqueViolation(err: unknown): boolean {
+  let current: unknown = err;
+  for (let depth = 0; current && depth < 5; depth++) {
+    const e = current as { code?: string; constraint?: string; cause?: unknown };
+    if (e.code === '23505' && (e.constraint ?? '').includes('slug')) return true;
+    current = e.cause;
+  }
+  return false;
+}
+
 function toPost(row: typeof posts.$inferSelect): Post {
   return {
     id: row.id,
@@ -131,38 +143,49 @@ export const postService = {
 
   create: async (params: CreatePostParams): Promise<Post> => {
     const slug = params.slug || generateSlug(params.title);
-
-    let uniqueSlug = slug;
-    let counter = 1;
-    while (true) {
-      const existing = await db
-        .select({ id: posts.id })
-        .from(posts)
-        .where(and(eq(posts.slug, uniqueSlug), isNull(posts.deleted_at)));
-
-      if (existing.length === 0) break;
-      uniqueSlug = `${slug}-${counter}`;
-      counter++;
-    }
-
     const { blocks: blockData, ...postData } = params;
 
-    const [post] = await db
-      .insert(posts)
-      .values({
-        ...postData,
-        slug: uniqueSlug,
-        status: params.status || 'draft',
-      })
-      .returning();
+    const MAX_ATTEMPTS = 3;
+    for (let attempt = 0; ; attempt++) {
+      let uniqueSlug = slug;
+      let counter = 1;
+      while (true) {
+        const existing = await db
+          .select({ id: posts.id })
+          .from(posts)
+          .where(and(eq(posts.slug, uniqueSlug), isNull(posts.deleted_at)));
 
-    if (!post) throw new NotFoundError('Failed to create post');
+        if (existing.length === 0) break;
+        uniqueSlug = `${slug}-${counter}`;
+        counter++;
+      }
 
-    if (blockData && blockData.length > 0) {
-      await blockService.create({ postId: post.id, blocks: blockData });
+      try {
+        return await db.transaction(async (tx) => {
+          const [post] = await tx
+            .insert(posts)
+            .values({
+              ...postData,
+              slug: uniqueSlug,
+              status: params.status || 'draft',
+            })
+            .returning();
+
+          if (!post) throw new NotFoundError('Failed to create post');
+
+          if (blockData && blockData.length > 0) {
+            await blockService.create({ postId: post.id, blocks: blockData }, tx);
+          }
+
+          return toPost(post);
+        });
+      } catch (err) {
+        // Concurrent create grabbed the slug between our check and insert — retry with a fresh suffix
+        if (isSlugUniqueViolation(err) && attempt < MAX_ATTEMPTS) continue;
+        if (isSlugUniqueViolation(err)) throw new ConflictError('Slug already exists');
+        throw err;
+      }
     }
-
-    return toPost(post);
   },
 
   update: async (id: string, params: UpdatePostParams): Promise<Post> => {
@@ -179,19 +202,26 @@ export const postService = {
       }
     }
 
-    const [post] = await db
-      .update(posts)
-      .set({ ...postData, updated_at: new Date() })
-      .where(eq(posts.id, id))
-      .returning();
+    try {
+      return await db.transaction(async (tx) => {
+        const [post] = await tx
+          .update(posts)
+          .set({ ...postData, updated_at: new Date() })
+          .where(eq(posts.id, id))
+          .returning();
 
-    if (!post) throw new NotFoundError('Failed to update post');
+        if (!post) throw new NotFoundError('Failed to update post');
 
-    if (blockData !== undefined) {
-      await blockService.syncBlocks(id, blockData);
+        if (blockData !== undefined) {
+          await blockService.syncBlocks(id, blockData, tx);
+        }
+
+        return toPost(post);
+      });
+    } catch (err) {
+      if (isSlugUniqueViolation(err)) throw new ConflictError('Slug already exists');
+      throw err;
     }
-
-    return toPost(post);
   },
 
   delete: async (id: string): Promise<void> => {

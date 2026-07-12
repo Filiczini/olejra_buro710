@@ -4,6 +4,7 @@
 
 import type { PostStatus, BlockType, UpsertBlockInput } from '@buro710/shared';
 import { postUpdateSchema } from '@buro710/shared';
+import { ValidationError as BadRequestError } from '../../lib/errors';
 
 export interface PostBody {
   title?: string;
@@ -67,7 +68,7 @@ export const parseJsonField = <T>(value: string | undefined, fieldName: string):
   try {
     return JSON.parse(value) as T;
   } catch {
-    throw new Error(`Invalid ${fieldName} format`);
+    throw new BadRequestError(`Invalid ${fieldName} format`);
   }
 };
 

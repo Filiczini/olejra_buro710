@@ -39,14 +39,16 @@ const {
   };
 });
 
-vi.mock('../../db', () => ({
-  db: {
+vi.mock('../../db', () => {
+  const dbMock = {
     select: mockSelect,
     insert: mockInsertFn,
     update: mockUpdateFn,
     delete: mockDeleteFn,
-  },
-}));
+    transaction: vi.fn(async (cb: (tx: unknown) => unknown) => cb(dbMock)),
+  };
+  return { db: dbMock };
+});
 
 vi.mock('../../db/schema', () => ({
   posts: {
@@ -312,10 +314,13 @@ describe('postService', () => {
         blocks: [{ type: 'text_full', data: { content: 'Hello' } }],
       });
 
-      expect(mockedBlockService.create).toHaveBeenCalledWith({
-        postId: 'p1',
-        blocks: [{ type: 'text_full', data: { content: 'Hello' } }],
-      });
+      expect(mockedBlockService.create).toHaveBeenCalledWith(
+        {
+          postId: 'p1',
+          blocks: [{ type: 'text_full', data: { content: 'Hello' } }],
+        },
+        expect.anything()
+      );
     });
   });
 
@@ -380,7 +385,7 @@ describe('postService', () => {
 
       await postService.update('p1', { blocks });
 
-      expect(mockedBlockService.syncBlocks).toHaveBeenCalledWith('p1', blocks);
+      expect(mockedBlockService.syncBlocks).toHaveBeenCalledWith('p1', blocks, expect.anything());
     });
 
     it('checks for slug uniqueness when slug is updated', async () => {
