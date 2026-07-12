@@ -248,6 +248,6 @@ describe('Response Format', () => {
     // Assert (API returns error string for missing title)
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty('error');
-    expect(response.body.error).toBe('Title is required');
+    expect(response.body.error).toBe('Validation failed');
   });
 });

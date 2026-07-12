@@ -3,7 +3,7 @@
  */
 
 import type { PostStatus, BlockType, UpsertBlockInput } from '@buro710/shared';
-import { postUpdateSchema } from '@buro710/shared';
+import { postCreateSchema, postUpdateSchema } from '@buro710/shared';
 import { ValidationError as BadRequestError } from '../../lib/errors';
 
 export interface PostBody {
@@ -29,7 +29,7 @@ export interface ValidationError {
   message: string;
 }
 
-export const validatePostInput = (data: PostBody, _isCreate: boolean): ValidationError[] => {
+export const validatePostInput = (data: PostBody, isCreate: boolean): ValidationError[] => {
   const dataToValidate: Record<string, unknown> = {};
 
   if (data.title !== undefined) dataToValidate.title = data.title;
@@ -49,10 +49,9 @@ export const validatePostInput = (data: PostBody, _isCreate: boolean): Validatio
     }
   }
 
-  // Always use postUpdateSchema (all fields optional) since we only validate
-  // fields that are actually present. Required field checks (e.g. title)
-  // are handled by the route handlers.
-  const schema = postUpdateSchema;
+  // Create requires title (postCreateSchema); update validates only present fields.
+  // Blocks arrive as a JSON string and are validated separately after parsing.
+  const schema = isCreate ? postCreateSchema.omit({ blocks: true }) : postUpdateSchema;
   const result = schema.safeParse(dataToValidate);
   if (!result.success) {
     return result.error.issues.map((e) => ({

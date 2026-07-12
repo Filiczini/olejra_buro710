@@ -96,7 +96,7 @@ describe('POST /api/v1/posts', () => {
 
     // Assert
     expect(response.status).toBe(400);
-    expect(response.body.error).toBe('Title is required');
+    expect(response.body.error).toBe('Validation failed');
   });
 
   it('returns 400 when title exceeds max length', async () => {

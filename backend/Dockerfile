@@ -19,6 +19,9 @@ ARG CACHE_BUST=1
 COPY shared/ ./shared/
 COPY backend/ ./backend/
 
+# Fail the build on type errors (runtime uses tsx, so this is the only tsc gate)
+RUN cd backend && npx tsc --noEmit
+
 # ── Stage 2: Production ───────────────────────────────────────────────────
 # Smaller image with only production dependencies and source files.
 FROM node:20-alpine

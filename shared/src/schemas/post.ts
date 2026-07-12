@@ -91,7 +91,8 @@ export const postCreateSchema = z.object({
     .max(15, "Максимум 15 тегів")
     .optional(),
   hero_location: z.string().max(200).optional(),
-  hero_year: z.string().max(20).optional(),
+  // Must match DB column varchar(10)
+  hero_year: z.string().max(10).optional(),
   blocks: z.array(blockSchema).optional(),
 });
 

@@ -450,7 +450,7 @@ describe('Error Recovery', () => {
     // Assert: Failure response (missing title returns error string)
     expect(failResponse.status).toBe(400);
     expect(failResponse.body).toHaveProperty('error');
-    expect(failResponse.body.error).toBe('Title is required');
+    expect(failResponse.body.error).toBe('Validation failed');
 
     // ================================================================
     // Step 2: Retry with valid data

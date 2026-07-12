@@ -323,6 +323,22 @@ router.put(
       blocks: parsedBlocks,
     });
 
+    // Remove files that this update stopped referencing (old gallery entries, images
+    // of deleted/replaced blocks). Hero/og replacement is handled by processImage.
+    const oldUrls = [
+      ...(existing.post.gallery_images || []),
+      ...postFileService.collectBlockImageUrls(existing.blocks),
+    ];
+    const stillReferenced = [
+      ...finalGalleryImages,
+      ...(parsedBlocks
+        ? postFileService.collectBlockImageUrls(parsedBlocks as { data: Record<string, unknown> }[])
+        : postFileService.collectBlockImageUrls(existing.blocks)),
+      ...(heroImageUrl ? [heroImageUrl] : []),
+      ...(ogImageUrl ? [ogImageUrl] : []),
+    ];
+    await postFileService.cleanupRemovedImages(oldUrls, stillReferenced);
+
     await activityLogService.log({
       user_email: req.user?.email || 'unknown',
       action: 'update',

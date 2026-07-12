@@ -110,6 +110,7 @@ jobs:
           restore-keys: ${{ runner.os }}-node-modules-
       - run: npm ci
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      - run: cd backend && npm run typecheck
       - run: cd backend && npm run test:run
       - run: cd backend && npm run test:coverage
       - uses: actions/upload-artifact@v4

@@ -79,7 +79,7 @@ describe('Edge Cases', () => {
 
     // Assert
     expect(response.status).toBe(400);
-    expect(response.body.error).toBe('Title is required');
+    expect(response.body.error).toBe('Validation failed');
   });
 
   it('handles undefined values in request body', async () => {

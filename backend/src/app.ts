@@ -22,6 +22,7 @@ import apiPostsRoutes from './routes/api/posts';
 import { db } from './db';
 import { sql } from 'drizzle-orm';
 import { swaggerSpec } from './docs/swagger';
+import swaggerUiDist from 'swagger-ui-dist';
 
 export const app = express();
 
@@ -89,13 +90,17 @@ if (process.env.NODE_ENV === 'production') {
 const swaggerCsp = helmet.contentSecurityPolicy({
   directives: {
     defaultSrc: ["'self'"],
-    scriptSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com'],
-    styleSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com'],
+    scriptSrc: ["'self'", "'unsafe-inline'"],
+    styleSrc: ["'self'", "'unsafe-inline'"],
     imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
     connectSrc: ["'self'"],
     fontSrc: ["'self'"],
   },
 });
+
+// Swagger UI static assets served locally (no CDN dependency).
+// Assets are public — the docs page itself is what's auth-gated in production.
+app.use('/api/docs/assets', express.static(swaggerUiDist.getAbsoluteFSPath(), { index: false }));
 
 app.get('/api/docs', ...docsMiddleware, swaggerCsp, (_req: Request, res: Response) => {
   const html = `<!DOCTYPE html>
@@ -104,12 +109,12 @@ app.get('/api/docs', ...docsMiddleware, swaggerCsp, (_req: Request, res: Respons
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Buro 710 API Docs</title>
-  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css">
+  <link rel="stylesheet" href="/api/docs/assets/swagger-ui.css">
 </head>
 <body>
   <div id="swagger-ui"></div>
-  <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js"></script>
-  <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js"></script>
+  <script src="/api/docs/assets/swagger-ui-bundle.js"></script>
+  <script src="/api/docs/assets/swagger-ui-standalone-preset.js"></script>
   <script>
     window.onload = function() {
       const spec = ${JSON.stringify(swaggerSpec)};

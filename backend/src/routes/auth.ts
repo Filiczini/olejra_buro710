@@ -18,6 +18,16 @@ const loginLimiter = rateLimit({
   message: { error: 'Забагато спроб входу. Спробуйте пізніше.' },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'test',
+});
+
+const refreshLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  message: { error: 'Too many refresh attempts, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'test',
 });
 
 router.post(
@@ -74,6 +84,7 @@ router.post(
 
 router.post(
   '/refresh',
+  refreshLimiter,
   asyncHandler(async (req: Request, res: Response) => {
     const { refreshToken, userId } = req.body;
 

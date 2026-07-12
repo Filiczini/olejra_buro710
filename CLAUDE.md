@@ -79,11 +79,13 @@ Express 5 server with TypeScript, running on port 3000.
 
 **Two API tiers:**
 - **Internal API** — JWT-authenticated, used by the React admin panel:
-  - `POST /api/admin/login`, `POST /api/admin/logout`, `GET /api/admin/me`
+  - `POST /api/admin/login`, `POST /api/admin/refresh`, `POST /api/admin/logout`, `GET /api/admin/me`
   - `GET|POST|PUT|DELETE /api/posts` — post CRUD + gallery upload
   - `GET /api/logs`, `GET /api/logs/users` — activity logs
   - `POST /api/contact` — contact form (rate-limited 3/min, sends to Telegram)
 - **External API v1** (`/api/v1/posts`) — API key-authenticated (`X-API-Key` header), public-facing CRUD with full OpenAPI docs at `/api/docs`
+
+**Auth:** short-lived JWT access tokens (30m) + rotating refresh tokens (7d, SHA-256 hashes stored in `refresh_tokens`). `authMiddleware` checks `token_version` against the DB on each request; logout bumps the version and revokes all refresh tokens.
 
 **Key modules:**
 - `src/index.ts` — Express app entry, route mounting, middleware stack, Swagger UI
@@ -93,7 +95,7 @@ Express 5 server with TypeScript, running on port 3000.
 - `src/db/` — Drizzle ORM schema (`schema.ts`) and database connection (`index.ts`)
 - `src/config/` — JWT config, env validation
 
-**Database:** PostgreSQL 16 via Drizzle ORM + `node-postgres` (pg). Connection configured via `DATABASE_URL` env var. Schema defined in `src/db/schema.ts` with 5 tables: `posts`, `blocks`, `users`, `activityLogs`, `contactMessages`.
+**Database:** PostgreSQL 17 via Drizzle ORM + `node-postgres` (pg). Connection configured via `DATABASE_URL` env var. Schema defined in `src/db/schema.ts` with 6 tables: `posts`, `blocks`, `users`, `refresh_tokens`, `activity_logs`, `contact_messages`. Active posts have a partial unique index on `slug` (`WHERE deleted_at IS NULL`); post/block writes run inside transactions.
 
 **Storage:** Local filesystem via `storageService`. Images uploaded via multer (memory storage) then written to `UPLOADS_DIR` (default `/app/uploads`). URLs are `/uploads/{folder}/{filename}`. File uploads support both binary multipart and URL strings — file takes priority over URL.
 
@@ -127,13 +129,9 @@ Admin pages are lazy-loaded.
 
 **Styling:** Tailwind CSS 4 utility classes only. Color palette: `zinc` as primary grayscale. Icons via `lucide-react`.
 
-### Database (PostgreSQL 16)
+### Database (PostgreSQL 17)
 
-DB columns use `snake_case`. Drizzle schema in `backend/src/db/schema.ts`.
-
-### Database (PostgreSQL 16)
-
-Tables: `posts`, `blocks`, `users`, `activity_logs`, `contact_messages`. DB columns use `snake_case`. Drizzle schema in `backend/src/db/schema.ts`.
+DB columns use `snake_case`. Drizzle schema in `backend/src/db/schema.ts`; migrations in `backend/src/db/migrations/` are applied automatically on container start (see `DOKPLOY.md`).
 
 ### Production
 

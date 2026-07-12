@@ -87,6 +87,41 @@ export const postFileService = {
   },
 
   /**
+   * Collect all image URLs referenced inside block data (image_url + images[].url).
+   */
+  collectBlockImageUrls: (blocks: { data: Record<string, unknown> }[]): string[] => {
+    const urls: string[] = [];
+    for (const block of blocks) {
+      const data = block.data;
+      if (typeof data.image_url === 'string' && data.image_url) {
+        urls.push(data.image_url);
+      }
+      if (Array.isArray(data.images)) {
+        for (const img of data.images as { url?: unknown }[]) {
+          if (img && typeof img.url === 'string' && img.url) {
+            urls.push(img.url);
+          }
+        }
+      }
+    }
+    return urls;
+  },
+
+  /**
+   * Delete uploaded files that were referenced before an update but are not anymore.
+   * Only touches local /uploads/ paths; external URLs are left alone.
+   */
+  cleanupRemovedImages: async (oldUrls: string[], stillReferenced: string[]): Promise<void> => {
+    const keep = new Set(stillReferenced);
+    const removed = [...new Set(oldUrls)].filter(
+      (url) => url.startsWith('/uploads/') && !keep.has(url)
+    );
+    if (removed.length > 0) {
+      await storageService.deleteImages(removed);
+    }
+  },
+
+  /**
    * Apply uploaded image URLs to block data objects.
    */
   applyBlockImageUrls: (
