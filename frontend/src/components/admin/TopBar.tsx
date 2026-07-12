@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { User, LogOut, Menu } from 'lucide-react';
 import { authService } from '../../services/api';
 
@@ -8,6 +9,7 @@ interface TopBarProps {
 
 export default function TopBar({ onMobileMenuClick }: TopBarProps) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const handleLogout = async () => {
     try {
@@ -15,6 +17,7 @@ export default function TopBar({ onMobileMenuClick }: TopBarProps) {
     } catch {
       // Cookies are cleared server-side; ignore network errors
     }
+    queryClient.setQueryData(['auth', 'me'], null);
     navigate('/');
   };
 

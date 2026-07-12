@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import api from '../api/client';
 import { authService } from '../services/api';
 import type { LoginCredentials } from '@buro710/shared';
@@ -14,6 +15,7 @@ export interface UseLoginFormReturn {
 
 export function useLoginForm(): UseLoginFormReturn {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [credentials, setCredentials] = useState<LoginCredentials>({
     email: '',
     password: '',
@@ -22,14 +24,19 @@ export function useLoginForm(): UseLoginFormReturn {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Cookie-based session: probe /admin/me and redirect if already logged in
+    // Cookie-based session: probe /admin/me and redirect if already logged in.
+    // Seed the auth query cache BEFORE navigating, otherwise ProtectedRoute
+    // reads a stale cached null and bounces back here (redirect loop).
     api
       .get('/admin/me')
-      .then(() => navigate('/admin/posts', { replace: true }))
+      .then((response) => {
+        queryClient.setQueryData(['auth', 'me'], response.data);
+        navigate('/admin/posts', { replace: true });
+      })
       .catch(() => {
         // Not authenticated — stay on the login page
       });
-  }, [navigate]);
+  }, [navigate, queryClient]);
 
   const handleChange = useCallback((field: keyof LoginCredentials, value: string) => {
     setCredentials((prev) => ({ ...prev, [field]: value }));
@@ -42,7 +49,9 @@ export function useLoginForm(): UseLoginFormReturn {
       setLoading(true);
 
       try {
-        await authService.login(credentials.email, credentials.password);
+        const response = await authService.login(credentials.email, credentials.password);
+        // Same cache-seeding as above — ProtectedRoute must see the fresh user
+        queryClient.setQueryData(['auth', 'me'], response.user);
         navigate('/admin/posts');
       } catch {
         setError('Невірний email або пароль');
@@ -50,7 +59,7 @@ export function useLoginForm(): UseLoginFormReturn {
         setLoading(false);
       }
     },
-    [credentials, navigate]
+    [credentials, navigate, queryClient]
   );
 
   return { credentials, error, loading, handleChange, handleSubmit };

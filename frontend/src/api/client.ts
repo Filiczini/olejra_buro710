@@ -12,14 +12,14 @@ const api = axios.create({
 });
 
 let isRefreshing = false;
-let refreshSubscribers: Array<() => void> = [];
+let refreshSubscribers: Array<(ok: boolean) => void> = [];
 
-function onRefreshed() {
-  refreshSubscribers.forEach((cb) => cb());
+function flushRefreshQueue(ok: boolean) {
+  refreshSubscribers.forEach((cb) => cb(ok));
   refreshSubscribers = [];
 }
 
-function subscribeTokenRefresh(cb: () => void) {
+function subscribeTokenRefresh(cb: (ok: boolean) => void) {
   refreshSubscribers.push(cb);
 }
 
@@ -54,9 +54,13 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       if (isRefreshing) {
-        return new Promise((resolve) => {
-          subscribeTokenRefresh(() => {
-            resolve(api(originalRequest));
+        return new Promise((resolve, reject) => {
+          subscribeTokenRefresh((ok: boolean) => {
+            if (ok) {
+              resolve(api(originalRequest));
+            } else {
+              reject(error);
+            }
           });
         });
       }
@@ -71,10 +75,15 @@ api.interceptors.response.use(
           { withCredentials: true }
         );
 
-        onRefreshed();
+        flushRefreshQueue(true);
         return api(originalRequest);
       } catch {
-        if (window.location.pathname.startsWith('/admin')) {
+        flushRefreshQueue(false);
+        // Don't reload if we're already on the login page — that would loop
+        if (
+          window.location.pathname.startsWith('/admin') &&
+          window.location.pathname !== '/admin/login'
+        ) {
           window.location.href = '/admin/login';
         }
         return Promise.reject(error);

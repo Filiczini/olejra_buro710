@@ -1,7 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import LoginPage from '../LoginPage';
+
+function renderLoginPage() {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>
+        <LoginPage />
+      </MemoryRouter>
+    </QueryClientProvider>
+  );
+}
 
 const { mockLogin } = vi.hoisted(() => ({
   mockLogin: vi.fn(),
@@ -42,11 +54,7 @@ describe('LoginPage', () => {
   it('redirects when session cookie is still valid', async () => {
     mockApiGet.mockResolvedValue({ data: { id: '1', email: 'a@b.c', role: 'admin' } });
 
-    render(
-      <MemoryRouter>
-        <LoginPage />
-      </MemoryRouter>
-    );
+    renderLoginPage();
 
     await waitFor(() =>
       expect(mockNavigate).toHaveBeenCalledWith('/admin/posts', { replace: true })
@@ -54,11 +62,7 @@ describe('LoginPage', () => {
   });
 
   it('renders login form', () => {
-    render(
-      <MemoryRouter>
-        <LoginPage />
-      </MemoryRouter>
-    );
+    renderLoginPage();
     expect(screen.getByPlaceholderText(/Введіть ваш email/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/Введіть ваш пароль/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /увійти/i })).toBeInTheDocument();
@@ -69,11 +73,7 @@ describe('LoginPage', () => {
       user: { id: 'u1', email: 'a@b.c' },
     });
 
-    render(
-      <MemoryRouter>
-        <LoginPage />
-      </MemoryRouter>
-    );
+    renderLoginPage();
 
     fireEvent.change(screen.getByPlaceholderText(/Введіть ваш email/i), {
       target: { value: 'a@b.c' },
@@ -90,11 +90,7 @@ describe('LoginPage', () => {
   it('shows error message on failed login', async () => {
     mockLogin.mockRejectedValueOnce(new Error('bad creds'));
 
-    render(
-      <MemoryRouter>
-        <LoginPage />
-      </MemoryRouter>
-    );
+    renderLoginPage();
 
     fireEvent.change(screen.getByPlaceholderText(/Введіть ваш email/i), {
       target: { value: 'a@b.c' },
@@ -117,11 +113,7 @@ describe('LoginPage', () => {
         })
     );
 
-    render(
-      <MemoryRouter>
-        <LoginPage />
-      </MemoryRouter>
-    );
+    renderLoginPage();
 
     fireEvent.change(screen.getByPlaceholderText(/Введіть ваш email/i), {
       target: { value: 'a@b.c' },
