@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { logger } from '../lib/logger';
 import { postService } from '../services/api';
 import { buildPostFormData } from '../lib/buildPostFormData';
@@ -7,6 +8,26 @@ import type { ValidationValues } from './usePostValidation';
 import type { PostStatus, ApiError } from '@buro710/shared';
 import type { EditBlock, BlockWithFile } from '../types/block';
 import type { PostHeroFormData } from '../types/post';
+
+function resolveSaveErrorMessage(error: unknown): string {
+  if (!axios.isAxiosError(error)) return 'Помилка збереження посту';
+
+  if (error.code === 'ECONNABORTED') {
+    return 'Перевищено час очікування — перевірте з’єднання і спробуйте ще раз';
+  }
+  if (!error.response) {
+    return 'Немає з’єднання з сервером';
+  }
+
+  const { status, data } = error.response;
+  const serverMessage = (data as { error?: string } | undefined)?.error;
+
+  if (status === 401) return 'Сесія закінчилась — увійдіть знову';
+  if (status === 403) return serverMessage || 'Немає прав для збереження цього посту';
+  if (status === 413) return 'Файл завеликий — зменшіть розмір зображення';
+  if (status >= 500) return 'Помилка сервера — спробуйте пізніше';
+  return serverMessage || 'Помилка збереження посту';
+}
 
 export interface SubmitValues {
   title: string;
@@ -96,7 +117,8 @@ export function usePostSubmit() {
         navigate('/admin/posts', { state: { saved: true } });
       } catch (error) {
         logger.error('Error saving post:', error);
-        callbacks.showToast('Помилка збереження', 'error');
+        const message = resolveSaveErrorMessage(error);
+        callbacks.showToast(message, 'error');
         const data = (error as ApiError)?.response?.data;
         if (data?.details?.length) {
           const fe: Record<string, string> = {};
@@ -112,7 +134,7 @@ export function usePostSubmit() {
                 : data.error,
           });
         } else {
-          callbacks.setErrors({ submit: 'Помилка збереження посту' });
+          callbacks.setErrors({ submit: message });
         }
         callbacks.scrollToFirstError();
       } finally {
