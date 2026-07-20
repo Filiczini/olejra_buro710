@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { authMiddleware, adminMiddleware } from '../middleware/auth';
+import { authMiddleware, editorMiddleware } from '../middleware/auth';
 import { activityLogService } from '../services/activityLogService';
 import { asyncHandler } from '../middleware/asyncHandler';
 
@@ -20,7 +20,7 @@ router.use(logsRateLimiter);
 router.get(
   '/',
   authMiddleware,
-  adminMiddleware,
+  editorMiddleware,
   asyncHandler(async (req, res) => {
     const { page, limit, user_email, action } = req.query;
 
@@ -43,7 +43,7 @@ router.get(
 router.get(
   '/users',
   authMiddleware,
-  adminMiddleware,
+  editorMiddleware,
   asyncHandler(async (_req, res) => {
     const users = await activityLogService.getUniqueUsers();
     res.json(users);

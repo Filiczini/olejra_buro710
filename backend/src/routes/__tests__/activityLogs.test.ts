@@ -9,6 +9,7 @@ vi.mock('../../middleware/auth', () => ({
     next();
   },
   adminMiddleware: (_req: any, _res: any, next: any) => next(),
+  editorMiddleware: (_req: any, _res: any, next: any) => next(),
 }));
 
 vi.mock('../../services/activityLogService', () => ({
