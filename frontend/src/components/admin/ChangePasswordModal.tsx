@@ -45,6 +45,8 @@ export default function ChangePasswordModal({
       </p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
+          id="change-user-password"
+          name="password"
           label="Новий пароль"
           type="password"
           value={newPassword}

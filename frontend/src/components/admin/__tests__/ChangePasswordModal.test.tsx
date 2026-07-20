@@ -28,7 +28,7 @@ describe('ChangePasswordModal', () => {
       <ChangePasswordModal user={user} onUpdate={onUpdate} onClose={vi.fn()} loading={false} />
     );
 
-    fireEvent.change(screen.getByPlaceholderText('Мінімум 6 символів'), {
+    fireEvent.change(screen.getByLabelText('Новий пароль', { exact: false }), {
       target: { value: '123' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Зберегти' }));
@@ -45,7 +45,7 @@ describe('ChangePasswordModal', () => {
       <ChangePasswordModal user={user} onUpdate={onUpdate} onClose={vi.fn()} loading={false} />
     );
 
-    fireEvent.change(screen.getByPlaceholderText('Мінімум 6 символів'), {
+    fireEvent.change(screen.getByLabelText('Новий пароль', { exact: false }), {
       target: { value: 'new-secret' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Зберегти' }));
@@ -59,7 +59,7 @@ describe('ChangePasswordModal', () => {
       <ChangePasswordModal user={user} onUpdate={vi.fn()} onClose={onClose} loading={false} />
     );
 
-    fireEvent.change(screen.getByPlaceholderText('Мінімум 6 символів'), {
+    fireEvent.change(screen.getByLabelText('Новий пароль', { exact: false }), {
       target: { value: 'partial' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Скасувати' }));

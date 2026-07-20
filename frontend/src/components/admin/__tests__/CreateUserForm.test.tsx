@@ -3,8 +3,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import CreateUserForm from '../CreateUserForm';
 
 function fillAndSubmit(email: string, password: string) {
-  fireEvent.change(screen.getByPlaceholderText('user@example.com'), { target: { value: email } });
-  fireEvent.change(screen.getByPlaceholderText('Мінімум 6 символів'), {
+  fireEvent.change(screen.getByLabelText('Email', { exact: false }), { target: { value: email } });
+  fireEvent.change(screen.getByLabelText('Пароль', { exact: false }), {
     target: { value: password },
   });
   fireEvent.submit(screen.getByRole('button', { name: /додати/i }).closest('form')!);
@@ -56,7 +56,7 @@ describe('CreateUserForm', () => {
         role: 'admin',
       })
     );
-    await waitFor(() => expect(screen.getByPlaceholderText('user@example.com')).toHaveValue(''));
+    await waitFor(() => expect(screen.getByLabelText('Email', { exact: false })).toHaveValue(''));
   });
 
   it('submits with the editor role when selected', async () => {

@@ -52,10 +52,10 @@ describe('UsersPage', () => {
     renderPage();
     await waitFor(() => expect(userService.getAll).toHaveBeenCalledTimes(1));
 
-    fireEvent.change(screen.getByPlaceholderText('user@example.com'), {
+    fireEvent.change(screen.getByLabelText('Email', { exact: false }), {
       target: { value: 'new@b710.design' },
     });
-    fireEvent.change(screen.getByPlaceholderText('Мінімум 6 символів'), {
+    fireEvent.change(screen.getByLabelText('Пароль', { exact: false }), {
       target: { value: 'secret123' },
     });
     fireEvent.submit(screen.getByRole('button', { name: /додати/i }).closest('form')!);
@@ -78,10 +78,10 @@ describe('UsersPage', () => {
     renderPage();
     await waitFor(() => expect(userService.getAll).toHaveBeenCalledTimes(1));
 
-    fireEvent.change(screen.getByPlaceholderText('user@example.com'), {
+    fireEvent.change(screen.getByLabelText('Email', { exact: false }), {
       target: { value: 'dup@b710.design' },
     });
-    fireEvent.change(screen.getByPlaceholderText('Мінімум 6 символів'), {
+    fireEvent.change(screen.getByLabelText('Пароль', { exact: false }), {
       target: { value: 'secret123' },
     });
     fireEvent.submit(screen.getByRole('button', { name: /додати/i }).closest('form')!);
@@ -111,7 +111,7 @@ describe('UsersPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Змінити пароль' }));
     const dialog = screen.getByRole('dialog');
-    fireEvent.change(within(dialog).getByPlaceholderText('Мінімум 6 символів'), {
+    fireEvent.change(within(dialog).getByLabelText('Новий пароль', { exact: false }), {
       target: { value: 'new-secret' },
     });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Зберегти' }));

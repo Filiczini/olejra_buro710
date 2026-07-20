@@ -38,6 +38,8 @@ export default function CreateUserForm({ onCreate, formLoading }: CreateUserForm
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
         <div className="md:col-span-4">
           <Input
+            id="new-user-email"
+            name="email"
             label="Email"
             type="email"
             value={email}
@@ -49,6 +51,8 @@ export default function CreateUserForm({ onCreate, formLoading }: CreateUserForm
         </div>
         <div className="md:col-span-3">
           <Input
+            id="new-user-password"
+            name="password"
             label="Пароль"
             type="password"
             value={password}
