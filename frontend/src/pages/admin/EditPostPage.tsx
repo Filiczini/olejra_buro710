@@ -177,7 +177,7 @@ export default function EditPostPage() {
           <PostHeroForm {...heroProps} />
         </div>
         <div className="lg:col-span-2">
-          <PostHeroPreview data={heroProps.data} />
+          <PostHeroPreview data={heroProps.data} title={title} />
         </div>
       </div>
 
