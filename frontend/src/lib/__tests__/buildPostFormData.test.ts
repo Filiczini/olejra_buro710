@@ -183,4 +183,35 @@ describe('buildPostFormData', () => {
     expect(fd.get('gallery_images')).toBe(JSON.stringify(['existing.jpg']));
     expect(fd.getAll('galleryImages')).toEqual([newImg]);
   });
+
+  it('includes blocks by default', () => {
+    const fd = buildPostFormData(
+      baseParams({
+        blocksData: [{ id: 'b1', type: 'text_full', data: { content: 'x' }, sort_order: 0 }],
+      })
+    );
+
+    expect(fd.get('blocks')).not.toBeNull();
+  });
+
+  it('omits the blocks field and block image files entirely when includeBlocks is false', () => {
+    const blockImg = file('block.jpg');
+    const fd = buildPostFormData(
+      baseParams({
+        blocksData: [{ id: 'b1', type: 'image_full', data: { image_url: '' }, sort_order: 0 }],
+        blockFiles: [{ id: 'b1', file: blockImg }],
+        includeBlocks: false,
+      })
+    );
+
+    expect(fd.get('blocks')).toBeNull();
+    expect(fd.getAll('blockImages')).toEqual([]);
+  });
+
+  it('still includes non-block fields when includeBlocks is false', () => {
+    const fd = buildPostFormData(baseParams({ title: 'Autosaved title', includeBlocks: false }));
+
+    expect(fd.get('title')).toBe('Autosaved title');
+    expect(fd.get('gallery_images')).toBe('[]');
+  });
 });

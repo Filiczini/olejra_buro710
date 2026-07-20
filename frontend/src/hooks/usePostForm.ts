@@ -7,6 +7,7 @@ import { usePostFormState } from './usePostFormState';
 import { usePostValidation } from './usePostValidation';
 import { usePostLoad } from './usePostLoad';
 import { usePostSubmit } from './usePostSubmit';
+import { usePostAutosave } from './usePostAutosave';
 import type { BlockType, BlockData } from '@buro710/shared';
 import type { EditBlock } from '../types/block';
 
@@ -17,6 +18,11 @@ export function usePostForm() {
   const [initialBlocks, setInitialBlocks] = useState<EditBlock[]>([]);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [pageBuilderKey, setPageBuilderKey] = useState(0);
+
+  // Set once an unsaved draft gets its first server-side autosave — lets submit/
+  // autosave target the right post without waiting for a route change.
+  const [autosavedId, setAutosavedId] = useState<string | undefined>(undefined);
+  const effectiveId = id || autosavedId;
 
   const { toast, showToast, dismissToast } = useToast();
 
@@ -55,6 +61,58 @@ export function usePostForm() {
     setGalleryNewFiles,
     handleBlockImageChange: fileBlockImageChange,
   } = files;
+
+  const { autosave } = usePostAutosave(effectiveId);
+
+  const autosaveToServer = useCallback(async () => {
+    const result = await autosave({
+      title,
+      slug,
+      status,
+      seoTitle,
+      seoDescription,
+      featured,
+      heroData,
+      ogImageFile,
+      galleryImages,
+      galleryNewFiles,
+    });
+    if (!result) return;
+
+    if (!effectiveId) {
+      // Sync the URL without a react-router navigation — a real navigate() would
+      // update useParams and re-trigger usePostLoad, remounting PageBuilder
+      // mid-edit. A plain history update just makes a refresh safe.
+      setAutosavedId(result.id);
+      window.history.replaceState(null, '', `/admin/posts/edit/${result.id}`);
+    }
+
+    // Drop already-uploaded Files so the next autosave doesn't re-upload them.
+    setHeroData((prev) => ({
+      ...prev,
+      heroImage: undefined,
+      hero_image_url: result.hero_image_url ?? prev.hero_image_url,
+    }));
+    setOgImageFile(null);
+    setGalleryImages(result.gallery_images ?? []);
+    setGalleryNewFiles([]);
+  }, [
+    autosave,
+    title,
+    slug,
+    status,
+    seoTitle,
+    seoDescription,
+    featured,
+    heroData,
+    ogImageFile,
+    galleryImages,
+    galleryNewFiles,
+    effectiveId,
+    setHeroData,
+    setOgImageFile,
+    setGalleryNewFiles,
+  ]);
 
   const draft = usePostDraft(`draft:${id || 'new'}`);
   const {
@@ -103,17 +161,23 @@ export function usePostForm() {
 
   useEffect(() => {
     if (!isDirty) return;
-    const tid = setInterval(() => draftSave(snapshotRef.current()), 30000);
+    const tid = setInterval(() => {
+      draftSave(snapshotRef.current());
+      autosaveToServer();
+    }, 30000);
     return () => clearInterval(tid);
-  }, [isDirty, draftSave]);
+  }, [isDirty, draftSave, autosaveToServer]);
 
   useEffect(() => {
     const h = () => {
-      if (isDirtyRef.current) draftSave(snapshotRef.current());
+      if (isDirtyRef.current) {
+        draftSave(snapshotRef.current());
+        autosaveToServer();
+      }
     };
     window.addEventListener('beforeunload', h);
     return () => window.removeEventListener('beforeunload', h);
-  }, [draftSave, isDirtyRef]);
+  }, [draftSave, isDirtyRef, autosaveToServer]);
 
   const restoreDraft = useCallback(() => {
     const data = draftDataRef.current;
@@ -201,8 +265,8 @@ export function usePostForm() {
         blockFiles,
         galleryImages,
         galleryNewFiles,
-        isEditing,
-        id,
+        isEditing: Boolean(effectiveId),
+        id: effectiveId,
       },
       {
         validate,

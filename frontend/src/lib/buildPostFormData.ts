@@ -15,6 +15,8 @@ interface BuildParams {
   blockFiles: BlockWithFile[];
   galleryImages: string[];
   galleryNewFiles: File[];
+  /** Omit the blocks field/files entirely — used by draft autosave, which never touches block content. */
+  includeBlocks?: boolean;
 }
 
 export function buildPostFormData({
@@ -30,6 +32,7 @@ export function buildPostFormData({
   blockFiles,
   galleryImages,
   galleryNewFiles,
+  includeBlocks = true,
 }: BuildParams): FormData {
   const fd = new FormData();
 
@@ -48,57 +51,59 @@ export function buildPostFormData({
   if (heroData.heroImage) fd.append('heroImage', heroData.heroImage);
   if (ogImageFile) fd.append('ogImage', ogImageFile);
 
-  // Build blocks JSON — mark which blocks have new image files so the backend
-  // can match uploaded files (appended below in the same iteration order).
-  const blocksJson = blocksData.map((block) => {
-    const blockId = block.id || block._tempId;
+  if (includeBlocks) {
+    // Build blocks JSON — mark which blocks have new image files so the backend
+    // can match uploaded files (appended below in the same iteration order).
+    const blocksJson = blocksData.map((block) => {
+      const blockId = block.id || block._tempId;
 
-    if (block.type === 'three_images') {
-      const newImageSlots: number[] = [];
-      for (let i = 0; i < 3; i++) {
-        if (blockFiles.find((f) => f.id === `${blockId}__images.${i}`)?.file) {
-          newImageSlots.push(i);
+      if (block.type === 'three_images') {
+        const newImageSlots: number[] = [];
+        for (let i = 0; i < 3; i++) {
+          if (blockFiles.find((f) => f.id === `${blockId}__images.${i}`)?.file) {
+            newImageSlots.push(i);
+          }
         }
+        return {
+          id: block.id?.startsWith('temp-') ? undefined : block.id,
+          _tempId: block._tempId,
+          type: block.type,
+          data: {
+            ...block.data,
+            _newImageSlots: newImageSlots.length > 0 ? newImageSlots : undefined,
+          },
+          sort_order: block.sort_order,
+        };
       }
+
       return {
         id: block.id?.startsWith('temp-') ? undefined : block.id,
         _tempId: block._tempId,
         type: block.type,
         data: {
           ...block.data,
-          _newImageSlots: newImageSlots.length > 0 ? newImageSlots : undefined,
+          _hasNewImage: !!blockFiles.find((f) => f.id === blockId)?.file,
         },
         sort_order: block.sort_order,
       };
-    }
+    });
+    fd.append('blocks', JSON.stringify(blocksJson));
 
-    return {
-      id: block.id?.startsWith('temp-') ? undefined : block.id,
-      _tempId: block._tempId,
-      type: block.type,
-      data: {
-        ...block.data,
-        _hasNewImage: !!blockFiles.find((f) => f.id === blockId)?.file,
-      },
-      sort_order: block.sort_order,
-    };
-  });
-  fd.append('blocks', JSON.stringify(blocksJson));
-
-  // Append files in the same order blocks are iterated above so the backend's
-  // positional fileIndex counter lines up correctly.
-  blocksData.forEach((block) => {
-    const blockId = block.id || block._tempId;
-    if (block.type === 'three_images') {
-      for (let i = 0; i < 3; i++) {
-        const bf = blockFiles.find((f) => f.id === `${blockId}__images.${i}`);
+    // Append files in the same order blocks are iterated above so the backend's
+    // positional fileIndex counter lines up correctly.
+    blocksData.forEach((block) => {
+      const blockId = block.id || block._tempId;
+      if (block.type === 'three_images') {
+        for (let i = 0; i < 3; i++) {
+          const bf = blockFiles.find((f) => f.id === `${blockId}__images.${i}`);
+          if (bf?.file) fd.append('blockImages', bf.file);
+        }
+      } else {
+        const bf = blockFiles.find((f) => f.id === blockId);
         if (bf?.file) fd.append('blockImages', bf.file);
       }
-    } else {
-      const bf = blockFiles.find((f) => f.id === blockId);
-      if (bf?.file) fd.append('blockImages', bf.file);
-    }
-  });
+    });
+  }
 
   fd.append('gallery_images', JSON.stringify(galleryImages));
   galleryNewFiles.forEach((file) => fd.append('galleryImages', file));

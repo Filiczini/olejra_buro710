@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 
 const mockNavigate = vi.fn();
@@ -338,5 +338,90 @@ describe('usePostForm', () => {
     });
 
     expect(mockNavigate).toHaveBeenCalledWith('/admin/posts');
+  });
+
+  describe('server-side draft autosave', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('creates a draft on the first autosave tick for a new post, then updates it on the next', async () => {
+      vi.mocked(postService.create).mockResolvedValue({ id: 'autosaved-1' } as never);
+      vi.mocked(postService.update).mockResolvedValue({ id: 'autosaved-1' } as never);
+      const replaceStateSpy = vi.spyOn(window.history, 'replaceState').mockImplementation(() => {});
+
+      const { result } = renderHook(() => usePostForm());
+      act(() => {
+        result.current.handleTitleChange('Draft post');
+      });
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(30000);
+      });
+
+      expect(postService.create).toHaveBeenCalledTimes(1);
+      expect(replaceStateSpy).toHaveBeenCalledWith(null, '', '/admin/posts/edit/autosaved-1');
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(30000);
+      });
+
+      expect(postService.update).toHaveBeenCalledWith('autosaved-1', expect.any(FormData));
+      expect(postService.create).toHaveBeenCalledTimes(1);
+
+      replaceStateSpy.mockRestore();
+    });
+
+    it('does not autosave to the server once the status is published', async () => {
+      const { result } = renderHook(() => usePostForm());
+      act(() => {
+        result.current.handleTitleChange('Draft post');
+      });
+      act(() => {
+        result.current.setStatus('published');
+      });
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(30000);
+      });
+
+      expect(postService.create).not.toHaveBeenCalled();
+      expect(postService.update).not.toHaveBeenCalled();
+    });
+
+    it('autosaves an already-existing draft post to its own id', async () => {
+      mockUseParams.mockReturnValue({ id: 'post-1' });
+      vi.mocked(postService.getById).mockResolvedValue({
+        post: {
+          id: 'post-1',
+          title: 'Existing draft',
+          slug: 'existing-draft',
+          status: 'draft',
+          created_at: '',
+          updated_at: '',
+        },
+        blocks: [],
+      } as never);
+      vi.mocked(postService.update).mockResolvedValue({ id: 'post-1' } as never);
+
+      const { result } = renderHook(() => usePostForm());
+      await act(async () => {
+        await Promise.resolve();
+      });
+      act(() => {
+        result.current.handleTitleChange('Existing draft, edited');
+      });
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(30000);
+      });
+
+      expect(postService.update).toHaveBeenCalledWith('post-1', expect.any(FormData));
+      expect(postService.create).not.toHaveBeenCalled();
+    });
   });
 });
