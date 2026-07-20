@@ -47,7 +47,6 @@ Tests live at `backend/src/**/*.test.ts` and `frontend/src/**/*.test.{ts,tsx}`.
 npm run seed:admin       # Create admin user (delegates to backend)
 npm run seed:posts       # Seed blog posts (delegates to backend)
 npm run seed:clean:posts # Clear posts (delegates to backend)
-npm run validate:i18n    # Validate i18n keys
 
 # Drizzle migrations
 cd backend && npx drizzle-kit generate   # Generate migration from schema changes

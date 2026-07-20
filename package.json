@@ -21,7 +21,6 @@
     "seed:posts": "npm run seed:posts --workspace=backend",
     "seed:clean:posts": "npm run seed:clean:posts --workspace=backend",
     "seed:admin": "npm run seed:admin --workspace=backend",
-    "validate:i18n": "node scripts/validate-i18n.js",
     "prepare": "husky"
   },
   "workspaces": [
