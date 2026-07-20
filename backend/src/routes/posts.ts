@@ -1,11 +1,6 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import {
-  authMiddleware,
-  adminMiddleware,
-  editorMiddleware,
-  optionalAuthMiddleware,
-} from '../middleware/auth';
+import { authMiddleware, editorMiddleware, optionalAuthMiddleware } from '../middleware/auth';
 import { postService } from '../services/postService';
 import { storageService } from '../services/storageService';
 import { activityLogService } from '../services/activityLogService';
@@ -365,7 +360,7 @@ router.put(
 router.delete(
   '/:id',
   authMiddleware,
-  adminMiddleware,
+  editorMiddleware,
   asyncHandler(async (req, res) => {
     const id = getParam(req.params.id);
     const result = await postService.getById(id);

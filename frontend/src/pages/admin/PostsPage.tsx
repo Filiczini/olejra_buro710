@@ -3,6 +3,7 @@ import { logger } from '../../lib/logger';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { PostStatus, Post } from '@buro710/shared';
 import { postService } from '../../services/api';
+import { resolveApiErrorMessage } from '../../lib/apiErrorMessage';
 import DataTable from '../../components/admin/DataTable';
 import PostsToolbar from '../../components/admin/PostsToolbar';
 import Toast from '../../components/ui/Toast';
@@ -66,6 +67,7 @@ export default function PostsPage() {
       await postService.delete(id);
     } catch (error) {
       logger.error('Error deleting post', error);
+      showToast(resolveApiErrorMessage(error, 'Помилка видалення посту'), 'error');
       setPosts(previousPostsRef.current);
     }
   };
@@ -80,6 +82,7 @@ export default function PostsPage() {
       setBulkDeleteConfirm(false);
     } catch (error) {
       logger.error('Error bulk deleting posts', error);
+      showToast(resolveApiErrorMessage(error, 'Помилка видалення постів'), 'error');
       refresh();
     } finally {
       setBulkLoading(false);
@@ -100,6 +103,7 @@ export default function PostsPage() {
       setSelectedIds(new Set());
     } catch (error) {
       logger.error('Error bulk updating status', error);
+      showToast(resolveApiErrorMessage(error, 'Помилка зміни статусу'), 'error');
       refresh();
     } finally {
       setBulkLoading(false);
