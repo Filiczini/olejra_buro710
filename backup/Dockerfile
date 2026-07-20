@@ -1,6 +1,6 @@
 FROM alpine:3.21
 
-RUN apk add --no-cache postgresql-client
+RUN apk add --no-cache postgresql-client rclone
 
 COPY scripts/backup.sh /backup.sh
 RUN chmod +x /backup.sh
