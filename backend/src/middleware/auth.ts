@@ -22,6 +22,14 @@ export const adminMiddleware = (req: Request, res: Response, next: NextFunction)
   next();
 };
 
+/** Post/content management — admins and editors. Users/logs stay admin-only. */
+export const editorMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  if (req.user?.role !== 'admin' && req.user?.role !== 'editor') {
+    return res.status(403).json({ error: 'Editor access required' });
+  }
+  next();
+};
+
 export const optionalAuthMiddleware = (req: Request, _res: Response, next: NextFunction) => {
   const token = extractToken(req);
 

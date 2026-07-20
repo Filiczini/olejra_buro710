@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authMiddleware, adminMiddleware } from '../middleware/auth';
+import { authMiddleware, editorMiddleware } from '../middleware/auth';
 import { postService } from '../services/postService';
 import { storageService } from '../services/storageService';
 import { activityLogService } from '../services/activityLogService';
@@ -11,7 +11,7 @@ const router = Router();
 router.post(
   '/:id/gallery',
   authMiddleware,
-  adminMiddleware,
+  editorMiddleware,
   uploadGalleryImages,
   asyncHandler(async (req, res) => {
     const id = getParam(req.params.id);
@@ -50,7 +50,7 @@ router.post(
 router.delete(
   '/:id/gallery',
   authMiddleware,
-  adminMiddleware,
+  editorMiddleware,
   asyncHandler(async (req, res) => {
     const id = getParam(req.params.id);
     const { image_url } = req.body as { image_url?: string };

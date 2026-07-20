@@ -1,6 +1,11 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { authMiddleware, adminMiddleware, optionalAuthMiddleware } from '../middleware/auth';
+import {
+  authMiddleware,
+  adminMiddleware,
+  editorMiddleware,
+  optionalAuthMiddleware,
+} from '../middleware/auth';
 import { postService } from '../services/postService';
 import { storageService } from '../services/storageService';
 import { activityLogService } from '../services/activityLogService';
@@ -86,7 +91,7 @@ router.get(
 router.get(
   '/:id',
   authMiddleware,
-  adminMiddleware,
+  editorMiddleware,
   asyncHandler(async (req, res) => {
     const id = getParam(req.params.id);
     const result = await postService.getById(id);
@@ -97,7 +102,7 @@ router.get(
 router.post(
   '/',
   authMiddleware,
-  adminMiddleware,
+  editorMiddleware,
   uploadBlockMedia,
   asyncHandler(async (req, res) => {
     const body: PostBody = req.body;
@@ -222,7 +227,7 @@ router.post(
 router.put(
   '/:id',
   authMiddleware,
-  adminMiddleware,
+  editorMiddleware,
   uploadBlockMedia,
   asyncHandler(async (req, res) => {
     const id = getParam(req.params.id);
