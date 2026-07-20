@@ -1,4 +1,5 @@
 import { Icon } from '@iconify-icon/react';
+import CompressionStatus from './CompressionStatus';
 
 interface GalleryDropzoneProps {
   isDragging: boolean;
@@ -62,20 +63,7 @@ export default function GalleryDropzone({
         </div>
       )}
 
-      {compressMsg && (
-        <div className="flex items-center gap-1.5 text-xs text-zinc-500">
-          {compressMsg.includes('→') ? (
-            <Icon
-              icon="solar:check-circle-linear"
-              width={14}
-              className="text-green-500 flex-shrink-0"
-            />
-          ) : (
-            <Icon icon="solar:spinner-linear" width={14} className="animate-spin flex-shrink-0" />
-          )}
-          <span>{compressMsg}</span>
-        </div>
-      )}
+      <CompressionStatus message={compressMsg} />
     </div>
   );
 }

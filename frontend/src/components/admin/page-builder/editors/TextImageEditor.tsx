@@ -4,6 +4,7 @@ import type { BlockData, TextImageData } from '@buro710/shared';
 import { BLOCK_ICONS } from '@buro710/shared';
 import { compressImage } from '../../../../lib/compressImage';
 import FeatureTagsInput from '../../../admin/FeatureTagsInput';
+import CompressionStatus from '../../CompressionStatus';
 
 interface TextImageEditorProps {
   blockId: string;
@@ -193,20 +194,7 @@ export default function TextImageEditor({
           </label>
         )}
 
-        {compressMsg && (
-          <div className="flex items-center gap-1.5 text-xs text-zinc-500 mb-2">
-            {compressMsg.includes('→') ? (
-              <Icon
-                icon="solar:check-circle-linear"
-                width={14}
-                className="text-green-500 flex-shrink-0"
-              />
-            ) : (
-              <Icon icon="solar:spinner-linear" width={14} className="animate-spin flex-shrink-0" />
-            )}
-            <span>{compressMsg}</span>
-          </div>
-        )}
+        <CompressionStatus message={compressMsg} className="mb-2" />
 
         <label htmlFor={f('image-alt')} className="sr-only">
           Alt-текст

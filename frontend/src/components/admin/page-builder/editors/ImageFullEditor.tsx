@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Icon } from '@iconify-icon/react';
 import type { BlockData, ImageFullData } from '@buro710/shared';
 import { compressImage } from '../../../../lib/compressImage';
+import CompressionStatus from '../../CompressionStatus';
 
 interface ImageFullEditorProps {
   blockId: string;
@@ -109,20 +110,7 @@ export default function ImageFullEditor({
         )}
       </div>
 
-      {compressMsg && (
-        <div className="flex items-center gap-1.5 text-xs text-zinc-500">
-          {compressMsg.includes('→') ? (
-            <Icon
-              icon="solar:check-circle-linear"
-              width={14}
-              className="text-green-500 flex-shrink-0"
-            />
-          ) : (
-            <Icon icon="solar:spinner-linear" width={14} className="animate-spin flex-shrink-0" />
-          )}
-          <span>{compressMsg}</span>
-        </div>
-      )}
+      <CompressionStatus message={compressMsg} />
 
       <div>
         <label htmlFor={f('caption')} className="block text-sm font-medium text-zinc-700 mb-2">

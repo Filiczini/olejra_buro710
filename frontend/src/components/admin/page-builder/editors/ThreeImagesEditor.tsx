@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Icon } from '@iconify-icon/react';
 import type { BlockData, ThreeImagesData } from '@buro710/shared';
 import { compressImage } from '../../../../lib/compressImage';
+import CompressionStatus from '../../CompressionStatus';
 
 interface ThreeImagesEditorProps {
   blockId: string;
@@ -178,24 +179,7 @@ export default function ThreeImagesEditor({
                 </label>
               )}
 
-              {compressMsgs[index] && (
-                <div className="flex items-center gap-1.5 text-xs text-zinc-500">
-                  {compressMsgs[index]!.includes('→') ? (
-                    <Icon
-                      icon="solar:check-circle-linear"
-                      width={14}
-                      className="text-green-500 flex-shrink-0"
-                    />
-                  ) : (
-                    <Icon
-                      icon="solar:spinner-linear"
-                      width={14}
-                      className="animate-spin flex-shrink-0"
-                    />
-                  )}
-                  <span>{compressMsgs[index]}</span>
-                </div>
-              )}
+              <CompressionStatus message={compressMsgs[index]} />
 
               <label htmlFor={`${imgId}-alt`} className="sr-only">
                 Alt-текст {index + 1}
