@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { compressImage } from '../../lib/compressImage';
+import { validateImageFile } from '../../lib/imageFileValidation';
 import CompressionStatus from './CompressionStatus';
 
 interface SingleImageUploadProps {
@@ -66,15 +67,9 @@ export default function SingleImageUpload({
   }, [image, initialImageUrl]);
 
   const validateFile = (file: File): string | null => {
-    const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    const maxSize = 10 * 1024 * 1024;
-
-    if (!validTypes.includes(file.type)) {
-      return 'Дозволені формати: JPEG, PNG';
-    }
-    if (file.size > maxSize) {
-      return 'Розмір файлу не повинен перевищувати 10 МБ';
-    }
+    const error = validateImageFile(file);
+    if (error === 'type') return 'Дозволені формати: JPEG, PNG';
+    if (error === 'size') return 'Розмір файлу не повинен перевищувати 10 МБ';
     return null;
   };
 

@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { compressImage } from '../../lib/compressImage';
+import { validateImageFile } from '../../lib/imageFileValidation';
 import GalleryPreview from './GalleryPreview';
 import GalleryDropzone from './GalleryDropzone';
 
@@ -70,15 +71,14 @@ export default function GalleryUploader({
     async (files: FileList | null) => {
       if (!files) return;
 
-      const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-      const maxSize = 10 * 1024 * 1024;
       const valid: File[] = [];
       const rejected: string[] = [];
 
       Array.from(files).forEach((file) => {
-        if (!validTypes.includes(file.type)) {
+        const error = validateImageFile(file);
+        if (error === 'type') {
           rejected.push(`${file.name}: тільки JPEG та PNG`);
-        } else if (file.size > maxSize) {
+        } else if (error === 'size') {
           rejected.push(`${file.name}: перевищує 10 МБ`);
         } else {
           valid.push(file);
