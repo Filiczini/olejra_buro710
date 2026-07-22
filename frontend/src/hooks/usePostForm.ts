@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useToast } from './useToast';
 import { usePostDraft } from './usePostDraft';
 import { usePostFiles } from './usePostFiles';
@@ -13,7 +13,11 @@ import type { EditBlock } from '../types/block';
 
 export function usePostForm() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const isEditing = Boolean(id);
+  // Captured once at mount — gates the initial-load effect so an id assigned
+  // later by autosave doesn't retrigger it (that would remount PageBuilder).
+  const initialIdRef = useRef(id);
 
   const [initialBlocks, setInitialBlocks] = useState<EditBlock[]>([]);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
@@ -63,41 +67,66 @@ export function usePostForm() {
   } = files;
 
   const { autosave } = usePostAutosave(effectiveId);
+  const autosaveInFlightRef = useRef(false);
 
   const autosaveToServer = useCallback(async () => {
-    const result = await autosave({
-      title,
-      slug,
-      status,
-      seoTitle,
-      seoDescription,
-      featured,
-      heroData,
-      ogImageFile,
-      galleryImages,
-      galleryNewFiles,
-    });
-    if (!result) return;
+    // Prevents the 30s interval and the beforeunload handler from ever
+    // overlapping — without this, two concurrent calls for a brand-new post
+    // could both see no id yet and each create a separate draft.
+    if (autosaveInFlightRef.current) return;
+    autosaveInFlightRef.current = true;
 
-    if (!effectiveId) {
-      // Sync the URL without a react-router navigation — a real navigate() would
-      // update useParams and re-trigger usePostLoad, remounting PageBuilder
-      // mid-edit. A plain history update just makes a refresh safe.
-      setAutosavedId(result.id);
-      window.history.replaceState(null, '', `/admin/posts/edit/${result.id}`);
+    // Snapshot exactly what's being sent so the response only overwrites
+    // fields that are still untouched when it comes back — a newer edit
+    // made while this request was in flight must win; the next tick will
+    // pick it up and send it for real.
+    const sentHeroImage = heroData.heroImage;
+    const sentOgImageFile = ogImageFile;
+    const sentGalleryImages = galleryImages;
+    const sentGalleryNewFiles = galleryNewFiles;
+
+    try {
+      const result = await autosave({
+        title,
+        slug,
+        status,
+        seoTitle,
+        seoDescription,
+        featured,
+        heroData,
+        ogImageFile,
+        galleryImages,
+        galleryNewFiles,
+      });
+      if (!result) return;
+
+      if (!effectiveId) {
+        setAutosavedId(result.id);
+        navigate(`/admin/posts/edit/${result.id}`, { replace: true });
+      }
+
+      // Drop already-uploaded Files so the next autosave doesn't re-upload
+      // them — but only where nothing changed locally since we sent this.
+      setHeroData((prev) =>
+        prev.heroImage === sentHeroImage
+          ? {
+              ...prev,
+              heroImage: undefined,
+              hero_image_url: result.hero_image_url ?? prev.hero_image_url,
+            }
+          : prev
+      );
+      setOgImageFile((prev) => (prev === sentOgImageFile ? null : prev));
+      setGalleryImages((prev) =>
+        prev === sentGalleryImages ? (result.gallery_images ?? []) : prev
+      );
+      setGalleryNewFiles((prev) => (prev === sentGalleryNewFiles ? [] : prev));
+    } finally {
+      autosaveInFlightRef.current = false;
     }
-
-    // Drop already-uploaded Files so the next autosave doesn't re-upload them.
-    setHeroData((prev) => ({
-      ...prev,
-      heroImage: undefined,
-      hero_image_url: result.hero_image_url ?? prev.hero_image_url,
-    }));
-    setOgImageFile(null);
-    setGalleryImages(result.gallery_images ?? []);
-    setGalleryNewFiles([]);
   }, [
     autosave,
+    navigate,
     title,
     slug,
     status,
@@ -203,8 +232,11 @@ export function usePostForm() {
   const { loading, load } = usePostLoad();
 
   useEffect(() => {
-    if (id) {
-      load(id, {
+    // Gated on the id captured at mount, not the live route param — an id
+    // assigned mid-session by autosave must not retrigger a reload (that
+    // would remount PageBuilder and lose in-progress block edits).
+    if (initialIdRef.current) {
+      load(initialIdRef.current, {
         applyFields,
         setInitialBlocks,
         setGalleryImages,
@@ -215,7 +247,7 @@ export function usePostForm() {
         onLoaded: () => setPageBuilderKey((k) => k + 1),
       });
     }
-  }, [id, load, applyFields, clearDirty]);
+  }, [load, applyFields, clearDirty]);
 
   const handleTitleChange = (value: string) => {
     updateTitle(value);

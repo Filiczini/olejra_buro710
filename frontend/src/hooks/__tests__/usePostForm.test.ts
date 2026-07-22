@@ -352,7 +352,6 @@ describe('usePostForm', () => {
     it('creates a draft on the first autosave tick for a new post, then updates it on the next', async () => {
       vi.mocked(postService.create).mockResolvedValue({ id: 'autosaved-1' } as never);
       vi.mocked(postService.update).mockResolvedValue({ id: 'autosaved-1' } as never);
-      const replaceStateSpy = vi.spyOn(window.history, 'replaceState').mockImplementation(() => {});
 
       const { result } = renderHook(() => usePostForm());
       act(() => {
@@ -364,7 +363,10 @@ describe('usePostForm', () => {
       });
 
       expect(postService.create).toHaveBeenCalledTimes(1);
-      expect(replaceStateSpy).toHaveBeenCalledWith(null, '', '/admin/posts/edit/autosaved-1');
+      expect(mockNavigate).toHaveBeenCalledWith('/admin/posts/edit/autosaved-1', { replace: true });
+      // The id assigned by autosave must not retrigger the load effect —
+      // that would remount PageBuilder and lose in-progress block edits.
+      expect(postService.getById).not.toHaveBeenCalled();
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(30000);
@@ -372,8 +374,71 @@ describe('usePostForm', () => {
 
       expect(postService.update).toHaveBeenCalledWith('autosaved-1', expect.any(FormData));
       expect(postService.create).toHaveBeenCalledTimes(1);
+    });
 
-      replaceStateSpy.mockRestore();
+    it('does not fire an overlapping autosave while one is still in flight', async () => {
+      let resolveCreate!: (value: unknown) => void;
+      vi.mocked(postService.create).mockReturnValue(
+        new Promise((resolve) => {
+          resolveCreate = resolve;
+        }) as never
+      );
+
+      const { result } = renderHook(() => usePostForm());
+      act(() => {
+        result.current.handleTitleChange('Draft post');
+      });
+
+      // First tick starts a create() that never resolves yet.
+      await act(async () => {
+        vi.advanceTimersByTime(30000);
+        await Promise.resolve();
+      });
+      expect(postService.create).toHaveBeenCalledTimes(1);
+
+      // A second tick fires while the first is still pending — must be a no-op.
+      await act(async () => {
+        vi.advanceTimersByTime(30000);
+        await Promise.resolve();
+      });
+      expect(postService.create).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        resolveCreate({ id: 'autosaved-1' });
+        await Promise.resolve();
+      });
+    });
+
+    it('does not clobber a gallery image added while an autosave request is in flight', async () => {
+      let resolveCreate!: (value: unknown) => void;
+      vi.mocked(postService.create).mockReturnValue(
+        new Promise((resolve) => {
+          resolveCreate = resolve;
+        }) as never
+      );
+
+      const { result } = renderHook(() => usePostForm());
+      act(() => {
+        result.current.handleTitleChange('Draft post');
+      });
+
+      await act(async () => {
+        vi.advanceTimersByTime(30000);
+        await Promise.resolve();
+      });
+      expect(postService.create).toHaveBeenCalledTimes(1);
+
+      // User adds a gallery image while that request is still pending.
+      act(() => {
+        result.current.galleryProps.onImagesChange(['new-photo.jpg']);
+      });
+
+      await act(async () => {
+        resolveCreate({ id: 'autosaved-1', gallery_images: [] });
+        await Promise.resolve();
+      });
+
+      expect(result.current.galleryProps.images).toEqual(['new-photo.jpg']);
     });
 
     it('does not autosave to the server once the status is published', async () => {

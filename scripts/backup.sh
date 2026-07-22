@@ -9,13 +9,35 @@ RETENTION_DAYS=7
 STATE_FILE="$BACKUP_DIR/.r2-last-upload"
 R2_PREFIX="buro710"
 WEEKLY_SECONDS=604800
+RAW_DUMP="$BACKUP_DIR/.tmp_dump_${DATE}.sql"
 
 mkdir -p "$BACKUP_DIR"
 
 echo "[$(date)] Starting backup..."
 
-# Database backup — uses DATABASE_URL connection string directly
-pg_dump "$DATABASE_URL" | gzip > "$DB_FILE"
+# Database backup — dumped to a plain file first (not piped straight into
+# gzip) so pg_dump's own exit status is checked directly. Piping it would
+# mean `set -e` only sees gzip's exit code, and gzip happily produces a
+# small-but-valid .gz from zero bytes if pg_dump fails partway — a broken
+# dump would otherwise look like a successful, empty backup.
+if ! pg_dump "$DATABASE_URL" > "$RAW_DUMP" 2>"$BACKUP_DIR/.tmp_dump_err"; then
+  echo "[$(date)] ERROR: pg_dump failed:"
+  cat "$BACKUP_DIR/.tmp_dump_err"
+  rm -f "$RAW_DUMP" "$BACKUP_DIR/.tmp_dump_err"
+  exit 1
+fi
+rm -f "$BACKUP_DIR/.tmp_dump_err"
+
+# Sanity-check the dump actually looks like a PostgreSQL dump, not just
+# "some bytes" — catches pg_dump exiting 0 while writing only a warning.
+head -c 4096 "$RAW_DUMP" | grep -q "PostgreSQL database dump" || {
+  echo "[$(date)] ERROR: dump doesn't look like a valid PostgreSQL dump"
+  rm -f "$RAW_DUMP"
+  exit 1
+}
+
+gzip -c "$RAW_DUMP" > "$DB_FILE"
+rm -f "$RAW_DUMP"
 
 # Integrity check
 gzip -t "$DB_FILE" || { echo "[$(date)] ERROR: database backup corrupted"; exit 1; }
@@ -23,10 +45,16 @@ gzip -t "$DB_FILE" || { echo "[$(date)] ERROR: database backup corrupted"; exit 
 
 echo "[$(date)] Database backup: $DB_FILE"
 
-# Uploads backup (skip if empty)
+# Uploads backup (skip if empty). A failure here must not take down the
+# whole run — the DB dump above already succeeded and should still reach
+# local storage / R2 even if the uploads archive can't be made.
 if [ -d "/uploads" ] && [ "$(ls -A /uploads 2>/dev/null)" ]; then
-  tar czf "$UPLOADS_FILE" -C / uploads
-  echo "[$(date)] Uploads backup: $UPLOADS_FILE"
+  if tar czf "$UPLOADS_FILE" -C / uploads; then
+    echo "[$(date)] Uploads backup: $UPLOADS_FILE"
+  else
+    echo "[$(date)] WARN: uploads archive failed — continuing with DB backup only"
+    rm -f "$UPLOADS_FILE"
+  fi
 else
   echo "[$(date)] No uploads to back up"
 fi
