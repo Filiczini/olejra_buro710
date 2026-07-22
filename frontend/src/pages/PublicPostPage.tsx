@@ -51,6 +51,7 @@ export default function PostPage() {
           !(post.gallery_images && post.gallery_images.length > 0) && (
             <div className="max-w-5xl mx-auto px-4 py-24">
               <div className="text-center text-zinc-400">
+                <h1 className="text-2xl font-bold text-zinc-700 mb-4">{post.title}</h1>
                 <Icon icon="solar:document-text-linear" width={48} className="mx-auto mb-4" />
                 <p>Контент сторінки буде додано пізніше...</p>
               </div>
