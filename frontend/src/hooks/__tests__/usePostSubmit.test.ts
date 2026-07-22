@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
 
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', () => ({
@@ -39,6 +41,12 @@ function values(overrides: Partial<SubmitValues> = {}): SubmitValues {
   };
 }
 
+const createWrapper = () => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client: queryClient }, children);
+};
+
 function makeCallbacks() {
   return {
     validate: vi.fn(() => true),
@@ -56,7 +64,7 @@ beforeEach(() => {
 
 describe('usePostSubmit', () => {
   it('does not call the API when client-side validation fails', async () => {
-    const { result } = renderHook(() => usePostSubmit());
+    const { result } = renderHook(() => usePostSubmit(), { wrapper: createWrapper() });
     const callbacks = makeCallbacks();
     callbacks.validate.mockReturnValue(false);
 
@@ -71,7 +79,7 @@ describe('usePostSubmit', () => {
 
   it('creates a new post and navigates away on success', async () => {
     vi.mocked(postService.create).mockResolvedValue({} as never);
-    const { result } = renderHook(() => usePostSubmit());
+    const { result } = renderHook(() => usePostSubmit(), { wrapper: createWrapper() });
     const callbacks = makeCallbacks();
 
     await act(async () => {
@@ -86,7 +94,7 @@ describe('usePostSubmit', () => {
 
   it('updates the existing post by id when editing', async () => {
     vi.mocked(postService.update).mockResolvedValue({} as never);
-    const { result } = renderHook(() => usePostSubmit());
+    const { result } = renderHook(() => usePostSubmit(), { wrapper: createWrapper() });
     const callbacks = makeCallbacks();
 
     await act(async () => {
@@ -101,7 +109,7 @@ describe('usePostSubmit', () => {
       isAxiosError: true,
       response: { status: 401 },
     });
-    const { result } = renderHook(() => usePostSubmit());
+    const { result } = renderHook(() => usePostSubmit(), { wrapper: createWrapper() });
     const callbacks = makeCallbacks();
 
     await act(async () => {
@@ -120,7 +128,7 @@ describe('usePostSubmit', () => {
       isAxiosError: true,
       response: { status: 403, data: { error: 'Editor access required' } },
     });
-    const { result } = renderHook(() => usePostSubmit());
+    const { result } = renderHook(() => usePostSubmit(), { wrapper: createWrapper() });
     const callbacks = makeCallbacks();
 
     await act(async () => {
@@ -134,7 +142,7 @@ describe('usePostSubmit', () => {
     vi.mocked(postService.create).mockRejectedValue({
       response: { data: { field: 'slug', error: 'Slug already exists' } },
     });
-    const { result } = renderHook(() => usePostSubmit());
+    const { result } = renderHook(() => usePostSubmit(), { wrapper: createWrapper() });
     const callbacks = makeCallbacks();
 
     await act(async () => {
@@ -156,7 +164,7 @@ describe('usePostSubmit', () => {
         },
       },
     });
-    const { result } = renderHook(() => usePostSubmit());
+    const { result } = renderHook(() => usePostSubmit(), { wrapper: createWrapper() });
     const callbacks = makeCallbacks();
 
     await act(async () => {
@@ -171,7 +179,7 @@ describe('usePostSubmit', () => {
 
   it('leaves saving false again after the request settles, on both success and failure', async () => {
     vi.mocked(postService.create).mockRejectedValue(new Error('boom'));
-    const { result } = renderHook(() => usePostSubmit());
+    const { result } = renderHook(() => usePostSubmit(), { wrapper: createWrapper() });
 
     await act(async () => {
       await result.current.submit(values(), makeCallbacks());

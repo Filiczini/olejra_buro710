@@ -13,6 +13,6 @@ test.describe('Contact Form', () => {
     await page.click('button:has-text("Надіслати повідомлення")');
 
     await expect(page.locator('text=Повідомлення надіслано!')).toBeVisible();
-    await expect(page.locator('text=Ми з\'яжемося з вами найближчим часом.')).toBeVisible();
+    await expect(page.locator('text=Ми зв\'яжемося з вами найближчим часом.')).toBeVisible();
   });
 });

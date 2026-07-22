@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { logger } from '../lib/logger';
 import { postService } from '../services/api';
 import { buildPostFormData } from '../lib/buildPostFormData';
@@ -37,6 +38,7 @@ export interface SubmitCallbacks {
 
 export function usePostSubmit() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [saving, setSaving] = useState(false);
 
   const submit = useCallback(
@@ -92,6 +94,9 @@ export function usePostSubmit() {
         } else {
           await postService.create(formData);
         }
+        // The admin posts list caches its query for 2 minutes (staleTime) — without
+        // invalidating, navigating back to it right after save shows the pre-save list.
+        await queryClient.invalidateQueries({ queryKey: ['adminList'] });
         callbacks.clearDirty();
         callbacks.draftDismiss();
         navigate('/admin/posts', { state: { saved: true } });

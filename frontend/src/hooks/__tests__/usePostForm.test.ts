@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
 
 const mockNavigate = vi.fn();
 const mockUseParams = vi.fn().mockReturnValue({});
@@ -39,6 +41,12 @@ import { postCreateSchema } from '@buro710/shared';
 
 const mockSafeParse = vi.mocked(postCreateSchema.safeParse);
 
+const createWrapper = () => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client: queryClient }, children);
+};
+
 describe('usePostForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -47,7 +55,7 @@ describe('usePostForm', () => {
   });
 
   it('initializes with default state for new post', () => {
-    const { result } = renderHook(() => usePostForm());
+    const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
 
     expect(result.current.isEditing).toBe(false);
     expect(result.current.title).toBe('');
@@ -64,7 +72,7 @@ describe('usePostForm', () => {
     mockUseParams.mockReturnValue({ id: 'post-123' });
     vi.mocked(postService.getById).mockReturnValue(new Promise(() => {}));
 
-    const { result } = renderHook(() => usePostForm());
+    const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
 
     expect(result.current.slugLocked).toBe(true);
   });
@@ -74,13 +82,13 @@ describe('usePostForm', () => {
 
     vi.mocked(postService.getById).mockReturnValue(new Promise(() => {}));
 
-    const { result } = renderHook(() => usePostForm());
+    const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
 
     expect(result.current.isEditing).toBe(true);
   });
 
   it('handleTitleChange updates title and generates slug for new post', () => {
-    const { result } = renderHook(() => usePostForm());
+    const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
 
     act(() => {
       result.current.handleTitleChange('My New Post');
@@ -91,7 +99,7 @@ describe('usePostForm', () => {
   });
 
   it('handleTitleChange continuously updates slug while unlocked', () => {
-    const { result } = renderHook(() => usePostForm());
+    const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
 
     act(() => {
       result.current.handleTitleChange('First');
@@ -108,7 +116,7 @@ describe('usePostForm', () => {
     mockUseParams.mockReturnValue({ id: 'post-123' });
     vi.mocked(postService.getById).mockReturnValue(new Promise(() => {}));
 
-    const { result } = renderHook(() => usePostForm());
+    const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
 
     act(() => {
       result.current.handleTitleChange('Updated Title');
@@ -119,7 +127,7 @@ describe('usePostForm', () => {
   });
 
   it('handleTitleChange does not overwrite manually set slug', () => {
-    const { result } = renderHook(() => usePostForm());
+    const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
 
     act(() => {
       result.current.handleSlugChange('custom-slug');
@@ -134,7 +142,7 @@ describe('usePostForm', () => {
   });
 
   it('handleSlugChange locks slug and stops auto-generation', () => {
-    const { result } = renderHook(() => usePostForm());
+    const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
 
     act(() => {
       result.current.handleSlugChange('my-custom-slug');
@@ -151,7 +159,7 @@ describe('usePostForm', () => {
   });
 
   it('handleSlugUnlock regenerates slug from current title and unlocks', () => {
-    const { result } = renderHook(() => usePostForm());
+    const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
 
     act(() => {
       result.current.handleTitleChange('My Post Title');
@@ -170,7 +178,7 @@ describe('usePostForm', () => {
   });
 
   it('setStatus updates status', () => {
-    const { result } = renderHook(() => usePostForm());
+    const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
 
     act(() => {
       result.current.setStatus('published');
@@ -180,7 +188,7 @@ describe('usePostForm', () => {
   });
 
   it('setFeatured toggles featured state', () => {
-    const { result } = renderHook(() => usePostForm());
+    const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
 
     act(() => {
       result.current.setFeatured(true);
@@ -190,7 +198,7 @@ describe('usePostForm', () => {
   });
 
   it('setSeoTitle and setSeoDescription update SEO fields', () => {
-    const { result } = renderHook(() => usePostForm());
+    const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
 
     act(() => {
       result.current.seoProps.onSeoTitleChange('SEO Title');
@@ -212,7 +220,7 @@ describe('usePostForm', () => {
       },
     } as never);
 
-    const { result } = renderHook(() => usePostForm());
+    const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
 
     await act(async () => {
       const fakeEvent = { preventDefault: vi.fn() } as unknown as React.FormEvent;
@@ -229,7 +237,7 @@ describe('usePostForm', () => {
   it('handleSubmit creates new post on valid data', async () => {
     vi.mocked(postService.create).mockResolvedValue({} as never);
 
-    const { result } = renderHook(() => usePostForm());
+    const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
 
     act(() => {
       result.current.handleTitleChange('Test Post');
@@ -259,7 +267,7 @@ describe('usePostForm', () => {
     } as never);
     vi.mocked(postService.update).mockResolvedValue({} as never);
 
-    const { result } = renderHook(() => usePostForm());
+    const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
 
     // Wait for loadPost to complete
     await act(async () => {
@@ -278,7 +286,7 @@ describe('usePostForm', () => {
   it('handleSubmit sets error on save failure', async () => {
     vi.mocked(postService.create).mockRejectedValue(new Error('Server error'));
 
-    const { result } = renderHook(() => usePostForm());
+    const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
 
     await act(async () => {
       const fakeEvent = { preventDefault: vi.fn() } as unknown as React.FormEvent;
@@ -312,7 +320,7 @@ describe('usePostForm', () => {
       blocks: [{ id: 'b1', type: 'text_full', data: { text: 'Hello' }, sort_order: 0 }],
     } as never);
 
-    const { result } = renderHook(() => usePostForm());
+    const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
 
     await act(async () => {
       await new Promise((r) => setTimeout(r, 0));
@@ -331,7 +339,7 @@ describe('usePostForm', () => {
     mockUseParams.mockReturnValue({ id: 'bad-id' });
     vi.mocked(postService.getById).mockRejectedValue(new Error('Not found'));
 
-    renderHook(() => usePostForm());
+    renderHook(() => usePostForm(), { wrapper: createWrapper() });
 
     await act(async () => {
       await new Promise((r) => setTimeout(r, 0));
@@ -353,7 +361,7 @@ describe('usePostForm', () => {
       vi.mocked(postService.create).mockResolvedValue({ id: 'autosaved-1' } as never);
       vi.mocked(postService.update).mockResolvedValue({ id: 'autosaved-1' } as never);
 
-      const { result } = renderHook(() => usePostForm());
+      const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
       act(() => {
         result.current.handleTitleChange('Draft post');
       });
@@ -384,7 +392,7 @@ describe('usePostForm', () => {
         }) as never
       );
 
-      const { result } = renderHook(() => usePostForm());
+      const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
       act(() => {
         result.current.handleTitleChange('Draft post');
       });
@@ -417,7 +425,7 @@ describe('usePostForm', () => {
         }) as never
       );
 
-      const { result } = renderHook(() => usePostForm());
+      const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
       act(() => {
         result.current.handleTitleChange('Draft post');
       });
@@ -442,7 +450,7 @@ describe('usePostForm', () => {
     });
 
     it('does not autosave to the server once the status is published', async () => {
-      const { result } = renderHook(() => usePostForm());
+      const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
       act(() => {
         result.current.handleTitleChange('Draft post');
       });
@@ -473,7 +481,7 @@ describe('usePostForm', () => {
       } as never);
       vi.mocked(postService.update).mockResolvedValue({ id: 'post-1' } as never);
 
-      const { result } = renderHook(() => usePostForm());
+      const { result } = renderHook(() => usePostForm(), { wrapper: createWrapper() });
       await act(async () => {
         await Promise.resolve();
       });

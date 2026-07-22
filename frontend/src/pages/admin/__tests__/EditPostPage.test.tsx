@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const { mockUseParams } = vi.hoisted(() => ({ mockUseParams: vi.fn().mockReturnValue({}) }));
 
@@ -39,9 +40,18 @@ beforeEach(() => {
   mockUseParams.mockReturnValue({});
 });
 
+function renderPage() {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <EditPostPage />
+    </QueryClientProvider>
+  );
+}
+
 describe('EditPostPage', () => {
   it('defaults status to draft and switches to published on selection', () => {
-    render(<EditPostPage />);
+    renderPage();
 
     const draftRadio = screen.getByRole('radio', { name: 'Чернетка' });
     const publishedRadio = screen.getByRole('radio', { name: 'Опубліковано' });
@@ -55,7 +65,7 @@ describe('EditPostPage', () => {
   });
 
   it('toggles the featured switch', () => {
-    render(<EditPostPage />);
+    renderPage();
     const featuredSwitch = screen.getByRole('switch');
     expect(featuredSwitch).toHaveAttribute('aria-checked', 'false');
 
@@ -65,7 +75,7 @@ describe('EditPostPage', () => {
   });
 
   it('shows "Синхронізувати" when the slug is locked by manual edits, and "Авто" once unlocked', () => {
-    render(<EditPostPage />);
+    renderPage();
 
     fireEvent.change(screen.getByPlaceholderText('url-adresa-storinky'), {
       target: { value: 'custom-slug' },
@@ -77,7 +87,7 @@ describe('EditPostPage', () => {
   });
 
   it('auto-generates the slug from the title until the slug is manually locked', () => {
-    render(<EditPostPage />);
+    renderPage();
 
     fireEvent.change(screen.getByPlaceholderText('Введіть назву сторінки'), {
       target: { value: 'Новий проєкт' },
@@ -87,7 +97,7 @@ describe('EditPostPage', () => {
   });
 
   it('titles the page "Нова сторінка" for a new post and "Редагувати сторінку" when editing', async () => {
-    const { unmount } = render(<EditPostPage />);
+    const { unmount } = renderPage();
     expect(screen.getByText('Нова сторінка')).toBeInTheDocument();
     unmount();
 
@@ -105,7 +115,7 @@ describe('EditPostPage', () => {
       blocks: [],
     } as never);
 
-    render(<EditPostPage />);
+    renderPage();
 
     await waitFor(() => expect(screen.getByText('Редагувати сторінку')).toBeInTheDocument());
   });
