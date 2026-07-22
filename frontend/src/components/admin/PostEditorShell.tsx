@@ -70,7 +70,7 @@ export default function PostEditorShell({
   const hasValidationErrors = Object.keys(errors).some((k) => k !== 'submit');
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-[1600px] mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-zinc-900">
           {isEditing ? 'Редагувати сторінку' : 'Нова сторінка'}
