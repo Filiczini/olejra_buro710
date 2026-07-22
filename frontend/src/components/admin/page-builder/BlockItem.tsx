@@ -102,7 +102,7 @@ export default function BlockItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-white rounded-xl shadow-lg border border-zinc-200 overflow-hidden ${
+      className={`relative bg-white rounded-xl shadow-lg border border-zinc-200 overflow-hidden ${
         isDragging ? 'opacity-50 shadow-xl' : ''
       }`}
     >

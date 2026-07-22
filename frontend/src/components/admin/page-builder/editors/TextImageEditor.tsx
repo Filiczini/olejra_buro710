@@ -147,9 +147,7 @@ export default function TextImageEditor({
       </div>
 
       <div className={order.image}>
-        <label htmlFor={f('image')} className="block text-sm font-medium text-zinc-700 mb-2">
-          Зображення
-        </label>
+        <p className="block text-sm font-medium text-zinc-700 mb-2">Зображення</p>
 
         {displayUrl ? (
           <div className="relative group mb-3">
