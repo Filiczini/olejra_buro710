@@ -5,9 +5,14 @@ import SidebarMenuItem from './SidebarMenuItem';
 interface MobileSidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  role?: string;
 }
 
-export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
+export default function MobileSidebar({ isOpen, onClose, role }: MobileSidebarProps) {
+  const visibleNavItems = adminNavItems.filter(
+    (item) => !item.roles || item.roles.includes(role as 'admin' | 'editor')
+  );
+
   return (
     <>
       {/* Overlay */}
@@ -41,7 +46,7 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          {adminNavItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <SidebarMenuItem
               key={item.path}
               icon={item.icon}

@@ -1,7 +1,15 @@
 import { adminNavItems, adminBottomNavItems } from '../../constants/navigation';
 import SidebarMenuItem from './SidebarMenuItem';
 
-export default function Sidebar() {
+interface SidebarProps {
+  role?: string;
+}
+
+export default function Sidebar({ role }: SidebarProps) {
+  const visibleNavItems = adminNavItems.filter(
+    (item) => !item.roles || item.roles.includes(role as 'admin' | 'editor')
+  );
+
   return (
     <aside className="w-72 h-full bg-zinc-950 text-zinc-400 flex flex-col border-r border-zinc-800 flex-shrink-0">
       {/* Logo Section */}
@@ -14,7 +22,7 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 space-y-1 mt-2">
-        {adminNavItems.map((item) => (
+        {visibleNavItems.map((item) => (
           <SidebarMenuItem
             key={item.path}
             icon={item.icon}

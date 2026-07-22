@@ -6,12 +6,14 @@ export interface AdminNavItem {
   label: string;
   path: string;
   isExternal?: boolean;
+  /** Omit to show to every logged-in role. */
+  roles?: Array<'admin' | 'editor'>;
 }
 
 export const adminNavItems: AdminNavItem[] = [
   { icon: FileText, label: 'Пости', path: '/admin/posts' },
   { icon: History, label: 'Журнал дій', path: '/admin/logs' },
-  { icon: Users, label: 'Користувачі', path: '/admin/users' },
+  { icon: Users, label: 'Користувачі', path: '/admin/users', roles: ['admin'] },
   { icon: Settings, label: 'Налаштування', path: '/admin/settings' },
 ];
 

@@ -28,5 +28,5 @@ export function useAuth() {
     queryClient.setQueryData(['auth', 'me'], null);
   };
 
-  return { isAuthenticated: !!user, isLoading, handleLogout };
+  return { isAuthenticated: !!user, isLoading, role: user?.role, handleLogout };
 }

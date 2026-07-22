@@ -54,6 +54,23 @@ describe('useAuth', () => {
     expect(mockGet).toHaveBeenCalledWith('/admin/me');
   });
 
+  it("exposes the authenticated user's role", async () => {
+    mockGet.mockResolvedValue({ data: { id: '1', email: 'diana@b710.design', role: 'editor' } });
+
+    const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.role).toBe('editor'));
+  });
+
+  it('role is undefined when there is no session', async () => {
+    mockGet.mockRejectedValue(new Error('Unauthorized'));
+
+    const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.role).toBeUndefined();
+  });
+
   it('returns isAuthenticated false when the session probe rejects', async () => {
     mockGet.mockRejectedValue(new Error('Unauthorized'));
 
