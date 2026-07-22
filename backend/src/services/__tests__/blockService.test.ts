@@ -161,6 +161,26 @@ describe('blockService', () => {
         })
       ).rejects.toThrow('Insert failed');
     });
+
+    it('preserves the text field on a text_image block (regression: union schema used to drop it)', async () => {
+      mockReturning.mockResolvedValue([]);
+
+      const textImageData = {
+        text: 'Some body text',
+        image_url: 'x.jpg',
+        image_alt: 'alt',
+        title: 'Title',
+      };
+
+      await blockService.create({
+        postId: 'p1',
+        blocks: [{ type: 'text_image', data: textImageData }],
+      });
+
+      expect(mockInsertValues).toHaveBeenCalledWith([
+        expect.objectContaining({ data: expect.objectContaining({ text: 'Some body text' }) }),
+      ]);
+    });
   });
 
   describe('delete', () => {

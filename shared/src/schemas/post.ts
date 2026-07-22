@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { BlockType } from "../types/block.js";
 
 const textFullDataSchema = z.object({
   content: z.string(),
@@ -39,6 +40,27 @@ export const blockDataSchema = z.union([
   textImageDataSchema,
   threeImagesDataSchema,
 ]);
+
+// z.object() strips unknown keys by default, so the union above silently matches
+// the first schema whose *required* fields happen to be present (e.g. imageFullDataSchema
+// matches any block with an image_url, discarding text_image's `text` field). Parse by the
+// block's own `type` instead of guessing from shape.
+const blockDataSchemaByType: Record<BlockType, z.ZodTypeAny> = {
+  text_full: textFullDataSchema,
+  image_full: imageFullDataSchema,
+  text_image: textImageDataSchema,
+  image_text: textImageDataSchema,
+  three_images: threeImagesDataSchema,
+};
+
+export function parseBlockData(
+  type: BlockType,
+  data: unknown,
+): z.infer<typeof blockDataSchema> {
+  return blockDataSchemaByType[type].parse(data) as z.infer<
+    typeof blockDataSchema
+  >;
+}
 
 export const blockSchema = z.object({
   id: z.string().optional(),

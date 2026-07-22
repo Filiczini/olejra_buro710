@@ -3,6 +3,7 @@ export {
   postUpdateSchema,
   blockSchema,
   blockDataSchema,
+  parseBlockData,
   type PostCreateInput,
   type PostUpdateInput,
 } from "./schemas/post.js";

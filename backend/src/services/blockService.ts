@@ -1,7 +1,7 @@
 import { eq, asc } from 'drizzle-orm';
 import { db, type DbClient } from '../db';
 import { blocks } from '../db/schema';
-import { blockDataSchema } from '@buro710/shared';
+import { parseBlockData } from '@buro710/shared';
 import type {
   Block,
   BlockType,
@@ -25,7 +25,7 @@ function toBlock(row: typeof blocks.$inferSelect): Block {
     id: row.id,
     post_id: row.post_id,
     type: row.type as BlockType,
-    data: blockDataSchema.parse(row.data),
+    data: parseBlockData(row.type as BlockType, row.data),
     sort_order: row.sort_order,
     created_at: row.created_at.toISOString(),
   };
@@ -46,7 +46,7 @@ export const blockService = {
     const values = params.blocks.map((block, index) => ({
       post_id: params.postId,
       type: block.type,
-      data: blockDataSchema.parse(block.data),
+      data: parseBlockData(block.type, block.data),
       sort_order: block.sort_order ?? index,
     }));
 
@@ -58,8 +58,20 @@ export const blockService = {
   update: async (id: string, data: UpdateBlockData, executor: DbClient = db): Promise<Block> => {
     const updateValues: Record<string, unknown> = {};
     if (data.type !== undefined) updateValues.type = data.type;
-    if (data.data !== undefined) updateValues.data = data.data;
     if (data.sort_order !== undefined) updateValues.sort_order = data.sort_order;
+
+    if (data.data !== undefined) {
+      let type = data.type;
+      if (!type) {
+        const [existing] = await executor
+          .select({ type: blocks.type })
+          .from(blocks)
+          .where(eq(blocks.id, id));
+        if (!existing) throw new Error('Block not found');
+        type = existing.type as BlockType;
+      }
+      updateValues.data = parseBlockData(type, data.data);
+    }
 
     const [result] = await executor
       .update(blocks)

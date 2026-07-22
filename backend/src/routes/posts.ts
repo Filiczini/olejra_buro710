@@ -189,6 +189,7 @@ router.post(
           }
         }
         await blockService.update(blockRecord.id, {
+          type: blockRecord.type,
           data: currentData as BlockData,
         });
       }
