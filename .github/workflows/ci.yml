@@ -61,9 +61,13 @@ jobs:
       - uses: actions/cache@v4
         id: cache-node-modules
         with:
-          path: node_modules
+          path: |
+            node_modules
+            shared/node_modules
+            frontend/node_modules
+            backend/node_modules
+            e2e/node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-          restore-keys: ${{ runner.os }}-node-modules-
       - run: npm ci
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
       - run: cd shared && npm run test:run
@@ -83,9 +87,13 @@ jobs:
       - uses: actions/cache@v4
         id: cache-node-modules
         with:
-          path: node_modules
+          path: |
+            node_modules
+            shared/node_modules
+            frontend/node_modules
+            backend/node_modules
+            e2e/node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-          restore-keys: ${{ runner.os }}-node-modules-
       - run: npm ci
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
       - run: cd frontend && npm run test:run
@@ -105,9 +113,13 @@ jobs:
       - uses: actions/cache@v4
         id: cache-node-modules
         with:
-          path: node_modules
+          path: |
+            node_modules
+            shared/node_modules
+            frontend/node_modules
+            backend/node_modules
+            e2e/node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-          restore-keys: ${{ runner.os }}-node-modules-
       - run: npm ci
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
       - run: cd backend && npm run typecheck
@@ -135,9 +147,13 @@ jobs:
       - uses: actions/cache@v4
         id: cache-node-modules
         with:
-          path: node_modules
+          path: |
+            node_modules
+            shared/node_modules
+            frontend/node_modules
+            backend/node_modules
+            e2e/node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-          restore-keys: ${{ runner.os }}-node-modules-
       - run: npm ci
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
       - run: cd backend && npm run test:integration
@@ -171,9 +187,13 @@ jobs:
       - uses: actions/cache@v4
         id: cache-node-modules
         with:
-          path: node_modules
+          path: |
+            node_modules
+            shared/node_modules
+            frontend/node_modules
+            backend/node_modules
+            e2e/node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-          restore-keys: ${{ runner.os }}-node-modules-
       - run: npm ci
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
       - name: Cache Playwright browsers
@@ -221,9 +241,13 @@ jobs:
       - uses: actions/cache@v4
         id: cache-node-modules
         with:
-          path: node_modules
+          path: |
+            node_modules
+            shared/node_modules
+            frontend/node_modules
+            backend/node_modules
+            e2e/node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-          restore-keys: ${{ runner.os }}-node-modules-
       - run: npm ci
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
       - run: cd frontend && npm run build
@@ -244,9 +268,13 @@ jobs:
       - uses: actions/cache@v4
         id: cache-node-modules
         with:
-          path: node_modules
+          path: |
+            node_modules
+            shared/node_modules
+            frontend/node_modules
+            backend/node_modules
+            e2e/node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-          restore-keys: ${{ runner.os }}-node-modules-
       - run: npm ci
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
       - run: cd frontend && npm run build
