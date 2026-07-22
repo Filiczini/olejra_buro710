@@ -126,7 +126,7 @@ export function usePostSubmit() {
         setSaving(false);
       }
     },
-    [navigate]
+    [navigate, queryClient]
   );
 
   return { saving, submit };
