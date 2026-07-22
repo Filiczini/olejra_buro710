@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { postCreateSchema } from '@buro710/shared';
 import type { ZodIssue, ZodTypeAny } from 'zod';
 import type { PostStatus } from '@buro710/shared';
@@ -15,6 +15,13 @@ export interface ValidationValues {
 
 export function usePostValidation() {
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
+  }, []);
 
   const clearFieldError = useCallback((field: string) => {
     setErrors((prev) => {
@@ -44,7 +51,8 @@ export function usePostValidation() {
   );
 
   const scrollToFirstError = useCallback(() => {
-    setTimeout(() => {
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = setTimeout(() => {
       const el = document.querySelector<HTMLElement>('.bg-red-50, .border-red-500, .text-red-500');
       el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 50);
