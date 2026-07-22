@@ -15,6 +15,7 @@ process.env.API_KEY = 'test-api-key';
 describe('API v1 contract tests', () => {
   let app: any;
   let apiKey: string;
+  let appDbPool: { end: () => Promise<void> };
 
   beforeAll(async () => {
     const { databaseUrl } = await setupIntegrationTests();
@@ -40,6 +41,7 @@ describe('API v1 contract tests', () => {
     // Re-import db with real DATABASE_URL, then mock it for routes
     const dbModule = await import('../../db/index.js');
     const { db, pool, schema } = dbModule;
+    appDbPool = pool;
     vi.doMock('../../db', () => ({ db, pool, schema }));
 
     // Now import app — it will pick up the mocked db
@@ -50,6 +52,10 @@ describe('API v1 contract tests', () => {
   }, 120_000);
 
   afterAll(async () => {
+    // Close the app's own db pool before the container goes down — an open pool
+    // left dangling gets an uncaught "terminating connection due to administrator
+    // command" error from the killed container, which fails the whole test run.
+    await appDbPool?.end();
     await teardownIntegrationTests();
   });
 
