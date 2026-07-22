@@ -204,6 +204,9 @@ jobs:
           key: ${{ runner.os }}-playwright-${{ hashFiles('e2e/package-lock.json') }}
       - run: cd e2e && npx playwright install chromium
         if: steps.cache-playwright.outputs.cache-hit != 'true'
+      - run: cd backend && npx tsx src/migrate.ts
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/bureau710_test
       - run: cd backend && npm run seed:admin
         env:
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/bureau710_test
@@ -281,6 +284,6 @@ jobs:
       - name: Run Lighthouse CI
         run: |
           npm install -g @lhci/cli@0.14.x
-          cd frontend && lhci autorun
+          cd frontend && lhci autorun --config=.lighthouserc.cjs
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}

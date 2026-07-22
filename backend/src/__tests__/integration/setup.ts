@@ -37,7 +37,13 @@ export async function setupIntegrationTests() {
   // Seed admin user
   execSync('npx tsx src/seed-admin.ts', {
     cwd: process.cwd(),
-    env: { ...process.env, DATABASE_URL: databaseUrl, NODE_ENV: 'test' },
+    env: {
+      ...process.env,
+      DATABASE_URL: databaseUrl,
+      NODE_ENV: 'test',
+      ADMIN_EMAIL: 'admin@test.com',
+      ADMIN_PASSWORD: 'admin123',
+    },
     stdio: 'inherit',
   });
 
