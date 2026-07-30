@@ -69,6 +69,13 @@ export default function HeroSlider() {
               />
             </div>
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/30"></div>
+            {post.hero_subtitle && (
+              <div className="absolute top-0 w-full px-6 md:px-10 pt-24 md:pt-32 flex justify-end pointer-events-none">
+                <p className="max-w-xs text-sm text-white/70 font-light leading-relaxed text-right">
+                  {post.hero_subtitle}
+                </p>
+              </div>
+            )}
             <div className="absolute bottom-0 w-full h-full px-6 md:px-10 pb-10 md:pb-14 flex flex-col justify-end">
               <div className="max-w-[1800px] mx-auto w-full flex flex-col md:flex-row items-end justify-between gap-10">
                 <div className="w-full md:max-w-4xl">

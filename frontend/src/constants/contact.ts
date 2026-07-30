@@ -40,17 +40,17 @@ export const contactInfo: ContactInfoItem[] = [
 
 export const socialLinks: SocialLinkItem[] = [
   {
-    icon: 'solar:instagram-linear',
+    icon: 'ri:instagram-line',
     name: 'Instagram',
     link: 'https://instagram.com/buro710',
   },
   {
-    icon: 'solar:youtube-linear',
+    icon: 'ri:youtube-line',
     name: 'YouTube',
     link: 'https://youtube.com/@buro710',
   },
   {
-    icon: 'solar:linkedin-linear',
+    icon: 'ri:linkedin-line',
     name: 'LinkedIn',
     link: 'https://linkedin.com/company/buro710',
   },
