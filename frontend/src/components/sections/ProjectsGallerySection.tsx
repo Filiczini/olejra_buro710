@@ -1,34 +1,41 @@
-import { memo } from 'react';
-import { Link } from 'react-router-dom';
-import { Icon } from '@iconify-icon/react';
+import { memo, useState } from 'react';
 import ProjectCard from '../projects/ProjectCard';
 import { useFetchPosts } from '../../hooks/useFetchPosts';
 
+const INITIAL_COUNT = 3;
+
 export default memo(function ProjectsGallerySection() {
   const { posts, loading, error } = useFetchPosts({ featured: true });
+  const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
 
   if (loading || error || posts.length === 0) return null;
 
+  const visiblePosts = posts.slice(0, visibleCount);
+  const hasMore = visibleCount < posts.length;
+
   return (
     <section className="max-w-[1800px] mx-auto px-6 mb-40">
-      <div className="flex justify-between items-end mb-16 border-b border-zinc-200 pb-6">
-        <h2 className="text-4xl font-medium tracking-tight uppercase text-zinc-900">
-          Вибрані Проєкти
-        </h2>
-        <Link
-          to="/projects"
-          className="hidden md:flex items-center gap-2 text-sm font-medium uppercase tracking-wide text-zinc-500 hover:text-zinc-900 transition-colors"
-        >
-          Всі проєкти{' '}
-          <Icon icon="lucide:arrow-right" className="w-4 h-4" style={{ strokeWidth: 1.5 }} />
-        </Link>
-      </div>
+      <h2 className="text-2xl md:text-h3 font-display tracking-tight text-zinc-900 text-center mb-16">
+        Вам може сподобатись
+      </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
-        {posts.map((post) => (
+        {visiblePosts.map((post) => (
           <ProjectCard key={post.id} post={post} />
         ))}
       </div>
+
+      {hasMore && (
+        <div className="flex justify-center mt-16">
+          <button
+            type="button"
+            onClick={() => setVisibleCount((count) => count + INITIAL_COUNT)}
+            className="px-8 py-3 border border-zinc-200 rounded-full text-sm font-medium hover:bg-zinc-900 hover:text-white hover:border-zinc-900 transition-colors cursor-pointer"
+          >
+            Показати ще
+          </button>
+        </div>
+      )}
     </section>
   );
 });

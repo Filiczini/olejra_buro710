@@ -108,7 +108,7 @@ export default function Header({ transparent = false }: HeaderProps) {
               </a>
             ))}
           </nav>
-          {isAuthenticated && (
+          {isAuthenticated ? (
             <div className="flex items-center gap-6 md:gap-8">
               <a
                 href="/admin/posts"
@@ -137,6 +137,17 @@ export default function Header({ transparent = false }: HeaderProps) {
                 Вийти
               </button>
             </div>
+          ) : (
+            <a
+              href="/contact"
+              className={`hidden md:inline-flex text-xs font-medium px-6 py-2.5 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-xl ${
+                isTransparent
+                  ? 'bg-white text-zinc-900 hover:bg-zinc-200 hover:shadow-zinc-900/20'
+                  : 'bg-zinc-900 text-white hover:bg-zinc-800 hover:shadow-zinc-900/20'
+              }`}
+            >
+              Зв'язатися
+            </a>
           )}
         </div>
       </header>

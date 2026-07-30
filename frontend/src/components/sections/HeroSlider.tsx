@@ -41,8 +41,8 @@ export default function HeroSlider() {
       <section className="relative w-full h-screen overflow-hidden bg-zinc-900 text-white">
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
-            <h1 className="text-5xl md:text-7xl font-semibold tracking-tight mb-4">Buro 710</h1>
-            <p className="text-zinc-400 text-lg">Архітектура та дизайн</p>
+            <h1 className="text-5xl md:text-h1 font-display tracking-tight mb-4">Buro 710</h1>
+            <p className="text-zinc-400 text-body">Архітектура та дизайн</p>
           </div>
         </div>
       </section>
@@ -72,7 +72,7 @@ export default function HeroSlider() {
             <div className="absolute bottom-0 w-full h-full px-6 md:px-10 pb-10 md:pb-14 flex flex-col justify-end">
               <div className="max-w-[1800px] mx-auto w-full flex flex-col md:flex-row items-end justify-between gap-10">
                 <div className="w-full md:max-w-4xl">
-                  <h1 className="text-5xl md:text-7xl lg:text-[88px] font-semibold tracking-tight leading-[0.9] mb-6">
+                  <h1 className="text-5xl md:text-h1 font-display tracking-tight leading-[0.9] mb-6">
                     {post.hero_title || post.title}
                   </h1>
                   <div className="hidden md:flex items-center gap-4 text-sm md:text-base font-medium text-white/80">

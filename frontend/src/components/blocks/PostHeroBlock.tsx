@@ -57,7 +57,7 @@ export default function PostHeroBlock({ post }: PostHeroBlockProps) {
               </span>
             )}
           </div>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-display text-white tracking-tight leading-none">
+          <h1 className="text-5xl md:text-h1 font-display text-white tracking-tight leading-none">
             {displayTitle?.split(' ').map((word, i, arr) => (
               <span key={i}>
                 {word}

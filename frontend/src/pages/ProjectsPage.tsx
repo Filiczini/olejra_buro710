@@ -1,6 +1,14 @@
 import ProjectCard from '../components/projects/ProjectCard';
 import { useFetchPosts } from '../hooks/useFetchPosts';
 
+function pluralizeProjects(count: number): string {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  if (mod10 === 1 && mod100 !== 11) return 'проєкт';
+  if ([2, 3, 4].includes(mod10) && ![12, 13, 14].includes(mod100)) return 'проєкти';
+  return 'проєктів';
+}
+
 export default function ProjectsPage() {
   const { posts, loading, error } = useFetchPosts({ status: 'published', limit: 100 });
 
@@ -9,11 +17,13 @@ export default function ProjectsPage() {
       <main className="pt-32 pb-24">
         <section className="max-w-[1600px] mx-auto px-6">
           <div className="flex justify-between items-end mb-16 border-b border-zinc-200 pb-6">
-            <h1 className="text-4xl font-medium tracking-tight uppercase text-zinc-900">
-              Всі Проєкти
+            <h1 className="text-2xl md:text-h4 font-display tracking-tight text-zinc-900">
+              Наші проєкти
             </h1>
             {!loading && (
-              <span className="text-sm text-zinc-400 font-medium">{posts.length} проєктів</span>
+              <span className="text-sm text-zinc-400 font-medium">
+                {posts.length} {pluralizeProjects(posts.length)}
+              </span>
             )}
           </div>
 

@@ -76,7 +76,7 @@ export default function AboutPage() {
         <section className="max-w-[1800px] mx-auto px-6 py-24 md:py-32">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
             <div>
-              <h1 className="text-5xl md:text-7xl font-medium tracking-tight leading-tight animate-reveal-up">
+              <h1 className="text-5xl md:text-h1 font-display tracking-tight leading-tight animate-reveal-up">
                 <>
                   Ми створюємо простори, <br className="hidden md:block" />
                   де архітектура зустрічається <br className="hidden md:block" />з тишею.
@@ -84,7 +84,7 @@ export default function AboutPage() {
               </h1>
             </div>
             <div className="space-y-8 flex flex-col justify-between">
-              <div className="space-y-6 text-lg text-zinc-500 font-light leading-relaxed max-w-xl">
+              <div className="space-y-6 text-body text-zinc-500 leading-relaxed max-w-xl">
                 <p>
                   <>Buro 710 — інтер'єрна студія.</>
                 </p>
@@ -116,10 +116,10 @@ export default function AboutPage() {
         <section className="bg-zinc-900 text-white py-24 md:py-32 px-6">
           <div className="max-w-[1800px] mx-auto">
             <div className="mb-16">
-              <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-4">
+              <h2 className="text-3xl md:text-h2 font-display tracking-tight mb-4">
                 Наші цінності
               </h2>
-              <p className="text-zinc-400 text-lg max-w-2xl">Ми віримо в силу простоти.</p>
+              <p className="text-zinc-400 text-body max-w-2xl">Ми віримо в силу простоти.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
               {values.map((value) => (
@@ -128,8 +128,8 @@ export default function AboutPage() {
                   className={`space-y-4 animate-reveal-up [animation-delay:${value.id * 100}ms]`}
                 >
                   <Icon icon={value.icon} width={32} className="text-zinc-500" />
-                  <h4 className="text-xl font-medium">{value.title}</h4>
-                  <p className="text-zinc-400 text-sm leading-relaxed">{value.description}</p>
+                  <h4 className="text-xl md:text-h4 font-display">{value.title}</h4>
+                  <p className="text-zinc-400 text-body-sm leading-relaxed">{value.description}</p>
                 </div>
               ))}
             </div>
@@ -140,8 +140,8 @@ export default function AboutPage() {
         <section className="max-w-[1800px] mx-auto px-6 py-24 md:py-32 border-b border-zinc-200">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
             <div className="lg:col-span-4">
-              <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-4">Наш процес</h2>
-              <p className="text-zinc-500 text-lg">Як ми працюємо з клієнтами.</p>
+              <h2 className="text-3xl md:text-h2 font-display tracking-tight mb-4">Наш процес</h2>
+              <p className="text-zinc-500 text-body">Як ми працюємо з клієнтами.</p>
             </div>
             <div className="lg:col-span-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -154,9 +154,9 @@ export default function AboutPage() {
                       <span className="text-xs font-medium text-zinc-400 mb-2 block group-hover:text-zinc-900">
                         {step.id}
                       </span>
-                      <h4 className="text-xl font-medium mb-2">{step.name}</h4>
+                      <h4 className="text-xl md:text-h4 font-display mb-2">{step.name}</h4>
                     </div>
-                    <p className="text-zinc-500 text-sm leading-relaxed">{step.description}</p>
+                    <p className="text-zinc-500 text-body-sm leading-relaxed">{step.description}</p>
                   </div>
                 ))}
               </div>
@@ -167,10 +167,12 @@ export default function AboutPage() {
         {/* Team Section */}
         <section id="team" className="max-w-[1800px] mx-auto px-6 py-24 md:py-32">
           <div className="mb-16">
-            <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-4">
+            <h2 className="text-3xl md:text-h2 font-display tracking-tight mb-4">
               Познайомтеся з командою
             </h2>
-            <p className="text-zinc-500 text-lg max-w-2xl">Люди, які стоять за кожним проектом.</p>
+            <p className="text-zinc-500 text-body max-w-2xl">
+              Люди, які стоять за кожним проектом.
+            </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {team.map((member) => (
@@ -184,8 +186,8 @@ export default function AboutPage() {
                   />
                 </div>
                 <div>
-                  <h4 className="text-lg font-medium text-zinc-900">{member.name}</h4>
-                  <p className="text-sm text-zinc-500 mt-1">{member.role}</p>
+                  <h4 className="text-lg md:text-h4 font-display text-zinc-900">{member.name}</h4>
+                  <p className="text-body-sm text-zinc-500 mt-1">{member.role}</p>
                 </div>
               </div>
             ))}
@@ -195,10 +197,10 @@ export default function AboutPage() {
         {/* Contact CTA */}
         <section className="bg-zinc-900 text-white py-24 md:py-32 px-6">
           <div className="max-w-[1800px] mx-auto text-center">
-            <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-6">
+            <h2 className="text-3xl md:text-h2 font-display tracking-tight mb-6">
               Готові розпочати?
             </h2>
-            <p className="text-zinc-400 text-lg max-w-2xl mx-auto mb-12">
+            <p className="text-zinc-400 text-body max-w-2xl mx-auto mb-12">
               Дозвольте нам допомогти вам.
             </p>
             <a

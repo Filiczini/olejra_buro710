@@ -4,6 +4,37 @@
   --font-sans: 'Didact Gothic', 'system-ui', sans-serif;
   --font-display: 'Oswald', 'system-ui', sans-serif;
 
+  --text-h1: 96px;
+  --text-h1--line-height: 1.05;
+  --text-h1--letter-spacing: -0.02em;
+  --text-h1--font-weight: 600;
+
+  --text-h2: 70px;
+  --text-h2--line-height: 1.1;
+  --text-h2--letter-spacing: -0.02em;
+  --text-h2--font-weight: 500;
+
+  --text-h3: 54px;
+  --text-h3--line-height: 1.15;
+  --text-h3--letter-spacing: -0.01em;
+  --text-h3--font-weight: 500;
+
+  --text-h4: 36px;
+  --text-h4--line-height: 1.2;
+  --text-h4--font-weight: 500;
+
+  --text-body-lg: 24px;
+  --text-body-lg--line-height: 1.5;
+  --text-body-lg--font-weight: 400;
+
+  --text-body: 18px;
+  --text-body--line-height: 1.6;
+  --text-body--font-weight: 400;
+
+  --text-body-sm: 16px;
+  --text-body-sm--line-height: 1.6;
+  --text-body-sm--font-weight: 400;
+
   --animate-reveal-up: revealUp 0.8s ease-out forwards;
   --animate-slide-in: slideIn 0.3s ease-out forwards;
   --animate-slide-out: slideOut 0.3s ease-in forwards;

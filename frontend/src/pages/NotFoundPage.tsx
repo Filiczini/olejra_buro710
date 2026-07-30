@@ -10,10 +10,10 @@ export default function NotFoundPage() {
             <span className="text-xs font-medium text-zinc-400 tracking-widest uppercase mb-6 block">
               404
             </span>
-            <h1 className="text-5xl md:text-7xl font-medium tracking-tight leading-tight mb-8">
+            <h1 className="text-5xl md:text-h1 font-display tracking-tight leading-tight mb-8">
               Сторінку не знайдено.
             </h1>
-            <p className="text-lg text-zinc-500 font-light leading-relaxed mb-12">
+            <p className="text-body text-zinc-500 leading-relaxed mb-12">
               Схоже, ця адреса не існує або була переміщена.
             </p>
             <Link

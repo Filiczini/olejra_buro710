@@ -9,7 +9,7 @@ export default function CinematicDivider() {
       />
       <div className="absolute inset-0 bg-black/20"></div>
       <div className="absolute inset-0 flex items-center justify-center">
-        <h2 className="text-3xl md:text-5xl font-medium text-white tracking-tight text-center px-4 mix-blend-overlay">
+        <h2 className="text-3xl md:text-h2 font-display text-white tracking-tight text-center px-4 mix-blend-overlay">
           Spaces designed for calm living.
         </h2>
       </div>

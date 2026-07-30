@@ -33,7 +33,7 @@ export const contactInfo: ContactInfoItem[] = [
   {
     icon: 'solar:clock-linear',
     label: 'Робочий час',
-    value: 'Пн-Пт: 9:00 - 18:00',
+    value: 'Пн-Пт: 10:00 - 19:00',
     link: null,
   },
 ];
@@ -45,13 +45,13 @@ export const socialLinks: SocialLinkItem[] = [
     link: 'https://instagram.com/buro710',
   },
   {
+    icon: 'solar:youtube-linear',
+    name: 'YouTube',
+    link: 'https://youtube.com/@buro710',
+  },
+  {
     icon: 'solar:linkedin-linear',
     name: 'LinkedIn',
     link: 'https://linkedin.com/company/buro710',
-  },
-  {
-    icon: 'solar:behance-linear',
-    name: 'Behance',
-    link: 'https://behance.net/buro710',
   },
 ];

@@ -12,12 +12,12 @@ export default function ContactPage() {
         <section className="max-w-[1800px] mx-auto px-6 py-24 md:py-32">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
             <div>
-              <h1 className="text-5xl md:text-7xl font-medium tracking-tight leading-tight animate-reveal-up">
+              <h1 className="text-5xl md:text-h1 font-display tracking-tight leading-tight animate-reveal-up">
                 Зв'яжіться з нами
               </h1>
             </div>
             <div className="space-y-8 flex flex-col justify-between">
-              <div className="space-y-6 text-lg text-zinc-500 font-light leading-relaxed max-w-xl">
+              <div className="space-y-6 text-body text-zinc-500 leading-relaxed max-w-xl">
                 <p>Ми раді допомогти вам втілити ваш дизайн-проект у життя.</p>
               </div>
               <div className="flex gap-6">
@@ -43,10 +43,10 @@ export default function ContactPage() {
         <section className="max-w-[1800px] mx-auto px-6 py-24 md:py-32 border-b border-zinc-200">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
             <div>
-              <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-6">
+              <h2 className="text-3xl md:text-h2 font-display tracking-tight mb-6">
                 Контактна інформація
               </h2>
-              <p className="text-zinc-500 text-lg mb-8">
+              <p className="text-zinc-500 text-body mb-8">
                 Зв'яжіться з нами зручним для вас способом.
               </p>
               <div className="space-y-6">
@@ -73,8 +73,10 @@ export default function ContactPage() {
               </div>
             </div>
             <div>
-              <h3 className="text-2xl font-medium tracking-tight mb-6">Соціальні мережі</h3>
-              <p className="text-zinc-500 text-lg mb-8">Дізнавайтеся про наші новини.</p>
+              <h3 className="text-2xl md:text-h3 font-display tracking-tight mb-6">
+                Соціальні мережі
+              </h3>
+              <p className="text-zinc-500 text-body mb-8">Дізнавайтеся про наші новини.</p>
               <div className="space-y-4">
                 {socialLinks.map((social) => (
                   <a
@@ -100,8 +102,10 @@ export default function ContactPage() {
         <section id="contact-form" className="max-w-[1800px] mx-auto px-6 py-24 md:py-32">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-4">Напишіть нам</h2>
-              <p className="text-zinc-500 text-lg max-w-2xl mx-auto">Розкажіть про свій проект.</p>
+              <h2 className="text-3xl md:text-h2 font-display tracking-tight mb-4">Напишіть нам</h2>
+              <p className="text-zinc-500 text-body max-w-2xl mx-auto">
+                Розкажіть про свій проект.
+              </p>
             </div>
 
             <ContactForm
@@ -120,8 +124,10 @@ export default function ContactPage() {
           <div className="max-w-[1800px] mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
-                <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-6">Знайти нас</h2>
-                <p className="text-zinc-400 text-lg mb-8">Наш офіс знаходиться в районі Майдану.</p>
+                <h2 className="text-3xl md:text-h2 font-display tracking-tight mb-6">Знайти нас</h2>
+                <p className="text-zinc-400 text-body mb-8">
+                  Наш офіс знаходиться в районі Майдану.
+                </p>
                 <div className="flex items-start gap-4">
                   <Icon icon="solar:map-point-linear" width={24} className="text-zinc-500" />
                   <div>

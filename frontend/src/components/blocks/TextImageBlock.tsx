@@ -40,12 +40,12 @@ export default function TextImageBlock({ data, mirrored }: TextImageBlockProps) 
             )}
 
             {title && (
-              <h3 className="text-3xl font-display tracking-tight text-zinc-900 mb-6">{title}</h3>
+              <h3 className="text-3xl md:text-h4 font-display tracking-tight text-zinc-900 mb-6">
+                {title}
+              </h3>
             )}
 
-            {text && (
-              <p className="text-zinc-600 font-light leading-7 mb-8 whitespace-pre-wrap">{text}</p>
-            )}
+            {text && <p className="text-zinc-600 text-body mb-8 whitespace-pre-wrap">{text}</p>}
 
             {features && features.length > 0 && (
               <ul className="space-y-4 border-t border-zinc-200 pt-6">

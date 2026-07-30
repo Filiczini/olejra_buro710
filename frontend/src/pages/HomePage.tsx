@@ -1,10 +1,10 @@
 import HeroSlider from '../components/sections/HeroSlider';
 import AboutSection from '../components/sections/AboutSection';
-import PhilosophySection from '../components/sections/PhilosophySection';
+import StatsSection from '../components/sections/StatsSection';
 import ProcessSection from '../components/sections/ProcessSection';
-import CinematicDivider from '../components/sections/CinematicDivider';
-import ContactCTA from '../components/sections/ContactCTA';
 import ProjectsGallerySection from '../components/sections/ProjectsGallerySection';
+import FAQSection from '../components/sections/FAQSection';
+import CinematicDivider from '../components/sections/CinematicDivider';
 
 export default function HomePage() {
   return (
@@ -12,11 +12,11 @@ export default function HomePage() {
       <main>
         <HeroSlider />
         <AboutSection />
-        <ProjectsGallerySection />
-        <PhilosophySection />
+        <StatsSection />
         <ProcessSection />
+        <ProjectsGallerySection />
+        <FAQSection />
         <CinematicDivider />
-        <ContactCTA />
       </main>
     </div>
   );
