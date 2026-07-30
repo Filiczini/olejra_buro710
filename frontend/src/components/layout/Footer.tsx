@@ -20,7 +20,7 @@ export default function Footer() {
           </a>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12 pb-16 border-b border-white/10">
+        <div className="flex flex-col md:flex-row md:justify-between gap-10 md:gap-12 pb-16">
           <div className="space-y-1">
             <a href="tel:+380441234567" className="block hover:text-white/70 transition-colors">
               +380 44 123 4567
