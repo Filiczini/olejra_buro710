@@ -22,8 +22,8 @@ export interface ImageFullData {
 }
 
 export interface TextImageData {
-  text: string;
-  image_url: string;
+  text?: string;
+  image_url?: string;
   image_alt?: string;
   icon?: string;
   label?: string;

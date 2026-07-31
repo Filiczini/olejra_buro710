@@ -16,8 +16,8 @@ const imageFullDataSchema = z.object({
 });
 
 const textImageDataSchema = z.object({
-  text: z.string(),
-  image_url: z.string(),
+  text: z.string().optional(),
+  image_url: z.string().optional(),
   image_alt: z.string().optional(),
   icon: z.string().optional(),
   label: z.string().optional(),
