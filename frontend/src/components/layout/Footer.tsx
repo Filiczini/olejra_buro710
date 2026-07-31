@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-16">
           <a
             href="/"
-            className="text-lg font-medium tracking-tight uppercase hover:opacity-70 transition-opacity"
+            className="inline-flex items-center w-[189px] h-7 text-xl font-medium tracking-tight uppercase hover:opacity-70 transition-opacity"
           >
             Buro 710
           </a>
