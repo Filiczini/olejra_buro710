@@ -14,7 +14,7 @@ export default function Footer() {
           </a>
           <a
             href="/contact"
-            className="inline-flex items-center gap-2 px-10 py-4 rounded-xl border border-white/20 text-sm font-medium hover:bg-white hover:text-zinc-900 transition-colors"
+            className="inline-flex items-center gap-2 px-14 py-4 rounded-xl border border-white/20 text-xl font-display hover:bg-white hover:text-zinc-900 transition-colors"
           >
             Написати
           </a>
