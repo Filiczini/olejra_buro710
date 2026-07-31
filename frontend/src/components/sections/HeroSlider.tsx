@@ -87,7 +87,7 @@ export default function HeroSlider() {
                 </div>
 
                 {post.hero_subtitle && (
-                  <div className="hidden md:block md:max-w-xs md:mb-2">
+                  <div className="hidden md:block md:max-w-xs md:mb-24">
                     <p className="text-white/80 text-sm font-light leading-relaxed">
                       {post.hero_subtitle}
                     </p>
