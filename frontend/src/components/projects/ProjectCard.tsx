@@ -31,9 +31,7 @@ export default function ProjectCard({ post }: ProjectCardProps) {
       </div>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-900">
-            {post.hero_title || post.title}
-          </h3>
+          <h3 className="text-base font-medium text-zinc-900">{post.hero_title || post.title}</h3>
           {meta && <div className="text-xs text-zinc-500 font-medium">{meta}</div>}
           {post.hero_tags && post.hero_tags.length > 0 && (
             <div className="text-xs text-zinc-800 mt-2 font-medium">
