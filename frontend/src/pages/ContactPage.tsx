@@ -2,6 +2,13 @@ import { Icon } from '@iconify-icon/react';
 import ContactForm from '../components/contact/ContactForm';
 import { useContactForm } from '../hooks/useContactForm';
 import { contactInfo, socialLinks } from '../constants/contact';
+import { InstagramIcon, LinkedinIcon, YoutubeIcon } from '../components/icons/SocialIcons';
+
+const socialIcons: Record<string, typeof InstagramIcon> = {
+  Instagram: InstagramIcon,
+  YouTube: YoutubeIcon,
+  LinkedIn: LinkedinIcon,
+};
 
 export default function ContactPage() {
   const { formData, loading, success, error, handleChange, handleSubmit, reset } = useContactForm();
@@ -78,22 +85,21 @@ export default function ContactPage() {
               </h3>
               <p className="text-zinc-500 text-body mb-8">Дізнавайтеся про наші новини.</p>
               <div className="space-y-4">
-                {socialLinks.map((social) => (
-                  <a
-                    key={social.name}
-                    href={social.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-4 p-4 border border-zinc-200 rounded-lg hover:border-zinc-900 hover:bg-zinc-100/50 transition-colors group"
-                  >
-                    <Icon
-                      icon={social.icon}
-                      width={24}
-                      className="text-zinc-900 group-hover:text-zinc-900"
-                    />
-                    <span className="text-zinc-900">{social.name}</span>
-                  </a>
-                ))}
+                {socialLinks.map((social) => {
+                  const SocialIcon = socialIcons[social.name];
+                  return (
+                    <a
+                      key={social.name}
+                      href={social.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-4 p-4 border border-zinc-200 rounded-lg hover:border-zinc-900 hover:bg-zinc-100/50 transition-colors group"
+                    >
+                      <SocialIcon width={24} />
+                      <span className="text-zinc-900">{social.name}</span>
+                    </a>
+                  );
+                })}
               </div>
             </div>
           </div>

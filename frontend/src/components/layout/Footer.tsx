@@ -1,5 +1,11 @@
-import { Icon } from '@iconify-icon/react';
 import { socialLinks } from '../../constants/contact';
+import { InstagramIcon, LinkedinIcon, YoutubeIcon } from '../icons/SocialIcons';
+
+const socialIcons: Record<string, typeof InstagramIcon> = {
+  Instagram: InstagramIcon,
+  YouTube: YoutubeIcon,
+  LinkedIn: LinkedinIcon,
+};
 
 export default function Footer() {
   return (
@@ -58,19 +64,22 @@ export default function Footer() {
         </div>
 
         <div className="flex justify-center gap-4 pt-12">
-          {socialLinks.map((social) => (
-            <a
-              key={social.name}
-              href={social.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={social.name}
-              title={social.name}
-              className="w-10 h-10 rounded-lg bg-white text-zinc-900 flex items-center justify-center hover:bg-zinc-200 transition-colors"
-            >
-              <Icon icon={social.icon} width={18} />
-            </a>
-          ))}
+          {socialLinks.map((social) => {
+            const SocialIcon = socialIcons[social.name];
+            return (
+              <a
+                key={social.name}
+                href={social.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={social.name}
+                title={social.name}
+                className="w-16 h-16 flex items-center justify-center hover:opacity-70 transition-opacity"
+              >
+                <SocialIcon width={64} />
+              </a>
+            );
+          })}
         </div>
       </div>
     </footer>
