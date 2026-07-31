@@ -69,13 +69,6 @@ export default function HeroSlider() {
               />
             </div>
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/30"></div>
-            {post.hero_subtitle && (
-              <div className="absolute top-0 w-full px-6 md:px-10 pt-24 md:pt-32 flex justify-end pointer-events-none">
-                <p className="max-w-xs text-sm text-white/70 font-light leading-relaxed text-right">
-                  {post.hero_subtitle}
-                </p>
-              </div>
-            )}
             <div className="absolute bottom-0 w-full h-full px-6 md:px-10 pb-10 md:pb-14 flex flex-col justify-end">
               <div className="max-w-[1800px] mx-auto w-full flex flex-col md:flex-row items-end justify-between gap-10">
                 <div className="w-full md:max-w-4xl">
@@ -92,6 +85,26 @@ export default function HeroSlider() {
                     )}
                   </div>
                 </div>
+
+                {post.hero_subtitle && (
+                  <div className="hidden md:block md:max-w-xs md:mb-2">
+                    <p className="text-white/80 text-sm font-light leading-relaxed">
+                      {post.hero_subtitle}
+                    </p>
+                    <div className="mt-6 flex items-center gap-4">
+                      <button
+                        onClick={() =>
+                          window.scrollBy({ top: window.innerHeight, behavior: 'smooth' })
+                        }
+                        className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-110 transition-transform duration-300 cursor-pointer"
+                        aria-label="Прокрутити далі"
+                      >
+                        <Icon icon="solar:arrow-down-linear" width={20} />
+                      </button>
+                      <span className="text-white/60 text-xs">Scroll to explore</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
