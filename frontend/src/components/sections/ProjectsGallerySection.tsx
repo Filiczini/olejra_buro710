@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import ProjectCard from '../projects/ProjectCard';
 import { useFetchPosts } from '../../hooks/useFetchPosts';
@@ -7,12 +7,9 @@ const INITIAL_COUNT = 3;
 
 export default memo(function ProjectsGallerySection() {
   const { posts, loading, error } = useFetchPosts({ featured: true });
-  const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
-
   if (loading || error || posts.length === 0) return null;
 
-  const visiblePosts = posts.slice(0, visibleCount);
-  const hasMore = visibleCount < posts.length;
+  const visiblePosts = posts.slice(0, INITIAL_COUNT);
 
   return (
     <section className="max-w-[1800px] mx-auto px-6 mb-40">
@@ -27,22 +24,12 @@ export default memo(function ProjectsGallerySection() {
       </div>
 
       <div className="flex justify-center mt-16">
-        {hasMore ? (
-          <button
-            type="button"
-            onClick={() => setVisibleCount((count) => count + INITIAL_COUNT)}
-            className="px-8 py-3 border border-zinc-200 rounded-full text-sm font-medium hover:bg-zinc-900 hover:text-white hover:border-zinc-900 transition-colors cursor-pointer"
-          >
-            Показати ще
-          </button>
-        ) : (
-          <Link
-            to="/projects"
-            className="px-8 py-3 border border-zinc-200 rounded-full text-sm font-medium hover:bg-zinc-900 hover:text-white hover:border-zinc-900 transition-colors"
-          >
-            Показати ще
-          </Link>
-        )}
+        <Link
+          to="/projects"
+          className="px-8 py-3 border border-zinc-200 rounded-full text-sm font-medium hover:bg-zinc-900 hover:text-white hover:border-zinc-900 transition-colors"
+        >
+          Показати ще
+        </Link>
       </div>
     </section>
   );
