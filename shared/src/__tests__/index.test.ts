@@ -296,7 +296,7 @@ describe("contactSchema", () => {
   const validContact = {
     name: "John Doe",
     email: "john@example.com",
-    subject: "Hello",
+    phone: "+380441234567",
     message: "This is a test message.",
   };
 
@@ -328,8 +328,8 @@ describe("contactSchema", () => {
     ).toBe(false);
   });
 
-  it("rejects missing subject", () => {
-    const { subject: _, ...rest } = validContact;
+  it("rejects missing phone", () => {
+    const { phone: _, ...rest } = validContact;
     expect(contactSchema.safeParse(rest).success).toBe(false);
   });
 

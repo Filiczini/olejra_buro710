@@ -25,7 +25,7 @@ describe('telegramService', () => {
   const messageData = {
     name: 'Іван',
     email: 'ivan@test.com',
-    subject: 'Тестова тема',
+    phone: '+380441234567',
     message: 'Тестове повідомлення',
   };
 

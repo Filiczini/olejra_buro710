@@ -4,7 +4,7 @@ import ContactForm from '../ContactForm';
 import type { ContactFormData } from '@buro710/shared';
 
 function baseProps(overrides: Partial<React.ComponentProps<typeof ContactForm>> = {}) {
-  const formData: ContactFormData = { name: '', email: '', subject: '', message: '' };
+  const formData: ContactFormData = { name: '', email: '', phone: '', message: '' };
   return {
     formData,
     loading: false,

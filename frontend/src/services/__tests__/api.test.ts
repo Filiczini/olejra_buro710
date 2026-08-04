@@ -152,7 +152,7 @@ describe('authService', () => {
 
 describe('contactService.submit', () => {
   it('posts the contact form payload', async () => {
-    const formData = { name: 'A', email: 'a@b.c', subject: 'Hi', message: 'Hello' };
+    const formData = { name: 'A', email: 'a@b.c', phone: '+380441234567', message: 'Hello' };
     mockPost.mockResolvedValue({ data: { success: true } });
 
     const result = await contactService.submit(formData);

@@ -38,7 +38,7 @@ const mockedContactService = vi.mocked(contactService);
 const VALID_CONTACT = {
   name: 'John Doe',
   email: 'john@example.com',
-  subject: 'Test Subject',
+  phone: '+380441234567',
   message: 'This is a test message.',
 };
 
@@ -116,10 +116,10 @@ describe('Contact Route', () => {
       expect(mockedContactService.create).not.toHaveBeenCalled();
     });
 
-    it('returns 400 when subject is missing', async () => {
-      const { subject: _, ...noSubject } = VALID_CONTACT;
+    it('returns 400 when phone is missing', async () => {
+      const { phone: _, ...noPhone } = VALID_CONTACT;
 
-      const res = await request(app).post('/contact').send(noSubject);
+      const res = await request(app).post('/contact').send(noPhone);
 
       expect(res.status).toBe(400);
       expect(res.body.error).toBe('Validation failed');
@@ -175,7 +175,7 @@ describe('Contact Route', () => {
     });
 
     it('includes validation details with field names', async () => {
-      const res = await request(app).post('/contact').send({ name: 'John' }); // missing email, subject, message
+      const res = await request(app).post('/contact').send({ name: 'John' }); // missing email, phone, message
 
       expect(res.status).toBe(400);
       expect(res.body.details).toBeDefined();
@@ -184,7 +184,7 @@ describe('Contact Route', () => {
 
       const fields = res.body.details.map((d: { field: string }) => d.field);
       expect(fields).toContain('email');
-      expect(fields).toContain('subject');
+      expect(fields).toContain('phone');
       expect(fields).toContain('message');
     });
   });

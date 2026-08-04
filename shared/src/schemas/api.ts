@@ -55,7 +55,7 @@ export const contactResponseSchema = z.object({
   id: z.string(),
   name: z.string(),
   email: z.string(),
-  subject: z.string(),
+  phone: z.string(),
   message: z.string(),
   telegram_sent: z.boolean().optional().nullable(),
   telegram_message_id: z.string().optional().nullable(),

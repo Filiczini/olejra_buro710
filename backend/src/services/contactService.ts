@@ -7,7 +7,7 @@ import { logger } from '../lib/logger.js';
 interface CreateContactData {
   name: string;
   email: string;
-  subject: string;
+  phone: string;
   message: string;
 }
 
@@ -20,7 +20,7 @@ export const contactService = {
       .values({
         name: data.name,
         email: data.email,
-        subject: data.subject,
+        phone: data.phone,
         message: data.message,
         telegram_sent: telegramResult.success,
         telegram_message_id: telegramResult.messageId || null,

@@ -54,7 +54,7 @@ const mockSendMessage = vi.mocked(telegramService.sendMessage);
 const contactData = {
   name: 'Іван',
   email: 'ivan@test.com',
-  subject: 'Запит',
+  phone: '+380441234567',
   message: 'Хочу замовити проєкт',
 };
 
@@ -75,7 +75,7 @@ describe('contactService', () => {
       expect(mockValues).toHaveBeenCalledWith({
         name: contactData.name,
         email: contactData.email,
-        subject: contactData.subject,
+        phone: contactData.phone,
         message: contactData.message,
         telegram_sent: true,
         telegram_message_id: '123',

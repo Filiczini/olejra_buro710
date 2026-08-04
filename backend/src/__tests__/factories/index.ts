@@ -103,7 +103,7 @@ export function makeContactMessage(
     id: string;
     name: string;
     email: string;
-    subject: string;
+    phone: string;
     message: string;
     telegram_sent: boolean;
     telegram_message_id: string | null;
@@ -115,7 +115,7 @@ export function makeContactMessage(
     id: randomUUID(),
     name: `Contact ${contactCounter}`,
     email: `contact${contactCounter}@test.com`,
-    subject: 'Test subject',
+    phone: '+380441234567',
     message: 'Test message body',
     telegram_sent: false,
     telegram_message_id: null,

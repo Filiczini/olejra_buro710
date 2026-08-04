@@ -6,7 +6,7 @@ export function useContactForm() {
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
-    subject: '',
+    phone: '',
     message: '',
   });
   const [loading, setLoading] = useState(false);
@@ -30,7 +30,7 @@ export function useContactForm() {
         const result = await contactService.submit(formData);
         if (result.success) {
           setSuccess(true);
-          setFormData({ name: '', email: '', subject: '', message: '' });
+          setFormData({ name: '', email: '', phone: '', message: '' });
         } else {
           setError(result.message || 'Помилка при відправці');
         }
@@ -46,7 +46,7 @@ export function useContactForm() {
   const reset = useCallback(() => {
     setSuccess(false);
     setError(null);
-    setFormData({ name: '', email: '', subject: '', message: '' });
+    setFormData({ name: '', email: '', phone: '', message: '' });
   }, []);
 
   return {

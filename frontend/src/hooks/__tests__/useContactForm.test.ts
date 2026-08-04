@@ -27,7 +27,7 @@ describe('useContactForm', () => {
   it('starts with an empty form and no success/error state', () => {
     const { result } = renderHook(() => useContactForm());
 
-    expect(result.current.formData).toEqual({ name: '', email: '', subject: '', message: '' });
+    expect(result.current.formData).toEqual({ name: '', email: '', phone: '', message: '' });
     expect(result.current.success).toBe(false);
     expect(result.current.error).toBeNull();
   });
@@ -55,7 +55,7 @@ describe('useContactForm', () => {
     });
 
     expect(result.current.success).toBe(true);
-    expect(result.current.formData).toEqual({ name: '', email: '', subject: '', message: '' });
+    expect(result.current.formData).toEqual({ name: '', email: '', phone: '', message: '' });
     expect(result.current.error).toBeNull();
   });
 
@@ -104,6 +104,6 @@ describe('useContactForm', () => {
 
     expect(result.current.error).toBeNull();
     expect(result.current.success).toBe(false);
-    expect(result.current.formData).toEqual({ name: '', email: '', subject: '', message: '' });
+    expect(result.current.formData).toEqual({ name: '', email: '', phone: '', message: '' });
   });
 });

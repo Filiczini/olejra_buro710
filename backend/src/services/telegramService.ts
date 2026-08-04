@@ -6,7 +6,7 @@ import { logger } from '../lib/logger.js';
 interface TelegramMessage {
   name: string;
   email: string;
-  subject: string;
+  phone: string;
   message: string;
 }
 
@@ -31,7 +31,7 @@ function formatMessage(data: TelegramMessage): string {
 
 👤 *Ім'я:* ${escapeMarkdown(data.name)}
 📧 *Email:* ${escapeMarkdown(data.email)}
-📝 *Тема:* ${escapeMarkdown(data.subject)}
+📞 *Телефон:* ${escapeMarkdown(data.phone)}
 
 💬 *Повідомлення:*
 ${escapeMarkdown(data.message)}

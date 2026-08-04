@@ -113,7 +113,7 @@ export const contactMessages = pgTable('contact_messages', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull(),
-  subject: varchar('subject', { length: 500 }).notNull(),
+  phone: varchar('phone', { length: 500 }).notNull(),
   message: text('message').notNull(),
   telegram_sent: boolean('telegram_sent').default(false),
   telegram_message_id: varchar('telegram_message_id', { length: 100 }),

@@ -208,7 +208,7 @@ describe('contactService integration', () => {
     const result = await contactService.create({
       name: 'Іван',
       email: 'ivan@test.com',
-      subject: 'Запит',
+      phone: '+380441234567',
       message: 'Хочу замовити проєкт',
     });
 
@@ -217,8 +217,18 @@ describe('contactService integration', () => {
   });
 
   it('paginates contact messages', async () => {
-    await contactService.create({ name: 'A', email: 'a@test.com', subject: 'S1', message: 'M1' });
-    await contactService.create({ name: 'B', email: 'b@test.com', subject: 'S2', message: 'M2' });
+    await contactService.create({
+      name: 'A',
+      email: 'a@test.com',
+      phone: '+380441111111',
+      message: 'M1',
+    });
+    await contactService.create({
+      name: 'B',
+      email: 'b@test.com',
+      phone: '+380442222222',
+      message: 'M2',
+    });
 
     const page = await contactService.getAll({ page: 1, limit: 1 });
     expect(page.data.length).toBe(1);

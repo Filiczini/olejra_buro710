@@ -21,9 +21,9 @@ router.post(
   contactLimiter,
   validateBody(contactSchema),
   asyncHandler(async (req: Request, res: Response) => {
-    const { name, email, subject, message } = req.body;
+    const { name, email, phone, message } = req.body;
 
-    const result = await contactService.create({ name, email, subject, message });
+    const result = await contactService.create({ name, email, phone, message });
     res.json(result);
   })
 );
