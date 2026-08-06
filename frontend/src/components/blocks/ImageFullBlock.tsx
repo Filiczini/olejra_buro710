@@ -11,7 +11,7 @@ export default function ImageFullBlock({ data }: ImageFullBlockProps) {
 
   return (
     <section className="px-5 py-6 md:px-10 md:py-10">
-      <figure className="group mx-auto max-w-[1120px] overflow-hidden">
+      <figure className="group w-full overflow-hidden">
         <img
           src={image_url}
           alt={alt || caption || ''}

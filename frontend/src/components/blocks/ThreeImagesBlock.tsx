@@ -11,7 +11,7 @@ export default function ThreeImagesBlock({ data }: ThreeImagesBlockProps) {
 
   return (
     <section className="px-5 py-6 md:px-10 md:py-10">
-      <div className="mx-auto grid max-w-[1120px] grid-cols-1 gap-3 md:grid-cols-3">
+      <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-3">
         {images.map((image, index) =>
           image.url ? (
             <div key={`${image.url}-${index}`} className="overflow-hidden group">
