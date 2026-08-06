@@ -22,21 +22,21 @@ export default function PostHeroBlock({ post }: PostHeroBlockProps) {
   if (!hasHeroContent) return null;
 
   return (
-    <header className="relative h-screen w-full flex items-end justify-start overflow-hidden">
+    <header className="relative min-h-[620px] h-[92vh] w-full flex items-end justify-start overflow-hidden">
       <div className="absolute inset-0 bg-zinc-900">
         {hero_image_url && (
           <>
             <img
               src={hero_image_url}
               alt={displayTitle}
-              className="w-full h-full object-cover opacity-80"
+              className="w-full h-full object-cover opacity-90"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-black/20" />
           </>
         )}
       </div>
 
-      <div className="relative z-10 p-6 md:p-12 w-full max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-8 mb-8">
+      <div className="relative z-10 w-full max-w-[1180px] mx-auto px-5 pb-10 md:px-10 md:pb-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div>
           <div className="flex items-center gap-3 mb-6 flex-wrap">
             {hero_tags &&
@@ -57,7 +57,7 @@ export default function PostHeroBlock({ post }: PostHeroBlockProps) {
               </span>
             )}
           </div>
-          <h1 className="text-5xl md:text-h1 font-display text-white tracking-tight leading-none">
+          <h1 className="max-w-3xl text-5xl md:text-7xl font-display font-medium text-white tracking-[-0.035em] leading-[0.95]">
             {displayTitle?.split(' ').map((word, i, arr) => (
               <span key={i}>
                 {word}

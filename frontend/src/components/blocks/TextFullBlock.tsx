@@ -12,16 +12,16 @@ export default function TextFullBlock({ data }: TextFullBlockProps) {
   const hasStats = area || months || year;
 
   return (
-    <section className="bg-white py-24 md:py-32 px-6">
-      <div className="max-w-[990px] mx-auto text-center">
+    <section className="bg-white px-5 py-20 md:px-10 md:py-32">
+      <div className="max-w-[760px] mx-auto text-center">
         {label && (
           <span className="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-6 block">
             {label}
           </span>
         )}
 
-        <h2 className="text-2xl md:text-h4 font-display tracking-tight text-zinc-900 mb-10 leading-snug whitespace-pre-wrap">
-          "{content}"
+        <h2 className="text-2xl md:text-[34px] font-display font-medium tracking-[-0.02em] text-zinc-900 mb-10 leading-[1.05] whitespace-pre-wrap">
+          {content}
         </h2>
 
         {hasStats && (

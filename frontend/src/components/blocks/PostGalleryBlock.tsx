@@ -73,9 +73,9 @@ export default function PostGalleryBlock({ images, title }: PostGalleryBlockProp
   }
 
   return (
-    <section className="py-24 px-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-12">
-        <h3 className="text-2xl md:text-h3 font-display tracking-tight text-zinc-900">Gallery</h3>
+    <section className="mx-auto max-w-[1120px] px-5 py-20 md:px-10 md:py-32">
+      <div className="flex items-center justify-between mb-8">
+        <h3 className="text-2xl md:text-3xl font-display tracking-tight text-zinc-900">Gallery</h3>
         <div className="flex gap-2">
           <button
             onClick={() => scroll('left')}
@@ -103,14 +103,14 @@ export default function PostGalleryBlock({ images, title }: PostGalleryBlockProp
       <div
         ref={scrollContainerRef}
         onScroll={checkScrollButtons}
-        className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory md:snap-none"
+        className="flex gap-3 overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory md:snap-none"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {images.map((image, index) => (
           <div
             key={`gallery-${index}`}
             onClick={() => openLightbox(index)}
-            className="gallery-item aspect-[2/3] w-[calc(100vw-48px)] md:w-auto md:min-w-[240px] md:max-w-[400px] bg-zinc-100 overflow-hidden group cursor-pointer flex-shrink-0 snap-center md:snap-none"
+            className="gallery-item aspect-[3/4] w-[75vw] md:w-[250px] bg-zinc-100 overflow-hidden group cursor-pointer flex-shrink-0 snap-center md:snap-none"
           >
             <img
               src={image}

@@ -10,15 +10,16 @@ export default function ImageFullBlock({ data }: ImageFullBlockProps) {
   if (!image_url) return null;
 
   return (
-    <section className="py-12 relative w-full h-[90vh] p-5vh overflow-hidden group">
-      <div className="w-full h-full overflow-hidden">
+    <section className="px-5 py-6 md:px-10 md:py-10">
+      <figure className="group mx-auto max-w-[1120px] overflow-hidden">
         <img
           src={image_url}
           alt={alt || caption || ''}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          className="block w-full aspect-[16/9] object-cover transition-transform duration-700 group-hover:scale-[1.02]"
           loading="lazy"
         />
-      </div>
+        {caption && <figcaption className="pt-2 text-xs text-zinc-500">{caption}</figcaption>}
+      </figure>
     </section>
   );
 }
