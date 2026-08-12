@@ -12,7 +12,7 @@ export default memo(function ProjectsGallerySection() {
   const visiblePosts = posts.slice(0, INITIAL_COUNT);
 
   return (
-    <section className="max-w-[1800px] mx-auto px-6 mb-40">
+    <section className="max-w-[1800px] mx-auto px-6">
       <h2 className="text-2xl md:text-h3 font-display tracking-tight text-zinc-900 text-center mb-16">
         Вам може сподобатись
       </h2>
