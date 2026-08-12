@@ -27,7 +27,7 @@ export default function TextImageBlock({ data, mirrored }: TextImageBlockProps) 
         </div>
 
         <div className={`flex flex-col justify-center ${textOrder}`}>
-          <div className={mirrored ? 'max-w-md' : 'max-w-md md:m-auto'}>
+          <div className="max-w-md md:m-auto">
             {(icon || label) && (
               <div className="flex items-center gap-2 mb-6">
                 {icon && <Icon icon={icon} className="text-zinc-400" width={20} />}
