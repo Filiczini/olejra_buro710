@@ -10,7 +10,7 @@ export default function ThreeImagesBlock({ data }: ThreeImagesBlockProps) {
   if (images.length === 0 || images.every((img) => !img.url)) return null;
 
   return (
-    <section className="px-5 py-6 md:px-10 md:py-10">
+    <section className="px-5 py-2 md:px-10 md:py-3">
       <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-3">
         {images.map((image, index) =>
           image.url ? (

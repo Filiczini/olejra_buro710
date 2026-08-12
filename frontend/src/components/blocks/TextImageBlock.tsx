@@ -15,7 +15,7 @@ export default function TextImageBlock({ data, mirrored }: TextImageBlockProps) 
   const textOrder = mirrored ? 'md:order-2' : 'md:order-1';
 
   return (
-    <section className="group px-5 py-16 md:px-10 md:py-24">
+    <section className="group px-5 py-5 md:px-10 md:py-8">
       <div className="grid w-full grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-16">
         <div className={`relative aspect-[4/5] ${order} overflow-hidden`}>
           <img

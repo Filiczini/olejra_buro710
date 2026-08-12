@@ -12,7 +12,7 @@ export default function TextFullBlock({ data }: TextFullBlockProps) {
   const hasStats = area || months || year;
 
   return (
-    <section className="bg-white px-5 py-20 md:px-10 md:py-32">
+    <section className="bg-white px-5 py-7 md:px-10 md:py-10">
       <div className="max-w-[760px] mx-auto text-center">
         {label && (
           <span className="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-6 block">

@@ -10,7 +10,7 @@ export default function ImageFullBlock({ data }: ImageFullBlockProps) {
   if (!image_url) return null;
 
   return (
-    <section className="px-5 py-6 md:px-10 md:py-10">
+    <section className="px-5 py-2 md:px-10 md:py-3">
       <figure className="group w-full overflow-hidden">
         <img
           src={image_url}
