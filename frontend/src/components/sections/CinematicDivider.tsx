@@ -2,7 +2,7 @@ export default function CinematicDivider() {
   return (
     <section className="relative w-full h-[60vh] md:h-[80vh] overflow-hidden">
       <img
-        src="https://images.unsplash.com/photo-1631679706909-1844bbd07221?q=80&w=2600&auto=format&fit=crop"
+        src="/cinematic-divider.png"
         alt="Atmosphere"
         loading="lazy"
         className="absolute inset-0 w-full h-full object-cover filter grayscale-[20%] contrast-[0.9]"
