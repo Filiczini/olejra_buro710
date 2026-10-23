@@ -11,8 +11,8 @@ const contactDetails = [
   {
     icon: 'solar:letter-linear',
     label: 'Email',
-    value: 'hello@buro710.com',
-    href: 'mailto:hello@buro710.com',
+    value: 'hello@b710.design',
+    href: 'mailto:hello@b710.design',
   },
   {
     icon: 'solar:phone-linear',
@@ -36,8 +36,6 @@ export default function ContactPage() {
               </h1>
               <p className="mb-12 max-w-[470px] text-lg leading-relaxed text-zinc-400">
                 Зв'яжіться з нами зручним для вас способом.
-                <br />
-                Ми відкриті до нових ідей та співпраці.
               </p>
 
               <div className="space-y-7">

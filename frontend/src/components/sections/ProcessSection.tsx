@@ -1,8 +1,20 @@
 const steps = [
-  { id: '01', name: 'Концепція', description: 'Вивчення контексту.' },
-  { id: '02', name: 'Дизайн', description: 'Створення детальних проектів.' },
-  { id: '03', name: 'Реалізація', description: 'Координація будівельних процесів.' },
-  { id: '04', name: 'Здача', description: 'Фіналізація проекту.' },
+  {
+    id: '01',
+    name: 'Концепція',
+    description: 'Вивчення контексту, підбір мудбордів, стилістичних та планувальних рішень',
+  },
+  {
+    id: '02',
+    name: 'Візуалізація',
+    description: 'Створення фотореалістичних візуалізацій з підбором майбутніх матеріалів ',
+  },
+  {
+    id: '03',
+    name: 'Робочі креслення',
+    description: 'Завершення креслень, що потрібні для будівництва ',
+  },
+  { id: '04', name: 'Реалізація', description: 'Авторський нагляд та комплектування проєкту' },
 ];
 
 export default function ProcessSection() {
@@ -11,7 +23,8 @@ export default function ProcessSection() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
         <div className="lg:col-span-4">
           <h3 className="text-2xl md:text-h3 font-display tracking-tight mb-4">
-            Етапи співпраці із нами
+            Етапи співпраці <br />
+            із нами
           </h3>
           <p className="text-zinc-500 text-body">Як ми працюємо з клієнтами</p>
         </div>

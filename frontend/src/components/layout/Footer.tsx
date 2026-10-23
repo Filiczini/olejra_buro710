@@ -33,10 +33,10 @@ export default function Footer() {
             </a>
             <p className="text-white/50 text-sm">WhatsApp, Telegram, Viber</p>
             <a
-              href="mailto:hello@buro710.com"
+              href="mailto:hello@b710.design"
               className="block text-white/70 hover:text-white transition-colors mt-2"
             >
-              hello@buro710.com
+              hello@b710.design
             </a>
           </div>
 

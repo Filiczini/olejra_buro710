@@ -4,23 +4,23 @@ import { Link } from 'react-router-dom';
 const values = [
   {
     icon: '/icon-water.png',
-    title: 'Звук',
-    description: 'Враховуємо акустичні сценарії.',
+    title: 'Прозорість',
+    description: 'Звітність на кожному етапі',
   },
   {
     icon: '/icon-earth.png',
-    title: 'Пропорції',
-    description: 'Працюємо з золотим перетином.',
+    title: 'Чесність',
+    description: 'Проєктуємо лише те, що можна втілити в життя',
   },
   {
     icon: '/icon-wind.png',
-    title: 'Шари',
-    description: 'Створюємо глибину через багатошаровість.',
+    title: 'Свобода',
+    description: 'Можливість бути собою, а не підлаштовуватись під проєктоване середовище ',
   },
   {
     icon: '/icon-fire.png',
-    title: 'Світло',
-    description: 'Проєктуємо світлотіньові сценарії.',
+    title: 'Повага',
+    description: 'Супровід проєкту та дотримання домовленостей',
   },
 ];
 
@@ -41,9 +41,10 @@ export default function AboutPage() {
         <section className="mx-auto flex min-h-[540px] max-w-[1560px] items-center px-6 py-20 md:px-10 lg:min-h-[650px] lg:py-28">
           <div className="grid w-full grid-cols-1 items-center gap-16 lg:grid-cols-[1.08fr_0.92fr] lg:gap-24 xl:gap-36">
             <h1 className="max-w-[760px] font-display text-[44px] font-semibold leading-[1.08] tracking-[-0.025em] sm:text-6xl lg:text-[76px]">
-              Ми створюємо простори,
-              <br className="hidden sm:block" /> що зустрічаються
-              <br className="hidden sm:block" /> з тишею
+              Простір продовження
+              <br className="hidden sm:block" /> особистості,
+              <br className="hidden sm:block" /> відображення характеру
+              <br className="hidden sm:block" /> відображення характеру
             </h1>
 
             <div className="max-w-[560px]">
@@ -51,7 +52,7 @@ export default function AboutPage() {
                 Buro 710 — інтер'єрна студія.
               </h2>
               <p className="mb-9 text-lg text-zinc-400 lg:text-xl">
-                Наш підхід базується на чистоті ліній.
+                Наш підхід базується на переосмисленні.
               </p>
               <div className="flex flex-col gap-4 sm:flex-row">
                 <a
@@ -76,7 +77,7 @@ export default function AboutPage() {
           <div className="mx-auto max-w-[1560px]">
             <div className="mb-16 lg:mb-24">
               <h2 className="mb-3 font-display text-4xl font-medium">Наші цінності</h2>
-              <p className="text-zinc-500">Ми віримо в силу простоти.</p>
+              <p className="text-zinc-500">Синергія прагнень і реальності.</p>
             </div>
 
             <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4 lg:gap-20">
@@ -100,14 +101,19 @@ export default function AboutPage() {
         <section className="mx-auto max-w-[1560px] px-6 py-24 md:px-10 lg:py-36">
           <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2 lg:gap-24 xl:gap-40">
             <div className="max-w-[570px] lg:justify-self-end">
-              <h2 className="mb-5 font-display text-4xl font-medium lg:text-5xl">
-                Хто ми слово про нас
-              </h2>
+              <h2 className="mb-5 font-display text-4xl font-medium lg:text-5xl">Хто ми</h2>
               <p className="mb-8 text-base leading-relaxed text-zinc-500 lg:text-lg">
-                Людина, яка стоїть за кожним проєктом. Ми створюємо інтер'єри, у яких архітектура,
-                світло та матеріали працюють як єдине ціле. Для нас важливі точність пропорцій,
-                чесність фактур і тиша, що залишається після першого враження. Кожен простір
-                народжується з діалогу та уваги до способу життя його майбутніх мешканців.
+                Кожен проєкт починається із переосмислення ваших потреб як у бізнесі, так і в
+                особистому житті . Ми переконані: архітектура — не тільки стіни, а сценарій,
+                втілений у формі, світлі й матеріалах.
+              </p>
+              <p className="mb-8 text-base leading-relaxed text-zinc-500 lg:text-lg">
+                З 2018 року ми створюємо простори, де естетика стає інструментом досягнення ваших
+                цілей. Наш дизайн не просто тішить око — він непомітно керує увагою клієнтів,
+                підвищує комфорт команди та капіталізує кожен квадратний метр.
+              </p>
+              <p className="mb-8 text-base leading-relaxed text-zinc-500 lg:text-lg">
+                Інтер'єри БЮРО 710 народжуються з діалогу — про звички, ритуали та спосіб життя .
               </p>
               <Link
                 to="/projects"
