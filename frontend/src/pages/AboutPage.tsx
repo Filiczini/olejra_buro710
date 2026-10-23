@@ -3,25 +3,33 @@ import { Link } from 'react-router-dom';
 
 const values = [
   {
-    icon: 'solar:soundwave-square-linear',
+    icon: '/icon-water.png',
     title: 'Звук',
     description: 'Враховуємо акустичні сценарії.',
   },
   {
-    icon: 'solar:ruler-pen-linear',
+    icon: '/icon-earth.png',
     title: 'Пропорції',
     description: 'Працюємо з золотим перетином.',
   },
   {
-    icon: 'solar:layers-minimalistic-linear',
+    icon: '/icon-wind.png',
     title: 'Шари',
     description: 'Створюємо глибину через багатошаровість.',
   },
   {
-    icon: 'solar:sun-2-linear',
+    icon: '/icon-fire.png',
     title: 'Світло',
     description: 'Проєктуємо світлотіньові сценарії.',
   },
+];
+
+const brandLogos = [
+  { src: '/quarter.png', alt: 'Quarter' },
+  { src: '/receptura.png', alt: 'Receptura' },
+  { src: '/school-and-beauty.png', alt: 'School and Beauty' },
+  { src: '/treskare.png', alt: 'Treskare' },
+  { src: '/trible.png', alt: 'Trible' },
 ];
 
 const STORY_IMAGE = '/about-person.png';
@@ -74,7 +82,13 @@ export default function AboutPage() {
             <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4 lg:gap-20">
               {values.map((value) => (
                 <article key={value.title} className="max-w-[250px]">
-                  <Icon icon={value.icon} width={29} className="mb-7 text-zinc-600" />
+                  <img
+                    src={value.icon}
+                    alt=""
+                    width={40}
+                    height={40}
+                    className="mb-7 h-10 w-auto"
+                  />
                   <h3 className="mb-3 font-display text-xl font-medium">{value.title}</h3>
                   <p className="text-base leading-snug text-zinc-500">{value.description}</p>
                 </article>
@@ -118,18 +132,14 @@ export default function AboutPage() {
             Ми працюємо з такими брендами
           </h2>
           <div className="flex flex-wrap items-center gap-x-14 gap-y-8 text-zinc-900">
-            <div className="text-center text-lg font-medium leading-[0.75]">
-              <span className="block text-sm">#NO</span>
-              <span className="block tracking-[0.2em]">NAME</span>
-              <span className="block tracking-[0.2em]">NAILS</span>
-            </div>
-            <div className="text-center">
-              <span className="mx-auto mb-2 block h-0 w-0 border-x-[32px] border-b-[24px] border-x-transparent border-b-zinc-900" />
-              <span className="text-lg">NSTVNK</span>
-            </div>
-            <div className="border-l border-zinc-700 py-5 pl-8 text-xl font-semibold tracking-tight">
-              SUMMANDS
-            </div>
+            {brandLogos.map((logo) => (
+              <img
+                key={logo.src}
+                src={logo.src}
+                alt={logo.alt}
+                className="h-16 w-auto object-contain"
+              />
+            ))}
           </div>
         </section>
       </main>

@@ -17,8 +17,8 @@ const contactDetails = [
   {
     icon: 'solar:phone-linear',
     label: 'Телефон',
-    value: '+380 44 123 4567',
-    href: 'tel:+380441234567',
+    value: '+380 95 34 00 7 00',
+    href: 'tel:+380953400700',
   },
 ];
 

@@ -28,8 +28,8 @@ export default function Footer() {
 
         <div className="flex flex-col md:flex-row md:justify-between gap-10 md:gap-12 pb-16">
           <div className="space-y-1">
-            <a href="tel:+380441234567" className="block hover:text-white/70 transition-colors">
-              +380 44 123 4567
+            <a href="tel:+380953400700" className="block hover:text-white/70 transition-colors">
+              +380 95 34 00 7 00
             </a>
             <p className="text-white/50 text-sm">WhatsApp, Telegram, Viber</p>
             <a
