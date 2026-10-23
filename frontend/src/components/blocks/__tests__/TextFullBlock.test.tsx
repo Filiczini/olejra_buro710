@@ -4,10 +4,10 @@ import TextFullBlock from '../TextFullBlock';
 import type { TextFullData } from '@buro710/shared';
 
 describe('TextFullBlock', () => {
-  it('renders content in quotes', () => {
+  it('renders content', () => {
     const data: TextFullData = { content: 'Hello world' };
     render(<TextFullBlock data={data} />);
-    expect(screen.getByText(/^"Hello world"$/)).toBeInTheDocument();
+    expect(screen.getByText('Hello world')).toBeInTheDocument();
   });
 
   it('renders label when provided', () => {

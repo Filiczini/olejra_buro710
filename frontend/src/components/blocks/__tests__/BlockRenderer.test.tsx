@@ -30,7 +30,7 @@ describe('BlockRenderer', () => {
       makeBlock({ type: 'text_full', data: { content: 'Full text content' } }),
     ];
     render(<BlockRenderer blocks={blocks} />);
-    expect(screen.getByText(/"Full text content"/)).toBeInTheDocument();
+    expect(screen.getByText('Full text content')).toBeInTheDocument();
   });
 
   it('renders correct component for image_full block type', () => {
