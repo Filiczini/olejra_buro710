@@ -44,7 +44,7 @@ export default function AboutPage() {
               Простір продовження
               <br className="hidden sm:block" /> особистості,
               <br className="hidden sm:block" /> відображення характеру
-              <br className="hidden sm:block" /> відображення характеру
+              <br className="hidden sm:block" /> через архітектуру
             </h1>
 
             <div className="max-w-[560px]">
