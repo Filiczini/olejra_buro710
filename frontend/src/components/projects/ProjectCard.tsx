@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Icon } from '@iconify-icon/react';
 import type { Post } from '@buro710/shared';
+import ResponsiveImage from '../ui/ResponsiveImage';
 
 interface ProjectCardProps {
   post: Post;
@@ -17,8 +18,9 @@ export default function ProjectCard({ post }: ProjectCardProps) {
     >
       <div className="aspect-[4/3] bg-zinc-100 overflow-hidden w-full relative">
         {post.hero_image_url ? (
-          <img
+          <ResponsiveImage
             src={post.hero_image_url}
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
             alt={post.title}
             loading="lazy"
             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out group-hover:scale-105"

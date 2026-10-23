@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Icon } from '@iconify-icon/react';
 import ImageLightbox from '../ui/ImageLightbox';
+import ResponsiveImage from '../ui/ResponsiveImage';
 
 interface PostGalleryBlockProps {
   images: string[];
@@ -112,8 +113,9 @@ export default function PostGalleryBlock({ images, title }: PostGalleryBlockProp
             onClick={() => openLightbox(index)}
             className="gallery-item aspect-[3/4] w-[75vw] md:w-[250px] bg-zinc-100 overflow-hidden group cursor-pointer flex-shrink-0 snap-center md:snap-none"
           >
-            <img
+            <ResponsiveImage
               src={image}
+              sizes="(min-width: 768px) 250px, 75vw"
               alt={`${title || 'Gallery'} — зображення ${index + 1}`}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />

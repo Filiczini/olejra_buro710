@@ -1,5 +1,6 @@
 import { Icon } from '@iconify-icon/react';
 import type { Post } from '@buro710/shared';
+import ResponsiveImage from '../ui/ResponsiveImage';
 
 interface PostHeroBlockProps {
   post: Post;
@@ -26,8 +27,9 @@ export default function PostHeroBlock({ post }: PostHeroBlockProps) {
       <div className="absolute inset-0 bg-zinc-900">
         {hero_image_url && (
           <>
-            <img
+            <ResponsiveImage
               src={hero_image_url}
+              sizes="100vw"
               alt={displayTitle}
               className="w-full h-full object-cover opacity-90"
             />

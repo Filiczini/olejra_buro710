@@ -17,5 +17,8 @@ if [ -n "$ADMIN_EMAIL" ] && [ -n "$ADMIN_PASSWORD" ]; then
   su-exec app npx tsx src/seed-admin.ts
 fi
 
+echo "Generating image variants..."
+su-exec app npx tsx src/generate-image-variants.ts || echo "Image variant generation failed (non-fatal)"
+
 echo "Starting server..."
 exec su-exec app npm start

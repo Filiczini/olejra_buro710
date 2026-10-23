@@ -14,6 +14,22 @@ vi.mock('fs/promises', () => ({
   },
 }));
 
+const { MAIN_BUFFER, VARIANT_BUFFER } = vi.hoisted(() => ({
+  MAIN_BUFFER: Buffer.from('main-webp'),
+  VARIANT_BUFFER: Buffer.from('variant-webp'),
+}));
+
+vi.mock('../imageProcessor', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../imageProcessor')>()),
+  processImage: vi.fn().mockResolvedValue({
+    main: MAIN_BUFFER,
+    variants: [
+      { width: 400, buffer: VARIANT_BUFFER },
+      { width: 1000, buffer: VARIANT_BUFFER },
+    ],
+  }),
+}));
+
 import { storageService } from '../storageService';
 
 // Valid JPEG magic bytes (FF D8 FF) followed by dummy data
@@ -77,9 +93,17 @@ describe('storageService', () => {
       expect(mockMkdir).toHaveBeenCalled();
       expect(mockWriteFile).toHaveBeenCalledWith(
         expect.stringContaining(path.join('posts')),
-        file.buffer
+        MAIN_BUFFER
       );
-      expect(result).toMatch(/^\/uploads\/posts\/\d+-[a-z0-9]{6}\.jpg$/);
+      expect(mockWriteFile).toHaveBeenCalledWith(
+        expect.stringMatching(/-400\.webp$/),
+        VARIANT_BUFFER
+      );
+      expect(mockWriteFile).toHaveBeenCalledWith(
+        expect.stringMatching(/-1000\.webp$/),
+        VARIANT_BUFFER
+      );
+      expect(result).toMatch(/^\/uploads\/posts\/\d+-[a-z0-9]{6}\.webp$/);
     });
 
     it('uses the blocks folder when bucket is "blocks"', async () => {
@@ -88,9 +112,9 @@ describe('storageService', () => {
 
       expect(mockWriteFile).toHaveBeenCalledWith(
         expect.stringContaining(path.join('blocks')),
-        file.buffer
+        MAIN_BUFFER
       );
-      expect(result).toMatch(/^\/uploads\/blocks\/\d+-[a-z0-9]{6}\.jpg$/);
+      expect(result).toMatch(/^\/uploads\/blocks\/\d+-[a-z0-9]{6}\.webp$/);
     });
 
     it('throws on disallowed file extension', async () => {

@@ -1,5 +1,6 @@
 import { Icon } from '@iconify-icon/react';
 import type { TextImageData } from '@buro710/shared';
+import ResponsiveImage from '../ui/ResponsiveImage';
 
 interface TextImageBlockProps {
   data: TextImageData;
@@ -18,8 +19,9 @@ export default function TextImageBlock({ data, mirrored }: TextImageBlockProps) 
     <section className="group px-5 py-5 md:px-10 md:py-8">
       <div className="grid w-full grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-16">
         <div className={`relative aspect-[4/5] ${order} overflow-hidden`}>
-          <img
+          <ResponsiveImage
             src={image_url}
+            sizes="(min-width: 1024px) 50vw, 100vw"
             alt={image_alt || title || ''}
             className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
             loading="lazy"

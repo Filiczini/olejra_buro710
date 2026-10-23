@@ -2,6 +2,7 @@ import { Icon } from '@iconify-icon/react';
 import { Link } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import { useFetchPosts } from '../../hooks/useFetchPosts';
+import ResponsiveImage from '../ui/ResponsiveImage';
 
 const SLIDE_INTERVAL_MS = 6000;
 
@@ -61,8 +62,9 @@ export default function HeroSlider() {
             data-index={index}
           >
             <div className="absolute inset-0 bg-zinc-800">
-              <img
+              <ResponsiveImage
                 src={post.hero_image_url}
+                sizes="100vw"
                 alt={post.hero_title || post.title}
                 loading={index === 0 ? 'eager' : 'lazy'}
                 className={`w-full h-full object-cover opacity-90 transition-transform duration-[6000ms] ease-out ${index === currentSlide ? 'scale-105' : 'scale-100'}`}

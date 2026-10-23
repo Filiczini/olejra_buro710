@@ -1,4 +1,5 @@
 import type { ThreeImagesData } from '@buro710/shared';
+import ResponsiveImage from '../ui/ResponsiveImage';
 
 interface ThreeImagesBlockProps {
   data: ThreeImagesData;
@@ -15,8 +16,9 @@ export default function ThreeImagesBlock({ data }: ThreeImagesBlockProps) {
         {images.map((image, index) =>
           image.url ? (
             <div key={`${image.url}-${index}`} className="overflow-hidden group">
-              <img
+              <ResponsiveImage
                 src={image.url}
+                sizes="(min-width: 768px) 33vw, 100vw"
                 alt={image.alt || ''}
                 className="w-full aspect-[3/4] object-cover transition-transform duration-700 group-hover:scale-[1.02]"
                 loading="lazy"

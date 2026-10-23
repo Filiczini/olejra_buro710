@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import { validateFileSignature } from '../middleware/multer';
 import { logger } from '../lib/logger';
+import { processImage, variantPath, VARIANT_WIDTHS } from './imageProcessor';
 
 const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png'];
 
@@ -60,12 +61,19 @@ export const storageService = {
     }
 
     const folder = bucket || 'posts';
-    const fileName = storageService.generateSafeFileName(file.originalname);
+    const fileName = storageService
+      .generateSafeFileName(file.originalname)
+      .replace(/\.[^.]+$/, '.webp');
     const dirPath = path.join(uploadsDir, folder);
     const filePath = path.join(dirPath, fileName);
 
+    const processed = await processImage(file.buffer);
+
     await fs.mkdir(dirPath, { recursive: true });
-    await fs.writeFile(filePath, file.buffer);
+    await Promise.all([
+      fs.writeFile(filePath, processed.main),
+      ...processed.variants.map((v) => fs.writeFile(variantPath(filePath, v.width), v.buffer)),
+    ]);
 
     logger.info(`Image uploaded: ${filePath}`);
 
@@ -140,6 +148,11 @@ export const storageService = {
       }
 
       await fs.unlink(filePath);
+      await Promise.all(
+        VARIANT_WIDTHS.map((width) =>
+          fs.unlink(variantPath(filePath, width)).catch(() => undefined)
+        )
+      );
       return { success: true };
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') {

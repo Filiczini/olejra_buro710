@@ -75,8 +75,16 @@ async function listFiles(dir: string, base = ''): Promise<string[]> {
   return files;
 }
 
+const stripExt = (rel: string) => rel.replace(/\.[^./]+$/, '');
+
 async function main() {
   const referenced = await collectReferencedPaths();
+  // Responsive variants (<name>-400.webp, <name>-1000.webp) live next to the referenced file
+  const referencedBases = new Set([...referenced].map(stripExt));
+  const isVariantOfReferenced = (rel: string) => {
+    const match = /^(.*)-(?:400|1000)\.webp$/.exec(rel);
+    return match !== null && referencedBases.has(match[1]);
+  };
   console.log(`Referenced files in DB: ${referenced.size}`);
 
   const allFiles = await listFiles(uploadsDir);
@@ -87,7 +95,7 @@ async function main() {
   let kept = 0;
 
   for (const rel of allFiles) {
-    if (referenced.has(rel)) {
+    if (referenced.has(rel) || isVariantOfReferenced(rel)) {
       kept++;
       continue;
     }
