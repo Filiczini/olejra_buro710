@@ -55,7 +55,7 @@ export default function ContactPage() {
                   </div>
                 ))}
                 <div className="pl-10">
-                  <p className="text-lg">Пн-Пт: 9:00 - 18:00</p>
+                  <p className="text-lg">Пн-Пт: 10:00 - 18:00</p>
                   <p className="text-sm text-zinc-400">Робочий час</p>
                 </div>
               </div>
