@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ImgHTMLAttributes } from 'react';
 import { getImageSrcSet } from '../../lib/imageVariants';
+import { enqueueImagePreload } from '../../lib/imagePreloadQueue';
 
 interface ResponsiveImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'srcSet'> {
   src?: string;
@@ -17,6 +18,12 @@ export default function ResponsiveImage({
 }: ResponsiveImageProps) {
   const [useSrcSet, setUseSrcSet] = useState(true);
   const srcSet = useSrcSet ? getImageSrcSet(src) : undefined;
+  const isLazy = rest.loading === 'lazy';
+
+  useEffect(() => {
+    if (isLazy && src) enqueueImagePreload({ src, srcSet, sizes });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- queue once per image URL
+  }, [src, isLazy]);
 
   return (
     <img
