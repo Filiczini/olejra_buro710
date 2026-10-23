@@ -2,7 +2,7 @@ export default function CinematicDivider() {
   return (
     <section className="relative w-full h-[60vh] md:h-[80vh] overflow-hidden">
       <img
-        src="/cinematic-divider.png"
+        src="/cinematic-divider.webp"
         alt="Atmosphere"
         loading="lazy"
         className="absolute inset-0 w-full h-full object-cover filter grayscale-[20%] contrast-[0.9]"

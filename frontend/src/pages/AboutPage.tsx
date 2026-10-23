@@ -32,7 +32,7 @@ const brandLogos = [
   { src: '/trible.png', alt: 'Trible' },
 ];
 
-const STORY_IMAGE = '/about-person.png';
+const STORY_IMAGE = '/about-person.webp';
 
 export default function AboutPage() {
   return (
