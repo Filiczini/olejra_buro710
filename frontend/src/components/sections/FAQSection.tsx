@@ -24,6 +24,11 @@ const faqItems = [
   },
 ];
 
+const longestIndex = faqItems.reduce(
+  (best, item, i) => (item.answer.length > faqItems[best].answer.length ? i : best),
+  0
+);
+
 export default function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -39,41 +44,57 @@ export default function FAQSection() {
           </p>
         </div>
 
-        <div className="lg:col-span-8">
-          {faqItems.map((item, index) => {
-            const isOpen = openIndex === index;
-            return (
+        <div className="lg:col-span-8 grid">
+          {/* Invisible copy with the longest answer open: reserves the max height so content below never shifts */}
+          <div aria-hidden className="invisible pointer-events-none col-start-1 row-start-1">
+            {faqItems.map((item, index) => (
               <div key={item.question} className="border-t border-zinc-200 last:border-b">
-                <button
-                  type="button"
-                  onClick={() => setOpenIndex(isOpen ? null : index)}
-                  aria-expanded={isOpen}
-                  className="w-full flex items-center justify-between gap-6 py-6 text-left cursor-pointer group"
-                >
-                  <span className="text-lg font-medium text-zinc-900 group-hover:text-zinc-600 transition-colors">
-                    {item.question}
-                  </span>
-                  <Icon
-                    icon="solar:add-circle-linear"
-                    width={24}
-                    className={`text-zinc-400 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-45' : ''}`}
-                  />
-                </button>
-                <div
-                  aria-hidden={!isOpen}
-                  className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
-                    isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-                  }`}
-                >
-                  <div className="overflow-hidden">
-                    <p className="text-zinc-500 text-body-sm leading-relaxed pb-6 pr-10">
-                      {item.answer}
-                    </p>
+                <div className="flex items-center justify-between gap-6 py-6">
+                  <span className="text-lg font-medium">{item.question}</span>
+                  <span className="w-6 shrink-0" />
+                </div>
+                {index === longestIndex && (
+                  <p className="text-body-sm leading-relaxed pb-6 pr-10">{item.answer}</p>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="col-start-1 row-start-1 self-start">
+            {faqItems.map((item, index) => {
+              const isOpen = openIndex === index;
+              return (
+                <div key={item.question} className="border-t border-zinc-200 last:border-b">
+                  <button
+                    type="button"
+                    onClick={() => setOpenIndex(isOpen ? null : index)}
+                    aria-expanded={isOpen}
+                    className="w-full flex items-center justify-between gap-6 py-6 text-left cursor-pointer group"
+                  >
+                    <span className="text-lg font-medium text-zinc-900 group-hover:text-zinc-600 transition-colors">
+                      {item.question}
+                    </span>
+                    <Icon
+                      icon="solar:add-circle-linear"
+                      width={24}
+                      className={`text-zinc-400 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-45' : ''}`}
+                    />
+                  </button>
+                  <div
+                    aria-hidden={!isOpen}
+                    className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+                      isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <p className="text-zinc-500 text-body-sm leading-relaxed pb-6 pr-10">
+                        {item.answer}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>
