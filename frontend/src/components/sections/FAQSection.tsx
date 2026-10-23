@@ -59,11 +59,18 @@ export default function FAQSection() {
                     className={`text-zinc-400 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-45' : ''}`}
                   />
                 </button>
-                {isOpen && (
-                  <p className="text-zinc-500 text-body-sm leading-relaxed pb-6 pr-10">
-                    {item.answer}
-                  </p>
-                )}
+                <div
+                  aria-hidden={!isOpen}
+                  className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+                    isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                  }`}
+                >
+                  <div className="overflow-hidden">
+                    <p className="text-zinc-500 text-body-sm leading-relaxed pb-6 pr-10">
+                      {item.answer}
+                    </p>
+                  </div>
+                </div>
               </div>
             );
           })}
