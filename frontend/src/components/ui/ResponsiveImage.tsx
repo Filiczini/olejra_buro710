@@ -3,7 +3,7 @@ import type { ImgHTMLAttributes } from 'react';
 import { getImageSrcSet } from '../../lib/imageVariants';
 
 interface ResponsiveImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'srcSet'> {
-  src: string;
+  src?: string;
   alt: string;
 }
 
