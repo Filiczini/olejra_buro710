@@ -7,7 +7,7 @@ test.describe('Contact Form', () => {
 
     await page.fill('input[name="name"]', 'E2E Test User');
     await page.fill('input[name="email"]', 'e2e@test.com');
-    await page.fill('input[name="subject"]', 'E2E Test Subject');
+    await page.fill('input[name="phone"]', '+380 50 123 45 67');
     await page.fill('textarea[name="message"]', 'This is a test message from E2E suite.');
 
     await page.click('button:has-text("Надіслати повідомлення")');
