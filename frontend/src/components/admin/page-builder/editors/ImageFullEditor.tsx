@@ -71,7 +71,7 @@ export default function ImageFullEditor({
             <img
               src={displayUrl}
               alt={data.alt || 'Preview'}
-              className="w-full h-48 object-cover rounded-lg border border-zinc-200"
+              className="w-full aspect-[16/9] object-cover rounded-lg border border-zinc-200"
             />
             <button
               type="button"

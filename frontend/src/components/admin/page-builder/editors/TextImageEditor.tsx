@@ -154,7 +154,7 @@ export default function TextImageEditor({
             <img
               src={displayUrl}
               alt={data.image_alt || 'Preview'}
-              className="w-full h-40 object-cover rounded-lg border border-zinc-200"
+              className="w-full aspect-[5/6] object-cover rounded-lg border border-zinc-200"
             />
             <button
               type="button"

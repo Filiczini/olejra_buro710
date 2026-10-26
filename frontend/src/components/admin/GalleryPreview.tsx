@@ -29,7 +29,7 @@ export default function GalleryPreview({
           onDragStart={() => onDragStart(index)}
           onDragOver={(e) => onDragOver(e, index)}
           onDragEnd={onDragEnd}
-          className={`relative aspect-[4/5] bg-zinc-100 rounded-lg overflow-hidden group cursor-move ${
+          className={`relative aspect-[2/3] bg-zinc-100 rounded-lg overflow-hidden group cursor-move ${
             draggedIndex === index ? 'opacity-50' : ''
           }`}
         >

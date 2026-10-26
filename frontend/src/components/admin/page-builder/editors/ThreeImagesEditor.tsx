@@ -122,7 +122,7 @@ export default function ThreeImagesEditor({
                   <img
                     src={displayUrl}
                     alt={images[index]?.alt || `Image ${index + 1}`}
-                    className="w-full h-48 object-cover rounded-lg border border-zinc-200"
+                    className="w-full aspect-[3/4] object-cover rounded-lg border border-zinc-200"
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
                     <label
