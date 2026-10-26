@@ -1,0 +1,19 @@
+# Build context is the repo root (see docker-compose*.yml), so per-package
+# .dockerignore files are not used. Keep secrets and local artifacts out of images.
+.git
+.github
+.husky
+.claude
+.opencode
+**/node_modules
+**/.env
+**/.env.*
+!**/.env.example
+**/coverage
+**/dist
+**/*.log
+e2e
+docs
+archive
+backup/supabase-export
+backend/backup

@@ -75,3 +75,8 @@ backend/coverage/
 
 # Playwright test results
 e2e/test-results/
+
+# Local tooling and database dumps (contain user data)
+.claude/settings.local.json
+backend/backup/
+backup/supabase-export/

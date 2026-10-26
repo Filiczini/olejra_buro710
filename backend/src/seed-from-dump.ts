@@ -39,7 +39,9 @@ async function seedFromDump() {
   const dumpPath = path.resolve(DUMP_PATH);
 
   if (!fs.existsSync(dumpPath)) {
-    console.error(`Dump file not found: ${dumpPath}`);
+    console.error(
+      `Dump file not found: ${dumpPath}. The dump is not tracked in git — set DUMP_PATH to a local copy.`
+    );
     process.exit(1);
   }
 
