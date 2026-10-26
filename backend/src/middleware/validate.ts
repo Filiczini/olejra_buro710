@@ -5,7 +5,8 @@ import { logger } from '../lib/logger.js';
 export const validateBody = (schema: ZodType) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await schema.parseAsync(req.body);
+      // Replace the body with the parsed result so unknown keys are stripped and defaults apply
+      req.body = await schema.parseAsync(req.body);
       next();
     } catch (error) {
       const zodError = error as ZodError;

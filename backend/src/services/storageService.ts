@@ -143,14 +143,14 @@ export const storageService = {
       // Prevent path traversal attacks
       const resolvedPath = path.resolve(filePath);
       const resolvedUploads = path.resolve(uploadsDir);
-      if (!resolvedPath.startsWith(resolvedUploads)) {
+      if (!resolvedPath.startsWith(resolvedUploads + path.sep)) {
         return { success: false, error: 'Invalid file path' };
       }
 
-      await fs.unlink(filePath);
+      await fs.unlink(resolvedPath);
       await Promise.all(
         VARIANT_WIDTHS.map((width) =>
-          fs.unlink(variantPath(filePath, width)).catch(() => undefined)
+          fs.unlink(variantPath(resolvedPath, width)).catch(() => undefined)
         )
       );
       return { success: true };

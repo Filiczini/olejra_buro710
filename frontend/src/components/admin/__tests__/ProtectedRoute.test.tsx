@@ -48,4 +48,28 @@ describe('ProtectedRoute', () => {
     );
     expect(screen.getByTestId('protected')).toHaveTextContent('secret');
   });
+
+  it('renders children when the role is allowed', () => {
+    mockUseAuth.mockReturnValue({ isLoading: false, isAuthenticated: true, role: 'admin' });
+    render(
+      <MemoryRouter>
+        <ProtectedRoute roles={['admin']}>
+          <div data-testid="protected">secret</div>
+        </ProtectedRoute>
+      </MemoryRouter>
+    );
+    expect(screen.getByTestId('protected')).toBeInTheDocument();
+  });
+
+  it('blocks an editor from an admin-only route', () => {
+    mockUseAuth.mockReturnValue({ isLoading: false, isAuthenticated: true, role: 'editor' });
+    render(
+      <MemoryRouter>
+        <ProtectedRoute roles={['admin']}>
+          <div data-testid="protected">secret</div>
+        </ProtectedRoute>
+      </MemoryRouter>
+    );
+    expect(screen.queryByTestId('protected')).not.toBeInTheDocument();
+  });
 });

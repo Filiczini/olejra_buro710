@@ -124,7 +124,15 @@ export const extractBlockImageUploads = (
     const data = { ...block.data };
 
     if (block.type === 'three_images') {
-      const newImageSlots = (data._newImageSlots as number[]) || [];
+      const rawSlots = data._newImageSlots ?? [];
+      if (
+        !Array.isArray(rawSlots) ||
+        !rawSlots.every((slot) => Number.isInteger(slot) && slot >= 0 && slot < 3) ||
+        new Set(rawSlots).size !== rawSlots.length
+      ) {
+        throw new BadRequestError('Invalid _newImageSlots format');
+      }
+      const newImageSlots = rawSlots as number[];
       for (const slot of newImageSlots) {
         if (imageFiles[fileIndex]) {
           uploads.push({ sort_order: index, file: imageFiles[fileIndex], imageSlot: slot });

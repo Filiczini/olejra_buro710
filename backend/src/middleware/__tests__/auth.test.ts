@@ -11,7 +11,7 @@ vi.mock('../../services/userService', () => ({
   },
 }));
 
-import { authMiddleware, adminMiddleware } from '../auth';
+import { authMiddleware, adminMiddleware, optionalAuthMiddleware } from '../auth';
 import { verifyToken } from '../../config/jwt';
 import { userService } from '../../services/userService';
 
@@ -186,5 +186,47 @@ describe('adminMiddleware', () => {
 
     expect(mockNext).toHaveBeenCalledTimes(1);
     expect(mockRes.status).not.toHaveBeenCalled();
+  });
+});
+
+describe('optionalAuthMiddleware', () => {
+  const decoded = { userId: 'u1', email: 'a@b.c', role: 'editor', tokenVersion: 2 };
+  let mockReq: Partial<Request>;
+  let mockNext: NextFunction;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockReq = { headers: { authorization: 'Bearer tok' } };
+    mockNext = vi.fn();
+  });
+
+  it('attaches the user when the token version matches the DB', async () => {
+    mockedVerifyToken.mockReturnValue(decoded as never);
+    mockedGetTokenVersion.mockResolvedValue(2);
+
+    await optionalAuthMiddleware(mockReq as Request, {} as Response, mockNext);
+
+    expect(mockReq.user).toEqual(decoded);
+    expect(mockNext).toHaveBeenCalled();
+  });
+
+  it('stays unauthenticated when the token version was bumped (logged out)', async () => {
+    mockedVerifyToken.mockReturnValue(decoded as never);
+    mockedGetTokenVersion.mockResolvedValue(3);
+
+    await optionalAuthMiddleware(mockReq as Request, {} as Response, mockNext);
+
+    expect(mockReq.user).toBeUndefined();
+    expect(mockNext).toHaveBeenCalled();
+  });
+
+  it('stays unauthenticated when the user no longer exists', async () => {
+    mockedVerifyToken.mockReturnValue(decoded as never);
+    mockedGetTokenVersion.mockResolvedValue(-1);
+
+    await optionalAuthMiddleware(mockReq as Request, {} as Response, mockNext);
+
+    expect(mockReq.user).toBeUndefined();
+    expect(mockNext).toHaveBeenCalled();
   });
 });

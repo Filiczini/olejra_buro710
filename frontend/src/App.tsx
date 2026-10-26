@@ -118,9 +118,11 @@ const router = createBrowserRouter([
       {
         path: 'users',
         element: (
-          <Suspense fallback={loadingFallback}>
-            <UsersPage />
-          </Suspense>
+          <ProtectedRoute roles={['admin']}>
+            <Suspense fallback={loadingFallback}>
+              <UsersPage />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
       {

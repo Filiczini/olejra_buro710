@@ -43,3 +43,15 @@ describe('variantPath', () => {
     expect(variantPath('/uploads/posts/123-abc.webp', 1000)).toMatch(/123-abc-1000\.webp$/);
   });
 });
+
+describe('processImage limits', () => {
+  it('rejects images over the input pixel limit', async () => {
+    await expect(processImage(await makeJpeg(7000, 7000))).rejects.toThrow();
+  });
+
+  it('processes many images concurrently without failing', async () => {
+    const input = await makeJpeg(400, 300);
+    const results = await Promise.all(Array.from({ length: 6 }, () => processImage(input)));
+    expect(results).toHaveLength(6);
+  });
+});

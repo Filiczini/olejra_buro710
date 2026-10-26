@@ -119,7 +119,10 @@ export const postService = {
 
   getById: async (id: string): Promise<{ post: Post; blocks: Block[] }> => {
     const [postResult, blocksList] = await Promise.all([
-      db.select().from(posts).where(eq(posts.id, id)),
+      db
+        .select()
+        .from(posts)
+        .where(and(eq(posts.id, id), isNull(posts.deleted_at))),
       blockService.getByPostId(id),
     ]);
 
@@ -207,7 +210,7 @@ export const postService = {
         const [post] = await tx
           .update(posts)
           .set({ ...postData, updated_at: new Date() })
-          .where(eq(posts.id, id))
+          .where(and(eq(posts.id, id), isNull(posts.deleted_at)))
           .returning();
 
         if (!post) throw new NotFoundError('Failed to update post');

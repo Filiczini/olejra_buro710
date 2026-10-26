@@ -3,10 +3,12 @@ import { useAuth } from '../../hooks/useAuth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  /** Omit to allow every logged-in role. */
+  roles?: Array<'admin' | 'editor'>;
 }
 
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = useAuth();
+export default function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, role } = useAuth();
 
   if (isLoading) {
     return (
@@ -18,6 +20,10 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (!isAuthenticated) {
     return <Navigate to="/admin/login" replace />;
+  }
+
+  if (roles && !roles.includes(role as 'admin' | 'editor')) {
+    return <Navigate to="/admin/posts" replace />;
   }
 
   return <>{children}</>;

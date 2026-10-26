@@ -30,14 +30,18 @@ export const editorMiddleware = (req: Request, res: Response, next: NextFunction
   next();
 };
 
-export const optionalAuthMiddleware = (req: Request, _res: Response, next: NextFunction) => {
+export const optionalAuthMiddleware = async (req: Request, _res: Response, next: NextFunction) => {
   const token = extractToken(req);
 
   if (token) {
     try {
-      req.user = verifyToken(token);
+      const decoded = verifyToken(token);
+      const dbVersion = await userService.getTokenVersion(decoded.userId);
+      if (dbVersion !== -1 && decoded.tokenVersion === dbVersion) {
+        req.user = decoded;
+      }
     } catch {
-      // Invalid token — proceed as unauthenticated
+      // Invalid or revoked token — proceed as unauthenticated
     }
   }
   next();

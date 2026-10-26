@@ -41,8 +41,8 @@ const apiRateLimiter = rateLimit({
   skip: () => process.env.NODE_ENV === 'test',
 });
 
-router.use(apiKeyMiddleware);
 router.use(apiRateLimiter);
+router.use(apiKeyMiddleware);
 
 /**
  * GET /api/v1/posts

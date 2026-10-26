@@ -221,6 +221,13 @@ describe('storageService', () => {
       expect(mockUnlink).toHaveBeenCalled();
     });
 
+    it('rejects path traversal into a sibling directory of the uploads dir', async () => {
+      const result = await storageService.deleteImage('/uploads/../uploads-evil/x.jpg');
+
+      expect(result).toEqual({ success: false, error: 'Invalid file path' });
+      expect(mockUnlink).not.toHaveBeenCalled();
+    });
+
     it('returns error for invalid URL format', async () => {
       const result = await storageService.deleteImage('https://example.com/random/image.jpg');
 
