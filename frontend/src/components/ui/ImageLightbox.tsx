@@ -145,10 +145,10 @@ export default function ImageLightbox({
           e.stopPropagation();
           handleClose();
         }}
-        className="absolute top-6 right-6 z-10 w-10 h-10 flex items-center justify-center text-white/80 hover:text-white transition-colors cursor-pointer"
+        className="absolute top-4 right-4 md:top-6 md:right-6 z-10 w-14 h-14 md:w-20 md:h-20 flex items-center justify-center rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
         aria-label="Закрити"
       >
-        <Icon icon="solar:close-circle-linear" width={32} />
+        <Icon icon="solar:close-circle-linear" width={48} />
       </button>
 
       <div className="absolute top-6 left-6 text-white/60 text-sm font-medium">
@@ -157,21 +157,21 @@ export default function ImageLightbox({
 
       <button
         onClick={handlePrev}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center text-white/80 hover:text-white opacity-70 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer"
+        className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-10 w-14 h-14 md:w-20 md:h-20 flex items-center justify-center rounded-full text-white/80 hover:text-white hover:bg-white/10 opacity-70 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer"
         aria-label="Попереднє"
       >
-        <Icon icon="solar:arrow-left-linear" width={32} />
+        <Icon icon="solar:arrow-left-linear" width={48} />
       </button>
 
       <button
         onClick={handleNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center text-white/80 hover:text-white opacity-70 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer"
+        className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-10 w-14 h-14 md:w-20 md:h-20 flex items-center justify-center rounded-full text-white/80 hover:text-white hover:bg-white/10 opacity-70 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer"
         aria-label="Наступне"
       >
-        <Icon icon="solar:arrow-right-linear" width={32} />
+        <Icon icon="solar:arrow-right-linear" width={48} />
       </button>
 
-      <div className="absolute inset-0 flex items-center justify-center p-16">
+      <div className="absolute inset-0 flex items-center justify-center p-16 md:p-28">
         <img
           src={images[currentIndex]}
           alt={`Зображення ${currentIndex + 1}`}
