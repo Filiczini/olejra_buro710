@@ -17,6 +17,7 @@ interface ToastState {
 
 interface PostEditorShellProps {
   isEditing: boolean;
+  previewId?: string;
   loading: boolean;
   saving: boolean;
   errors: Record<string, string>;
@@ -34,6 +35,7 @@ interface PostEditorShellProps {
 
 export default function PostEditorShell({
   isEditing,
+  previewId,
   loading,
   saving,
   errors,
@@ -122,6 +124,17 @@ export default function PostEditorShell({
         )}
 
         <div className="flex gap-4 justify-end">
+          {previewId && (
+            <a
+              href={`/admin/posts/preview/${previewId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-zinc-200 text-zinc-700 hover:bg-zinc-50 transition-colors"
+            >
+              <Icon icon="solar:eye-linear" width={16} />
+              Перегляд
+            </a>
+          )}
           <Button type="button" variant="secondary" onClick={onCancel}>
             Скасувати
           </Button>

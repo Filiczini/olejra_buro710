@@ -109,18 +109,20 @@ export function usePostsColumns(
             >
               <Pencil className="h-5 w-5 stroke-[1.5]" />
             </button>
-            {post.status === 'published' && (
-              <a
-                href={`/page/${post.slug}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
-                title="Перегляд"
-                aria-label="Переглянути пост"
-              >
-                <Eye className="h-5 w-5 stroke-[1.5]" />
-              </a>
-            )}
+            <a
+              href={
+                post.status === 'published'
+                  ? `/page/${post.slug}`
+                  : `/admin/posts/preview/${post.id}`
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+              title="Перегляд"
+              aria-label="Переглянути пост"
+            >
+              <Eye className="h-5 w-5 stroke-[1.5]" />
+            </a>
             <button
               onClick={() => setDeleteTarget({ id: post.id, title: post.title })}
               className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"

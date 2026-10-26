@@ -40,6 +40,7 @@ export default function EditPostPage() {
   return (
     <PostEditorShell
       isEditing={isEditing}
+      previewId={id}
       loading={formState.loading}
       saving={formState.saving}
       errors={formState.errors}

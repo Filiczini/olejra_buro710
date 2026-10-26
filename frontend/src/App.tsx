@@ -39,6 +39,7 @@ const EditPostPage = lazyWithReload(() => import('./pages/admin/EditPostPage'));
 const ActivityLogPage = lazyWithReload(() => import('./pages/admin/ActivityLogPage'));
 const UsersPage = lazyWithReload(() => import('./pages/admin/UsersPage'));
 const SettingsPage = lazyWithReload(() => import('./pages/admin/SettingsPage'));
+const PostPreviewPage = lazyWithReload(() => import('./pages/admin/PostPreviewPage'));
 
 const loadingFallback = (
   <div className="flex items-center justify-center py-32 text-gray-400">Завантаження...</div>
@@ -68,6 +69,16 @@ const router = createBrowserRouter([
     ],
   },
   { path: '/admin/login', element: <LoginPage /> },
+  {
+    path: '/admin/posts/preview/:id',
+    element: (
+      <ProtectedRoute>
+        <Suspense fallback={loadingFallback}>
+          <PostPreviewPage />
+        </Suspense>
+      </ProtectedRoute>
+    ),
+  },
   {
     path: '/admin',
     element: <AdminWrapper />,
