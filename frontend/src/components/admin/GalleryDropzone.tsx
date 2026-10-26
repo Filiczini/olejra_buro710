@@ -49,6 +49,9 @@ export default function GalleryDropzone({
               Формати: <span className="font-medium">JPEG, PNG</span> · Максимальний розмір:{' '}
               <span className="font-medium">10MB</span> на файл
             </p>
+            <p className="text-xs text-zinc-500">
+              Вертикальне 2:3, від 1000×1500. Відкривається на весь екран — найвища якість.
+            </p>
           </div>
         </label>
       </div>

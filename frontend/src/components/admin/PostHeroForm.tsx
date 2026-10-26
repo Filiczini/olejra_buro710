@@ -31,6 +31,7 @@ export default function PostHeroForm({ data, onChange, errors, onBlurField }: Po
           initialImageUrl={data.hero_image_url}
           label="Головне зображення"
           placeholder="Перетягніть зображення або натисніть для вибору файлу"
+          hint="Горизонтальне 16:9, від 2400×1350. Головне — в центрі, краї можуть обрізатись."
           error={errors?.heroImage}
         />
 

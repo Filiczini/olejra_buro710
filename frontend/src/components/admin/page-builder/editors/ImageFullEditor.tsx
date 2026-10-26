@@ -97,6 +97,9 @@ export default function ImageFullEditor({
               Формати: <span className="font-medium">JPEG, PNG</span> · Максимум:{' '}
               <span className="font-medium">10MB</span>
             </span>
+            <span className="text-xs text-zinc-500 mt-1 px-4 text-center">
+              Горизонтальне 16:9, від 2400×1350. Краї можуть обрізатись.
+            </span>
             <input
               id={f('image')}
               name={f('image')}

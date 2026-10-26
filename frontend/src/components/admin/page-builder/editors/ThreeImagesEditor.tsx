@@ -167,6 +167,9 @@ export default function ThreeImagesEditor({
                   <span className="text-xs text-zinc-400">
                     Авто-стиснення до <span className="font-medium">1 МБ</span>
                   </span>
+                  <span className="text-xs text-zinc-500 mt-1 px-2 text-center">
+                    Вертикальне 3:4, від 1200×1600. Усі три — однакові.
+                  </span>
                   <input
                     id={`${imgId}-upload`}
                     name={`${imgId}-upload`}

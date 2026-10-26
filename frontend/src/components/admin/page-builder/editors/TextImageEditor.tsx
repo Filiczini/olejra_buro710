@@ -180,6 +180,9 @@ export default function TextImageEditor({
               Формати: <span className="font-medium">JPEG, PNG</span> · Максимум:{' '}
               <span className="font-medium">10MB</span>
             </span>
+            <span className="text-xs text-zinc-500 mt-1 px-4 text-center">
+              Вертикальне 5:6, від 1000×1200. Краї можуть обрізатись.
+            </span>
             <input
               id={f('image')}
               name={f('image')}

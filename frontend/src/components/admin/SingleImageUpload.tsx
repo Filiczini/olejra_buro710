@@ -9,6 +9,7 @@ interface SingleImageUploadProps {
   initialImageUrl?: string | null;
   label?: string;
   placeholder?: string;
+  hint?: string;
   error?: string;
 }
 
@@ -38,6 +39,7 @@ export default function SingleImageUpload({
   initialImageUrl,
   label = 'Image',
   placeholder = 'Drag and drop image, or browse',
+  hint,
   error,
 }: SingleImageUploadProps) {
   const [preview, setPreview] = useState<ImagePreview | null>(null);
@@ -207,6 +209,7 @@ export default function SingleImageUpload({
                 Формати: <span className="font-medium">JPEG, PNG</span> · Авто-стиснення до{' '}
                 <span className="font-medium">1 МБ</span>
               </p>
+              {hint && <p className="text-xs text-zinc-500">{hint}</p>}
             </div>
           </label>
         </div>
