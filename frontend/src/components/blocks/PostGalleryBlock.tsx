@@ -108,10 +108,11 @@ export default function PostGalleryBlock({ images, title }: PostGalleryBlockProp
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {images.map((image, index) => (
-          <div
+          <button
+            type="button"
             key={`gallery-${index}`}
             onClick={() => openLightbox(index)}
-            className="gallery-item aspect-[3/4] w-[75vw] md:w-[250px] bg-zinc-100 overflow-hidden group cursor-pointer flex-shrink-0 snap-center md:snap-none"
+            className="gallery-item aspect-[3/4] w-[75vw] md:w-[250px] bg-zinc-100 overflow-hidden group cursor-pointer flex-shrink-0 snap-center md:snap-none block p-0 border-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900"
           >
             <ResponsiveImage
               src={image}
@@ -119,7 +120,7 @@ export default function PostGalleryBlock({ images, title }: PostGalleryBlockProp
               alt={`${title || 'Галерея'} — зображення ${index + 1}`}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
-          </div>
+          </button>
         ))}
       </div>
 

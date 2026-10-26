@@ -25,7 +25,7 @@ function metaContent(name: string): string | null {
 
 afterEach(() => {
   cleanup();
-  document.head.querySelectorAll('meta').forEach((el) => el.remove());
+  document.head.querySelectorAll('meta, link[rel="canonical"]').forEach((el) => el.remove());
   document.title = 'Buro 710';
 });
 
@@ -100,5 +100,47 @@ describe('usePostSEO', () => {
     unmount();
 
     expect(document.title).toBe('Buro 710');
+  });
+
+  it('sets canonical, og:url and twitter tags for the post page', () => {
+    renderHook(() =>
+      usePostSEO(makePost({ slug: 'my-post', seo_title: 'T', hero_image_url: 'hero.jpg' }))
+    );
+
+    const url = `${window.location.origin}/page/my-post`;
+    expect(document.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(url);
+    expect(metaContent('og:url')).toBe(url);
+    expect(metaContent('og:type')).toBe('article');
+    expect(metaContent('twitter:title')).toBe('T');
+    expect(metaContent('twitter:image')).toBe('hero.jpg');
+  });
+
+  it('removes the canonical link on unmount', () => {
+    const { unmount } = renderHook(() => usePostSEO(makePost()));
+    expect(document.querySelector('link[rel="canonical"]')).not.toBeNull();
+
+    unmount();
+
+    expect(document.querySelector('link[rel="canonical"]')).toBeNull();
+  });
+
+  it('restores pre-existing meta tags and removes added ones on unmount', () => {
+    const existing = document.createElement('meta');
+    existing.setAttribute('property', 'og:title');
+    existing.setAttribute('content', 'Site default');
+    document.head.appendChild(existing);
+
+    const { unmount } = renderHook(() =>
+      usePostSEO(makePost({ seo_title: 'Post title', hero_image_url: 'hero.jpg' }))
+    );
+    expect(metaContent('og:title')).toBe('Post title');
+    expect(metaContent('og:image')).toBe('hero.jpg');
+
+    unmount();
+
+    expect(metaContent('og:title')).toBe('Site default');
+    expect(metaContent('og:image')).toBeNull();
+    expect(metaContent('og:url')).toBeNull();
+    expect(metaContent('twitter:title')).toBeNull();
   });
 });

@@ -63,4 +63,58 @@ describe('Modal', () => {
 
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  it('calls onClose on Escape and not when closed', () => {
+    const onClose = vi.fn();
+    const { rerender } = render(
+      <Modal isOpen title="T" onClose={onClose}>
+        Body
+      </Modal>
+    );
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <Modal isOpen={false} title="T" onClose={onClose}>
+        Body
+      </Modal>
+    );
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('labels the dialog with its title and locks body scroll while open', () => {
+    const { unmount } = render(
+      <Modal isOpen title="My title" onClose={vi.fn()}>
+        Body
+      </Modal>
+    );
+
+    expect(screen.getByRole('dialog')).toHaveAccessibleName('My title');
+    expect(document.body.style.overflow).toBe('hidden');
+
+    unmount();
+    expect(document.body.style.overflow).not.toBe('hidden');
+  });
+
+  it('closes only the topmost modal on Escape when modals are stacked', () => {
+    const outer = vi.fn();
+    const inner = vi.fn();
+    render(
+      <>
+        <Modal isOpen title="Outer" onClose={outer}>
+          Outer body
+        </Modal>
+        <Modal isOpen title="Inner" onClose={inner}>
+          Inner body
+        </Modal>
+      </>
+    );
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    expect(inner).toHaveBeenCalledTimes(1);
+    expect(outer).not.toHaveBeenCalled();
+  });
 });

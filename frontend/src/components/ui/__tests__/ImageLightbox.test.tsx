@@ -159,4 +159,29 @@ describe('ImageLightbox', () => {
     expect(onPrev).not.toHaveBeenCalled();
     expect(onNext).not.toHaveBeenCalled();
   });
+
+  it('still closes when animationend never fires (reduced motion)', async () => {
+    vi.useFakeTimers();
+    const onClose = vi.fn();
+    render(
+      <ImageLightbox
+        images={images}
+        currentIndex={0}
+        onClose={onClose}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+      />
+    );
+
+    await act(async () => {
+      fireEvent.keyDown(document, { key: 'Escape' });
+    });
+    expect(onClose).not.toHaveBeenCalled();
+
+    await act(async () => {
+      vi.advanceTimersByTime(500);
+    });
+    expect(onClose).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
+  });
 });

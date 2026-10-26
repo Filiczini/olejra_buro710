@@ -48,4 +48,12 @@ describe('Toast', () => {
 
     expect(onDismiss).not.toHaveBeenCalled();
   });
+
+  it('announces errors assertively and successes politely', () => {
+    const { rerender } = render(<Toast message="Oops" type="error" onDismiss={vi.fn()} />);
+    expect(screen.getByRole('alert')).toHaveTextContent('Oops');
+
+    rerender(<Toast message="Done" type="success" onDismiss={vi.fn()} />);
+    expect(screen.getByRole('status')).toHaveTextContent('Done');
+  });
 });

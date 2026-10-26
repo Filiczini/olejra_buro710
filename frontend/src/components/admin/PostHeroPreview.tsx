@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Icon } from '@iconify-icon/react';
 import type { PostHeroFormData } from '../../types/post';
 
@@ -7,9 +8,20 @@ interface PostHeroPreviewProps {
 }
 
 export default function PostHeroPreview({ data, title }: PostHeroPreviewProps) {
-  const imageUrl = data.heroImage
-    ? URL.createObjectURL(data.heroImage)
-    : data.hero_image_url || null;
+  // Created in an effect (not during render) so StrictMode's mount/cleanup/mount
+  // cycle never leaves us holding a revoked blob URL.
+  const [objectUrl, setObjectUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!data.heroImage) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncs state with the external blob URL lifecycle
+      setObjectUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(data.heroImage);
+    setObjectUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [data.heroImage]);
+  const imageUrl = objectUrl ?? (data.hero_image_url || null);
 
   // Mirrors PostHeroBlock's rendering rules exactly, so this preview never
   // shows/hides content the public page wouldn't.

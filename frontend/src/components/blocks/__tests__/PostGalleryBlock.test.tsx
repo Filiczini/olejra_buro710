@@ -48,4 +48,13 @@ describe('PostGalleryBlock', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Наступне' }));
     expect(screen.getByText('2 / 3')).toBeInTheDocument();
   });
+
+  it('renders thumbnails as keyboard-focusable buttons', () => {
+    render(<PostGalleryBlock images={images} title="My project" />);
+
+    const thumbs = screen.getAllByRole('button', { name: /My project — зображення/ });
+    expect(thumbs).toHaveLength(3);
+    fireEvent.click(thumbs[2]);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
 });

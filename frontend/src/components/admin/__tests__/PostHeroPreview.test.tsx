@@ -8,7 +8,11 @@ function data(overrides: Partial<PostHeroFormData> = {}): PostHeroFormData {
 }
 
 beforeEach(() => {
-  vi.stubGlobal('URL', { ...URL, createObjectURL: vi.fn(() => 'blob:mock') });
+  vi.stubGlobal('URL', {
+    ...URL,
+    createObjectURL: vi.fn(() => 'blob:mock'),
+    revokeObjectURL: vi.fn(),
+  });
 });
 
 describe('PostHeroPreview', () => {
@@ -73,5 +77,16 @@ describe('PostHeroPreview', () => {
     );
 
     expect(screen.getByRole('img')).toHaveAttribute('src', 'https://x.test/a.jpg');
+  });
+
+  it('revokes the blob URL of a new hero file on unmount', () => {
+    const file = new File(['x'], 'hero.jpg', { type: 'image/jpeg' });
+    const { unmount } = render(<PostHeroPreview data={data({ heroImage: file })} title="" />);
+
+    expect(screen.getByRole('img')).toHaveAttribute('src', 'blob:mock');
+
+    unmount();
+
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock');
   });
 });

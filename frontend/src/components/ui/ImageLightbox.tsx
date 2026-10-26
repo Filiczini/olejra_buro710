@@ -19,16 +19,30 @@ export default function ImageLightbox({
   const [isClosing, setIsClosing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const closedRef = useRef(false);
+
   const handleClose = useCallback(() => {
+    closedRef.current = false;
     setIsClosing(true);
   }, []);
 
+  const finishClose = useCallback(() => {
+    if (closedRef.current) return;
+    closedRef.current = true;
+    onClose();
+    setIsClosing(false);
+  }, [onClose]);
+
   const handleAnimationEnd = useCallback(() => {
-    if (isClosing) {
-      onClose();
-      setIsClosing(false);
-    }
-  }, [isClosing, onClose]);
+    if (isClosing) finishClose();
+  }, [isClosing, finishClose]);
+
+  // animationend never fires with reduced motion / disabled animations — close anyway
+  useEffect(() => {
+    if (!isClosing) return;
+    const timer = setTimeout(finishClose, 400);
+    return () => clearTimeout(timer);
+  }, [isClosing, finishClose]);
 
   const handlePrev = useCallback(
     (e: React.MouseEvent) => {
