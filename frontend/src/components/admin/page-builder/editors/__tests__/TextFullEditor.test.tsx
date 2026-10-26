@@ -20,7 +20,7 @@ describe('TextFullEditor', () => {
     const onChange = vi.fn();
     render(<TextFullEditor blockId="b1" data={{ content: 'x' }} onChange={onChange} />);
 
-    fireEvent.change(screen.getByPlaceholderText('The Concept'), {
+    fireEvent.change(screen.getByPlaceholderText('Концепція'), {
       target: { value: 'The Vision' },
     });
 

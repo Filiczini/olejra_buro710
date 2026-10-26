@@ -20,14 +20,14 @@ export default function PostHeroPreview({ data, title }: PostHeroPreviewProps) {
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-4 sticky top-8">
-      <h3 className="text-lg font-semibold text-zinc-900 mb-4">Прев'ю hero секції</h3>
+      <h3 className="text-lg font-semibold text-zinc-900 mb-4">Прев'ю головного екрана</h3>
 
       <div className="relative w-full aspect-[16/9] bg-zinc-900 rounded-lg overflow-hidden">
         {imageUrl && (
           <>
             <img
               src={imageUrl}
-              alt="Hero preview"
+              alt="Прев'ю hero"
               className="absolute inset-0 w-full h-full object-cover opacity-80"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
@@ -79,7 +79,7 @@ export default function PostHeroPreview({ data, title }: PostHeroPreviewProps) {
                   <div className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center cursor-pointer hover:scale-110 transition-transform duration-300">
                     <Icon icon="solar:arrow-down-linear" width={16} />
                   </div>
-                  <span className="text-white/60 text-xs">Scroll to explore</span>
+                  <span className="text-white/60 text-xs">Прогорнути вниз</span>
                 </div>
               </div>
             )}

@@ -29,7 +29,7 @@ export default function TopBar({ onMobileMenuClick }: TopBarProps) {
         <button
           onClick={onMobileMenuClick}
           className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 cursor-pointer"
-          aria-label="Toggle menu"
+          aria-label="Меню"
         >
           <Menu className="h-5 w-5" />
         </button>
@@ -45,7 +45,7 @@ export default function TopBar({ onMobileMenuClick }: TopBarProps) {
       <button
         onClick={handleLogout}
         className="flex items-center text-gray-500 hover:text-red-600 transition-colors text-sm font-medium cursor-pointer"
-        aria-label="Logout"
+        aria-label="Вийти"
       >
         <LogOut className="h-4 w-4 mr-2" />
         Вийти

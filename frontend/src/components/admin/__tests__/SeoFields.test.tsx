@@ -92,7 +92,7 @@ describe('SeoFields', () => {
     fireEvent.change(input, { target: { files: [file] } });
 
     expect(onOgImageChange).toHaveBeenCalledWith(file);
-    await waitFor(() => expect(screen.getByAltText('OG Preview')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByAltText("Прев'ю OG")).toBeInTheDocument());
   });
 
   it('removes the OG image preview and calls onOgImageChange(null)', async () => {

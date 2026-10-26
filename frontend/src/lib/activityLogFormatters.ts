@@ -37,7 +37,7 @@ export const formatChanges = (changes: Record<string, unknown>) => {
     ) {
       parts.push(`Hero: ${changes.hero_fields.join(', ')}`);
     } else {
-      parts.push('Hero оновлено');
+      parts.push('Головний екран оновлено');
     }
   }
 

@@ -59,7 +59,7 @@ describe('Modal', () => {
       </Modal>
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /close/i }));
+    fireEvent.click(screen.getByRole('button', { name: /закрити/i }));
 
     expect(onClose).toHaveBeenCalledTimes(1);
   });

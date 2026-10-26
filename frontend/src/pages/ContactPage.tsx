@@ -10,7 +10,7 @@ const contactDetails = [
   },
   {
     icon: 'solar:letter-linear',
-    label: 'Email',
+    label: 'Ел. пошта',
     value: 'hello@b710.design',
     href: 'mailto:hello@b710.design',
   },

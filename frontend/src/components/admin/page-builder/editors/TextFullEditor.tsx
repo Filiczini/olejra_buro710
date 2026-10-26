@@ -25,7 +25,7 @@ export default function TextFullEditor({ blockId, data, onChange }: TextFullEdit
           type="text"
           value={data.label || ''}
           onChange={(e) => updateField('label', e.target.value)}
-          placeholder="The Concept"
+          placeholder="Концепція"
           className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900"
         />
       </div>

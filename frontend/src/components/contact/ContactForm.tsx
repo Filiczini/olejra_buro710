@@ -88,7 +88,7 @@ export default function ContactForm({
         onChange={onChange}
       />
       <ContactField
-        label="Email"
+        label="Ел. пошта"
         name="email"
         type="email"
         value={formData.email}

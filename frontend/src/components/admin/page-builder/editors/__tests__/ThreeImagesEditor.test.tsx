@@ -61,7 +61,9 @@ describe('ThreeImagesEditor', () => {
       />
     );
 
-    fireEvent.change(screen.getByPlaceholderText('Alt-текст 2'), { target: { value: 'New B' } });
+    fireEvent.change(screen.getByPlaceholderText('Альтернативний текст 2'), {
+      target: { value: 'New B' },
+    });
 
     expect(onChange).toHaveBeenCalledWith({
       images: [

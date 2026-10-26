@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { logger } from '../lib/logger';
 import { postService } from '../services/api';
 import { buildPostFormData } from '../lib/buildPostFormData';
-import { resolveApiErrorMessage } from '../lib/apiErrorMessage';
+import { resolveApiErrorMessage, translateServerMessage } from '../lib/apiErrorMessage';
 import type { ValidationValues } from './usePostValidation';
 import type { PostStatus, ApiError } from '@buro710/shared';
 import type { EditBlock, BlockWithFile } from '../types/block';
@@ -113,10 +113,7 @@ export function usePostSubmit() {
           callbacks.setErrors(fe);
         } else if (data?.field && data?.error) {
           callbacks.setErrors({
-            [data.field]:
-              data.field === 'slug' && data.error === 'Slug already exists'
-                ? 'Такий URL вже існує'
-                : data.error,
+            [data.field]: translateServerMessage(data.error),
           });
         } else {
           callbacks.setErrors({ submit: message });

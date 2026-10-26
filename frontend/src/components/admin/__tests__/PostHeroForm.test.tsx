@@ -23,7 +23,7 @@ describe('PostHeroForm', () => {
     const onChange = vi.fn();
     render(<PostHeroForm data={data({ hero_location: 'Kyiv' })} onChange={onChange} />);
 
-    fireEvent.change(screen.getByPlaceholderText('Введіть заголовок hero секції'), {
+    fireEvent.change(screen.getByPlaceholderText('Введіть заголовок головного екрана'), {
       target: { value: 'New title' },
     });
 

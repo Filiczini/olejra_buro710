@@ -66,10 +66,10 @@ describe('PostHeroBlock', () => {
 
   it('shows the subtitle and scroll button only when hero_subtitle is present', () => {
     const { rerender } = render(<PostHeroBlock post={makePost()} />);
-    expect(screen.queryByText('Scroll to explore')).not.toBeInTheDocument();
+    expect(screen.queryByText('Прогорнути вниз')).not.toBeInTheDocument();
 
     rerender(<PostHeroBlock post={makePost({ hero_subtitle: 'A short teaser' })} />);
     expect(screen.getByText('A short teaser')).toBeInTheDocument();
-    expect(screen.getByText('Scroll to explore')).toBeInTheDocument();
+    expect(screen.getByText('Прогорнути вниз')).toBeInTheDocument();
   });
 });

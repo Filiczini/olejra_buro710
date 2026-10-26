@@ -27,7 +27,7 @@ describe('SingleImageUpload', () => {
   it('shows the initial image url as a preview when no new file is selected', () => {
     render(<SingleImageUpload onImageChange={vi.fn()} initialImageUrl="https://x.test/a.jpg" />);
 
-    expect(screen.getByAltText('Preview')).toHaveAttribute('src', 'https://x.test/a.jpg');
+    expect(screen.getByAltText("Прев'ю")).toHaveAttribute('src', 'https://x.test/a.jpg');
   });
 
   it('rejects a file with a disallowed type without calling onImageChange', async () => {
@@ -84,7 +84,7 @@ describe('SingleImageUpload', () => {
       <SingleImageUpload onImageChange={onImageChange} initialImageUrl="https://x.test/a.jpg" />
     );
 
-    fireEvent.click(screen.getByTitle('Remove image'));
+    fireEvent.click(screen.getByTitle('Видалити зображення'));
 
     expect(onImageChange).toHaveBeenCalledWith(null);
   });

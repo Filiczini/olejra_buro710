@@ -21,7 +21,7 @@ export default function PostHeroForm({ data, onChange, errors, onBlurField }: Po
   return (
     <section className="bg-white rounded-xl shadow-lg p-6 md:p-8">
       <h2 className="text-xl font-semibold text-zinc-900 mb-6 pb-2 border-b border-zinc-200">
-        Hero секція
+        Головний екран
       </h2>
 
       <div className="flex flex-col gap-6">
@@ -38,8 +38,8 @@ export default function PostHeroForm({ data, onChange, errors, onBlurField }: Po
         <Input
           id="hero-title"
           name="hero_title"
-          label="Hero заголовок"
-          placeholder="Введіть заголовок hero секції"
+          label="Заголовок головного екрана"
+          placeholder="Введіть заголовок головного екрана"
           value={data.hero_title || ''}
           onChange={(e) => handleChange('hero_title', e.target.value)}
           onBlur={(e) => onBlurField?.('hero_title', e.target.value)}
@@ -48,7 +48,7 @@ export default function PostHeroForm({ data, onChange, errors, onBlurField }: Po
 
         <div>
           <label htmlFor="hero-subtitle" className="block text-sm font-medium text-zinc-700 mb-2">
-            Hero підзаголовок (опис)
+            Підзаголовок головного екрана (опис)
           </label>
           <textarea
             id="hero-subtitle"

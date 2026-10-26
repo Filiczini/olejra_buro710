@@ -152,12 +152,12 @@ export default function SingleImageUpload({
 
       {preview ? (
         <div className="relative w-full aspect-video bg-zinc-100 rounded-lg overflow-hidden">
-          <img src={preview.previewUrl} alt="Preview" className="w-full h-full object-cover" />
+          <img src={preview.previewUrl} alt="Прев'ю" className="w-full h-full object-cover" />
           <button
             type="button"
             onClick={handleRemove}
             className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors cursor-pointer"
-            title="Remove image"
+            title="Видалити зображення"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -172,9 +172,9 @@ export default function SingleImageUpload({
             type="button"
             onClick={handleReplace}
             className="absolute bottom-2 right-2 bg-zinc-900 text-white px-3 py-1.5 rounded-md hover:bg-zinc-800 transition-colors text-sm font-medium cursor-pointer"
-            title="Replace image"
+            title="Замінити зображення"
           >
-            Replace
+            Замінити
           </button>
         </div>
       ) : (

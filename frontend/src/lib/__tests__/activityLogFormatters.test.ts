@@ -52,7 +52,7 @@ describe('activityLogFormatters', () => {
     });
 
     it('formats hero_updated without hero_fields', () => {
-      expect(formatChanges({ hero_updated: true })).toBe('Hero оновлено');
+      expect(formatChanges({ hero_updated: true })).toBe('Головний екран оновлено');
     });
 
     it('formats blocks_count', () => {

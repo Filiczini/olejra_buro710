@@ -16,7 +16,7 @@ export default function Sidebar({ role }: SidebarProps) {
       <div className="p-6">
         <h1 className="text-white text-xl tracking-tight font-semibold">BURO 710</h1>
         <span className="text-xs uppercase tracking-wider text-zinc-500 font-medium mt-1 block">
-          Admin
+          Адмін
         </span>
       </div>
 

@@ -76,7 +76,7 @@ export default function PostGalleryBlock({ images, title }: PostGalleryBlockProp
   return (
     <section className="w-full px-5 py-7 md:px-10 md:py-10">
       <div className="flex items-center justify-between mb-8">
-        <h3 className="text-2xl md:text-3xl font-display tracking-tight text-zinc-900">Gallery</h3>
+        <h3 className="text-2xl md:text-3xl font-display tracking-tight text-zinc-900">Галерея</h3>
         <div className="flex gap-2">
           <button
             onClick={() => scroll('left')}
@@ -84,7 +84,7 @@ export default function PostGalleryBlock({ images, title }: PostGalleryBlockProp
             className={`w-10 h-10 border border-zinc-200 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
               canScrollLeft ? 'hover:bg-zinc-100' : 'opacity-30 cursor-not-allowed'
             }`}
-            aria-label="Previous images"
+            aria-label="Попередні зображення"
           >
             <Icon icon="solar:arrow-left-linear" width={20} />
           </button>
@@ -94,7 +94,7 @@ export default function PostGalleryBlock({ images, title }: PostGalleryBlockProp
             className={`w-10 h-10 border border-zinc-200 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
               canScrollRight ? 'hover:bg-zinc-100' : 'opacity-30 cursor-not-allowed'
             }`}
-            aria-label="Next images"
+            aria-label="Наступні зображення"
           >
             <Icon icon="solar:arrow-right-linear" width={20} />
           </button>
@@ -116,7 +116,7 @@ export default function PostGalleryBlock({ images, title }: PostGalleryBlockProp
             <ResponsiveImage
               src={image}
               sizes="(min-width: 768px) 250px, 75vw"
-              alt={`${title || 'Gallery'} — зображення ${index + 1}`}
+              alt={`${title || 'Галерея'} — зображення ${index + 1}`}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
           </div>

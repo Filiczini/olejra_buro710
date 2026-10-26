@@ -35,7 +35,7 @@ describe('resolveApiErrorMessage', () => {
     const error = axiosError({
       response: { status: 403, data: { error: 'Editor access required' } },
     });
-    expect(resolveApiErrorMessage(error, 'fallback')).toBe('Editor access required');
+    expect(resolveApiErrorMessage(error, 'fallback')).toBe('Потрібні права редактора');
   });
 
   it('falls back to a generic 403 message when the backend sends none', () => {
@@ -57,7 +57,7 @@ describe('resolveApiErrorMessage', () => {
     const error = axiosError({
       response: { status: 409, data: { error: 'Slug already exists' } },
     });
-    expect(resolveApiErrorMessage(error, 'fallback')).toBe('Slug already exists');
+    expect(resolveApiErrorMessage(error, 'fallback')).toBe('Такий URL вже існує');
   });
 
   it('falls back to the provided default for other statuses without a backend message', () => {

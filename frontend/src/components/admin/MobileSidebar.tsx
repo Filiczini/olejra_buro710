@@ -33,7 +33,7 @@ export default function MobileSidebar({ isOpen, onClose, role }: MobileSidebarPr
         <div className="p-6 border-b border-zinc-800 flex items-center justify-between">
           <h1 className="text-xl font-bold tracking-tight text-white">
             BURO 710
-            <span className="block text-sm font-normal text-zinc-400">ADMIN</span>
+            <span className="block text-sm font-normal text-zinc-400">АДМІН</span>
           </h1>
           <button
             onClick={onClose}

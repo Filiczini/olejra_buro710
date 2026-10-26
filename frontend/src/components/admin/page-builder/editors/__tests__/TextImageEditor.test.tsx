@@ -30,7 +30,7 @@ describe('TextImageEditor', () => {
       />
     );
 
-    fireEvent.change(screen.getByPlaceholderText('Organic Textures'), {
+    fireEvent.change(screen.getByPlaceholderText('Органічні текстури'), {
       target: { value: 'New title' },
     });
 

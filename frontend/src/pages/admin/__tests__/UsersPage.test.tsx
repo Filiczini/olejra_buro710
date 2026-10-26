@@ -52,7 +52,7 @@ describe('UsersPage', () => {
     renderPage();
     await waitFor(() => expect(userService.getAll).toHaveBeenCalledTimes(1));
 
-    fireEvent.change(screen.getByLabelText('Email', { exact: false }), {
+    fireEvent.change(screen.getByLabelText('Ел. пошта', { exact: false }), {
       target: { value: 'new@b710.design' },
     });
     fireEvent.change(screen.getByLabelText('Пароль', { exact: false }), {
@@ -73,12 +73,12 @@ describe('UsersPage', () => {
 
   it('shows the backend error toast when user creation fails', async () => {
     vi.mocked(userService.create).mockRejectedValue({
-      response: { data: { error: 'Email already exists' } },
+      response: { data: { error: 'Користувач з такою електронною поштою вже існує' } },
     });
     renderPage();
     await waitFor(() => expect(userService.getAll).toHaveBeenCalledTimes(1));
 
-    fireEvent.change(screen.getByLabelText('Email', { exact: false }), {
+    fireEvent.change(screen.getByLabelText('Ел. пошта', { exact: false }), {
       target: { value: 'dup@b710.design' },
     });
     fireEvent.change(screen.getByLabelText('Пароль', { exact: false }), {
@@ -86,7 +86,11 @@ describe('UsersPage', () => {
     });
     fireEvent.submit(screen.getByRole('button', { name: /додати/i }).closest('form')!);
 
-    await waitFor(() => expect(screen.getByText('Email already exists')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(
+        screen.getByText('Користувач з такою електронною поштою вже існує')
+      ).toBeInTheDocument()
+    );
   });
 
   it('deletes a user after confirmation', async () => {

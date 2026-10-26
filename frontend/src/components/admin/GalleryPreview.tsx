@@ -33,7 +33,7 @@ export default function GalleryPreview({
             draggedIndex === index ? 'opacity-50' : ''
           }`}
         >
-          <img src={item.url} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover" />
+          <img src={item.url} alt={`Галерея ${index + 1}`} className="w-full h-full object-cover" />
           {item.isNew && (
             <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded">
               Нове

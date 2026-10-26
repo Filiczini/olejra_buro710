@@ -58,13 +58,13 @@ describe('PostHeroPreview', () => {
 
   it('shows the subtitle and scroll-to-explore hint only together', () => {
     const { rerender } = render(<PostHeroPreview data={data({ hero_title: 'T' })} title="" />);
-    expect(screen.queryByText('Scroll to explore')).not.toBeInTheDocument();
+    expect(screen.queryByText('Прогорнути вниз')).not.toBeInTheDocument();
 
     rerender(
       <PostHeroPreview data={data({ hero_title: 'T', hero_subtitle: 'A teaser' })} title="" />
     );
     expect(screen.getByText('A teaser')).toBeInTheDocument();
-    expect(screen.getByText('Scroll to explore')).toBeInTheDocument();
+    expect(screen.getByText('Прогорнути вниз')).toBeInTheDocument();
   });
 
   it('renders the hero image when provided', () => {

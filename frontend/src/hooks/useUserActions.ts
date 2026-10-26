@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { logger } from '../lib/logger';
 import { userService } from '../services/api';
 import type { User, ApiError } from '@buro710/shared';
+import { translateServerMessage } from '../lib/apiErrorMessage';
 
 export interface UseUserActionsReturn {
   formLoading: boolean;
@@ -34,8 +35,8 @@ export function useUserActions(refresh: () => Promise<unknown>): UseUserActionsR
         return undefined;
       } catch (error: unknown) {
         logger.error('Error creating user', error);
-        const msg = (error as ApiError)?.response?.data?.error || 'Не вдалося створити користувача';
-        return msg;
+        const msg = (error as ApiError)?.response?.data?.error;
+        return msg ? translateServerMessage(msg) : 'Не вдалося створити користувача';
       } finally {
         setFormLoading(false);
       }
@@ -52,8 +53,8 @@ export function useUserActions(refresh: () => Promise<unknown>): UseUserActionsR
       return undefined;
     } catch (error: unknown) {
       logger.error('Error deleting user', error);
-      const msg = (error as ApiError)?.response?.data?.error || 'Не вдалося видалити користувача';
-      return msg;
+      const msg = (error as ApiError)?.response?.data?.error;
+      return msg ? translateServerMessage(msg) : 'Не вдалося видалити користувача';
     }
   }, [deleteTarget, refresh]);
 

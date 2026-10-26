@@ -13,7 +13,7 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <Input
             type="email"
-            label="Email"
+            label="Ел. пошта"
             placeholder="Введіть ваш email"
             value={credentials.email}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>

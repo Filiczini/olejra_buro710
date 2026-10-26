@@ -103,7 +103,7 @@ export default function TextImageEditor({
               type="text"
               value={data.label || ''}
               onChange={(e) => updateField('label', e.target.value)}
-              placeholder="Interior"
+              placeholder="Інтер'єр"
               className="w-full px-2 py-1.5 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
             />
           </div>
@@ -119,7 +119,7 @@ export default function TextImageEditor({
             type="text"
             value={data.title || ''}
             onChange={(e) => updateField('title', e.target.value)}
-            placeholder="Organic Textures"
+            placeholder="Органічні текстури"
             className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
           />
         </div>
@@ -153,7 +153,7 @@ export default function TextImageEditor({
           <div className="relative group mb-3">
             <img
               src={displayUrl}
-              alt={data.image_alt || 'Preview'}
+              alt={data.image_alt || "Прев'ю"}
               className="w-full aspect-[5/6] object-cover rounded-lg border border-zinc-200"
             />
             <button
@@ -198,7 +198,7 @@ export default function TextImageEditor({
         <CompressionStatus message={compressMsg} className="mb-2" />
 
         <label htmlFor={f('image-alt')} className="sr-only">
-          Alt-текст
+          Альтернативний текст
         </label>
         <input
           id={f('image-alt')}
@@ -206,7 +206,7 @@ export default function TextImageEditor({
           type="text"
           value={data.image_alt || ''}
           onChange={(e) => updateField('image_alt', e.target.value)}
-          placeholder="Alt-текст"
+          placeholder="Альтернативний текст"
           className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
         />
       </div>

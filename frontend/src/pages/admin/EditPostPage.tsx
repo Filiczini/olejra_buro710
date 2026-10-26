@@ -70,7 +70,7 @@ export default function EditPostPage() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <label htmlFor="post-slug" className="text-sm font-medium text-zinc-700">
-              URL Slug
+              URL-адреса
             </label>
             {slugLocked ? (
               <button

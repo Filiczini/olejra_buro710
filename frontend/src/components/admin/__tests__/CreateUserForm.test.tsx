@@ -3,7 +3,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import CreateUserForm from '../CreateUserForm';
 
 function fillAndSubmit(email: string, password: string) {
-  fireEvent.change(screen.getByLabelText('Email', { exact: false }), { target: { value: email } });
+  fireEvent.change(screen.getByLabelText('Ел. пошта', { exact: false }), {
+    target: { value: email },
+  });
   fireEvent.change(screen.getByLabelText('Пароль', { exact: false }), {
     target: { value: password },
   });
@@ -17,7 +19,7 @@ describe('CreateUserForm', () => {
 
     fillAndSubmit('', 'secret123');
 
-    await waitFor(() => expect(screen.getByText("Email обов'язковий")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Ел. пошта обов'язкова")).toBeInTheDocument());
     expect(onCreate).not.toHaveBeenCalled();
   });
 
@@ -56,7 +58,9 @@ describe('CreateUserForm', () => {
         role: 'admin',
       })
     );
-    await waitFor(() => expect(screen.getByLabelText('Email', { exact: false })).toHaveValue(''));
+    await waitFor(() =>
+      expect(screen.getByLabelText('Ел. пошта', { exact: false })).toHaveValue('')
+    );
   });
 
   it('submits with the editor role when selected', async () => {

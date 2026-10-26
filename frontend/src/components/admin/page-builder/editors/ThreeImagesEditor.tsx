@@ -185,7 +185,7 @@ export default function ThreeImagesEditor({
               <CompressionStatus message={compressMsgs[index]} />
 
               <label htmlFor={`${imgId}-alt`} className="sr-only">
-                Alt-текст {index + 1}
+                Альтернативний текст {index + 1}
               </label>
               <input
                 id={`${imgId}-alt`}
@@ -193,7 +193,7 @@ export default function ThreeImagesEditor({
                 type="text"
                 value={images[index]?.alt || ''}
                 onChange={(e) => updateAlt(index, e.target.value)}
-                placeholder={`Alt-текст ${index + 1}`}
+                placeholder={`Альтернативний текст ${index + 1}`}
                 className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900"
               />
             </div>

@@ -70,7 +70,7 @@ export default function ImageFullEditor({
           <div className="relative group">
             <img
               src={displayUrl}
-              alt={data.alt || 'Preview'}
+              alt={data.alt || "Прев'ю"}
               className="w-full aspect-[16/9] object-cover rounded-lg border border-zinc-200"
             />
             <button
@@ -117,7 +117,7 @@ export default function ImageFullEditor({
 
       <div>
         <label htmlFor={f('caption')} className="block text-sm font-medium text-zinc-700 mb-2">
-          Підпис (caption)
+          Підпис
         </label>
         <input
           id={f('caption')}
@@ -125,14 +125,14 @@ export default function ImageFullEditor({
           type="text"
           value={data.caption || ''}
           onChange={(e) => updateField('caption', e.target.value)}
-          placeholder="Living Space"
+          placeholder="Вітальня"
           className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900"
         />
       </div>
 
       <div>
         <label htmlFor={f('alt')} className="block text-sm font-medium text-zinc-700 mb-2">
-          Alt-текст (опис для SEO)
+          Альтернативний текст (для SEO)
         </label>
         <input
           id={f('alt')}

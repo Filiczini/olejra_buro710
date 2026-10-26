@@ -103,7 +103,7 @@ export default function HeroSlider() {
                       >
                         <Icon icon="solar:arrow-down-linear" width={20} />
                       </button>
-                      <span className="text-white/60 text-xs">Scroll to explore</span>
+                      <span className="text-white/60 text-xs">Прогорнути вниз</span>
                     </div>
                   </div>
                 )}

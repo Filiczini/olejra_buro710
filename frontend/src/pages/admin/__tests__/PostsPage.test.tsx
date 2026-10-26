@@ -86,7 +86,9 @@ describe('PostsPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Видалити пост' }));
     fireEvent.click(screen.getByRole('button', { name: 'Видалити' }));
 
-    await waitFor(() => expect(screen.getByText('Admin access required')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText('Потрібні права адміністратора')).toBeInTheDocument()
+    );
     expect(screen.getByText('First post')).toBeInTheDocument();
   });
 

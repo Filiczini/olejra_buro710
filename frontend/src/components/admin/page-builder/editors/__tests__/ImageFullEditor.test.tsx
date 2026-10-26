@@ -37,7 +37,7 @@ describe('ImageFullEditor', () => {
       />
     );
 
-    expect(screen.getByAltText('Preview')).toHaveAttribute('src', 'https://x.test/a.jpg');
+    expect(screen.getByAltText("Прев'ю")).toHaveAttribute('src', 'https://x.test/a.jpg');
   });
 
   it('compresses a newly selected file and calls onImageChange with it', async () => {
@@ -84,7 +84,7 @@ describe('ImageFullEditor', () => {
       <ImageFullEditor blockId="b1" data={data} onChange={onChange} onImageChange={vi.fn()} />
     );
 
-    fireEvent.change(screen.getByPlaceholderText('Living Space'), {
+    fireEvent.change(screen.getByPlaceholderText('Вітальня'), {
       target: { value: 'Kitchen view' },
     });
     fireEvent.change(screen.getByPlaceholderText('Опис зображення'), {

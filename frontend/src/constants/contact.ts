@@ -14,7 +14,7 @@ export interface SocialLinkItem {
 export const contactInfo: ContactInfoItem[] = [
   {
     icon: 'solar:letter-linear',
-    label: 'Email',
+    label: 'Ел. пошта',
     value: 'hello@buro710.com',
     link: 'mailto:hello@buro710.com',
   },
@@ -42,7 +42,7 @@ export const socialLinks: SocialLinkItem[] = [
   {
     icon: 'ri:instagram-line',
     name: 'Instagram',
-    link: 'https://instagram.com/buro710',
+    link: 'https://www.instagram.com/b710.design/',
   },
   {
     icon: 'ri:youtube-line',

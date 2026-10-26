@@ -12,7 +12,7 @@ export function useUserColumns(
     () => [
       {
         key: 'email',
-        header: 'Email',
+        header: 'Ел. пошта',
         cell: (user) => <span className="text-base font-medium text-gray-900">{user.email}</span>,
       },
       {

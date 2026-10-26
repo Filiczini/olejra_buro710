@@ -32,11 +32,11 @@ describe('TextFullBlock', () => {
     render(<TextFullBlock data={data} />);
     expect(screen.getByText('120')).toBeInTheDocument();
     expect(screen.getByText('m²')).toBeInTheDocument();
-    expect(screen.getByText('Area')).toBeInTheDocument();
+    expect(screen.getByText('Площа')).toBeInTheDocument();
     expect(screen.getByText('6')).toBeInTheDocument();
-    expect(screen.getByText('Months')).toBeInTheDocument();
+    expect(screen.getByText('Місяців')).toBeInTheDocument();
     expect(screen.getByText('2024')).toBeInTheDocument();
-    expect(screen.getByText('Year')).toBeInTheDocument();
+    expect(screen.getByText('Рік')).toBeInTheDocument();
   });
 
   it('does not render stats section when no stats', () => {

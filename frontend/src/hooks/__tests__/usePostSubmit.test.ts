@@ -135,7 +135,7 @@ describe('usePostSubmit', () => {
       await result.current.submit(values(), callbacks);
     });
 
-    expect(callbacks.showToast).toHaveBeenCalledWith('Editor access required', 'error');
+    expect(callbacks.showToast).toHaveBeenCalledWith('Потрібні права редактора', 'error');
   });
 
   it('maps a duplicate slug error to the slug field specifically', async () => {

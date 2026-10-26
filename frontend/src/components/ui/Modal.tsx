@@ -28,7 +28,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
             <button
               onClick={onClose}
               className="text-zinc-400 hover:text-zinc-600 transition-colors cursor-pointer"
-              aria-label="Close"
+              aria-label="Закрити"
             >
               <X className="h-5 w-5" />
             </button>
@@ -37,7 +37,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 transition-colors cursor-pointer"
-            aria-label="Close"
+            aria-label="Закрити"
           >
             <X className="h-5 w-5" />
           </button>

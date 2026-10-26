@@ -33,7 +33,7 @@ export default function TextFullBlock({ data }: TextFullBlockProps) {
                   <span className="text-sm align-top text-zinc-400">m²</span>
                 </span>
                 <span className="text-xs text-zinc-400 uppercase tracking-wider mt-1 block">
-                  Area
+                  Площа
                 </span>
               </div>
             )}
@@ -41,7 +41,7 @@ export default function TextFullBlock({ data }: TextFullBlockProps) {
               <div className="text-center">
                 <span className="block text-2xl font-medium text-zinc-900">{months}</span>
                 <span className="text-xs text-zinc-400 uppercase tracking-wider mt-1 block">
-                  Months
+                  Місяців
                 </span>
               </div>
             )}
@@ -49,7 +49,7 @@ export default function TextFullBlock({ data }: TextFullBlockProps) {
               <div className="text-center">
                 <span className="block text-2xl font-medium text-zinc-900">{year}</span>
                 <span className="text-xs text-zinc-400 uppercase tracking-wider mt-1 block">
-                  Year
+                  Рік
                 </span>
               </div>
             )}

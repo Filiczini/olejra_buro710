@@ -15,7 +15,7 @@ export default function CreateUserForm({ onCreate, formLoading }: CreateUserForm
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
-    if (!email.trim()) errors.email = "Email обов'язковий";
+    if (!email.trim()) errors.email = "Ел. пошта обов'язкова";
     else if (!/^\S+@\S+\.\S+$/.test(email)) errors.email = 'Невірний формат email';
     if (!password || password.length < 6) errors.password = 'Пароль має бути не менше 6 символів';
     setFormErrors(errors);
@@ -40,7 +40,7 @@ export default function CreateUserForm({ onCreate, formLoading }: CreateUserForm
           <Input
             id="new-user-email"
             name="email"
-            label="Email"
+            label="Ел. пошта"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}

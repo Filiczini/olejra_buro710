@@ -56,7 +56,7 @@ describe('useUserActions', () => {
       });
     });
 
-    expect(error).toBe('Email already exists');
+    expect(error).toBe('Користувач з такою електронною поштою вже існує');
     expect(refresh).not.toHaveBeenCalled();
   });
 

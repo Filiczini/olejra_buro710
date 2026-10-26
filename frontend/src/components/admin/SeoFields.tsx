@@ -89,7 +89,7 @@ export default function SeoFields({
           <div>
             <div className="flex justify-between items-center mb-1">
               <label htmlFor="seo-title" className="block text-sm font-medium text-zinc-700">
-                SEO Title
+                SEO заголовок
               </label>
               <span className={`text-xs ${titleColor}`}>{titleLength}/60</span>
             </div>
@@ -112,7 +112,7 @@ export default function SeoFields({
           <div>
             <div className="flex justify-between items-center mb-1">
               <label htmlFor="seo-description" className="block text-sm font-medium text-zinc-700">
-                SEO Description
+                SEO опис
               </label>
               <span className={`text-xs ${descColor}`}>{descLength}/160</span>
             </div>
@@ -147,7 +147,7 @@ export default function SeoFields({
                 <div className="relative group">
                   <img
                     src={previewUrl}
-                    alt="OG Preview"
+                    alt="Прев'ю OG"
                     className="w-full h-32 object-cover rounded-lg border border-zinc-200"
                   />
                   <button
