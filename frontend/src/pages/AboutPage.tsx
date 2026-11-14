@@ -38,8 +38,8 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-white text-zinc-900">
       <main className="pt-20 md:pt-24">
-        <section className="mx-auto flex min-h-[540px] max-w-[1560px] items-center px-6 py-20 md:px-10 lg:min-h-[650px] lg:py-28">
-          <div className="grid w-full grid-cols-1 items-center gap-16 lg:grid-cols-[1.08fr_0.92fr] lg:gap-24 xl:gap-36">
+        <section className="mx-auto flex max-w-[1560px] items-center px-6 pt-8 pb-16 md:min-h-[540px] md:px-10 md:py-20 lg:min-h-[650px] lg:py-28">
+          <div className="grid w-full grid-cols-1 items-center gap-10 md:gap-16 lg:grid-cols-[1.08fr_0.92fr] lg:gap-24 xl:gap-36">
             <h1 className="max-w-[760px] font-display text-[44px] font-semibold leading-[1.08] tracking-[-0.025em] sm:text-6xl lg:text-[76px]">
               Простір продовження
               <br className="hidden sm:block" /> особистості,
@@ -51,7 +51,7 @@ export default function AboutPage() {
               <h2 className="mb-4 font-display text-2xl font-medium lg:text-4xl">
                 Buro 710 — інтер'єрна студія.
               </h2>
-              <p className="mb-9 text-lg text-zinc-400 lg:text-xl">
+              <p className="mb-7 text-lg text-zinc-400 md:mb-9 lg:text-xl">
                 Наш підхід базується на переосмисленні.
               </p>
               <div className="flex flex-col gap-4 sm:flex-row">

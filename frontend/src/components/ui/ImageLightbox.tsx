@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { Icon } from '@iconify-icon/react';
+import ZoomableImage from './ZoomableImage';
 
 interface ImageLightboxProps {
   images: string[];
@@ -104,14 +105,23 @@ export default function ImageLightbox({
   );
 
   const touchStartX = useRef<number | null>(null);
+  const [zoomed, setZoomed] = useState(false);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartX.current = e.changedTouches[0].screenX;
-  }, []);
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      // No swipe navigation while zoomed (one finger pans) or during a pinch
+      touchStartX.current =
+        zoomed || (e.touches && e.touches.length > 1) ? null : e.changedTouches[0].screenX;
+    },
+    [zoomed]
+  );
 
   const handleTouchEnd = useCallback(
     (e: React.TouchEvent) => {
-      if (touchStartX.current === null) return;
+      if (touchStartX.current === null || zoomed) {
+        touchStartX.current = null;
+        return;
+      }
       const diff = touchStartX.current - e.changedTouches[0].screenX;
       const threshold = 50;
       if (diff > threshold) {
@@ -121,7 +131,7 @@ export default function ImageLightbox({
       }
       touchStartX.current = null;
     },
-    [onPrev, onNext]
+    [onPrev, onNext, zoomed]
   );
 
   useEffect(() => {
@@ -169,29 +179,35 @@ export default function ImageLightbox({
         {currentIndex + 1} / {images.length}
       </div>
 
+      {/* Mobile: image spans the full width and the arrows sit on top of it */}
+      <div
+        className="absolute inset-0 py-20 md:p-28"
+        onClick={(e) => e.target === e.currentTarget && handleClose()}
+      >
+        <ZoomableImage
+          key={currentIndex}
+          src={images[currentIndex]}
+          alt={`Зображення ${currentIndex + 1}`}
+          onZoomChange={setZoomed}
+          onBackdropClick={handleClose}
+        />
+      </div>
+
       <button
         onClick={handlePrev}
-        className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-10 w-14 h-14 md:w-20 md:h-20 flex items-center justify-center rounded-full text-white/80 hover:text-white hover:bg-white/10 opacity-70 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer"
+        className={`absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 md:w-20 md:h-20 flex items-center justify-center rounded-full text-white bg-black/40 backdrop-blur-sm md:bg-transparent md:backdrop-blur-none md:text-white/80 hover:text-white md:hover:bg-white/10 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer ${zoomed ? 'hidden' : 'opacity-80'}`}
         aria-label="Попереднє"
       >
-        <Icon icon="solar:arrow-left-linear" width={48} />
+        <Icon icon="solar:arrow-left-linear" className="text-2xl md:text-5xl" />
       </button>
 
       <button
         onClick={handleNext}
-        className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-10 w-14 h-14 md:w-20 md:h-20 flex items-center justify-center rounded-full text-white/80 hover:text-white hover:bg-white/10 opacity-70 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer"
+        className={`absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 md:w-20 md:h-20 flex items-center justify-center rounded-full text-white bg-black/40 backdrop-blur-sm md:bg-transparent md:backdrop-blur-none md:text-white/80 hover:text-white md:hover:bg-white/10 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer ${zoomed ? 'hidden' : 'opacity-80'}`}
         aria-label="Наступне"
       >
-        <Icon icon="solar:arrow-right-linear" width={48} />
+        <Icon icon="solar:arrow-right-linear" className="text-2xl md:text-5xl" />
       </button>
-
-      <div className="absolute inset-0 flex items-center justify-center p-16 md:p-28">
-        <img
-          src={images[currentIndex]}
-          alt={`Зображення ${currentIndex + 1}`}
-          className="max-w-full max-h-full object-contain"
-        />
-      </div>
     </div>
   );
 }

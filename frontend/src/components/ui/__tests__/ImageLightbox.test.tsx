@@ -184,4 +184,32 @@ describe('ImageLightbox', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
     vi.useRealTimers();
   });
+
+  it('zooms on double-click and disables swipe navigation while zoomed', () => {
+    const onNext = vi.fn();
+    render(
+      <ImageLightbox
+        images={images}
+        currentIndex={1}
+        onClose={vi.fn()}
+        onPrev={vi.fn()}
+        onNext={onNext}
+      />
+    );
+    const img = screen.getByRole('img');
+
+    fireEvent.pointerDown(img, { pointerId: 1, pointerType: 'mouse', button: 0 });
+    fireEvent.pointerUp(img, { pointerId: 1, pointerType: 'mouse' });
+    fireEvent.doubleClick(img);
+    expect(img.style.transform).toContain('scale(2.5)');
+    expect(screen.getByRole('button', { name: 'Наступне' }).className).toContain('hidden');
+
+    const dialog = screen.getByRole('dialog');
+    fireEvent.touchStart(dialog, { changedTouches: [{ screenX: 200 }] });
+    fireEvent.touchEnd(dialog, { changedTouches: [{ screenX: 100 }] });
+    expect(onNext).not.toHaveBeenCalled();
+
+    fireEvent.doubleClick(img);
+    expect(img.style.transform).toContain('scale(1)');
+  });
 });

@@ -24,11 +24,6 @@ const faqItems = [
   },
 ];
 
-const longestIndex = faqItems.reduce(
-  (best, item, i) => (item.answer.length > faqItems[best].answer.length ? i : best),
-  0
-);
-
 export default function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -44,22 +39,8 @@ export default function FAQSection() {
           </p>
         </div>
 
-        <div className="lg:col-span-8 grid">
-          {/* Invisible copy with the longest answer open: reserves the max height so content below never shifts */}
-          <div aria-hidden className="invisible pointer-events-none col-start-1 row-start-1">
-            {faqItems.map((item, index) => (
-              <div key={item.question} className="border-t border-zinc-200 last:border-b">
-                <div className="flex items-center justify-between gap-6 py-6">
-                  <span className="text-lg font-medium">{item.question}</span>
-                  <span className="w-6 shrink-0" />
-                </div>
-                {index === longestIndex && (
-                  <p className="text-body-sm leading-relaxed pb-6 pr-10">{item.answer}</p>
-                )}
-              </div>
-            ))}
-          </div>
-          <div className="col-start-1 row-start-1 self-start">
+        <div className="lg:col-span-8">
+          <div>
             {faqItems.map((item, index) => {
               const isOpen = openIndex === index;
               return (
