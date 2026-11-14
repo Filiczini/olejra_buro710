@@ -1,5 +1,6 @@
 import type { ImageFullData } from '@buro710/shared';
 import ResponsiveImage from '../ui/ResponsiveImage';
+import { OpenImageButton } from './PostImageViewer';
 
 interface ImageFullBlockProps {
   data: ImageFullData;
@@ -12,7 +13,8 @@ export default function ImageFullBlock({ data }: ImageFullBlockProps) {
 
   return (
     <section className="px-5 py-2 md:px-10 md:py-3">
-      <figure className="group w-full overflow-hidden">
+      <figure className="group relative w-full overflow-hidden">
+        <OpenImageButton src={image_url} />
         <ResponsiveImage
           src={image_url}
           sizes="100vw"

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Icon } from '@iconify-icon/react';
 import type { Post, Block } from '@buro710/shared';
 import Header from '../layout/Header';
@@ -5,6 +6,8 @@ import Footer from '../layout/Footer';
 import PostHeroBlock from './PostHeroBlock';
 import BlockRenderer from './BlockRenderer';
 import PostGalleryBlock from './PostGalleryBlock';
+import { PostImageViewer } from './PostImageViewer';
+import { collectPostImages } from '../../lib/collectPostImages';
 
 interface PostPageViewProps {
   post: Post;
@@ -13,33 +16,39 @@ interface PostPageViewProps {
 
 export default function PostPageView({ post, blocks }: PostPageViewProps) {
   const hasHero = Boolean(post.hero_image_url || post.hero_title);
+  const allImages = useMemo(
+    () => collectPostImages(blocks, post.gallery_images ?? []),
+    [blocks, post.gallery_images]
+  );
 
   return (
-    <div className="bg-white text-zinc-900 antialiased">
-      <Header transparent={hasHero} />
+    <PostImageViewer images={allImages}>
+      <div className="bg-white text-zinc-900 antialiased">
+        <Header transparent={hasHero} />
 
-      {hasHero && <PostHeroBlock post={post} />}
+        {hasHero && <PostHeroBlock post={post} />}
 
-      <main className={hasHero ? '' : 'pt-16'}>
-        {blocks.length > 0 && <BlockRenderer blocks={blocks} />}
+        <main className={hasHero ? '' : 'pt-16'}>
+          {blocks.length > 0 && <BlockRenderer blocks={blocks} />}
 
-        {post.gallery_images && post.gallery_images.length > 0 && (
-          <PostGalleryBlock images={post.gallery_images} title={post.title} />
-        )}
-
-        {!hasHero &&
-          blocks.length === 0 &&
-          !(post.gallery_images && post.gallery_images.length > 0) && (
-            <div className="max-w-5xl mx-auto px-4 py-24">
-              <div className="text-center text-zinc-400">
-                <h1 className="text-2xl font-bold text-zinc-700 mb-4">{post.title}</h1>
-                <Icon icon="solar:document-text-linear" width={48} className="mx-auto mb-4" />
-                <p>Контент сторінки буде додано пізніше...</p>
-              </div>
-            </div>
+          {post.gallery_images && post.gallery_images.length > 0 && (
+            <PostGalleryBlock images={post.gallery_images} title={post.title} />
           )}
-      </main>
-      <Footer />
-    </div>
+
+          {!hasHero &&
+            blocks.length === 0 &&
+            !(post.gallery_images && post.gallery_images.length > 0) && (
+              <div className="max-w-5xl mx-auto px-4 py-24">
+                <div className="text-center text-zinc-400">
+                  <h1 className="text-2xl font-bold text-zinc-700 mb-4">{post.title}</h1>
+                  <Icon icon="solar:document-text-linear" width={48} className="mx-auto mb-4" />
+                  <p>Контент сторінки буде додано пізніше...</p>
+                </div>
+              </div>
+            )}
+        </main>
+        <Footer />
+      </div>
+    </PostImageViewer>
   );
 }

@@ -1,6 +1,7 @@
 import { Icon } from '@iconify-icon/react';
 import type { TextImageData } from '@buro710/shared';
 import ResponsiveImage from '../ui/ResponsiveImage';
+import { OpenImageButton } from './PostImageViewer';
 
 interface TextImageBlockProps {
   data: TextImageData;
@@ -19,6 +20,7 @@ export default function TextImageBlock({ data, mirrored }: TextImageBlockProps) 
     <section className="group px-5 py-5 md:px-10 md:py-8">
       <div className="grid w-full grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-16">
         <div className={`relative aspect-[4/5] ${order} overflow-hidden`}>
+          <OpenImageButton src={image_url} />
           <ResponsiveImage
             src={image_url}
             sizes="(min-width: 1024px) 50vw, 100vw"

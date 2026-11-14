@@ -1,5 +1,6 @@
 import type { ThreeImagesData } from '@buro710/shared';
 import ResponsiveImage from '../ui/ResponsiveImage';
+import { OpenImageButton } from './PostImageViewer';
 
 interface ThreeImagesBlockProps {
   data: ThreeImagesData;
@@ -15,7 +16,8 @@ export default function ThreeImagesBlock({ data }: ThreeImagesBlockProps) {
       <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-3">
         {images.map((image, index) =>
           image.url ? (
-            <div key={`${image.url}-${index}`} className="overflow-hidden group">
+            <div key={`${image.url}-${index}`} className="relative overflow-hidden group">
+              <OpenImageButton src={image.url} />
               <ResponsiveImage
                 src={image.url}
                 sizes="(min-width: 768px) 33vw, 100vw"
