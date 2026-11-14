@@ -29,7 +29,7 @@ export default function HeroSlider() {
 
   if (loading) {
     return (
-      <section className="relative w-full h-screen overflow-hidden bg-zinc-900 text-white">
+      <section className="relative w-full h-svh overflow-hidden bg-zinc-900 text-white">
         <div className="flex items-center justify-center h-full">
           <div className="text-zinc-400">Завантаження...</div>
         </div>
@@ -39,7 +39,7 @@ export default function HeroSlider() {
 
   if (error || posts.length === 0) {
     return (
-      <section className="relative w-full h-screen overflow-hidden bg-zinc-900 text-white">
+      <section className="relative w-full h-svh overflow-hidden bg-zinc-900 text-white">
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
             <h1 className="text-5xl md:text-h1 font-display tracking-tight mb-4">Buro 710</h1>
@@ -53,7 +53,7 @@ export default function HeroSlider() {
   const currentPost = posts[currentSlide];
 
   return (
-    <header className="relative w-full h-screen overflow-hidden bg-zinc-900 text-white">
+    <header className="relative w-full h-svh overflow-hidden bg-zinc-900 text-white">
       <div className="relative w-full h-full">
         {posts.map((post, index) => (
           <div
@@ -71,7 +71,7 @@ export default function HeroSlider() {
               />
             </div>
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/30"></div>
-            <div className="absolute bottom-0 w-full h-full px-6 md:px-10 pb-10 md:pb-14 flex flex-col justify-end">
+            <div className="absolute bottom-0 w-full h-full px-6 md:px-10 pb-28 md:pb-14 flex flex-col justify-end">
               <div className="max-w-[1800px] mx-auto w-full flex flex-col md:flex-row items-end justify-between gap-10">
                 <div className="w-full md:max-w-4xl">
                   <h1 className="text-5xl md:text-h1 font-display tracking-tight leading-[0.9] mb-6">
@@ -114,9 +114,20 @@ export default function HeroSlider() {
       </div>
 
       <div className="absolute bottom-0 w-full px-6 md:px-10 pb-10 md:pb-14 pointer-events-none z-20">
-        <div className="max-w-[1800px] mx-auto w-full flex justify-end">
-          <div className="flex flex-col items-end gap-6 pointer-events-auto">
-            <div className="flex items-center gap-6">
+        <div className="max-w-[1800px] mx-auto w-full flex items-center justify-between md:justify-end gap-4">
+          <Link
+            to={`/page/${currentPost.slug}`}
+            className="group md:hidden flex items-center gap-2 text-sm font-medium text-white/90 hover:text-white transition-all duration-300 hover:opacity-80 cursor-pointer pointer-events-auto"
+          >
+            Переглянути пост
+            <Icon
+              icon="solar:arrow-right-linear"
+              width={16}
+              className="transition-transform duration-300 group-hover:translate-x-1 group-hover:scale-110"
+            />
+          </Link>
+          <div className="pointer-events-auto">
+            <div className="flex items-center gap-4 md:gap-6">
               <span className="text-sm font-semibold tracking-wide">
                 {String(currentSlide + 1).padStart(2, '0')}
               </span>
@@ -132,7 +143,7 @@ export default function HeroSlider() {
                   className="transition-transform duration-300 group-hover:translate-x-3 group-hover:scale-110"
                 />
               </Link>
-              <div className="flex gap-2 ml-4">
+              <div className="flex gap-2 md:ml-4">
                 <button
                   onClick={prevSlide}
                   aria-label="Попередній слайд"
@@ -157,17 +168,6 @@ export default function HeroSlider() {
                 </button>
               </div>
             </div>
-            <Link
-              to={`/page/${currentPost.slug}`}
-              className="md:hidden flex items-center gap-2 text-sm font-medium text-white/90 hover:text-white transition-all duration-300 hover:opacity-80 cursor-pointer"
-            >
-              Переглянути пост{' '}
-              <Icon
-                icon="solar:arrow-right-linear"
-                width={16}
-                className="transition-transform duration-300 group-hover:translate-x-1 group-hover:scale-110"
-              />
-            </Link>
           </div>
         </div>
       </div>

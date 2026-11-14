@@ -44,16 +44,12 @@ export default function Header({ transparent = false }: HeaderProps) {
     }
   };
 
-  const lastScrollTime = useRef(0);
-
   useEffect(() => {
-    const handleScroll = () => {
-      const now = Date.now();
-      if (now - lastScrollTime.current < 100) return;
-      lastScrollTime.current = now;
-      setScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
+    // No throttling: React bails out when the boolean doesn't change, and a dropped
+    // final event would leave the header stuck in the wrong state.
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
