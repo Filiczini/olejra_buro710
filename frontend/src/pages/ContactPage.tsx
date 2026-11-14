@@ -28,7 +28,8 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-white text-zinc-900">
       <main className="pt-20 md:pt-24">
-        <section className="mx-auto max-w-[1560px] px-6 py-20 md:px-10 lg:py-28">
+        {/* Mobile top padding matches AboutPage so both pages start at the same height */}
+        <section className="mx-auto max-w-[1560px] px-6 pt-8 pb-20 md:px-10 md:pt-20 lg:py-28">
           <div className="grid grid-cols-1 gap-16 lg:grid-cols-[0.85fr_1.15fr] lg:gap-28">
             <div>
               <h1 className="mb-7 font-display text-5xl font-semibold tracking-tight sm:text-6xl lg:text-[74px]">
