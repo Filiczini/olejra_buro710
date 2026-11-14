@@ -160,7 +160,8 @@ jobs:
 
   test-e2e:
     name: E2E Tests (Playwright)
-    runs-on: ubuntu-latest
+    # Pinned: Playwright 1.59 can't install browsers on ubuntu-latest (26.04)
+    runs-on: ubuntu-24.04
     needs: changes
     if: ${{ needs.changes.outputs.e2e == 'true' || github.event_name == 'push' }}
     services:
