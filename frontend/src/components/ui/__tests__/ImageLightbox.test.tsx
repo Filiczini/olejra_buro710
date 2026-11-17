@@ -212,4 +212,74 @@ describe('ImageLightbox', () => {
     fireEvent.doubleClick(img);
     expect(img.style.transform).toContain('scale(1)');
   });
+
+  describe('slide animation', () => {
+    const renderAt = (onNext = vi.fn(), onPrev = vi.fn()) => {
+      const utils = render(
+        <ImageLightbox
+          images={images}
+          currentIndex={1}
+          onClose={vi.fn()}
+          onPrev={onPrev}
+          onNext={onNext}
+        />
+      );
+      return { ...utils, track: () => screen.getByTestId('lightbox-track') };
+    };
+
+    it('renders the neighbours beside the current image, hidden from assistive tech', () => {
+      const { container } = renderAt();
+      const srcs = [...container.querySelectorAll('img')].map((i) => i.getAttribute('src'));
+      expect(srcs).toEqual(['a.jpg', 'b.jpg', 'c.jpg']);
+      expect(screen.getAllByRole('img')).toHaveLength(1);
+    });
+
+    it('moves the image with the finger while swiping', () => {
+      const { track } = renderAt();
+      const dialog = screen.getByRole('dialog');
+      fireEvent.touchStart(dialog, { changedTouches: [{ screenX: 200 }] });
+      fireEvent.touchMove(dialog, { changedTouches: [{ screenX: 170 }] });
+      expect(track().style.transform).toContain('-30px');
+      expect(track().style.transition).toBe('none');
+    });
+
+    it('springs back when the swipe is too short', () => {
+      const onNext = vi.fn();
+      const { track } = renderAt(onNext);
+      const dialog = screen.getByRole('dialog');
+      fireEvent.touchStart(dialog, { changedTouches: [{ screenX: 200 }] });
+      fireEvent.touchMove(dialog, { changedTouches: [{ screenX: 180 }] });
+      fireEvent.touchEnd(dialog, { changedTouches: [{ screenX: 180 }] });
+      expect(onNext).not.toHaveBeenCalled();
+      expect(track().style.transform).toContain('+ 0px');
+      expect(track().style.transition).toContain('transform');
+    });
+
+    it('starts the next image from where the swipe left off, then glides it to the centre', async () => {
+      vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'cancelAnimationFrame'] });
+      const { track } = renderAt();
+      const dialog = screen.getByRole('dialog');
+      fireEvent.touchStart(dialog, { changedTouches: [{ screenX: 300 }] });
+      fireEvent.touchMove(dialog, { changedTouches: [{ screenX: 180 }] });
+      fireEvent.touchEnd(dialog, { changedTouches: [{ screenX: 180 }] });
+
+      // Old image is shown in the side slot, still offset by the drag, with no transition
+      expect(track().style.transform).toBe('translate3d(calc(0% + -120px), 0, 0)');
+      expect(track().style.transition).toBe('none');
+
+      await act(async () => {
+        vi.advanceTimersToNextFrame();
+        vi.advanceTimersToNextFrame();
+      });
+      expect(track().style.transform).toBe('translate3d(calc(-100% + 0px), 0, 0)');
+      expect(track().style.transition).toContain('transform');
+      vi.useRealTimers();
+    });
+
+    it('slides in from the left when going back with the arrow', () => {
+      const { track } = renderAt();
+      fireEvent.click(screen.getByRole('button', { name: 'Попереднє' }));
+      expect(track().style.transform).toBe('translate3d(calc(-200% + 0px), 0, 0)');
+    });
+  });
 });

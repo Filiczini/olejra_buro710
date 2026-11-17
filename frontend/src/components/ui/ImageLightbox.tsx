@@ -45,20 +45,57 @@ export default function ImageLightbox({
     return () => clearTimeout(timer);
   }, [isClosing, finishClose]);
 
+  /**
+   * Slide transition. The track holds [prev, current, next]. After navigating, the new image
+   * is already in the centre slot and the old one sits in a side slot, so we render one frame
+   * shifted back to where the old image was (`pendingNav`) and then let the track glide to 0.
+   * `fromPx` keeps the finger's drag offset so the swipe continues without a jump.
+   */
+  const [dragX, setDragX] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [pendingNav, setPendingNav] = useState<{ shift: number; fromPx: number } | null>(null);
+
+  const navigate = useCallback(
+    (dir: 'next' | 'prev', fromPx = 0) => {
+      const reduceMotion =
+        typeof window !== 'undefined' &&
+        window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      if (!reduceMotion && images.length > 1) {
+        setPendingNav({ shift: dir === 'next' ? 100 : -100, fromPx });
+      }
+      setDragX(0);
+      if (dir === 'next') onNext();
+      else onPrev();
+    },
+    [images.length, onNext, onPrev]
+  );
+
+  const goNext = useCallback((fromPx?: number) => navigate('next', fromPx), [navigate]);
+  const goPrev = useCallback((fromPx?: number) => navigate('prev', fromPx), [navigate]);
+
+  useEffect(() => {
+    if (!pendingNav) return;
+    // Two frames: let the browser paint the start position before enabling the transition
+    let id = requestAnimationFrame(() => {
+      id = requestAnimationFrame(() => setPendingNav(null));
+    });
+    return () => cancelAnimationFrame(id);
+  }, [pendingNav]);
+
   const handlePrev = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      onPrev();
+      goPrev();
     },
-    [onPrev]
+    [goPrev]
   );
 
   const handleNext = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      onNext();
+      goNext();
     },
-    [onNext]
+    [goNext]
   );
 
   const handleKeyDown = useCallback(
@@ -68,10 +105,10 @@ export default function ImageLightbox({
           handleClose();
           break;
         case 'ArrowLeft':
-          onPrev();
+          goPrev();
           break;
         case 'ArrowRight':
-          onNext();
+          goNext();
           break;
         case 'Tab': {
           // Focus trap: keep Tab within lightbox
@@ -92,7 +129,7 @@ export default function ImageLightbox({
         }
       }
     },
-    [handleClose, onPrev, onNext]
+    [handleClose, goPrev, goNext]
   );
 
   const handleBackdropClick = useCallback(
@@ -111,28 +148,54 @@ export default function ImageLightbox({
     (e: React.TouchEvent) => {
       // No swipe navigation while zoomed (one finger pans) or during a pinch
       touchStartX.current =
-        zoomed || (e.touches && e.touches.length > 1) ? null : e.changedTouches[0].screenX;
+        zoomed || images.length < 2 || (e.touches && e.touches.length > 1)
+          ? null
+          : e.changedTouches[0].screenX;
+    },
+    [zoomed, images.length]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (touchStartX.current === null) return;
+      if (zoomed || (e.touches && e.touches.length > 1)) {
+        // A second finger landed: this is a pinch, not a swipe
+        touchStartX.current = null;
+        setDragging(false);
+        setDragX(0);
+        return;
+      }
+      setDragging(true);
+      setDragX(e.changedTouches[0].screenX - touchStartX.current);
     },
     [zoomed]
   );
 
   const handleTouchEnd = useCallback(
     (e: React.TouchEvent) => {
+      setDragging(false);
       if (touchStartX.current === null || zoomed) {
         touchStartX.current = null;
+        setDragX(0);
         return;
       }
-      const diff = touchStartX.current - e.changedTouches[0].screenX;
-      const threshold = 50;
-      if (diff > threshold) {
-        onNext();
-      } else if (diff < -threshold) {
-        onPrev();
-      }
+      const offset = e.changedTouches[0].screenX - touchStartX.current;
       touchStartX.current = null;
+      const threshold = 50;
+      if (offset < -threshold) {
+        goNext(offset);
+      } else if (offset > threshold) {
+        goPrev(offset);
+      } else {
+        setDragX(0); // not far enough: spring back
+      }
     },
-    [onPrev, onNext, zoomed]
+    [goNext, goPrev, zoomed]
   );
+
+  const hasNeighbours = images.length > 1;
+  const prevIndex = (currentIndex - 1 + images.length) % images.length;
+  const nextIndex = (currentIndex + 1) % images.length;
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
@@ -160,7 +223,9 @@ export default function ImageLightbox({
       onAnimationEnd={handleAnimationEnd}
       onClick={handleBackdropClick}
       onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
     >
       <div className="absolute inset-0 bg-black/95" />
 
@@ -180,17 +245,31 @@ export default function ImageLightbox({
       </div>
 
       {/* Mobile: image spans the full width and the arrows sit on top of it */}
-      <div
-        className="absolute inset-0 py-20 md:p-28"
-        onClick={(e) => e.target === e.currentTarget && handleClose()}
-      >
-        <ZoomableImage
-          key={currentIndex}
-          src={images[currentIndex]}
-          alt={`Зображення ${currentIndex + 1}`}
-          onZoomChange={setZoomed}
-          onBackdropClick={handleClose}
-        />
+      <div className="absolute inset-0 overflow-hidden">
+        <div
+          data-testid="lightbox-track"
+          className="flex h-full will-change-transform"
+          style={{
+            transform: `translate3d(calc(${(hasNeighbours ? -100 : 0) + (pendingNav?.shift ?? 0)}% + ${pendingNav ? pendingNav.fromPx : dragX}px), 0, 0)`,
+            transition:
+              pendingNav || dragging ? 'none' : 'transform 400ms cubic-bezier(0.22, 0.61, 0.36, 1)',
+          }}
+        >
+          {hasNeighbours && <NeighbourSlide src={images[prevIndex]} />}
+          <div
+            className="h-full w-full shrink-0 py-20 md:p-28"
+            onClick={(e) => e.target === e.currentTarget && handleClose()}
+          >
+            <ZoomableImage
+              key={currentIndex}
+              src={images[currentIndex]}
+              alt={`Зображення ${currentIndex + 1}`}
+              onZoomChange={setZoomed}
+              onBackdropClick={handleClose}
+            />
+          </div>
+          {hasNeighbours && <NeighbourSlide src={images[nextIndex]} />}
+        </div>
       </div>
 
       <button
@@ -208,6 +287,22 @@ export default function ImageLightbox({
       >
         <Icon icon="solar:arrow-right-linear" className="text-2xl md:text-5xl" />
       </button>
+    </div>
+  );
+}
+
+/** Previous/next image beside the current one, visible while swiping and during the slide. */
+function NeighbourSlide({ src }: { src: string }) {
+  return (
+    <div aria-hidden className="h-full w-full shrink-0 py-20 md:p-28">
+      <div className="flex h-full w-full items-center justify-center">
+        <img
+          src={src}
+          alt=""
+          draggable={false}
+          className="max-h-full max-w-full select-none object-contain"
+        />
+      </div>
     </div>
   );
 }
