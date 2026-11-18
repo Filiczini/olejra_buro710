@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useImperativeHandle, useRef, useState, type Ref } from 'react';
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 4;
@@ -11,12 +11,18 @@ interface Transform {
   y: number;
 }
 
+export interface ZoomableImageHandle {
+  /** Zoom in around the centre, or reset if already zoomed (used by the mobile magnifier button). */
+  toggleZoom: () => void;
+}
+
 interface ZoomableImageProps {
+  ref?: Ref<ZoomableImageHandle>;
   src: string;
   alt: string;
   /** Reports whether the image is zoomed in, so the parent can disable swipe navigation. */
   onZoomChange: (zoomed: boolean) => void;
-  /** Called on a click on the empty area around the image while not zoomed. */
+  /** Called on a click/tap on the empty area around the image while not zoomed. */
   onBackdropClick: () => void;
   className?: string;
 }
@@ -24,10 +30,14 @@ interface ZoomableImageProps {
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
 /**
- * Image with pinch-to-zoom, double-tap / double-click zoom, wheel zoom and drag-to-pan.
+ * Image with click-to-zoom (mouse), pinch / double-tap zoom (touch), wheel zoom and drag-to-pan.
  * Built on pointer events so it works the same for touch, pen and mouse.
+ *
+ * Clicks are classified in pointerup, not onClick: pointer capture retargets `click` to the
+ * wrapper, which made a click on the photo look like a click on the backdrop and close the viewer.
  */
 export default function ZoomableImage({
+  ref,
   src,
   alt,
   onZoomChange,
@@ -53,7 +63,8 @@ export default function ZoomableImage({
   } | null>(null);
   const moved = useRef(false);
   const lastTap = useRef(0);
-  const lastPointerType = useRef('mouse');
+  // Whether the current press started on the photo itself (vs the empty area around it)
+  const downOnImage = useRef(false);
 
   const zoomed = t.scale > 1.01;
   useEffect(() => onZoomChange(zoomed), [zoomed, onZoomChange]);
@@ -104,10 +115,12 @@ export default function ZoomableImage({
 
   const handlePointerDown = (e: React.PointerEvent) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
-    lastPointerType.current = e.pointerType;
     (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (pointers.current.size === 1) moved.current = false;
+    if (pointers.current.size === 1) {
+      moved.current = false;
+      downOnImage.current = e.target === imgRef.current;
+    }
     setAnimate(false);
     beginGesture();
   };
@@ -138,26 +151,35 @@ export default function ZoomableImage({
     // Re-anchor so lifting one finger of a pinch continues as a pan without a jump
     beginGesture();
 
-    if (pointers.current.size === 0 && !moved.current && e.pointerType !== 'mouse') {
-      const now = e.timeStamp;
-      if (now - lastTap.current < DOUBLE_TAP_MS) {
-        lastTap.current = 0;
-        toggleZoom(e.clientX, e.clientY);
-      } else {
-        lastTap.current = now;
-      }
+    if (e.type === 'pointercancel' || pointers.current.size > 0 || moved.current) return;
+
+    // A press without movement: decide what it was
+    if (!downOnImage.current) {
+      if (tRef.current.scale <= 1.01) onBackdropClick();
+      return;
+    }
+    if (e.pointerType === 'mouse') {
+      toggleZoom(toLocal(e.clientX, e.clientY));
+      return;
+    }
+    // Touch: single tap does nothing (zoom is via the magnifier button, double tap or pinch)
+    const now = e.timeStamp;
+    if (now - lastTap.current < DOUBLE_TAP_MS) {
+      lastTap.current = 0;
+      toggleZoom(toLocal(e.clientX, e.clientY));
+    } else {
+      lastTap.current = now;
     }
   };
 
-  const toggleZoom = (clientX: number, clientY: number) => {
+  /** Zoom in to DOUBLE_TAP_SCALE around `focus` (local coords, default centre), or reset. */
+  const toggleZoom = (focus = { x: 0, y: 0 }) => {
     setAnimate(true);
     const cur = tRef.current;
-    setT(
-      cur.scale > 1.01
-        ? { scale: 1, x: 0, y: 0 }
-        : zoomAt(cur, DOUBLE_TAP_SCALE, toLocal(clientX, clientY))
-    );
+    setT(cur.scale > 1.01 ? { scale: 1, x: 0, y: 0 } : zoomAt(cur, DOUBLE_TAP_SCALE, focus));
   };
+
+  useImperativeHandle(ref, () => ({ toggleZoom: () => toggleZoom() }));
 
   // Wheel needs a non-passive listener to stop the page from scrolling
   useEffect(() => {
@@ -181,14 +203,6 @@ export default function ZoomableImage({
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
-      onDoubleClick={(e) => {
-        // Touch double-taps are handled in pointerup; some browsers also emit dblclick
-        if (lastPointerType.current === 'mouse' && e.target === imgRef.current)
-          toggleZoom(e.clientX, e.clientY);
-      }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget && !zoomed && !moved.current) onBackdropClick();
-      }}
     >
       <img
         ref={imgRef}
@@ -200,7 +214,7 @@ export default function ZoomableImage({
           transition: animate ? 'transform 250ms ease-out' : 'none',
         }}
         className={`max-w-full max-h-full object-contain will-change-transform ${
-          zoomed ? 'cursor-grab active:cursor-grabbing' : 'cursor-zoom-in'
+          zoomed ? 'cursor-zoom-out active:cursor-grabbing' : 'cursor-zoom-in'
         }`}
       />
     </div>

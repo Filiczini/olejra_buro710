@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { Icon } from '@iconify-icon/react';
-import ZoomableImage from './ZoomableImage';
+import ZoomableImage, { type ZoomableImageHandle } from './ZoomableImage';
 
 interface ImageLightboxProps {
   images: string[];
@@ -19,6 +19,7 @@ export default function ImageLightbox({
 }: ImageLightboxProps) {
   const [isClosing, setIsClosing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const zoomRef = useRef<ZoomableImageHandle>(null);
 
   const closedRef = useRef(false);
 
@@ -261,6 +262,7 @@ export default function ImageLightbox({
             onClick={(e) => e.target === e.currentTarget && handleClose()}
           >
             <ZoomableImage
+              ref={zoomRef}
               key={currentIndex}
               src={images[currentIndex]}
               alt={`Зображення ${currentIndex + 1}`}
@@ -286,6 +288,22 @@ export default function ImageLightbox({
         aria-label="Наступне"
       >
         <Icon icon="solar:arrow-right-linear" className="text-2xl md:text-5xl" />
+      </button>
+
+      {/* Mobile magnifier: on desktop a click on the photo zooms instead */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          zoomRef.current?.toggleZoom();
+        }}
+        className="md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-10 w-12 h-12 flex items-center justify-center rounded-full text-white bg-black/40 backdrop-blur-sm cursor-pointer"
+        aria-label={zoomed ? 'Зменшити' : 'Збільшити'}
+      >
+        <Icon
+          icon={zoomed ? 'solar:magnifer-zoom-out-linear' : 'solar:magnifer-zoom-in-linear'}
+          className="text-2xl"
+        />
       </button>
     </div>
   );

@@ -185,7 +185,12 @@ describe('ImageLightbox', () => {
     vi.useRealTimers();
   });
 
-  it('zooms on double-click and disables swipe navigation while zoomed', () => {
+  const mouseClick = (el: Element) => {
+    fireEvent.pointerDown(el, { pointerId: 1, pointerType: 'mouse', button: 0 });
+    fireEvent.pointerUp(el, { pointerId: 1, pointerType: 'mouse' });
+  };
+
+  it('zooms on a mouse click and disables swipe navigation while zoomed', () => {
     const onNext = vi.fn();
     render(
       <ImageLightbox
@@ -198,9 +203,7 @@ describe('ImageLightbox', () => {
     );
     const img = screen.getByRole('img');
 
-    fireEvent.pointerDown(img, { pointerId: 1, pointerType: 'mouse', button: 0 });
-    fireEvent.pointerUp(img, { pointerId: 1, pointerType: 'mouse' });
-    fireEvent.doubleClick(img);
+    mouseClick(img);
     expect(img.style.transform).toContain('scale(2.5)');
     expect(screen.getByRole('button', { name: 'Наступне' }).className).toContain('hidden');
 
@@ -209,8 +212,79 @@ describe('ImageLightbox', () => {
     fireEvent.touchEnd(dialog, { changedTouches: [{ screenX: 100 }] });
     expect(onNext).not.toHaveBeenCalled();
 
-    fireEvent.doubleClick(img);
+    mouseClick(img);
     expect(img.style.transform).toContain('scale(1)');
+  });
+
+  it('does not close when the photo is clicked with the mouse (pointer capture retargets click)', () => {
+    const onClose = vi.fn();
+    render(
+      <ImageLightbox
+        images={images}
+        currentIndex={0}
+        onClose={onClose}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+      />
+    );
+    const img = screen.getByRole('img');
+    mouseClick(img);
+    // What the browser does after pointer capture: the click lands on the wrapper
+    fireEvent.click(img.parentElement!);
+
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByRole('dialog').className).toContain('animate-fade-in');
+  });
+
+  it('starts closing on a click on the empty area around the photo', () => {
+    render(
+      <ImageLightbox
+        images={images}
+        currentIndex={0}
+        onClose={vi.fn()}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+      />
+    );
+    mouseClick(screen.getByRole('img').parentElement!);
+    expect(screen.getByRole('dialog').className).toContain('animate-fade-out');
+  });
+
+  it('a single touch tap on the photo neither zooms nor closes', () => {
+    render(
+      <ImageLightbox
+        images={images}
+        currentIndex={0}
+        onClose={vi.fn()}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+      />
+    );
+    const img = screen.getByRole('img');
+    fireEvent.pointerDown(img, { pointerId: 2, pointerType: 'touch' });
+    fireEvent.pointerUp(img, { pointerId: 2, pointerType: 'touch' });
+    expect(img.style.transform).toContain('scale(1)');
+    expect(screen.getByRole('dialog').className).toContain('animate-fade-in');
+  });
+
+  it('the magnifier button zooms in and out', () => {
+    render(
+      <ImageLightbox
+        images={images}
+        currentIndex={0}
+        onClose={vi.fn()}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+      />
+    );
+    const img = screen.getByRole('img');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Збільшити' }));
+    expect(img.style.transform).toContain('scale(2.5)');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Зменшити' }));
+    expect(img.style.transform).toContain('scale(1)');
+    expect(screen.getByRole('button', { name: 'Збільшити' })).toBeInTheDocument();
   });
 
   describe('slide animation', () => {
